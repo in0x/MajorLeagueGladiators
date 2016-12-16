@@ -2,7 +2,9 @@
 
 #include "Prototype.h"
 #include "PrototypeGameModeBase.h"
+#include "PlayerCharacter.h"
 
-
-
-
+APrototypeGameModeBase::APrototypeGameModeBase(const FObjectInitializer& ObjectInitializer)
+{
+	DefaultPawnClass = APlayerCharacter::StaticClass();
+}
