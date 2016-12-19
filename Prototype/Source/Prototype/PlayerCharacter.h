@@ -15,5 +15,22 @@ class PROTOTYPE_API APlayerCharacter : public AVRSimpleCharacter
 public:
 	APlayerCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* playerInputComponent) override;
+	virtual void Tick(float DeltaTime) override;
+
+	void MoveForward(float value);
+	void MoveRight(float value);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	UStaticMeshComponent* leftMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	UStaticMeshComponent* rightMesh;
+
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* leftHand; // GripMotionController || "HandComponent"
+
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* rightHand;
 };
