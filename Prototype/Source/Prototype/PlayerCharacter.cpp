@@ -3,6 +3,7 @@
 #include "Prototype.h"
 #include "PlayerCharacter.h"
 #include "HandComponent.h"
+#include "IPlayerCharacterMotionController.h"
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer)
@@ -16,38 +17,29 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if (GEngine->HMDDevice.IsValid() && GEngine->HMDDevice->IsHMDConnected()) // Check if we are in VR mode
+
+	if (!GEngine->HMDDevice.IsValid() || !GEngine->HMDDevice->IsHMDConnected()) 
 	{
-		leftHand = LeftMotionController;
-		rightHand = RightMotionController;
+		TArray<IPlayerCharacterMotionController*> playerContainers
+			= IModularFeatures::Get().GetModularFeatureImplementations<IPlayerCharacterMotionController>(IPlayerCharacterMotionController::GetModularFeatureName());
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("HMD is valid"));
-	}
-	else // If not, assign placeholder hand objects
-	{
-		auto lh = NewObject<UHandComponent>();
-		lh->SetControllerHand(EControllerHand::Left);
-		leftHand = lh;
-		 
-		auto rh = NewObject<UHandComponent>();
-		rh->SetControllerHand(EControllerHand::Right);
-		rightHand = rh;
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("HMD is not valid"));
-
-		FAttachmentTransformRules handRules(EAttachmentRule::KeepRelative, false);
-
-		leftHand->AttachToComponent(RootComponent, handRules);
-		rightHand->AttachToComponent(RootComponent, handRules);
+		for (auto container : playerContainers)
+		{
+			if (container != nullptr)
+			{
+				container->SetPlayerCharacter(this);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("IPlayerCharacterMotionController is null"));
+			}
+		}
 	}	
 
 	FAttachmentTransformRules meshRules(EAttachmentRule::SnapToTarget, false);
 	
-	leftMesh->AttachToComponent(leftHand, meshRules);
-	rightMesh->AttachToComponent(rightHand, meshRules);
-	
-	leftHand->RegisterComponent();
-	rightHand->RegisterComponent();
+	leftMesh->AttachToComponent(LeftMotionController, meshRules);
+	rightMesh->AttachToComponent(RightMotionController, meshRules);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)

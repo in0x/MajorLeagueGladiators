@@ -28,9 +28,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	UStaticMeshComponent* rightMesh;
 
-	UPROPERTY(VisibleAnywhere)
-	USceneComponent* leftHand; // GripMotionController || "HandComponent"
+	//UPROPERTY(VisibleAnywhere)
+	//USceneComponent* leftHand; // GripMotionController || "HandComponent"
 
-	UPROPERTY(VisibleAnywhere)
-	USceneComponent* rightHand;
+	//UPROPERTY(VisibleAnywhere)
+	//USceneComponent* rightHand;
 };
