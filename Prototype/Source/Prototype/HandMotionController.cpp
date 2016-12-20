@@ -3,9 +3,9 @@
 #include "PlayerCharacter.h"
 
 HandMotionController::HandMotionController(APlayerCharacter* playerCharacter)
+	: playerChar(playerCharacter)
 {
 	IModularFeatures::Get().RegisterModularFeature(IMotionController::GetModularFeatureName(), this);
-	playerChar = playerCharacter;
 }
 
 HandMotionController::~HandMotionController()
