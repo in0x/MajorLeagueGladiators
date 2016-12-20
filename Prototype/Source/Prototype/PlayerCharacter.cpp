@@ -20,8 +20,7 @@ void APlayerCharacter::BeginPlay()
 
 	if (!GEngine->HMDDevice.IsValid() || !GEngine->HMDDevice->IsHMDConnected()) 
 	{
-		pHandMotionController = std::make_unique<HandMotionController>();
-		pHandMotionController->SetPlayerCharacter(this);
+		pHandMotionController = std::make_unique<HandMotionController>(this);
 	}	
 
 	FAttachmentTransformRules meshRules(EAttachmentRule::SnapToTarget, false);
