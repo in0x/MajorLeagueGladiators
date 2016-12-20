@@ -1,19 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Prototype.h"
 #include "HandMotionController.h"
 #include "PlayerCharacter.h"
 
-HandMotionController::HandMotionController()
+HandMotionController::HandMotionController(APlayerCharacter* playerCharacter)
 {
 	IModularFeatures::Get().RegisterModularFeature(IMotionController::GetModularFeatureName(), this);
-	IModularFeatures::Get().RegisterModularFeature(IPlayerCharacterMotionController::GetModularFeatureName(), this);
+	playerChar = playerCharacter;
 }
 
 HandMotionController::~HandMotionController()
 {
 	IModularFeatures::Get().UnregisterModularFeature(IMotionController::GetModularFeatureName(), this);
-	IModularFeatures::Get().UnregisterModularFeature(IPlayerCharacterMotionController::GetModularFeatureName(), this);
 }
 
 bool HandMotionController::GetControllerOrientationAndPosition(int32 controllerIndex, EControllerHand deviceHand, FRotator& outOrientation, FVector& outPosition) const
@@ -39,10 +36,5 @@ bool HandMotionController::GetControllerOrientationAndPosition(int32 controllerI
 ETrackingStatus HandMotionController::GetControllerTrackingStatus(int32 controllerIndex, EControllerHand deviceHand) const
 {
 	return ETrackingStatus::Tracked;
-}
-
-void HandMotionController::SetPlayerCharacter(APlayerCharacter* playerCharacter) 
-{
-	playerChar = playerCharacter;
 }
 
