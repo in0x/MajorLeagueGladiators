@@ -4,11 +4,12 @@
 
 #include "Components/SceneComponent.h"
 #include "InputCoreTypes.h"
+//#include "IMotionController.h"
 
 #include "HandComponent.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PROTOTYPE_API UHandComponent : public USceneComponent
+class PROTOTYPE_API UHandComponent : public USceneComponent/*, public IMotionController*/
 {
 	GENERATED_BODY()
 
@@ -16,12 +17,11 @@ public:
 	// Sets default values for this component's properties
 	UHandComponent();
 
-	// Called when the game starts
 	virtual void BeginPlay() override;
-	
-	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
-
+	/*virtual bool GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const override;
+	virtual ETrackingStatus GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const override;
+*/
 	void SetControllerHand(EControllerHand newHand);
 
 private:
