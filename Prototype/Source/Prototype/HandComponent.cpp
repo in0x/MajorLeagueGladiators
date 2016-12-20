@@ -10,6 +10,7 @@ UHandComponent::UHandComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+	//IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
 }
 
 // Called when the game starts
@@ -32,4 +33,15 @@ void UHandComponent::SetControllerHand(EControllerHand newHand)
 	offset.Y *= hand == EControllerHand::Right ? -1.f : 1.f;
 	AddLocalOffset(offset);
 }
+
+//bool UHandComponent::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const
+//{
+//	return true;
+//}
+//
+//ETrackingStatus UHandComponent::GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const
+//{
+//	return ETrackingStatus::Tracked;
+//}
+
 

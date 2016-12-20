@@ -53,6 +53,25 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	TArray<IMotionController*> MotionControllers = IModularFeatures::Get().GetModularFeatureImplementations<IMotionController>(IMotionController::GetModularFeatureName());
+	for (auto MotionController : MotionControllers)
+	{
+		FRotator rot;
+		FVector vec;
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::FromInt(MotionControllers.Num()));
+
+		if ((MotionController != nullptr) && MotionController->GetControllerOrientationAndPosition(0, EControllerHand::Left, rot, vec))
+		{
+			auto status = (EBPTrackingStatus)MotionController->GetControllerTrackingStatus(0, EControllerHand::Right);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("MotionController found"));
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("MotionController not found"));
+		}
+	}
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInputComponent)
