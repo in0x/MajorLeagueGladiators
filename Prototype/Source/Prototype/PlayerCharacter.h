@@ -3,6 +3,9 @@
 #pragma once
 
 #include "VRExpansion/VRSimpleCharacter.h"
+#include "HandMotionController.h"
+#include <memory>
+
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -14,7 +17,7 @@ class PROTOTYPE_API APlayerCharacter : public AVRSimpleCharacter
 	GENERATED_BODY()
 public:
 	APlayerCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
+	
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* playerInputComponent) override;
 	virtual void Tick(float DeltaTime) override;
@@ -28,9 +31,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	UStaticMeshComponent* rightMesh;
 
-	//UPROPERTY(VisibleAnywhere)
-	//USceneComponent* leftHand; // GripMotionController || "HandComponent"
-
-	//UPROPERTY(VisibleAnywhere)
-	//USceneComponent* rightHand;
+private:
+	std::unique_ptr<HandMotionController> pHandMotionController;
 };
