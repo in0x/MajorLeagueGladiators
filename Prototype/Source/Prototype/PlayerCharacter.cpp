@@ -2,7 +2,6 @@
 
 #include "Prototype.h"
 #include "PlayerCharacter.h"
-#include "HandComponent.h"
 #include "IPlayerCharacterMotionController.h"
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -14,26 +13,15 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 	rightMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightMesh"));
 }
 
+
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 	if (!GEngine->HMDDevice.IsValid() || !GEngine->HMDDevice->IsHMDConnected()) 
 	{
-		TArray<IPlayerCharacterMotionController*> playerContainers
-			= IModularFeatures::Get().GetModularFeatureImplementations<IPlayerCharacterMotionController>(IPlayerCharacterMotionController::GetModularFeatureName());
-
-		for (auto container : playerContainers)
-		{
-			if (container != nullptr)
-			{
-				container->SetPlayerCharacter(this);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("IPlayerCharacterMotionController is null"));
-			}
-		}
+		pHandMotionController = std::make_unique<HandMotionController>();
+		pHandMotionController->SetPlayerCharacter(this);
 	}	
 
 	FAttachmentTransformRules meshRules(EAttachmentRule::SnapToTarget, false);

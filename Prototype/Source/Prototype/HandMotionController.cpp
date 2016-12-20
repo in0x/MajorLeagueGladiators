@@ -4,14 +4,19 @@
 #include "HandMotionController.h"
 #include "PlayerCharacter.h"
 
-UHandMotionController::UHandMotionController(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+HandMotionController::HandMotionController()
 {
 	IModularFeatures::Get().RegisterModularFeature(IMotionController::GetModularFeatureName(), this);
 	IModularFeatures::Get().RegisterModularFeature(IPlayerCharacterMotionController::GetModularFeatureName(), this);
 }
 
-bool UHandMotionController::GetControllerOrientationAndPosition(int32 controllerIndex, EControllerHand deviceHand, FRotator& outOrientation, FVector& outPosition) const
+HandMotionController::~HandMotionController()
+{
+	IModularFeatures::Get().UnregisterModularFeature(IMotionController::GetModularFeatureName(), this);
+	IModularFeatures::Get().UnregisterModularFeature(IPlayerCharacterMotionController::GetModularFeatureName(), this);
+}
+
+bool HandMotionController::GetControllerOrientationAndPosition(int32 controllerIndex, EControllerHand deviceHand, FRotator& outOrientation, FVector& outPosition) const
 {
 	if (deviceHand != EControllerHand::Left && deviceHand != EControllerHand::Right)
 	{
@@ -31,12 +36,12 @@ bool UHandMotionController::GetControllerOrientationAndPosition(int32 controller
 	return true;
 }
 
-ETrackingStatus UHandMotionController::GetControllerTrackingStatus(int32 controllerIndex, EControllerHand deviceHand) const
+ETrackingStatus HandMotionController::GetControllerTrackingStatus(int32 controllerIndex, EControllerHand deviceHand) const
 {
 	return ETrackingStatus::Tracked;
 }
 
-void UHandMotionController::SetPlayerCharacter(APlayerCharacter* playerCharacter) 
+void HandMotionController::SetPlayerCharacter(APlayerCharacter* playerCharacter) 
 {
 	playerChar = playerCharacter;
 }

@@ -1,9 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 #include "IPlayerCharacterMotionController.h"
 
-#include "HandMotionController.generated.h"
 
 class APlayerCharacter;
 
@@ -12,18 +10,16 @@ class APlayerCharacter;
 * to change the GripMotionController, as it's going to use the position from out HandComponents
 * when no actual MotionController are attached.
 */
-UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class PROTOTYPE_API UHandMotionController : public UObject, public IPlayerCharacterMotionController
+class PROTOTYPE_API HandMotionController :  public IPlayerCharacterMotionController
 {
-	GENERATED_BODY()
-
 public:
-	UHandMotionController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	HandMotionController();
+	~HandMotionController();
+	
 	virtual bool GetControllerOrientationAndPosition(int32 controllerIndex, EControllerHand deviceHand, FRotator& outOrientation, FVector& outPosition) const override;
 	virtual ETrackingStatus GetControllerTrackingStatus(int32 controllerIndex, EControllerHand deviceHand) const override;
 	virtual void SetPlayerCharacter(APlayerCharacter* playerCharacter) override;
 
 private:
-	UPROPERTY()
 	APlayerCharacter* playerChar;
 };
