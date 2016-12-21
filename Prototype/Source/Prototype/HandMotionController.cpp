@@ -23,12 +23,12 @@ bool HandMotionController::GetControllerOrientationAndPosition(int32 controllerI
 
 	auto trafo = playerChar->GetActorTransform();
 
-	FVector offset(0, 25, -75);
+	FVector offset(75, 25, 0);
 	offset.Y *= deviceHand == EControllerHand::Right ? -1.f : 1.f;
 	trafo.AddToTranslation(offset);
 
-	outPosition = trafo.GetLocation();
-	outOrientation = trafo.Rotator();
+	outPosition = offset;
+	outOrientation = FRotator{};
 
 	return true;
 }

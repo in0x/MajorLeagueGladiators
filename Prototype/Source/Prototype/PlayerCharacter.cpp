@@ -34,6 +34,7 @@ void APlayerCharacter::BeginPlay()
 	if (!GEngine->HMDDevice.IsValid() || !GEngine->HMDDevice->IsHMDConnected()) 
 	{
 		pHandMotionController = std::make_unique<HandMotionController>(this);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("IModularFeature"));
 	}	
 }
 
