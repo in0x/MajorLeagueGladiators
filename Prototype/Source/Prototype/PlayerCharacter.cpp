@@ -57,6 +57,14 @@ namespace
 	
 		return false;
 	}
+
+	void Drop(UGripMotionControllerComponent* hand)
+	{
+		for (auto& grip : hand->GrippedActors)
+		{
+			hand->DropGrip(grip, true);
+		}
+	}
 }
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -67,7 +75,6 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 	leftMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftMesh"));
 	rightMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightMesh"));
 }
-
 
 void APlayerCharacter::BeginPlay()
 {
@@ -98,8 +105,14 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInputCom
 	playerInputComponent->BindAxis("Turn", this, &APlayerCharacter::AddControllerYawInput);
 	playerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::AddControllerPitchInput);
 
-	playerInputComponent->BindAxis("LeftTrigger", this, &APlayerCharacter::OnLeftTrigger);
-	playerInputComponent->BindAxis("RightTrigger", this, &APlayerCharacter::OnRightTrigger);
+	playerInputComponent->BindAxis("LeftTrigger", this, &APlayerCharacter::OnLeftTriggerAxis);
+	playerInputComponent->BindAxis("RightTrigger", this, &APlayerCharacter::OnRightTriggerAxis);
+
+	playerInputComponent->BindAction("LeftTriggerClicked", EInputEvent::IE_Pressed,  this, &APlayerCharacter::OnLeftTriggerClicked);
+	playerInputComponent->BindAction("LeftTriggerClicked", EInputEvent::IE_Released, this, &APlayerCharacter::OnLeftTriggerReleased);
+
+	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &APlayerCharacter::OnRightTriggerClicked);
+	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &APlayerCharacter::OnRightTriggerReleased);
 }
 
 void APlayerCharacter::MoveForward(float value)
@@ -114,22 +127,39 @@ void APlayerCharacter::MoveRight(float value)
 	AddMovementInput(direction, value);
 }
 
-void APlayerCharacter::OnLeftTrigger(float value)
+void APlayerCharacter::OnLeftTriggerAxis(float value)
 {
 	if (value > 0.f)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("LeftTrigger: %f"), value));
-		::Grab(LeftMotionController);
 	}
 }
 
-void APlayerCharacter::OnRightTrigger(float value)
+void APlayerCharacter::OnRightTriggerAxis(float value)
 {
 	if (value > 0.f)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("RightTrigger: %f"), value));
-		::Grab(RightMotionController);
 	}
 }
 
+void APlayerCharacter::OnLeftTriggerClicked()
+{
+	::Grab(LeftMotionController);
+}
+
+void APlayerCharacter::OnLeftTriggerReleased()
+{
+	::Drop(LeftMotionController);
+}
+
+void APlayerCharacter::OnRightTriggerClicked()
+{
+	::Grab(RightMotionController);
+}
+
+void APlayerCharacter::OnRightTriggerReleased()
+{
+	::Drop(RightMotionController);
+}
 

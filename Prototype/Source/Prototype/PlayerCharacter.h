@@ -23,8 +23,13 @@ public:
 	void MoveForward(float value);
 	void MoveRight(float value);
 	
-	void OnLeftTrigger(float value);
-	void OnRightTrigger(float value);
+	void OnLeftTriggerAxis(float value);
+	void OnRightTriggerAxis(float value);
+
+	void OnLeftTriggerClicked();
+	void OnLeftTriggerReleased();
+	void OnRightTriggerClicked();
+	void OnRightTriggerReleased();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	UStaticMeshComponent* leftMesh;
