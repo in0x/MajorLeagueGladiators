@@ -72,6 +72,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInputCom
 
 	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &APlayerCharacter::OnRightTriggerClicked);
 	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &APlayerCharacter::OnRightTriggerReleased);
+
+	playerInputComponent->BindAction("TeleportPress", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnTeleportPressed);
+	playerInputComponent->BindAction("TeleportPress", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
 }
 
 void APlayerCharacter::MoveForward(float value)
@@ -90,7 +93,7 @@ void APlayerCharacter::OnLeftTriggerAxis(float value)
 {
 	if (value > 0.f)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("LeftTrigger: %f"), value));
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("LeftTrigger: %f"), value), false);
 	}
 }
 
@@ -98,7 +101,7 @@ void APlayerCharacter::OnRightTriggerAxis(float value)
 {
 	if (value > 0.f)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("RightTrigger: %f"), value));
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("RightTrigger: %f"), value), false);
 	}
 }
 
@@ -122,3 +125,12 @@ void APlayerCharacter::OnRightTriggerReleased()
 	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
 }
 
+void APlayerCharacter::OnTeleportPressed()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("OnTeleportPressed"));
+}
+
+void APlayerCharacter::OnTeleportReleased()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("OnTeleportReleased"));
+}

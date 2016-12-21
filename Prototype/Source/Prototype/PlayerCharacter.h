@@ -30,6 +30,8 @@ public:
 	void OnLeftTriggerReleased();
 	void OnRightTriggerClicked();
 	void OnRightTriggerReleased();
+	void OnTeleportPressed();
+	void OnTeleportReleased();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	UStaticMeshComponent* leftMesh;
