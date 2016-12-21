@@ -3,77 +3,28 @@
 #include "Prototype.h"
 #include "PlayerCharacter.h"
 #include "IPlayerCharacterMotionController.h"
+#include "VRControllerComponent.h"
 #include <algorithm>
 
-namespace 
-{
-	AActor* GetOverlapping(UPrimitiveComponent& component)
-	{
-		TArray<AActor*> overlaps;
-		component.GetOverlappingActors(overlaps);
-
-		overlaps = overlaps.FilterByPredicate([](AActor* pActor)
-		{
-			return Cast<IVRGripInterface>(pActor->GetRootComponent()) != nullptr;
-		});
-
-		if (overlaps.Num() == 0)
-		{
-			return nullptr;
-		}
-		else if (overlaps.Num() == 1)
-			return *overlaps.GetData();
-
-		AActor* closest = std::min(*overlaps.GetData(), overlaps.Last(), [&component](auto a, auto b)
-		{
-			return FVector::DistSquared((a)->GetRootComponent()->GetComponentLocation(), component.GetComponentLocation())
-				 < FVector::DistSquared((b)->GetRootComponent()->GetComponentLocation(), component.GetComponentLocation());
-		});
-
-		return closest;
-	}
-
-	bool Grab(UGripMotionControllerComponent* hand)
-	{
-		AActor* closest = nullptr;
-		auto components = hand->GetAttachChildren();
-		components.Add(hand);
-
-		for (auto comp : components)
-		{
-			UPrimitiveComponent* primitveComp = Cast<UPrimitiveComponent>(comp);
-
-			if (primitveComp)
-			{
-				closest = GetOverlapping(*primitveComp);
-
-				if (closest)
-				{
-					hand->GripActor(closest, closest->GetTransform());
-					return true;
-				}
-			}
-		}
-	
-		return false;
-	}
-
-	void Drop(UGripMotionControllerComponent* hand)
-	{
-		for (auto& grip : hand->GrippedActors)
-		{
-			hand->DropGrip(grip, true);
-		}
-	}
-}
-
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
-	: Super(ObjectInitializer)
+	: Super(ObjectInitializer
+		.SetDefaultSubobjectClass<UVRControllerComponent>(TEXT("Left Grip Motion Controller"))
+		.SetDefaultSubobjectClass<UVRControllerComponent>(TEXT("Right Grip Motion Controller"))
+	)
 {
 	bUseControllerRotationPitch = true;
 
 	leftMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftMesh"));
 	rightMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightMesh"));
+
+	leftMesh->SetupAttachment(LeftMotionController);
+	rightMesh->SetupAttachment(RightMotionController);
+
+	leftGrabSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("LeftGrabSphere"));
+	rightGrabSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("RightGrabSphere"));
+
+	leftGrabSphere->SetupAttachment(LeftMotionController);
+	rightGrabSphere->SetupAttachment(RightMotionController);
 }
 
 void APlayerCharacter::BeginPlay()
@@ -84,11 +35,6 @@ void APlayerCharacter::BeginPlay()
 	{
 		pHandMotionController = std::make_unique<HandMotionController>(this);
 	}	
-
-	FAttachmentTransformRules meshRules(EAttachmentRule::SnapToTarget, false);
-	
-	leftMesh->AttachToComponent(LeftMotionController, meshRules);
-	rightMesh->AttachToComponent(RightMotionController, meshRules);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -145,21 +91,21 @@ void APlayerCharacter::OnRightTriggerAxis(float value)
 
 void APlayerCharacter::OnLeftTriggerClicked()
 {
-	::Grab(LeftMotionController);
+	CastChecked<UVRControllerComponent>(LeftMotionController)->GrabNearestActor(*leftGrabSphere);
 }
 
 void APlayerCharacter::OnLeftTriggerReleased()
 {
-	::Drop(LeftMotionController);
+	CastChecked<UVRControllerComponent>(LeftMotionController)->DropAllGrips();
 }
 
 void APlayerCharacter::OnRightTriggerClicked()
 {
-	::Grab(RightMotionController);
+	CastChecked<UVRControllerComponent>(RightMotionController)->GrabNearestActor(*rightGrabSphere);
 }
 
 void APlayerCharacter::OnRightTriggerReleased()
 {
-	::Drop(RightMotionController);
+	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
 }
 
