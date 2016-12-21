@@ -3,6 +3,61 @@
 #include "Prototype.h"
 #include "PlayerCharacter.h"
 #include "IPlayerCharacterMotionController.h"
+#include <algorithm>
+
+namespace 
+{
+	AActor* GetOverlapping(UPrimitiveComponent& component)
+	{
+		TArray<AActor*> overlaps;
+		component.GetOverlappingActors(overlaps);
+
+		overlaps = overlaps.FilterByPredicate([](AActor* pActor)
+		{
+			return Cast<IVRGripInterface>(pActor->GetRootComponent()) != nullptr;
+		});
+
+		if (overlaps.Num() == 0)
+		{
+			return nullptr;
+		}
+		else if (overlaps.Num() == 1)
+			return *overlaps.GetData();
+
+		AActor* closest = std::min(*overlaps.GetData(), overlaps.Last(), [&component](auto a, auto b)
+		{
+			return FVector::DistSquared((a)->GetRootComponent()->GetComponentLocation(), component.GetComponentLocation())
+				 < FVector::DistSquared((b)->GetRootComponent()->GetComponentLocation(), component.GetComponentLocation());
+		});
+
+		return closest;
+	}
+
+	bool Grab(UGripMotionControllerComponent* hand)
+	{
+		AActor* closest = nullptr;
+		auto components = hand->GetAttachChildren();
+		components.Add(hand);
+
+		for (auto comp : components)
+		{
+			UPrimitiveComponent* primitveComp = Cast<UPrimitiveComponent>(comp);
+
+			if (primitveComp)
+			{
+				closest = GetOverlapping(*primitveComp);
+
+				if (closest)
+				{
+					hand->GripActor(closest, closest->GetTransform());
+					return true;
+				}
+			}
+		}
+	
+		return false;
+	}
+}
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer)
@@ -30,27 +85,7 @@ void APlayerCharacter::BeginPlay()
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	TArray<IMotionController*> MotionControllers = IModularFeatures::Get().GetModularFeatureImplementations<IMotionController>(IMotionController::GetModularFeatureName());
-	for (auto MotionController : MotionControllers)
-	{
-		FRotator rot;
-		FVector vec;
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::FromInt(MotionControllers.Num()));
-
-		if ((MotionController != nullptr) && MotionController->GetControllerOrientationAndPosition(0, EControllerHand::Left, rot, vec))
-		{
-			auto status = (EBPTrackingStatus)MotionController->GetControllerTrackingStatus(0, EControllerHand::Right);
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("MotionController found"));
-		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("MotionController not found"));
-		}
-	}
+{	
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInputComponent)
@@ -62,8 +97,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInputCom
 
 	playerInputComponent->BindAxis("Turn", this, &APlayerCharacter::AddControllerYawInput);
 	playerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::AddControllerPitchInput);
-}
 
+	playerInputComponent->BindAxis("LeftTrigger", this, &APlayerCharacter::OnLeftTrigger);
+	playerInputComponent->BindAxis("RightTrigger", this, &APlayerCharacter::OnRightTrigger);
+}
 
 void APlayerCharacter::MoveForward(float value)
 {
@@ -76,4 +113,23 @@ void APlayerCharacter::MoveRight(float value)
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
 	AddMovementInput(direction, value);
 }
+
+void APlayerCharacter::OnLeftTrigger(float value)
+{
+	if (value > 0.f)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("LeftTrigger: %f"), value));
+		::Grab(LeftMotionController);
+	}
+}
+
+void APlayerCharacter::OnRightTrigger(float value)
+{
+	if (value > 0.f)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("RightTrigger: %f"), value));
+		::Grab(RightMotionController);
+	}
+}
+
 
