@@ -4,6 +4,7 @@
 
 #include "Engine.h"
 
+// PROTOTYPE
 #include "VRExpansion/VRBPDatatypes.h"
 #include "VRExpansion/GripMotionControllerComponent.h"
 #include "VRExpansion/VRExpansionFunctionLibrary.h"
@@ -19,3 +20,10 @@
 #include "PhysXIncludes.h"
 #include "Runtime/Engine/Private/EnginePrivate.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
+
+// STL
+#include <algorithm>
+#include <memory>
+
+// LOG
+DECLARE_LOG_CATEGORY_EXTERN(DebugLog, Log, All);
