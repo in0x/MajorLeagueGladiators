@@ -31,11 +31,23 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// If no HMD is connected, setup non VR mode.
 	if (!GEngine->HMDDevice.IsValid() || !GEngine->HMDDevice->IsHMDConnected()) 
 	{
 		pHandMotionController = std::make_unique<HandMotionController>(this);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("IModularFeature"));
+
+		// Set Capsule collider dimensions so that the player has an actual height in non VR mode.
+		// Having this set in VR Mode causes the HMD to be offset too far from the floor.
+		auto capsule = CastChecked<UCapsuleComponent>(GetRootComponent());
+		capsule->SetCapsuleRadius(20.f);
+		capsule->SetCapsuleHalfHeight(96.f);
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("NON VR MODE"));
 	}	
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("VR MODE"));
+	}
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
