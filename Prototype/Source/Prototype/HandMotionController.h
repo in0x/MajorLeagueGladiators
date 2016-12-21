@@ -4,7 +4,7 @@
 class APlayerCharacter;
 
 /*
-* NOTE(Phil):
+* NOTE(Phil)
 * This serves as the IMotionController IModularfeature when no actual Motion
 * controllers are connected. Since the VRExpansion::UGripMotionController
 * gets the MotionController through IModularFeatures, this class takes the 
