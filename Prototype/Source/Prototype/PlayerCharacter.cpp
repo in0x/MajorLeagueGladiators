@@ -5,6 +5,7 @@
 #include "IPlayerCharacterMotionController.h"
 #include "VRControllerComponent.h"
 #include <algorithm>
+#include <tuple>
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -27,7 +28,10 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 	rightGrabSphere->SetupAttachment(RightMotionController);
 
 	// ArrowComponent is used to determine position and direction for teleport.
-	vrArrow = CastChecked<UArrowComponent>(GetComponentByClass(UArrowComponent::StaticClass())); 
+	//vrArrow = CastChecked<UArrowComponent>(GetComponentByClass(UArrowComponent::StaticClass())); 
+
+	teleportComp = ObjectInitializer.CreateDefaultSubobject<UTeleportComponent>(this, TEXT("TeleportComp"));
+	teleportComp->Disable();
 }
 
 void APlayerCharacter::BeginPlay()
@@ -76,7 +80,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInputCom
 	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &APlayerCharacter::OnRightTriggerClicked);
 	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &APlayerCharacter::OnRightTriggerReleased);
 
-	playerInputComponent->BindAction("TeleportPress", EInputEvent::IE_Repeat, this, &APlayerCharacter::OnTeleportPressed);
+	playerInputComponent->BindAction("TeleportPress", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnTeleportPressed);
 	playerInputComponent->BindAction("TeleportPress", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
 }
 
@@ -130,37 +134,31 @@ void APlayerCharacter::OnRightTriggerReleased()
 
 void APlayerCharacter::OnTeleportPressed()
 {
-	TArray<FVector> positions;
-	FVector lastTraceDest;
-	TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{ EObjectTypeQuery::ObjectTypeQuery1 };
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("OnTeleportPressed"));
 
-	UGameplayStatics::PredictProjectilePath(
-		GetWorld(),
-		tpHitResult,
-		positions,
-		lastTraceDest,
-		vrArrow->GetComponentLocation(),
-		vrArrow->GetForwardVector() * 900,
-		true,
-		0, 
-		queryTypes,
-		false,
-		TArray<AActor*>(),
-		EDrawDebugTrace::ForOneFrame,
-		0.f
-	);
+	teleportComp->Enable(LeftMotionController);
 }
 
 void APlayerCharacter::OnTeleportReleased()
 {
-	auto success = TeleportTo(tpHitResult.Location, vrArrow->GetComponentRotation(), false, true);
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("OnTeleportReleased"));
 	
-	if (success)
+	auto result = teleportComp->GetTeleportData();
+	teleportComp->Disable();
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::Printf(TEXT("%d %d %d"), result.Position.X, result.Position.Y, result.Position.Z));
+
+	if (result.ShouldTeleport)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Teleport Success"));
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Teleport Fail"));
+		auto success = TeleportTo(result.Position, GetActorRotation(), false, true);
+
+		if (success)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Teleport Success"));
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Teleport Fail"));
+		}
 	}
 }

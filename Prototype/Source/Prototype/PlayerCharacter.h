@@ -2,7 +2,7 @@
 
 #include "VRExpansion/VRSimpleCharacter.h"
 #include "HandMotionController.h"
-#include <memory>
+#include "TeleportComponent.h"
 
 #include "PlayerCharacter.generated.h"
 
@@ -45,7 +45,5 @@ private:
 	USphereComponent* leftGrabSphere;
 	USphereComponent* rightGrabSphere;
 
-	UArrowComponent* vrArrow;
-
-	FHitResult tpHitResult;
+	UTeleportComponent* teleportComp;
 };
