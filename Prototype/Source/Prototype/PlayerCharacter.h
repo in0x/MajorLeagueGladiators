@@ -30,7 +30,8 @@ public:
 	void OnLeftTriggerReleased();
 	void OnRightTriggerClicked();
 	void OnRightTriggerReleased();
-	void OnTeleportPressed();
+	void OnTeleportPressedLeft();
+	void OnTeleportPressedRight();
 	void OnTeleportReleased();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
