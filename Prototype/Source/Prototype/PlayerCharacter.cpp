@@ -80,8 +80,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInputCom
 	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &APlayerCharacter::OnRightTriggerClicked);
 	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &APlayerCharacter::OnRightTriggerReleased);
 
-	playerInputComponent->BindAction("TeleportPress", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnTeleportPressed);
-	playerInputComponent->BindAction("TeleportPress", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
+	playerInputComponent->BindAction("TeleportPressLeft", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnTeleportPressedLeft);
+	playerInputComponent->BindAction("TeleportPressRight", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnTeleportPressedRight);
+
+	playerInputComponent->BindAction("TeleportPressLeft", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
+	playerInputComponent->BindAction("TeleportPressRight", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
 }
 
 void APlayerCharacter::MoveForward(float value)
@@ -132,33 +135,23 @@ void APlayerCharacter::OnRightTriggerReleased()
 	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
 }
 
-void APlayerCharacter::OnTeleportPressed()
+void APlayerCharacter::OnTeleportPressedLeft()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("OnTeleportPressed"));
-
 	teleportComp->Enable(LeftMotionController);
+}
+
+void APlayerCharacter::OnTeleportPressedRight()
+{
+	teleportComp->Enable(RightMotionController);
 }
 
 void APlayerCharacter::OnTeleportReleased()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("OnTeleportReleased"));
-	
 	auto result = teleportComp->GetTeleportData();
 	teleportComp->Disable();
-
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::Printf(TEXT("%d %d %d"), result.Position.X, result.Position.Y, result.Position.Z));
 
 	if (result.ShouldTeleport)
 	{
 		auto success = TeleportTo(result.Position, GetActorRotation(), false, true);
-
-		if (success)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Teleport Success"));
-		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Teleport Fail"));
-		}
 	}
 }
