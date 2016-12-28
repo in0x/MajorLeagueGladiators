@@ -76,7 +76,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInputCom
 	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &APlayerCharacter::OnRightTriggerClicked);
 	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &APlayerCharacter::OnRightTriggerReleased);
 
-	playerInputComponent->BindAction("TeleportPress", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnTeleportPressed);
+	playerInputComponent->BindAction("TeleportPress", EInputEvent::IE_Repeat, this, &APlayerCharacter::OnTeleportPressed);
 	playerInputComponent->BindAction("TeleportPress", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
 }
 
@@ -130,36 +130,13 @@ void APlayerCharacter::OnRightTriggerReleased()
 
 void APlayerCharacter::OnTeleportPressed()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("OnTeleportPressed"));
-	
-	//FHitResult result;
-	//TArray<FVector> positions;
-	//FVector lastTraceDest;
-	///*FVector vel(100, 0, 50);*/
-	//TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{ EObjectTypeQuery::ObjectTypeQuery1 };
-
-	//UGameplayStatics::PredictProjectilePath(GetWorld(),
-	//	result,
-	//	positions,
-	//	lastTraceDest,
-	//	GetActorLocation(),
-	//	GetActorForwardVector() * 100, //vel,
-	//	true,
-	//	10,
-	//	queryTypes,
-	//	true,
-	//	TArray<AActor*>(),
-	//	EDrawDebugTrace::ForOneFrame,
-	//	1.f);
-
-	FHitResult result;
 	TArray<FVector> positions;
 	FVector lastTraceDest;
 	TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{ EObjectTypeQuery::ObjectTypeQuery1 };
 
 	UGameplayStatics::PredictProjectilePath(
 		GetWorld(),
-		result,
+		tpHitResult,
 		positions,
 		lastTraceDest,
 		vrArrow->GetComponentLocation(),
@@ -169,14 +146,21 @@ void APlayerCharacter::OnTeleportPressed()
 		queryTypes,
 		false,
 		TArray<AActor*>(),
-		EDrawDebugTrace::ForDuration,
-		5.f
+		EDrawDebugTrace::ForOneFrame,
+		0.f
 	);
-
-	
 }
 
 void APlayerCharacter::OnTeleportReleased()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("OnTeleportReleased"));
+	auto success = TeleportTo(tpHitResult.Location, vrArrow->GetComponentRotation(), false, true);
+	
+	if (success)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Teleport Success"));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Teleport Fail"));
+	}
 }
