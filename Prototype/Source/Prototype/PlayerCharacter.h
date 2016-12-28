@@ -43,5 +43,6 @@ private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
 	USphereComponent* leftGrabSphere;
 	USphereComponent* rightGrabSphere;
+	UArrowComponent* vrArrow;
 
 };

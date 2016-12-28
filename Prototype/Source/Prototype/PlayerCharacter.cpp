@@ -25,6 +25,9 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 
 	leftGrabSphere->SetupAttachment(LeftMotionController);
 	rightGrabSphere->SetupAttachment(RightMotionController);
+
+	// ArrowComponent is used to determine position and direction for teleport.
+	vrArrow = CastChecked<UArrowComponent>(GetComponentByClass(UArrowComponent::StaticClass())); 
 }
 
 void APlayerCharacter::BeginPlay()
@@ -128,6 +131,49 @@ void APlayerCharacter::OnRightTriggerReleased()
 void APlayerCharacter::OnTeleportPressed()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("OnTeleportPressed"));
+	
+	//FHitResult result;
+	//TArray<FVector> positions;
+	//FVector lastTraceDest;
+	///*FVector vel(100, 0, 50);*/
+	//TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{ EObjectTypeQuery::ObjectTypeQuery1 };
+
+	//UGameplayStatics::PredictProjectilePath(GetWorld(),
+	//	result,
+	//	positions,
+	//	lastTraceDest,
+	//	GetActorLocation(),
+	//	GetActorForwardVector() * 100, //vel,
+	//	true,
+	//	10,
+	//	queryTypes,
+	//	true,
+	//	TArray<AActor*>(),
+	//	EDrawDebugTrace::ForOneFrame,
+	//	1.f);
+
+	FHitResult result;
+	TArray<FVector> positions;
+	FVector lastTraceDest;
+	TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{ EObjectTypeQuery::ObjectTypeQuery1 };
+
+	UGameplayStatics::PredictProjectilePath(
+		GetWorld(),
+		result,
+		positions,
+		lastTraceDest,
+		vrArrow->GetComponentLocation(),
+		vrArrow->GetForwardVector() * 900,
+		true,
+		0, 
+		queryTypes,
+		false,
+		TArray<AActor*>(),
+		EDrawDebugTrace::ForDuration,
+		5.f
+	);
+
+	
 }
 
 void APlayerCharacter::OnTeleportReleased()
