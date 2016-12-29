@@ -32,7 +32,7 @@ private:
 	USplineMeshComponent* tpSpline;
 	TArray<FVector> positions;
 	FVector lastTraceDest;
-	TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{ EObjectTypeQuery::ObjectTypeQuery1 };
+	TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{ EObjectTypeQuery::ObjectTypeQuery1 }; // ObjectTypeQuery1 is static world objects
 	FHitResult tpHitResult;
 	bool shouldTeleport;
 };
