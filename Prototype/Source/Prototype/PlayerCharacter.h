@@ -40,11 +40,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	UStaticMeshComponent* rightMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTeleportComponent* teleportComp;
+
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
 
 	USphereComponent* leftGrabSphere;
 	USphereComponent* rightGrabSphere;
-
-	UTeleportComponent* teleportComp;
 };

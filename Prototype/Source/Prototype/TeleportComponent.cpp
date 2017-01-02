@@ -3,9 +3,14 @@
 #include "Prototype.h"
 #include "TeleportComponent.h"
 
-UTeleportComponent::UTeleportComponent()
+UTeleportComponent::UTeleportComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	arcSpline = ObjectInitializer.CreateDefaultSubobject<USplineMeshComponent>(this, TEXT("ArcSpline"));
+	arcSpline->SetMaterial(0, ArcSplineMaterial);
+	arcSpline->SetMaterial(1, ArcSplineMaterial);
 }
 
 void UTeleportComponent::BeginPlay()
@@ -36,12 +41,26 @@ void UTeleportComponent::TickComponent( float DeltaTime, ELevelTick TickType, FA
 		EDrawDebugTrace::ForOneFrame,
 		1.f
 	);
+
+	arcSpline->SetStartAndEnd(origin->GetComponentLocation(), FVector(0.5f, 0.f, 0.5f), tpHitResult.ImpactPoint, FVector(0.5f, 0.f, 0.5f));
+
+	/*int32 SplinePoints = Spline->GetNumSplinePoints() - 1;
+	for (int32 i = 0; i < SplinePoints; ++i) {
+		FVector Location, Tangent, LocationNext, TangentNext;
+		Spline->GetLocalLocationAndTangentAtSplinePoint(i, Location, Tangent);
+		Spline->GetLocalLocationAndTangentAtSplinePoint(i + 1, LocationNext, TangentNext);
+		auto *s = ConstructObject<USplineMeshComponent>(USplineMeshComponent::StaticClass(), GetOwner());
+		s->SetStaticMesh(Mesh);
+		s->SetStartAndEnd(Location, Tangent, LocationNext, TangentNext);
+	}*/
 }
 
 void UTeleportComponent::Enable(USceneComponent* teleportOrigin)
 {
 	origin = teleportOrigin;
 	Activate();
+
+	arcSpline->Activate();
 }
 
 TeleportData UTeleportComponent::GetTeleportData()
@@ -62,5 +81,6 @@ void UTeleportComponent::Disable()
 {
 	origin = nullptr;
 	Deactivate();
+	arcSpline->Deactivate();
 }
 
