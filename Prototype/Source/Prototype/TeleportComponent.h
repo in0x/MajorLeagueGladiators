@@ -13,13 +13,13 @@ struct TeleportData
 	bool ShouldTeleport;
 };
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PROTOTYPE_API UTeleportComponent : public UActorComponent
+UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
+class PROTOTYPE_API UTeleportComponent : public UPrimitiveComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UTeleportComponent();
+	UTeleportComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void BeginPlay() override;
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 	
@@ -27,12 +27,17 @@ public:
 	TeleportData GetTeleportData();
 	void Disable();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
+	UMaterial* ArcSplineMaterial;
+
 private:
 	USceneComponent* origin;
-	USplineMeshComponent* tpSpline;
-	TArray<FVector> positions;
+	USplineMeshComponent* arcSpline;
+
+	// PredictProjectilePath Hit Test Data
 	FVector lastTraceDest;
-	TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{ EObjectTypeQuery::ObjectTypeQuery1 }; // ObjectTypeQuery1 is static world objects
 	FHitResult tpHitResult;
+	TArray<FVector> positions;
+	TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{ EObjectTypeQuery::ObjectTypeQuery1 }; // ObjectTypeQuery1 is static world objects
 	bool shouldTeleport;
 };

@@ -2,10 +2,8 @@
 
 #include "Prototype.h"
 #include "PlayerCharacter.h"
-#include "IPlayerCharacterMotionController.h"
 #include "VRControllerComponent.h"
 #include <algorithm>
-#include <tuple>
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
