@@ -11,14 +11,34 @@ UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectI
 bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere)
 {	
 	AActor* closest = GetNearestGrabableActor(grabSphere);
-
-	if (closest)
+	
+	if (!closest)
 	{
-		GripActor(closest, closest->GetTransform());
-		return true;
+		return false;
+	}
+
+	auto gripComp = Cast<IVRGripInterface>(closest->GetRootComponent());
+	
+	if (gripComp)
+	{
+		bool foundSlot;
+		FTransform slotTrafo;
+
+		gripComp->ClosestPrimarySlotInRange_Implementation(GetComponentLocation(), foundSlot, slotTrafo);
+
+		if (foundSlot)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Slot"));
+			slotTrafo = UKismetMathLibrary::ConvertTransformToRelative(slotTrafo, closest->GetActorTransform());
+			GripActor(closest, slotTrafo, true);
+		}
 	}
 	
-	return false;
+	auto gripTrafo = closest->GetTransform();
+	gripTrafo.SetLocation(GetComponentLocation());
+	GripActor(closest, gripTrafo); 
+	
+	return true;
 }
 
 void UVRControllerComponent::DropAllGrips()
