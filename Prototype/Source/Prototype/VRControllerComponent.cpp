@@ -28,7 +28,6 @@ bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere
 
 		if (foundSlot)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Slot"));
 			slotTrafo = UKismetMathLibrary::ConvertTransformToRelative(slotTrafo, closest->GetActorTransform());
 			GripActor(closest, slotTrafo, true);
 		}
