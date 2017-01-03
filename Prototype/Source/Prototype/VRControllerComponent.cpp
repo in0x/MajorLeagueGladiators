@@ -8,6 +8,14 @@ UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectI
 	:Super(ObjectInitializer)
 {}
 
+/*
+NOTE(Phil)
+We now try to find a primary socket in range for gripping first. If we dont find a
+socket, we simply attach the Actor as it is at the time of the overlap.
+VRExpansion supports gripping sockets, however, the sockets need to be 
+named either VRGripP (Primary) or VRGripS(Secondary). 
+IVRGripInterface implementers can be queried using Closest[Primary|Secondary]SlotinRange.  
+*/
 bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere)
 {	
 	AActor* closest = GetNearestGrabableActor(grabSphere);
