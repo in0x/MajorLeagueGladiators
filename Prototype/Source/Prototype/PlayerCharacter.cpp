@@ -102,39 +102,33 @@ void APlayerCharacter::MoveRight(float value)
 
 void APlayerCharacter::OnLeftTriggerAxis(float value)
 {
-	if (value > 0.f)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("LeftTrigger: %f"), value), false);
-	}
 }
 
 void APlayerCharacter::OnRightTriggerAxis(float value)
 {
-	if (value > 0.f)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("RightTrigger: %f"), value), false);
-	}
 }
 
 void APlayerCharacter::OnLeftTriggerClicked()
 {
+	CastChecked<UVRControllerComponent>(LeftMotionController)->UseGrippedActors();
 	CastChecked<UVRControllerComponent>(LeftMotionController)->GrabNearestActor(*leftGrabSphere);
 }
 
 void APlayerCharacter::OnLeftTriggerReleased()
 {
-	CastChecked<UVRControllerComponent>(LeftMotionController)->DropAllGrips();
+	CastChecked<UVRControllerComponent>(LeftMotionController)->EndUseGrippedActors();
 	CastChecked<UVRControllerComponent>(LeftMotionController)->DropManipulationGrips();
 }
 
 void APlayerCharacter::OnRightTriggerClicked()
 {
+	CastChecked<UVRControllerComponent>(RightMotionController)->UseGrippedActors();
 	CastChecked<UVRControllerComponent>(RightMotionController)->GrabNearestActor(*rightGrabSphere);
 }
 
 void APlayerCharacter::OnRightTriggerReleased()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
+	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
 	CastChecked<UVRControllerComponent>(RightMotionController)->DropManipulationGrips();
 }
 
