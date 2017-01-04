@@ -19,5 +19,12 @@ public:
 	void DropAllGrips();
 
 private:
-	AActor* GetNearestGrabableActor(const USphereComponent& grabSphere) const;
+
+	struct ActorGrabData
+	{
+		AActor* pActorToGrip;
+		IVRGripInterface* pIVRGrip;
+	};
+
+	ActorGrabData GetNearestGrabableActor(const USphereComponent& grabSphere) const;
 };

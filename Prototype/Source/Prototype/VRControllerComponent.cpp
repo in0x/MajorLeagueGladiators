@@ -5,7 +5,7 @@
 #include <algorithm>
 
 UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectInitializer)
-	:Super(ObjectInitializer)
+	: Super(ObjectInitializer)
 {}
 
 /*
@@ -18,14 +18,15 @@ IVRGripInterface implementers can be queried using Closest[Primary|Secondary]Slo
 */
 bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere)
 {	
-	AActor* closest = GetNearestGrabableActor(grabSphere);
+	auto grabData = GetNearestGrabableActor(grabSphere);
 	
-	if (!closest)
+	if (!grabData.pActorToGrip)
 	{
 		return false;
 	}
 
-	auto gripComp = Cast<IVRGripInterface>(closest->GetRootComponent());
+	IVRGripInterface* gripComp = grabData.pIVRGrip;
+	AActor* closest = grabData.pActorToGrip;
 	
 	if (gripComp)
 	{
@@ -38,7 +39,13 @@ bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere
 		{
 			slotTrafo = UKismetMathLibrary::ConvertTransformToRelative(slotTrafo, closest->GetActorTransform());
 			GripActor(closest, slotTrafo, true);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("From Socket"));
+			return true;
 		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No IVRGrip"));
 	}
 	
 	auto gripTrafo = closest->GetTransform();
@@ -59,22 +66,22 @@ void UVRControllerComponent::DropAllGrips()
 	}
 }
 
-AActor* UVRControllerComponent::GetNearestGrabableActor(const USphereComponent& grabSphere) const
+UVRControllerComponent::ActorGrabData UVRControllerComponent::GetNearestGrabableActor(const USphereComponent& grabSphere) const
 {
 	TArray<AActor*> overlaps;
 	grabSphere.GetOverlappingActors(overlaps);
 
 	overlaps = overlaps.FilterByPredicate([](AActor* pActor)
 	{
-		return Cast<IVRGripInterface>(pActor->GetRootComponent()) != nullptr;
+		// Covers two cases: We have an Actor whose RootComponent is of IVRGripInterface or we have an Actor
+		// who is derived from another grippable Actor, such as AGrippableStaticMeshActor.
+		return Cast<IVRGripInterface>(pActor->GetRootComponent()) != nullptr || Cast<IVRGripInterface>(pActor) != nullptr;
 	});
 
 	if (overlaps.Num() == 0)
 	{
-		return nullptr;
+		return {};
 	}
-	else if (overlaps.Num() == 1)
-		return *overlaps.GetData();
 
 	AActor* closest = std::min(*overlaps.GetData(), overlaps.Last(), [&grabSphere](auto a, auto b)
 	{
@@ -82,7 +89,16 @@ AActor* UVRControllerComponent::GetNearestGrabableActor(const USphereComponent& 
 			 < FVector::DistSquared(b->GetRootComponent()->GetComponentLocation(), grabSphere.GetComponentLocation());
 	});
 
-	return closest;
+	ActorGrabData ret;
+	ret.pActorToGrip = closest;
+
+	ret.pIVRGrip = Cast<IVRGripInterface>(closest->GetRootComponent());
+	if (!ret.pIVRGrip)
+	{
+		ret.pIVRGrip = Cast<IVRGripInterface>(closest);
+	}
+	
+	return ret;
 }
 
 
