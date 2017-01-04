@@ -16,8 +16,11 @@ class PROTOTYPE_API AGunActor : public AGrippableStaticMeshActor
 	
 public:
 	AGunActor();
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AGunProjectile> GunProjectileClass;
+
+	UStaticMeshSocket* projectileSpawnSocket;
 };

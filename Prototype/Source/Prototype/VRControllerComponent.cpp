@@ -50,6 +50,9 @@ bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere
 
 void UVRControllerComponent::DropAllGrips()
 {
+	if (GrippedActors.Num() == 0)
+		return;
+
 	for (auto& grip : GrippedActors)
 	{
 		DropGrip(grip, true);
