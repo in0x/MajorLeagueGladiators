@@ -19,6 +19,12 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
+		void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation);
+	
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
+		void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AGunProjectile> GunProjectileClass;
 
