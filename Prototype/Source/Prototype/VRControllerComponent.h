@@ -17,6 +17,7 @@ public:
 	UVRControllerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	bool GrabNearestActor(const USphereComponent& grabSphere);
 	void DropAllGrips();
+	void DropManipulationGrips();
 
 private:
 
