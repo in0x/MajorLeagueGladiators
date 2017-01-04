@@ -15,7 +15,7 @@ class PROTOTYPE_API AGunActor : public AGrippableStaticMeshActor
 	GENERATED_BODY()
 	
 public:
-	AGunActor();
+	AGunActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
