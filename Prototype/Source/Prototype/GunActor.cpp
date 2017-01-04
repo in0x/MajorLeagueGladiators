@@ -9,19 +9,33 @@ AGunActor::AGunActor()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
+void AGunActor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	auto mesh = GetStaticMeshComponent()->GetStaticMesh();
+	if (mesh)
+	{
+		projectileSpawnSocket = mesh->FindSocket(FName("ProjectileSpawn"));
+
+		if (!projectileSpawnSocket)
+		{
+			UE_LOG(DebugLog, Warning, TEXT("Gun Mesh does not have a 'ProjectileSpawn' socket, projectiles will be spawned at incorrect position"));
+		}
+	}
+}
+
 void AGunActor::Tick(float DeltaTime)
 {
-	auto projectile = GetWorld()->SpawnActor<AGunProjectile>(GunProjectileClass, GetActorTransform());
+	Super::Tick(DeltaTime);
 
-	if (projectile)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("SPAWNED"));
-		projectile->SetActorLocation(GetActorLocation());
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("FAILED"));
-	}
+	FTransform trafo;
+	projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
+	
+	auto projectile = GetWorld()->SpawnActor<AGunProjectile>(GunProjectileClass, trafo);
+
+	auto projectileSpawnPos = trafo.GetLocation();
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("%f, %f, %f"), projectileSpawnPos.X, projectileSpawnPos.Y, projectileSpawnPos.Z));
 }
 
 
