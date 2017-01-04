@@ -27,7 +27,8 @@ bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere
 
 	IVRGripInterface* gripComp = grabData.pIVRGrip;
 	AActor* closest = grabData.pActorToGrip;
-	
+	auto gripTrafo = closest->GetTransform();
+
 	if (gripComp)
 	{
 		bool foundSlot;
@@ -38,19 +39,16 @@ bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere
 		if (foundSlot)
 		{
 			slotTrafo = UKismetMathLibrary::ConvertTransformToRelative(slotTrafo, closest->GetActorTransform());
-			GripActor(closest, slotTrafo, true);
+			slotTrafo.SetScale3D(gripTrafo.GetScale3D());
+			
+			GripActor(closest, slotTrafo, true, FName(), gripComp->SlotGripType_Implementation());
+
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("From Socket"));
 			return true;
 		}
 	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No IVRGrip"));
-	}
-	
-	auto gripTrafo = closest->GetTransform();
 	gripTrafo.SetLocation(GetComponentLocation());
-	GripActor(closest, gripTrafo); 
+	GripActor(closest, gripTrafo, false, FName(), gripComp->FreeGripType_Implementation());
 	
 	return true;
 }
@@ -61,7 +59,7 @@ void UVRControllerComponent::DropAllGrips()
 		return;
 
 	for (auto& grip : GrippedActors)
-	{
+	{ 
 		DropGrip(grip, true);
 	}
 }

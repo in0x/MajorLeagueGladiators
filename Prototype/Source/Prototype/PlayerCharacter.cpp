@@ -124,6 +124,7 @@ void APlayerCharacter::OnLeftTriggerClicked()
 void APlayerCharacter::OnLeftTriggerReleased()
 {
 	CastChecked<UVRControllerComponent>(LeftMotionController)->DropAllGrips();
+	CastChecked<UVRControllerComponent>(LeftMotionController)->DropManipulationGrips();
 }
 
 void APlayerCharacter::OnRightTriggerClicked()
@@ -134,6 +135,7 @@ void APlayerCharacter::OnRightTriggerClicked()
 void APlayerCharacter::OnRightTriggerReleased()
 {
 	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
+	CastChecked<UVRControllerComponent>(RightMotionController)->DropManipulationGrips();
 }
 
 void APlayerCharacter::OnTeleportPressedLeft()
