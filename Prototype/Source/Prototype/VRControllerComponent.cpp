@@ -64,6 +64,27 @@ void UVRControllerComponent::DropAllGrips()
 	}
 }
 
+void UVRControllerComponent::DropManipulationGrips()
+{
+	if (GrippedActors.Num() == 0)
+		return;
+
+	for (auto& grip : GrippedActors)
+	{
+		/*
+		NOTE(Phil): Following the conventions used by the Dev of VRExpansion,
+		the grip's collision type decides how interactions work.
+		Only ManipulationGrips are dropped when the trigger is released.
+		Other GripCollisiontypes should require another action to detach
+		(such as weapon grips).
+		*/
+		if (grip.GripCollisionType.GetValue() == EGripCollisionType::ManipulationGrip)
+		{
+			DropGrip(grip, true);
+		}
+	}
+}
+
 UVRControllerComponent::ActorGrabData UVRControllerComponent::GetNearestGrabableActor(const USphereComponent& grabSphere) const
 {
 	TArray<AActor*> overlaps;
@@ -99,4 +120,35 @@ UVRControllerComponent::ActorGrabData UVRControllerComponent::GetNearestGrabable
 	return ret;
 }
 
+void UVRControllerComponent::UseGrippedActors()
+{
+	if (GrippedActors.Num() == 0)
+		return;
+
+	for (auto& grip : GrippedActors)
+	{
+		auto gripActor = Cast<IVRGripInterface>(grip.Actor);
+
+		if (gripActor)
+		{
+			gripActor->OnUsed();
+		}
+	}
+}
+
+void UVRControllerComponent::EndUseGrippedActors()
+{
+	if (GrippedActors.Num() == 0)
+		return;
+
+	for (auto& grip : GrippedActors)
+	{
+		auto gripActor = Cast<IVRGripInterface>(grip.Actor);
+
+		if (gripActor)
+		{
+			gripActor->OnEndUsed();
+		}
+	}
+}
 

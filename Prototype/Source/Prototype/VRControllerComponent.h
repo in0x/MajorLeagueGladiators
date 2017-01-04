@@ -18,6 +18,8 @@ public:
 	bool GrabNearestActor(const USphereComponent& grabSphere);
 	void DropAllGrips();
 	void DropManipulationGrips();
+	void UseGrippedActors();
+	void EndUseGrippedActors();
 
 private:
 

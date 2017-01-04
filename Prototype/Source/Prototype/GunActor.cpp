@@ -59,6 +59,16 @@ void AGunActor::OnGripRelease_Implementation(UGripMotionControllerComponent * Re
 	bShooting = false;
 }
 
+void AGunActor::OnUsed()
+{
+	bShooting = true;
+}
+
+void AGunActor::OnEndUsed()
+{
+	bShooting = false;
+}
+
 
 
 

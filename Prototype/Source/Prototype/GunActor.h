@@ -25,6 +25,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
 		void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation);
 
+	virtual void OnUsed() override;
+		
+	virtual void OnEndUsed() override;
+		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AGunProjectile> GunProjectileClass;
 
