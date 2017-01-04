@@ -79,16 +79,25 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 		void ClosestPrimarySlotInRange(FVector WorldLocation, bool & bHadSlotInRange, FTransform & SlotWorldTransform);
 
-
 	// Events that can be called for interface inheriting actors
 
+	
+	/*============
+
+	NOTE(Phil): I had to change OnGrip and OnGripRelease to BlueprintNativeEvent so that I can implement them in C++.
+				We need this to notify objects when they are gripped / dropped.
+	*/
 	// Event triggered on the interfaced object when gripped
-	UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
+	// UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
 		void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation);
 
 	// Event triggered on the interfaced object when grip is released
-	UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
+	//UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
 		void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation);
+	
+	//===========
 
 	// Event triggered on the interfaced object when child component is gripped
 	UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")

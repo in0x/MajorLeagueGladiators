@@ -30,13 +30,20 @@ void AGunActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//FTransform trafo;
-	//projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
-	//
-	//auto projectile = GetWorld()->SpawnActor<AGunProjectile>(GunProjectileClass, trafo);
+	FTransform trafo;
+	projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
+	
+	auto projectile = GetWorld()->SpawnActor<AGunProjectile>(GunProjectileClass, trafo);
+}
 
-	//auto projectileSpawnPos = trafo.GetLocation();
-	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("%f, %f, %f"), projectileSpawnPos.X, projectileSpawnPos.Y, projectileSpawnPos.Z));
+void AGunActor::OnGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Gripped"));
+}
+
+void AGunActor::OnGripRelease_Implementation(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Grip Release"));
 }
 
 
