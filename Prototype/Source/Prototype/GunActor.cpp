@@ -3,6 +3,11 @@
 #include "Prototype.h"
 #include "GunActor.h"
 
+namespace 
+{
+	bool bShooting;
+}
+
 AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -24,26 +29,34 @@ void AGunActor::BeginPlay()
 			UE_LOG(DebugLog, Warning, TEXT("Gun Mesh does not have a 'ProjectileSpawn' socket, projectiles will be spawned at incorrect position"));
 		}
 	}
+
+	SetActorTickInterval(0.1f);
 }
 
 void AGunActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FTransform trafo;
-	projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
-	
-	auto projectile = GetWorld()->SpawnActor<AGunProjectile>(GunProjectileClass, trafo);
+	if (bShooting)
+	{
+		FTransform trafo;
+		projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
+
+		auto projectile = GetWorld()->SpawnActor<AGunProjectile>(GunProjectileClass, trafo);
+		projectile->GetStaticMeshComponent()->AddImpulse(GetActorRightVector() * 10000.f);
+	}
 }
 
 void AGunActor::OnGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Gripped"));
+	bShooting = true;
 }
 
 void AGunActor::OnGripRelease_Implementation(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Grip Release"));
+	bShooting = false;
 }
 
 
