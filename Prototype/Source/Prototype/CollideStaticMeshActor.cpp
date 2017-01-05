@@ -9,9 +9,6 @@ ACollideStaticMeshActor::ACollideStaticMeshActor()
 {
 	OnActorHit.AddDynamic(this, &ACollideStaticMeshActor::OnHit);
 
-	USceneComponent* rootComp = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	RootComponent = rootComp;
-
 }
 
 void ACollideStaticMeshActor::OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
@@ -22,5 +19,5 @@ void ACollideStaticMeshActor::OnHit(AActor* SelfActor, AActor* OtherActor, FVect
 	float damage = 10.f;
 	TSubclassOf<UDamageType> const gunDamageType = TSubclassOf<UDamageType>(UDamageType::StaticClass()); //TODO GunDamageType, SwordDamageType, ...
 
-	UGameplayStatics::ApplyDamage(SelfActor, damage, nullptr, OtherActor, gunDamageType);
+	UGameplayStatics::ApplyDamage(this, damage, nullptr, OtherActor, gunDamageType);
 }

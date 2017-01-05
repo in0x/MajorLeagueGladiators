@@ -23,6 +23,7 @@ public:
 
 protected:
 
+	UFUNCTION()
 	void HandleDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	
 };
