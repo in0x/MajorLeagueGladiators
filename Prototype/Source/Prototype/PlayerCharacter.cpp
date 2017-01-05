@@ -115,22 +115,22 @@ void APlayerCharacter::OnRightTriggerAxis(float value)
 
 void APlayerCharacter::OnLeftTriggerClicked()
 {
-	CastChecked<UVRControllerComponent>(LeftMotionController)->GrabNearestActor(*leftGrabSphere);
+	Server_LeftHandGrab();
 }
 
 void APlayerCharacter::OnLeftTriggerReleased()
 {
-	CastChecked<UVRControllerComponent>(LeftMotionController)->DropAllGrips();
+	Server_LeftHandDrop();
 }
 
 void APlayerCharacter::OnRightTriggerClicked()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->GrabNearestActor(*rightGrabSphere);
+	Server_RightHandGrab();
 }
 
 void APlayerCharacter::OnRightTriggerReleased()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
+	Server_RightHandDrop();
 }
 
 void APlayerCharacter::OnTeleportPressedLeft()
@@ -152,4 +152,46 @@ void APlayerCharacter::OnTeleportReleased()
 	{
 		auto success = TeleportTo(result.Position, GetActorRotation(), false, true);
 	}
+}
+
+//left hand
+bool APlayerCharacter::Server_LeftHandGrab_Validate()
+{
+	return true;
+}
+
+void APlayerCharacter::Server_LeftHandGrab_Implementation()
+{
+	CastChecked<UVRControllerComponent>(LeftMotionController)->GrabNearestActor(*leftGrabSphere);
+}
+
+bool APlayerCharacter::Server_LeftHandDrop_Validate()
+{
+	return true;
+}
+
+void APlayerCharacter::Server_LeftHandDrop_Implementation()
+{
+	CastChecked<UVRControllerComponent>(LeftMotionController)->DropAllGrips();
+}
+
+//right hand
+bool APlayerCharacter::Server_RightHandGrab_Validate()
+{
+	return true;
+}
+
+void APlayerCharacter::Server_RightHandGrab_Implementation()
+{
+	CastChecked<UVRControllerComponent>(RightMotionController)->GrabNearestActor(*rightGrabSphere);
+}
+
+bool APlayerCharacter::Server_RightHandDrop_Validate()
+{
+	return true;
+}
+
+void APlayerCharacter::Server_RightHandDrop_Implementation()
+{
+	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
 }
