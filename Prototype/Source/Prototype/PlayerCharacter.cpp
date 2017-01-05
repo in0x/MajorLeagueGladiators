@@ -115,22 +115,22 @@ void APlayerCharacter::OnRightTriggerAxis(float value)
 
 void APlayerCharacter::OnLeftTriggerClicked()
 {
-	Server_LeftHandGrab();
+	LeftHandGrab_Server();
 }
 
 void APlayerCharacter::OnLeftTriggerReleased()
 {
-	Server_LeftHandDrop();
+	LeftHandDrop_Server();
 }
 
 void APlayerCharacter::OnRightTriggerClicked()
 {
-	Server_RightHandGrab();
+	RightHandGrab_Server();
 }
 
 void APlayerCharacter::OnRightTriggerReleased()
 {
-	Server_RightHandDrop();
+	RightHandDrop_Server();
 }
 
 void APlayerCharacter::OnTeleportPressedLeft()
@@ -155,43 +155,43 @@ void APlayerCharacter::OnTeleportReleased()
 }
 
 //left hand
-bool APlayerCharacter::Server_LeftHandGrab_Validate()
+bool APlayerCharacter::LeftHandGrab_Server_Validate()
 {
 	return true;
 }
 
-void APlayerCharacter::Server_LeftHandGrab_Implementation()
+void APlayerCharacter::LeftHandGrab_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(LeftMotionController)->GrabNearestActor(*leftGrabSphere);
 }
 
-bool APlayerCharacter::Server_LeftHandDrop_Validate()
+bool APlayerCharacter::LeftHandDrop_Server_Validate()
 {
 	return true;
 }
 
-void APlayerCharacter::Server_LeftHandDrop_Implementation()
+void APlayerCharacter::LeftHandDrop_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(LeftMotionController)->DropAllGrips();
 }
 
 //right hand
-bool APlayerCharacter::Server_RightHandGrab_Validate()
+bool APlayerCharacter::RightHandGrab_Server_Validate()
 {
 	return true;
 }
 
-void APlayerCharacter::Server_RightHandGrab_Implementation()
+void APlayerCharacter::RightHandGrab_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(RightMotionController)->GrabNearestActor(*rightGrabSphere);
 }
 
-bool APlayerCharacter::Server_RightHandDrop_Validate()
+bool APlayerCharacter::RightHandDrop_Server_Validate()
 {
 	return true;
 }
 
-void APlayerCharacter::Server_RightHandDrop_Implementation()
+void APlayerCharacter::RightHandDrop_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
 }
