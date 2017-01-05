@@ -16,4 +16,5 @@ class PROTOTYPE_API ACollideStaticMeshActor : public AStaticMeshActor
 public:
 	ACollideStaticMeshActor();
 	UFUNCTION() void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+
 };
