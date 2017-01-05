@@ -22,8 +22,9 @@ void UDamageHandlerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	if (GetOwner())
+	if (GetOwner() != nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Adding HandleDamage func..."));
 		GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UDamageHandlerComponent::HandleDamage);
 	}
 }
@@ -42,12 +43,13 @@ void UDamageHandlerComponent::HandleDamage(AActor* DamagedActor, float Damage, c
 {
 	//FPointDamageEvent pointDamageEvent = Cast<FPointDamageEvent>(DamageType);
 	auto hComp = DamagedActor->GetComponentByClass(UHealthComponent::StaticClass());
+	
 
 	if (hComp)
 	{
 		UHealthComponent* healthComp = CastChecked<UHealthComponent>(hComp);
 
 		healthComp->CurrentHealth -= Damage;
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("CurrentHealth: %f"), healthComp->CurrentHealth));
+		UE_LOG(LogTemp, Warning, TEXT("Apply damage... | Health left: %f"), healthComp->CurrentHealth);
 	}
 }
