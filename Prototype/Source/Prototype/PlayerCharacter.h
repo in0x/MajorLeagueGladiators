@@ -50,16 +50,16 @@ private:
 
 #pragma region serverFunctions
 	UFUNCTION(Server, WithValidation, reliable)
-	void Server_LeftHandGrab();
+	void LeftHandGrab_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
-	void Server_LeftHandDrop();
+	void LeftHandDrop_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
-	void Server_RightHandGrab();
+	void RightHandGrab_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
-	void Server_RightHandDrop();
+	void RightHandDrop_Server();
 #pragma endregion
 
 };
