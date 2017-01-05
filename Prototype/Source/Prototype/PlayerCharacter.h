@@ -25,7 +25,6 @@ public:
 	
 	void OnLeftTriggerAxis(float value);
 	void OnRightTriggerAxis(float value);
-
 	void OnLeftTriggerClicked();
 	void OnLeftTriggerReleased();
 	void OnRightTriggerClicked();
@@ -48,4 +47,19 @@ private:
 
 	USphereComponent* leftGrabSphere;
 	USphereComponent* rightGrabSphere;
+
+#pragma region serverFunctions
+	UFUNCTION(Server, WithValidation, reliable)
+	void Server_LeftHandGrab();
+
+	UFUNCTION(Server, WithValidation, reliable)
+	void Server_LeftHandDrop();
+
+	UFUNCTION(Server, WithValidation, reliable)
+	void Server_RightHandGrab();
+
+	UFUNCTION(Server, WithValidation, reliable)
+	void Server_RightHandDrop();
+#pragma endregion
+
 };
