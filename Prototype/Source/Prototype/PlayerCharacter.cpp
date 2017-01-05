@@ -86,6 +86,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInputCom
 
 	playerInputComponent->BindAction("TeleportPressLeft", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
 	playerInputComponent->BindAction("TeleportPressRight", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
+
+	playerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonLeft);
+	playerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonRight);
 }
 
 void APlayerCharacter::MoveForward(float value)
@@ -151,4 +154,14 @@ void APlayerCharacter::OnTeleportReleased()
 	{
 		auto success = TeleportTo(result.Position, GetActorRotation(), false, true);
 	}
+}
+
+void APlayerCharacter::OnSideGripButtonLeft()
+{
+	CastChecked<UVRControllerComponent>(LeftMotionController)->DropAllGrips();
+}
+
+void APlayerCharacter::OnSideGripButtonRight()
+{
+	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
 }
