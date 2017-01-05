@@ -33,6 +33,8 @@ public:
 	void OnTeleportPressedLeft();
 	void OnTeleportPressedRight();
 	void OnTeleportReleased();
+	void OnSideGripButtonLeft();
+	void OnSideGripButtonRight();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	UStaticMeshComponent* leftMesh;
