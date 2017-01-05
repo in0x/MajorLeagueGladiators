@@ -30,10 +30,10 @@ void UHealthComponent::TickComponent( float DeltaTime, ELevelTick TickType, FAct
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	if (CurrentHealth <= 0.f) 
+	/*if (CurrentHealth <= 0.f) 
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("Health is zero or below."));
-	}
+	}*/
 
 }
 

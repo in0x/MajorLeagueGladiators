@@ -9,7 +9,7 @@ UDamageHandlerComponent::UDamageHandlerComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	
 	
@@ -51,5 +51,10 @@ void UDamageHandlerComponent::HandleDamage(AActor* DamagedActor, float Damage, c
 
 		healthComp->CurrentHealth -= Damage;
 		UE_LOG(LogTemp, Warning, TEXT("Apply damage... | Health left: %f"), healthComp->CurrentHealth);
+
+		if (healthComp->CurrentHealth <= 0.f)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("The actor '%s' has no health left!"), *DamagedActor->GetName()));
+		}
 	}
 }
