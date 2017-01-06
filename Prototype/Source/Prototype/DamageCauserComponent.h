@@ -3,17 +3,20 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
-#include "HealthComponent.generated.h"
+#include "DamageCauserComponent.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PROTOTYPE_API UHealthComponent : public USceneComponent
+class PROTOTYPE_API UDamageCauserComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+private:
+	UFUNCTION() void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+
 public:	
 	// Sets default values for this component's properties
-	UHealthComponent();
+	UDamageCauserComponent();
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -21,12 +24,6 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	bool IsMainHealth;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float MaxHealth;
+		
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float CurrentHealth;
 };

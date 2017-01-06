@@ -26,6 +26,14 @@ void UDamageHandlerComponent::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Adding HandleDamage func..."));
 		GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UDamageHandlerComponent::HandleDamage);
+		GetOwner()->OnTakePointDamage.AddDynamic(this, &UDamageHandlerComponent::HandlePointDamage);
+		health_components = TArray<UHealthComponent*>();
+		TArray<UActorComponent*> healthcomps = GetOwner()->GetComponentsByClass(UHealthComponent::StaticClass());
+
+		for (int i = 0; i < healthcomps.Num(); i++)
+		{
+			health_components.Add(CastChecked<UHealthComponent>(healthcomps[i]));
+		}
 	}
 }
 
@@ -42,12 +50,17 @@ void UDamageHandlerComponent::TickComponent( float DeltaTime, ELevelTick TickTyp
 void UDamageHandlerComponent::HandleDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
 	//FPointDamageEvent pointDamageEvent = Cast<FPointDamageEvent>(DamageType);
-	auto hComp = DamagedActor->GetComponentByClass(UHealthComponent::StaticClass());
+	UHealthComponent* healthComp = *health_components.FindByPredicate([](auto hc)
+	{
+		return hc->IsMainHealth;
+	});
+	
+	//auto hComp = DamagedActor->GetComponentByClass(UHealthComponent::StaticClass());
 	
 
-	if (hComp)
+	if (healthComp)
 	{
-		UHealthComponent* healthComp = CastChecked<UHealthComponent>(hComp);
+		//UHealthComponent* healthComp = CastChecked<UHealthComponent>(hComp);
 
 		healthComp->CurrentHealth -= Damage;
 		UE_LOG(LogTemp, Warning, TEXT("Apply damage... | Health left: %f"), healthComp->CurrentHealth);
@@ -57,4 +70,42 @@ void UDamageHandlerComponent::HandleDamage(AActor* DamagedActor, float Damage, c
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("The actor '%s' has no health left!"), *DamagedActor->GetName()));
 		}
 	}
+}
+
+
+void UDamageHandlerComponent::HandlePointDamage(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser)
+{
+
+	//FPointDamageEvent pointDamageEvent = Cast<FPointDamageEvent>(DamageType);
+	//auto hComp = DamagedActor->GetComponentByClass(UHealthComponent::StaticClass());
+	float minDistance = FLT_MAX;
+	UHealthComponent* closest = nullptr;
+
+	for (int i = 0; i < health_components.Num();i++)
+	{
+		if (health_components[i]->IsMainHealth)
+			continue;
+		float distance = (health_components[i]->GetComponentLocation() - HitLocation).Size();
+		if (distance < minDistance)
+		{
+			minDistance = distance;
+			closest = health_components[i];
+		}
+	}
+
+
+
+	if (closest)
+	{
+		//Uclosestonent* closest = CastChecked<Uclosestonent>(hComp);
+
+		closest->CurrentHealth -= Damage;
+		UE_LOG(LogTemp, Warning, TEXT("Apply damage... | Health left: %f"), closest->CurrentHealth);
+
+		if (closest->CurrentHealth <= 0.f)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("The actor '%s' has no health left!"), *DamagedActor->GetName()));
+		}
+	}
+
 }
