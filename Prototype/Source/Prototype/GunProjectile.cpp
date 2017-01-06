@@ -5,6 +5,15 @@
 
 AGunProjectile::AGunProjectile()
 {
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+void AGunProjectile::Tick(float deltaTimeS)
+{
+	timeAliveS += deltaTimeS;
+
+	if (timeAliveS >= lifeTimeS)
+		Destroy();
 }
 
 

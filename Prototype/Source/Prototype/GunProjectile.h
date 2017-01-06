@@ -15,5 +15,12 @@ class PROTOTYPE_API AGunProjectile : public AStaticMeshActor
 	
 public:
 	AGunProjectile();
-	
+	virtual void Tick(float deltaTimeS) override;
+
+	// Time until this projectile is destroyed in seconds.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float lifeTimeS;
+
+private:
+	float timeAliveS;
 };
