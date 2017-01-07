@@ -60,6 +60,12 @@ private:
 
 	UFUNCTION(Server, WithValidation, reliable)
 	void RightHandDrop_Server();
+
+	UFUNCTION(Server, WithValidation, reliable)
+	void RequestTeleport_Server(FVector location, FRotator rotation);
+	
+	UFUNCTION(NetMulticast, reliable)
+	void PerformTeleport_NetMulticast(FVector location, FRotator rotation);
 #pragma endregion
 
 };

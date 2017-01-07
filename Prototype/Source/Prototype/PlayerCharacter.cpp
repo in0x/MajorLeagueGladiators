@@ -150,7 +150,14 @@ void APlayerCharacter::OnTeleportReleased()
 
 	if (result.ShouldTeleport)
 	{
-		auto success = TeleportTo(result.Position, GetActorRotation(), false, true);
+		if (Role >= ROLE_Authority)
+		{
+			PerformTeleport_NetMulticast(result.Position, GetActorRotation());
+		}
+		else
+		{
+			RequestTeleport_Server(result.Position, GetActorRotation());
+		}		
 	}
 }
 
@@ -194,4 +201,18 @@ bool APlayerCharacter::RightHandDrop_Server_Validate()
 void APlayerCharacter::RightHandDrop_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
+}
+bool APlayerCharacter::RequestTeleport_Server_Validate(FVector location, FRotator rotation)
+{
+	//you could check if teleport is realistic/possible to prevent cheats
+	return true;
+}
+void APlayerCharacter::RequestTeleport_Server_Implementation(FVector location, FRotator rotation)
+{
+	PerformTeleport_NetMulticast(location, rotation);
+}
+
+void APlayerCharacter::PerformTeleport_NetMulticast_Implementation(FVector location, FRotator rotation)
+{
+	TeleportTo(location, rotation, false, true);
 }
