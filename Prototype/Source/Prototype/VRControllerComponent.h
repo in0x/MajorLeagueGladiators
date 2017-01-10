@@ -17,7 +17,17 @@ public:
 	UVRControllerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	bool GrabNearestActor(const USphereComponent& grabSphere);
 	void DropAllGrips();
+	void DropManipulationGrips();
+	void UseGrippedActors();
+	void EndUseGrippedActors();
 
 private:
-	AActor* GetNearestGrabableActor(const USphereComponent& grabSphere) const;
+
+	struct ActorGrabData
+	{
+		AActor* pActorToGrip;
+		IVRGripInterface* pIVRGrip;
+	};
+
+	ActorGrabData GetNearestGrabableActor(const USphereComponent& grabSphere) const;
 };

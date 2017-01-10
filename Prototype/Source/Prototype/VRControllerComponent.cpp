@@ -5,20 +5,52 @@
 #include <algorithm>
 
 UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectInitializer)
-	:Super(ObjectInitializer)
+	: Super(ObjectInitializer)
 {}
 
+/*
+NOTE(Phil)
+We now try to find a primary socket in range for gripping first. If we dont find a
+socket, we simply attach the Actor as it is at the time of the overlap.
+VRExpansion supports gripping sockets, however, the sockets need to be 
+named either VRGripP (Primary) or VRGripS(Secondary). 
+IVRGripInterface implementers can be queried using Closest[Primary|Secondary]SlotinRange.  
+*/
 bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere)
 {	
-	AActor* closest = GetNearestGrabableActor(grabSphere);
-
-	if (closest)
-	{
-		GripActor(closest, closest->GetTransform());
-		return true;
-	}
+	auto grabData = GetNearestGrabableActor(grabSphere);
 	
-	return false;
+	if (!grabData.pActorToGrip)
+	{
+		return false;
+	}
+
+	IVRGripInterface* gripComp = grabData.pIVRGrip;
+	AActor* closest = grabData.pActorToGrip;
+	auto gripTrafo = closest->GetTransform();
+
+	if (gripComp)
+	{
+		bool foundSlot;
+		FTransform slotTrafo;
+
+		gripComp->ClosestPrimarySlotInRange_Implementation(GetComponentLocation(), foundSlot, slotTrafo);
+
+		if (foundSlot)
+		{
+			slotTrafo = UKismetMathLibrary::ConvertTransformToRelative(slotTrafo, closest->GetActorTransform());
+			slotTrafo.SetScale3D(gripTrafo.GetScale3D());
+			
+			GripActor(closest, slotTrafo, true, FName(), gripComp->SlotGripType_Implementation());
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("From Socket"));
+			return true;
+		}
+	}
+	gripTrafo.SetLocation(GetComponentLocation());
+	GripActor(closest, gripTrafo, false, FName(), gripComp->FreeGripType_Implementation());
+	
+	return true;
 }
 
 void UVRControllerComponent::DropAllGrips()
@@ -29,22 +61,43 @@ void UVRControllerComponent::DropAllGrips()
 	}
 }
 
-AActor* UVRControllerComponent::GetNearestGrabableActor(const USphereComponent& grabSphere) const
+void UVRControllerComponent::DropManipulationGrips()
+{
+	if (GrippedActors.Num() == 0)
+		return;
+
+	for (auto& grip : GrippedActors)
+	{
+		/*
+		NOTE(Phil): Following the conventions used by the Dev of VRExpansion,
+		the grip's collision type decides how interactions work.
+		Only ManipulationGrips are dropped when the trigger is released.
+		Other GripCollisiontypes should require another action to detach
+		(such as weapon grips).
+		*/
+		if (grip.GripCollisionType.GetValue() == EGripCollisionType::ManipulationGrip)
+		{
+			DropGrip(grip, true);
+		}
+	}
+}
+
+UVRControllerComponent::ActorGrabData UVRControllerComponent::GetNearestGrabableActor(const USphereComponent& grabSphere) const
 {
 	TArray<AActor*> overlaps;
 	grabSphere.GetOverlappingActors(overlaps);
 
 	overlaps = overlaps.FilterByPredicate([](AActor* pActor)
 	{
-		return Cast<IVRGripInterface>(pActor->GetRootComponent()) != nullptr;
+		// Covers two cases: We have an Actor whose RootComponent is of IVRGripInterface or we have an Actor
+		// who is derived from another grippable Actor, such as AGrippableStaticMeshActor.
+		return Cast<IVRGripInterface>(pActor->GetRootComponent()) != nullptr || Cast<IVRGripInterface>(pActor) != nullptr;
 	});
 
 	if (overlaps.Num() == 0)
 	{
-		return nullptr;
+		return {};
 	}
-	else if (overlaps.Num() == 1)
-		return *overlaps.GetData();
 
 	AActor* closest = std::min(*overlaps.GetData(), overlaps.Last(), [&grabSphere](auto a, auto b)
 	{
@@ -52,7 +105,47 @@ AActor* UVRControllerComponent::GetNearestGrabableActor(const USphereComponent& 
 			 < FVector::DistSquared(b->GetRootComponent()->GetComponentLocation(), grabSphere.GetComponentLocation());
 	});
 
-	return closest;
+	ActorGrabData ret;
+	ret.pActorToGrip = closest;
+
+	ret.pIVRGrip = Cast<IVRGripInterface>(closest->GetRootComponent());
+	if (!ret.pIVRGrip)
+	{
+		ret.pIVRGrip = Cast<IVRGripInterface>(closest);
+	}
+	
+	return ret;
 }
 
+void UVRControllerComponent::UseGrippedActors()
+{
+	if (GrippedActors.Num() == 0)
+		return;
+
+	for (auto& grip : GrippedActors)
+	{
+		auto gripActor = Cast<IVRGripInterface>(grip.Actor);
+
+		if (gripActor)
+		{
+			gripActor->OnUsed();
+		}
+	}
+}
+
+void UVRControllerComponent::EndUseGrippedActors()
+{
+	if (GrippedActors.Num() == 0)
+		return;
+
+	for (auto& grip : GrippedActors)
+	{
+		auto gripActor = Cast<IVRGripInterface>(grip.Actor);
+
+		if (gripActor)
+		{
+			gripActor->OnEndUsed();
+		}
+	}
+}
 
