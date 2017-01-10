@@ -55,10 +55,16 @@ private:
 	void LeftHandGrab_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
+	void LeftHandRelease_Server();
+
+	UFUNCTION(Server, WithValidation, reliable)
 	void LeftHandDrop_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
 	void RightHandGrab_Server();
+
+	UFUNCTION(Server, WithValidation, reliable)
+	void RightHandRelease_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
 	void RightHandDrop_Server();
