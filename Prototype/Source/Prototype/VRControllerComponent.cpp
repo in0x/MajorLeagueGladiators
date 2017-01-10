@@ -63,10 +63,7 @@ void UVRControllerComponent::DropAllGrips()
 
 void UVRControllerComponent::DropManipulationGrips()
 {
-	if (GrippedActors.Num() == 0)
-		return;
-
-	for (auto& grip : GrippedActors)
+	for (int i = GrippedActors.Num() - 1; i >= 0; --i)
 	{
 		/*
 		NOTE(Phil): Following the conventions used by the Dev of VRExpansion,
@@ -75,9 +72,9 @@ void UVRControllerComponent::DropManipulationGrips()
 		Other GripCollisiontypes should require another action to detach
 		(such as weapon grips).
 		*/
-		if (grip.GripCollisionType.GetValue() == EGripCollisionType::ManipulationGrip)
+		if (GrippedActors[i].GripCollisionType.GetValue() == EGripCollisionType::ManipulationGrip)
 		{
-			DropGrip(grip, true);
+			DropGrip(GrippedActors[i], true);
 		}
 	}
 }
@@ -119,9 +116,6 @@ UVRControllerComponent::ActorGrabData UVRControllerComponent::GetNearestGrabable
 
 void UVRControllerComponent::UseGrippedActors()
 {
-	if (GrippedActors.Num() == 0)
-		return;
-
 	for (auto& grip : GrippedActors)
 	{
 		auto gripActor = Cast<IVRGripInterface>(grip.Actor);
@@ -135,9 +129,6 @@ void UVRControllerComponent::UseGrippedActors()
 
 void UVRControllerComponent::EndUseGrippedActors()
 {
-	if (GrippedActors.Num() == 0)
-		return;
-
 	for (auto& grip : GrippedActors)
 	{
 		auto gripActor = Cast<IVRGripInterface>(grip.Actor);
