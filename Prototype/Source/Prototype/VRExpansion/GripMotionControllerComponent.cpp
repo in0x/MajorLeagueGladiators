@@ -28,7 +28,13 @@ namespace {
 
 } // anonymous namespace
 
-static const auto CVarEnableMotionControllerLateUpdate = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("vr.EnableMotionControllerLateUpdate"));
+static const auto CVarEnableMotionControllerLateUpdate = []()
+{
+	auto result = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("vr.EnableMotionControllerLateUpdate"));
+	return result ? result : new TConsoleVariableData<int32>(0);
+
+}();
+
 
 
   //=============================================================================

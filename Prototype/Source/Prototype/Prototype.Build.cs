@@ -7,7 +7,10 @@ public class Prototype : ModuleRules
 {
     public Prototype(TargetInfo Target)
 	{
-         PublicIncludePaths.AddRange(
+        MinFilesUsingPrecompiledHeaderOverride = 1;
+        bFasterWithoutUnity = true;
+
+        PublicIncludePaths.AddRange(
 			new string[] {
                 "HeadMountedDisplay/Public",
                 "Runtime/Engine/Classes/Kismet",
