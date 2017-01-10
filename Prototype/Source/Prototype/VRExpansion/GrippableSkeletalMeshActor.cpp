@@ -116,3 +116,13 @@ FBPInteractionSettings AGrippableSkeletalMeshActor::GetInteractionSettings_Imple
 {
 	return VRGripInterfaceSettings.InteractionSettings;
 }
+
+void AGrippableSkeletalMeshActor::OnGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Gripped"));
+}
+
+void AGrippableSkeletalMeshActor::OnGripRelease_Implementation(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Grip Release"));
+}

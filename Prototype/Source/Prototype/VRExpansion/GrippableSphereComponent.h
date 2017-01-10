@@ -88,4 +88,9 @@ class PROTOTYPE_API UGrippableSphereComponent : public USphereComponent, public 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 		FBPInteractionSettings GetInteractionSettings();
 
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
+		void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
+		void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation);
 };

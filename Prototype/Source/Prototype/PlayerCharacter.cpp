@@ -25,6 +25,9 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 	leftGrabSphere->SetupAttachment(LeftMotionController);
 	rightGrabSphere->SetupAttachment(RightMotionController);
 
+	/*leftGrabSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	rightGrabSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);*/
+
 	// ArrowComponent is used to determine position and direction for teleport.
 	//vrArrow = CastChecked<UArrowComponent>(GetComponentByClass(UArrowComponent::StaticClass())); 
 
@@ -83,6 +86,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInputCom
 
 	playerInputComponent->BindAction("TeleportPressLeft", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
 	playerInputComponent->BindAction("TeleportPressRight", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
+
+	playerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonLeft);
+	playerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonRight);
 }
 
 void APlayerCharacter::MoveForward(float value)
@@ -99,18 +105,10 @@ void APlayerCharacter::MoveRight(float value)
 
 void APlayerCharacter::OnLeftTriggerAxis(float value)
 {
-	if (value > 0.f)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("LeftTrigger: %f"), value), false);
-	}
 }
 
 void APlayerCharacter::OnRightTriggerAxis(float value)
 {
-	if (value > 0.f)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, FString::Printf(TEXT("RightTrigger: %f"), value), false);
-	}
 }
 
 void APlayerCharacter::OnLeftTriggerClicked()
@@ -169,6 +167,7 @@ bool APlayerCharacter::LeftHandGrab_Server_Validate()
 
 void APlayerCharacter::LeftHandGrab_Server_Implementation()
 {
+	CastChecked<UVRControllerComponent>(LeftMotionController)->UseGrippedActors();
 	CastChecked<UVRControllerComponent>(LeftMotionController)->GrabNearestActor(*leftGrabSphere);
 }
 
@@ -178,6 +177,12 @@ bool APlayerCharacter::LeftHandDrop_Server_Validate()
 }
 
 void APlayerCharacter::LeftHandDrop_Server_Implementation()
+{
+	CastChecked<UVRControllerComponent>(LeftMotionController)->EndUseGrippedActors();
+	CastChecked<UVRControllerComponent>(LeftMotionController)->DropManipulationGrips();
+}
+
+void APlayerCharacter::OnSideGripButtonLeft()
 {
 	CastChecked<UVRControllerComponent>(LeftMotionController)->DropAllGrips();
 }
@@ -190,6 +195,7 @@ bool APlayerCharacter::RightHandGrab_Server_Validate()
 
 void APlayerCharacter::RightHandGrab_Server_Implementation()
 {
+	CastChecked<UVRControllerComponent>(RightMotionController)->UseGrippedActors();
 	CastChecked<UVRControllerComponent>(RightMotionController)->GrabNearestActor(*rightGrabSphere);
 }
 
@@ -200,8 +206,10 @@ bool APlayerCharacter::RightHandDrop_Server_Validate()
 
 void APlayerCharacter::RightHandDrop_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
+	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
+	CastChecked<UVRControllerComponent>(RightMotionController)->DropManipulationGrips();
 }
+
 bool APlayerCharacter::RequestTeleport_Server_Validate(FVector location, FRotator rotation)
 {
 	//you could check if teleport is realistic/possible to prevent cheats
@@ -215,4 +223,9 @@ void APlayerCharacter::RequestTeleport_Server_Implementation(FVector location, F
 void APlayerCharacter::PerformTeleport_NetMulticast_Implementation(FVector location, FRotator rotation)
 {
 	TeleportTo(location, rotation, false, true);
+}
+
+void APlayerCharacter::OnSideGripButtonRight()
+{
+	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
 }
