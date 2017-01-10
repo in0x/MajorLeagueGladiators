@@ -64,7 +64,9 @@ DerivedDataCache/*
 # Mac Artifacts
 .DS_Store
 
-# Vim Artifacts
+Content/Assets_Proto
 *.swp
 *.swo
 .ctrlp_cache/
+
+
