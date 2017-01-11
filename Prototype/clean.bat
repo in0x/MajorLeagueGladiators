@@ -1,9 +1,3 @@
-del /S *.slo
-del /S *.lo
-del /S *.o
-del /S *.obj
-del /S *.gch
-del /S *.pch
 del /S *.so
 del /S *.dylib
 del /S *.dll
@@ -25,6 +19,5 @@ del /S *.sln
 del /S *.swp
 del /S *.swo
 del /S *.VC.db
-rmdir /s /q Intermediate
 rmdir /s /q Saved
 rmdir /s /q Binaries
