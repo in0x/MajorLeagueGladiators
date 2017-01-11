@@ -12,20 +12,14 @@ class PROTOTYPE_API UDamageHandlerComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UDamageHandlerComponent();
-
-	// Called when the game starts
 	virtual void BeginPlay() override;
 	
-	// Called every frame
-	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
-
-
 protected:
+	UFUNCTION() void HandleDamage(AActor* damagedActor, float damage, const UDamageType* damageType, AController* instigatedBy, AActor* damageCauser);
 
-	UFUNCTION() void HandleDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
-	UFUNCTION() void HandlePointDamage(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser);
-	TArray<UHealthComponent*> health_components;
+	UFUNCTION() void HandlePointDamage( AActor* damagedActor, float damage, AController* instigatedBy, FVector hitLocation, UPrimitiveComponent* hitComponent, 
+										FName boneName, FVector shotFromDirection, const UDamageType* damageType, AActor* damageCauser);
 	
+	TArray<UHealthComponent*> healthComponents;
 };
