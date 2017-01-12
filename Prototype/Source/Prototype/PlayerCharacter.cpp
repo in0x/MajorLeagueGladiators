@@ -3,7 +3,7 @@
 #include "Prototype.h"
 #include "PlayerCharacter.h"
 #include "VRControllerComponent.h"
-#include <algorithm>
+#include "TeleportComponent.h"
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -52,77 +52,62 @@ void APlayerCharacter::BeginPlay()
 	}
 }
 
-void APlayerCharacter::Tick(float DeltaTime)
-{	
-}
-
-void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInputComponent)
+void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(playerInputComponent);
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	playerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
-	playerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 
-	playerInputComponent->BindAxis("Turn", this, &APlayerCharacter::AddControllerYawInput);
-	playerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::AddControllerPitchInput);
 
-	playerInputComponent->BindAxis("LeftTrigger", this, &APlayerCharacter::OnLeftTriggerAxis);
-	playerInputComponent->BindAxis("RightTrigger", this, &APlayerCharacter::OnRightTriggerAxis);
+	PlayerInputComponent->BindAction("LeftTriggerClicked", EInputEvent::IE_Pressed,  this, &APlayerCharacter::OnLeftTriggerClicked);
+	PlayerInputComponent->BindAction("LeftTriggerClicked", EInputEvent::IE_Released, this, &APlayerCharacter::OnLeftTriggerReleased);
 
-	playerInputComponent->BindAction("LeftTriggerClicked", EInputEvent::IE_Pressed,  this, &APlayerCharacter::OnLeftTriggerClicked);
-	playerInputComponent->BindAction("LeftTriggerClicked", EInputEvent::IE_Released, this, &APlayerCharacter::OnLeftTriggerReleased);
+	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &APlayerCharacter::OnRightTriggerClicked);
+	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &APlayerCharacter::OnRightTriggerReleased);
 
-	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &APlayerCharacter::OnRightTriggerClicked);
-	playerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &APlayerCharacter::OnRightTriggerReleased);
+	PlayerInputComponent->BindAction("TeleportPressLeft", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnTeleportPressedLeft);
+	PlayerInputComponent->BindAction("TeleportPressRight", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnTeleportPressedRight);
 
-	playerInputComponent->BindAction("TeleportPressLeft", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnTeleportPressedLeft);
-	playerInputComponent->BindAction("TeleportPressRight", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnTeleportPressedRight);
+	PlayerInputComponent->BindAction("TeleportPressLeft", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
+	PlayerInputComponent->BindAction("TeleportPressRight", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
 
-	playerInputComponent->BindAction("TeleportPressLeft", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
-	playerInputComponent->BindAction("TeleportPressRight", EInputEvent::IE_Released, this, &APlayerCharacter::OnTeleportReleased);
-
-	playerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonLeft);
-	playerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonRight);
+	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonLeft);
+	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonRight);
 }
 
-void APlayerCharacter::MoveForward(float value)
+void APlayerCharacter::MoveForward(float Value)
 {
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
-	AddMovementInput(direction, value);
+	AddMovementInput(direction, Value);
 }
 
-void APlayerCharacter::MoveRight(float value)
+void APlayerCharacter::MoveRight(float Value)
 {
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
-	AddMovementInput(direction, value);
-}
-
-void APlayerCharacter::OnLeftTriggerAxis(float value)
-{
-}
-
-void APlayerCharacter::OnRightTriggerAxis(float value)
-{
+	AddMovementInput(direction, Value);
 }
 
 void APlayerCharacter::OnLeftTriggerClicked()
 {
-	LeftHandGrab_Server();
+	leftHandGrab_Server();
 }
 
 void APlayerCharacter::OnLeftTriggerReleased()
 {
-	LeftHandRelease_Server();
+	leftHandRelease_Server();
 }
 
 void APlayerCharacter::OnRightTriggerClicked()
 {
-	RightHandGrab_Server();
+	rightHandGrab_Server();
 }
 
 void APlayerCharacter::OnRightTriggerReleased()
 {
-	RightHandRelease_Server();
+	rightHandRelease_Server();
 }
 
 void APlayerCharacter::OnTeleportPressedLeft()
@@ -137,111 +122,112 @@ void APlayerCharacter::OnTeleportPressedRight()
 
 void APlayerCharacter::OnSideGripButtonLeft()
 {
-	LeftHandDrop_Server();
+	leftHandDrop_Server();
 }
 
 void APlayerCharacter::OnSideGripButtonRight()
 {
-	RightHandDrop_Server();
+	rightHandDrop_Server();
 }
 
 void APlayerCharacter::OnTeleportReleased()
 {
-	auto result = teleportComp->GetTeleportData();
+	auto result = teleportComp->GetTeleportResult();
 	teleportComp->Disable();
 
 	if (result.ShouldTeleport)
 	{
 		if (Role >= ROLE_Authority)
 		{
-			PerformTeleport_NetMulticast(result.Position, GetActorRotation());
+			performTeleport_NetMulticast(result.Position, GetActorRotation());
 		}
 		else
 		{
-			RequestTeleport_Server(result.Position, GetActorRotation());
+			requestTeleport_Server(result.Position, GetActorRotation());
 		}		
 	}
 }
 
-//left hand
-bool APlayerCharacter::LeftHandGrab_Server_Validate()
+// Left hand.
+bool APlayerCharacter::leftHandGrab_Server_Validate()
 {
 	return true;
 }
 
-void APlayerCharacter::LeftHandGrab_Server_Implementation()
+void APlayerCharacter::leftHandGrab_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(LeftMotionController)->UseGrippedActors();
 	CastChecked<UVRControllerComponent>(LeftMotionController)->GrabNearestActor(*leftGrabSphere);
 }
 
-bool APlayerCharacter::LeftHandRelease_Server_Validate()
+bool APlayerCharacter::leftHandRelease_Server_Validate()
 {
 	return true;
 }
 
-void APlayerCharacter::LeftHandRelease_Server_Implementation()
+void APlayerCharacter::leftHandRelease_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(LeftMotionController)->EndUseGrippedActors();
 	CastChecked<UVRControllerComponent>(LeftMotionController)->DropManipulationGrips();
 }
 
-bool APlayerCharacter::LeftHandDrop_Server_Validate()
+bool APlayerCharacter::leftHandDrop_Server_Validate()
 {
 	return true;
 }
 
-void APlayerCharacter::LeftHandDrop_Server_Implementation()
+void APlayerCharacter::leftHandDrop_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
 	CastChecked<UVRControllerComponent>(LeftMotionController)->DropAllGrips();
 }
 
-//right hand
-bool APlayerCharacter::RightHandGrab_Server_Validate()
+// Right hand.
+bool APlayerCharacter::rightHandGrab_Server_Validate()
 {
 	return true;
 }
 
-void APlayerCharacter::RightHandGrab_Server_Implementation()
+void APlayerCharacter::rightHandGrab_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(RightMotionController)->UseGrippedActors();
 	CastChecked<UVRControllerComponent>(RightMotionController)->GrabNearestActor(*rightGrabSphere);
 }
 
-bool APlayerCharacter::RightHandRelease_Server_Validate()
+bool APlayerCharacter::rightHandRelease_Server_Validate()
 {
 	return true;
 }
 
-void APlayerCharacter::RightHandRelease_Server_Implementation()
+void APlayerCharacter::rightHandRelease_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
 	CastChecked<UVRControllerComponent>(RightMotionController)->DropManipulationGrips();
 }
 
-bool APlayerCharacter::RightHandDrop_Server_Validate()
+bool APlayerCharacter::rightHandDrop_Server_Validate()
 {
 	return true;
 }
 
-void APlayerCharacter::RightHandDrop_Server_Implementation()
+void APlayerCharacter::rightHandDrop_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
 	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
 }
 
-bool APlayerCharacter::RequestTeleport_Server_Validate(FVector location, FRotator rotation)
+bool APlayerCharacter::requestTeleport_Server_Validate(FVector Location, FRotator Rotation)
 {
 	//you could check if teleport is realistic/possible to prevent cheats
 	return true;
 }
-void APlayerCharacter::RequestTeleport_Server_Implementation(FVector location, FRotator rotation)
+
+void APlayerCharacter::requestTeleport_Server_Implementation(FVector Location, FRotator Rotation)
 {
-	PerformTeleport_NetMulticast(location, rotation);
+	performTeleport_NetMulticast(Location, Rotation);
 }
 
-void APlayerCharacter::PerformTeleport_NetMulticast_Implementation(FVector location, FRotator rotation)
+void APlayerCharacter::performTeleport_NetMulticast_Implementation(FVector Location, FRotator Rotation)
 {
-	TeleportTo(location, rotation, false, true);
+	TeleportTo(Location, Rotation, false, true);
 }

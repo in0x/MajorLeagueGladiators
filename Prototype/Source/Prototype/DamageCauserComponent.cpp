@@ -14,8 +14,8 @@ void UDamageCauserComponent::BeginPlay()
 	GetOwner()->OnActorHit.AddDynamic(this, &UDamageCauserComponent::OnHit);
 }
 
-void UDamageCauserComponent::OnHit(AActor* selfActor, AActor* otherActor, FVector normalImpulse, const FHitResult& hit)
+void UDamageCauserComponent::OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
 {
 	auto gunDamageType = TSubclassOf<UDamageType>(UDamageType::StaticClass());	
-	UGameplayStatics::ApplyPointDamage(otherActor, damageAppliedOnHit, normalImpulse, hit, nullptr, selfActor, gunDamageType);
+	UGameplayStatics::ApplyPointDamage(OtherActor, damageAppliedOnHit, NormalImpulse, Hit, nullptr, SelfActor, gunDamageType);
 }

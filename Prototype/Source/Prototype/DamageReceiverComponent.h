@@ -15,10 +15,12 @@ class PROTOTYPE_API UDamageReceiverComponent : public UActorComponent
 public:	
 	virtual void BeginPlay() override;
 	
-protected:
-	UFUNCTION() void HandleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
+private:
+	UFUNCTION()
+	void handleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 	
-	UFUNCTION() void HandlePointDamage(AActor* DamagedActor, float Damage, AController* instigatedBy, FVector HitLocation, UPrimitiveComponent* HitComponent, 
+	UFUNCTION() 
+	void handlePointDamage(AActor* DamagedActor, float Damage, AController* instigatedBy, FVector HitLocation, UPrimitiveComponent* HitComponent, 
 									   FName BoneName, FVector ShotFromDirection, const UDamageType* DamageType, AActor* DamageCauser);
 	
 	TArray<UHealthComponent*> healthComponents;

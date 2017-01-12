@@ -15,7 +15,7 @@ class PROTOTYPE_API UVRControllerComponent : public UGripMotionControllerCompone
 
 public:
 	UVRControllerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	bool GrabNearestActor(const USphereComponent& grabSphere);
+	bool GrabNearestActor(const USphereComponent& GrabSphere);
 	void DropAllGrips();
 	void DropManipulationGrips();
 	void UseGrippedActors();
@@ -29,5 +29,5 @@ private:
 		IVRGripInterface* pIVRGrip;
 	};
 
-	ActorGrabData GetNearestGrabableActor(const USphereComponent& grabSphere) const;
+	ActorGrabData getNearestGrabableActor(const USphereComponent& GrabSphere) const;
 };

@@ -3,11 +3,6 @@
 #include "Prototype.h"
 #include "GunActor.h"
 
-namespace 
-{
-	bool bShooting;
-}
-
 AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -30,7 +25,7 @@ void AGunActor::BeginPlay()
 		}
 	}
 
-	SetActorTickInterval(0.1f);
+	SetActorTickInterval(shotFrequency);
 }
 
 void AGunActor::Tick(float DeltaTime)
@@ -42,21 +37,9 @@ void AGunActor::Tick(float DeltaTime)
 		FTransform trafo;
 		projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
 
-		auto projectile = GetWorld()->SpawnActor<AGunProjectile>(GunProjectileClass, trafo);
-		projectile->GetStaticMeshComponent()->AddImpulse(GetActorRightVector() * 10000.f);
+		auto projectile = GetWorld()->SpawnActor<AGunProjectile>(gunProjectileClass, trafo);
+		projectile->GetStaticMeshComponent()->AddImpulse(GetActorRightVector() * projectileVelAccel);
 	}
-}
-
-void AGunActor::OnGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Gripped"));
-	bShooting = true;
-}
-
-void AGunActor::OnGripRelease_Implementation(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Grip Release"));
-	bShooting = false;
 }
 
 void AGunActor::OnUsed()

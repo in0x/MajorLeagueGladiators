@@ -2,9 +2,9 @@
 
 #include "VRExpansion/VRSimpleCharacter.h"
 #include "HandMotionController.h"
-#include "TeleportComponent.h"
-
 #include "PlayerCharacter.generated.h"
+
+class UTeleportComponent;
 
 /**
  *
@@ -17,14 +17,10 @@ public:
 	APlayerCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	
 	virtual void BeginPlay() override;
-	virtual void SetupPlayerInputComponent(UInputComponent* playerInputComponent) override;
-	virtual void Tick(float DeltaTime) override;
-
-	void MoveForward(float value);
-	void MoveRight(float value);
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
-	void OnLeftTriggerAxis(float value);
-	void OnRightTriggerAxis(float value);
+	void MoveForward(float Value);
+	void MoveRight(float Value);
 	void OnLeftTriggerClicked();
 	void OnLeftTriggerReleased();
 	void OnRightTriggerClicked();
@@ -35,45 +31,42 @@ public:
 	void OnSideGripButtonLeft();
 	void OnSideGripButtonRight();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-	UStaticMeshComponent* leftMesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-	UStaticMeshComponent* rightMesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTeleportComponent* teleportComp;
-
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* leftMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* rightMesh;
+
+	UPROPERTY(EditAnywhere)
+	UTeleportComponent* teleportComp;
 
 	USphereComponent* leftGrabSphere;
 	USphereComponent* rightGrabSphere;
 
-#pragma region serverFunctions
 	UFUNCTION(Server, WithValidation, reliable)
-	void LeftHandGrab_Server();
+	void leftHandGrab_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
-	void LeftHandRelease_Server();
+	void leftHandRelease_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
-	void LeftHandDrop_Server();
+	void leftHandDrop_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
-	void RightHandGrab_Server();
+	void rightHandGrab_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
-	void RightHandRelease_Server();
+	void rightHandRelease_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
-	void RightHandDrop_Server();
+	void rightHandDrop_Server();
 
 	UFUNCTION(Server, WithValidation, reliable)
-	void RequestTeleport_Server(FVector location, FRotator rotation);
+	void requestTeleport_Server(FVector Location, FRotator Rotation);
 	
 	UFUNCTION(NetMulticast, reliable)
-	void PerformTeleport_NetMulticast(FVector location, FRotator rotation);
-#pragma endregion
-
+	void performTeleport_NetMulticast(FVector Location, FRotator Rotation);
 };

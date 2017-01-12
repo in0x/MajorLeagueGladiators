@@ -5,7 +5,6 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROTOTYPE_API UHealthComponent : public USceneComponent
 {
@@ -17,7 +16,7 @@ public:
 	float CurrentHealth() const;
 	float MaxHealth() const;
 
-	void DecreaseHealth(float val);
+	void DecreaseHealth(float Val);
 	void RefillHealth();
 
 private:

@@ -3,11 +3,9 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
-#include <tuple>
-
 #include "TeleportComponent.generated.h"
 
-struct TeleportData
+struct TeleportResult
 {
 	FVector Position;
 	bool ShouldTeleport;
@@ -21,19 +19,15 @@ class PROTOTYPE_API UTeleportComponent : public UPrimitiveComponent
 public:	
 	UTeleportComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void BeginPlay() override;
-	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 	
-	void Enable(USceneComponent* teleportOrigin);
-	TeleportData GetTeleportData();
+	void Enable(USceneComponent* TeleportOrigin);
+	TeleportResult GetTeleportResult() const;
 	void Disable();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
-	UMaterial* ArcSplineMaterial;
 
 private:
 	USceneComponent* origin;
-	USplineMeshComponent* arcSpline;
-
+	
 	// PredictProjectilePath Hit Test Data
 	FVector lastTraceDest;
 	FHitResult tpHitResult;
