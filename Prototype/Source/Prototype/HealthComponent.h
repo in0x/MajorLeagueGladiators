@@ -13,11 +13,12 @@ class PROTOTYPE_API UHealthComponent : public USceneComponent
 public:	
 	UHealthComponent();
 	
-	float CurrentHealth() const;
-	float MaxHealth() const;
+	float GetCurrentHealth() const;
+	float GetMaxHealth() const;
 
+	void IncreaseHealth(float Val);
 	void DecreaseHealth(float Val);
-	void RefillHealth();
+	void SetHealthToMax();
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Health")
