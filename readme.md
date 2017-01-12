@@ -2,3 +2,4 @@ After cloning, locate your local starter content (Program Files (x86)/Epic Games
 
 [Wiki](http://mmp3admin.bplaced.net/wiki/index.php?title=Hauptseite)
 [Slack](https://bottompit.slack.com)
+[Coding Conventions](http://mmp3admin.bplaced.net/wiki/index.php?title=Coding_Conventions)
