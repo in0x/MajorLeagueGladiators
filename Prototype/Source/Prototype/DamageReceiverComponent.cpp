@@ -8,8 +8,8 @@ void UDamageReceiverComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UDamageReceiverComponent::HandleDamage);
-	GetOwner()->OnTakePointDamage.AddDynamic(this, &UDamageReceiverComponent::HandlePointDamage);
+	GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UDamageReceiverComponent::handleDamage);
+	GetOwner()->OnTakePointDamage.AddDynamic(this, &UDamageReceiverComponent::handlePointDamage);
 
 	for (auto& healthComp : GetOwner()->GetComponentsByClass(UHealthComponent::StaticClass()))
 	{
@@ -17,7 +17,7 @@ void UDamageReceiverComponent::BeginPlay()
 	}
 }
 
-void UDamageReceiverComponent::HandleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	UHealthComponent* healthComp = healthComponents[0];
 
@@ -38,7 +38,7 @@ void UDamageReceiverComponent::HandleDamage(AActor* DamagedActor, float Damage, 
 	}
 }
 
-void UDamageReceiverComponent::HandlePointDamage(AActor* DamagedActor, float Damage, AController* InstigatedBy, FVector HitLocation, 
+void UDamageReceiverComponent::handlePointDamage(AActor* DamagedActor, float Damage, AController* InstigatedBy, FVector HitLocation, 
 												UPrimitiveComponent* HitComponent, FName BoneName, FVector ShotFromDirection, 
 												const UDamageType* DamageType, AActor* DamageCauser)
 {
@@ -63,7 +63,8 @@ void UDamageReceiverComponent::HandlePointDamage(AActor* DamagedActor, float Dam
 
 		if (closest->CurrentHealth() == 0.f)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("The actor '%s' has no health left!"), *DamagedActor->GetName()));
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("The actor '%s' has no health left!")
+				, *DamagedActor->GetName()));
 		}
 	}
 }

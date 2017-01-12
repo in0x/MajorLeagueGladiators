@@ -6,7 +6,6 @@
 UHealthComponent::UHealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	RefillHealth();
 }
 
 float UHealthComponent::CurrentHealth() const
@@ -19,10 +18,10 @@ float UHealthComponent::MaxHealth() const
 	return maxHealth;
 }
 
-void UHealthComponent::DecreaseHealth(float val)
+void UHealthComponent::DecreaseHealth(float Val)
 {
-	val = std::abs(val);
-	currentHealth -= val;
+	Val = std::abs(Val);
+	currentHealth -= Val;
 	currentHealth = std::max(0.f, currentHealth);
 }
 

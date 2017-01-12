@@ -8,9 +8,9 @@ AGunProjectile::AGunProjectile()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void AGunProjectile::Tick(float deltaTimeS)
+void AGunProjectile::Tick(float DeltaTimeS)
 {
-	timeAliveS += deltaTimeS;
+	timeAliveS += DeltaTimeS;
 
 	if (timeAliveS >= lifeTimeS)
 		Destroy();

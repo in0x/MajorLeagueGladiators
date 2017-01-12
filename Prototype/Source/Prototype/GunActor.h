@@ -19,18 +19,21 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
-		void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation);
-	
-	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
-		void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation);
-
-	virtual void OnUsed() override;
-		
+	virtual void OnUsed() override;	
 	virtual void OnEndUsed() override;
-		
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AGunProjectile> GunProjectileClass;
+
+private:
+	UPROPERTY(EditAnywhere, Category="Gun")
+	TSubclassOf<AGunProjectile> gunProjectileClass;
+	
+	UPROPERTY(EditAnywhere, Category = "Gun")
+	float projectileVelAccel = 10000.f;
+
+	// How often, in seconds, this actor shoots.
+	UPROPERTY(EditAnywhere, Category = "Gun")
+	float shotFrequency = 0.1f;
 
 	UStaticMeshSocket* projectileSpawnSocket;
+	
+	bool bShooting;
 };

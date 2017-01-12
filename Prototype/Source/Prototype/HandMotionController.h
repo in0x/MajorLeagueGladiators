@@ -17,11 +17,11 @@ class APlayerCharacter;
 class PROTOTYPE_API HandMotionController :  public IMotionController
 {
 public:
-	HandMotionController(APlayerCharacter* playerCharacter);
+	HandMotionController(APlayerCharacter* PlayerCharacter);
 	virtual ~HandMotionController();
 	
-	virtual bool GetControllerOrientationAndPosition(int32 controllerIndex, EControllerHand deviceHand, FRotator& outOrientation, FVector& outPosition) const override;
-	virtual ETrackingStatus GetControllerTrackingStatus(int32 controllerIndex, EControllerHand deviceHand) const override;
+	virtual bool GetControllerOrientationAndPosition(int32 ControllerIndex, EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const override;
+	virtual ETrackingStatus GetControllerTrackingStatus(int32 ControllerIndex, EControllerHand DeviceHand) const override;
 	
 private:
 	APlayerCharacter* playerChar;

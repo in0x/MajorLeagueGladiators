@@ -16,9 +16,9 @@ VRExpansion supports gripping sockets, however, the sockets need to be
 named either VRGripP (Primary) or VRGripS(Secondary). 
 IVRGripInterface implementers can be queried using Closest[Primary|Secondary]SlotinRange.  
 */
-bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere)
+bool UVRControllerComponent::GrabNearestActor(const USphereComponent& GrabSphere)
 {	
-	auto grabData = GetNearestGrabableActor(grabSphere);
+	auto grabData = getNearestGrabableActor(GrabSphere);
 	
 	if (!grabData.pActorToGrip)
 	{
@@ -27,7 +27,7 @@ bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere
 
 	IVRGripInterface* gripComp = grabData.pIVRGrip;
 	AActor* closest = grabData.pActorToGrip;
-	auto gripTrafo = closest->GetTransform();
+	FTransform gripTrafo = closest->GetTransform();
 
 	if (gripComp)
 	{
@@ -40,10 +40,7 @@ bool UVRControllerComponent::GrabNearestActor(const USphereComponent& grabSphere
 		{
 			slotTrafo = UKismetMathLibrary::ConvertTransformToRelative(slotTrafo, closest->GetActorTransform());
 			slotTrafo.SetScale3D(gripTrafo.GetScale3D());
-			
 			GripActor(closest, slotTrafo, true, FName(), gripComp->SlotGripType_Implementation());
-
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("From Socket"));
 			return true;
 		}
 	}
@@ -79,10 +76,10 @@ void UVRControllerComponent::DropManipulationGrips()
 	}
 }
 
-UVRControllerComponent::ActorGrabData UVRControllerComponent::GetNearestGrabableActor(const USphereComponent& grabSphere) const
+UVRControllerComponent::ActorGrabData UVRControllerComponent::getNearestGrabableActor(const USphereComponent& GrabSphere) const
 {
 	TArray<AActor*> overlaps;
-	grabSphere.GetOverlappingActors(overlaps);
+	GrabSphere.GetOverlappingActors(overlaps);
 
 	overlaps = overlaps.FilterByPredicate([](AActor* pActor)
 	{
@@ -96,10 +93,10 @@ UVRControllerComponent::ActorGrabData UVRControllerComponent::GetNearestGrabable
 		return {};
 	}
 
-	AActor* closest = std::min(*overlaps.GetData(), overlaps.Last(), [&grabSphere](auto a, auto b)
+	AActor* closest = std::min(*overlaps.GetData(), overlaps.Last(), [&GrabSphere](auto a, auto b)
 	{
-		return FVector::DistSquared(a->GetRootComponent()->GetComponentLocation(), grabSphere.GetComponentLocation())
-			 < FVector::DistSquared(b->GetRootComponent()->GetComponentLocation(), grabSphere.GetComponentLocation());
+		return FVector::DistSquared(a->GetRootComponent()->GetComponentLocation(), GrabSphere.GetComponentLocation())
+			 < FVector::DistSquared(b->GetRootComponent()->GetComponentLocation(), GrabSphere.GetComponentLocation());
 	});
 
 	ActorGrabData ret;
