@@ -17,8 +17,9 @@ public:
 	
 protected:
 	UFUNCTION() void HandleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
+	
 	UFUNCTION() void HandlePointDamage(AActor* DamagedActor, float Damage, AController* instigatedBy, FVector HitLocation, UPrimitiveComponent* HitComponent, 
-										FName BoneName, FVector ShotFromDirection, const UDamageType* DamageType, AActor* DamageCauser);
+									   FName BoneName, FVector ShotFromDirection, const UDamageType* DamageType, AActor* DamageCauser);
 	
 	TArray<UHealthComponent*> healthComponents;
 };

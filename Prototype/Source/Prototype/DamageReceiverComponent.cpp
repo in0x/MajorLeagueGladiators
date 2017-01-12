@@ -19,24 +19,22 @@ void UDamageReceiverComponent::BeginPlay()
 
 void UDamageReceiverComponent::HandleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	UHealthComponent* healthComp = *healthComponents.FindByPredicate([](auto hc)
-	{
-		return hc->IsMainHealth;
-	});
-	
+	UHealthComponent* healthComp = healthComponents[0];
+
 	if (healthComp)
 	{
-		healthComp->CurrentHealth -= Damage;
-		UE_LOG(LogTemp, Warning, TEXT("Apply damage | Health left: %f"), healthComp->CurrentHealth);
+		healthComp->DecreaseHealth(Damage);
 
-		if (healthComp->CurrentHealth <= 0.f)
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("Apply damage | Health left: %f"), healthComp->CurrentHealth()));
+
+		if (healthComp->CurrentHealth() == 0.f)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("The actor '%s' has no health left!"), *DamagedActor->GetName()));
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("The actor '%s' has no health left!"), *DamagedActor->GetName()));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Couldnt find MainHealth, cant apply damage"));
+		UE_LOG(LogTemp, Warning, TEXT("Couldnt find HealthComponent, cant apply damage"));
 	}
 }
 
@@ -49,9 +47,6 @@ void UDamageReceiverComponent::HandlePointDamage(AActor* DamagedActor, float Dam
 
 	for (auto healthComp : healthComponents)
 	{
-		if (healthComp->IsMainHealth)
-			continue;
-
 		float distance = (healthComp->GetComponentLocation() - HitLocation).Size();
 
 		if (distance < minDistance)
@@ -63,10 +58,10 @@ void UDamageReceiverComponent::HandlePointDamage(AActor* DamagedActor, float Dam
 
 	if (closest)
 	{
-		closest->CurrentHealth -= Damage;
-		UE_LOG(LogTemp, Warning, TEXT("Apply damage | Health left: %f"), closest->CurrentHealth);
+		closest->DecreaseHealth(Damage);
+		UE_LOG(LogTemp, Warning, TEXT("Apply damage | Health left: %f"), closest->CurrentHealth());
 
-		if (closest->CurrentHealth <= 0.f)
+		if (closest->CurrentHealth() == 0.f)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("The actor '%s' has no health left!"), *DamagedActor->GetName()));
 		}

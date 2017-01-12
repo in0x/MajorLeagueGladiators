@@ -6,7 +6,7 @@
 #include "HealthComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROTOTYPE_API UHealthComponent : public USceneComponent
 {
 	GENERATED_BODY()
@@ -14,12 +14,16 @@ class PROTOTYPE_API UHealthComponent : public USceneComponent
 public:	
 	UHealthComponent();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	bool IsMainHealth;
+	float CurrentHealth() const;
+	float MaxHealth() const;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float MaxHealth;
+	void DecreaseHealth(float val);
+	void RefillHealth();
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Health")
+	float maxHealth;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float CurrentHealth;
+	UPROPERTY(EditAnywhere, Category = "Health")
+	float currentHealth;
 };
