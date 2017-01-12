@@ -2,10 +2,18 @@
 
 #include "Prototype.h"
 #include "HealthComponent.h"
+#include "UnrealNetwork.h"
 
 UHealthComponent::UHealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicated(true);
+}
+
+void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UHealthComponent, currentHealth);
 }
 
 float UHealthComponent::GetCurrentHealth() const
