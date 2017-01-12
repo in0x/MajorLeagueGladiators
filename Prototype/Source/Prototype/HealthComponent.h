@@ -12,7 +12,8 @@ class PROTOTYPE_API UHealthComponent : public USceneComponent
 
 public:	
 	UHealthComponent();
-	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	float GetCurrentHealth() const;
 	float GetMaxHealth() const;
 
@@ -24,6 +25,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Health")
 	float maxHealth;
 	
-	UPROPERTY(EditAnywhere, Category = "Health")
+	UPROPERTY(EditAnywhere, Replicated, Category = "Health")
 	float currentHealth;
 };

@@ -13,8 +13,10 @@ class PROTOTYPE_API UDamageReceiverComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
+	UDamageReceiverComponent();
 	virtual void BeginPlay() override;
-	
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction) override;
+
 private:
 	UFUNCTION()
 	void handleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
