@@ -16,4 +16,7 @@ public:
 	
 private:
 	UFUNCTION() void OnHit(AActor* selfActor, AActor* otherActor, FVector normalImpulse, const FHitResult& hit);
+
+	UPROPERTY(EditAnywhere, Category="Damage")
+	float damageAppliedOnHit;
 };
