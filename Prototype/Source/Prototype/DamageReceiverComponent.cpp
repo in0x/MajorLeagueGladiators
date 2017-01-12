@@ -24,13 +24,6 @@ void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, 
 	if (healthComp)
 	{
 		healthComp->DecreaseHealth(Damage);
-
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("Apply damage | Health left: %f"), healthComp->CurrentHealth()));
-
-		if (healthComp->CurrentHealth() == 0.f)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("The actor '%s' has no health left!"), *DamagedActor->GetName()));
-		}
 	}
 	else
 	{
@@ -59,12 +52,5 @@ void UDamageReceiverComponent::handlePointDamage(AActor* DamagedActor, float Dam
 	if (closest)
 	{
 		closest->DecreaseHealth(Damage);
-		UE_LOG(LogTemp, Warning, TEXT("Apply damage | Health left: %f"), closest->CurrentHealth());
-
-		if (closest->CurrentHealth() == 0.f)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("The actor '%s' has no health left!")
-				, *DamagedActor->GetName()));
-		}
 	}
 }

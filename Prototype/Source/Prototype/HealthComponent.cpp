@@ -8,24 +8,31 @@ UHealthComponent::UHealthComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-float UHealthComponent::CurrentHealth() const
+float UHealthComponent::GetCurrentHealth() const
 {
 	return currentHealth;
 }
 
-float UHealthComponent::MaxHealth() const
+float UHealthComponent::GetMaxHealth() const
 {
 	return maxHealth;
 }
 
+void UHealthComponent::IncreaseHealth(float Val)
+{
+	checkf(Val > 0, TEXT("Health cannot be decreased by negative value."));
+	currentHealth += Val;
+	currentHealth = std::min(currentHealth, maxHealth);
+}
+
 void UHealthComponent::DecreaseHealth(float Val)
 {
-	Val = std::abs(Val);
+	checkf(Val > 0, TEXT("Health cannot be decreased by negative value."));
 	currentHealth -= Val;
 	currentHealth = std::max(0.f, currentHealth);
 }
 
-void UHealthComponent::RefillHealth()
+void UHealthComponent::SetHealthToMax()
 {
 	currentHealth = maxHealth;
 }
