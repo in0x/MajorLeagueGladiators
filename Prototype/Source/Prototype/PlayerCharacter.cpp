@@ -25,12 +25,6 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 	leftGrabSphere->SetupAttachment(LeftMotionController);
 	rightGrabSphere->SetupAttachment(RightMotionController);
 
-	/*leftGrabSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	rightGrabSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);*/
-
-	// ArrowComponent is used to determine position and direction for teleport.
-	//vrArrow = CastChecked<UArrowComponent>(GetComponentByClass(UArrowComponent::StaticClass())); 
-
 	teleportComp = ObjectInitializer.CreateDefaultSubobject<UTeleportComponent>(this, TEXT("TeleportComp"));
 	teleportComp->Disable();
 }
