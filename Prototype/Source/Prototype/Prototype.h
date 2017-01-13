@@ -20,6 +20,7 @@
 #include "PhysXIncludes.h"
 #include "Runtime/Engine/Private/EnginePrivate.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
+#include "UnrealNetwork.h"
 
 // STL
 #include <algorithm>
