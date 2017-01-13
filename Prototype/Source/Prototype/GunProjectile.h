@@ -16,10 +16,11 @@ class PROTOTYPE_API AGunProjectile : public AStaticMeshActor
 public:
 	AGunProjectile();
 	virtual void Tick(float DeltaTimeS) override;
-
+	
 private:
 	// Time until this projectile is destroyed in seconds.
 	UPROPERTY(EditAnywhere)
 	float lifeTimeS;
+
 	float timeAliveS;
 };

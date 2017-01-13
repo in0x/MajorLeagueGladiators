@@ -6,12 +6,15 @@
 AGunProjectile::AGunProjectile()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	bReplicates = true;
+	bReplicateMovement = true;
+	bStaticMeshReplicateMovement = true;
 }
 
 void AGunProjectile::Tick(float DeltaTimeS)
 {
 	timeAliveS += DeltaTimeS;
-
 	if (timeAliveS >= lifeTimeS)
 		Destroy();
 }

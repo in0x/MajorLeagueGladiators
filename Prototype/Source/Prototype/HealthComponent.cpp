@@ -2,7 +2,6 @@
 
 #include "Prototype.h"
 #include "HealthComponent.h"
-#include "UnrealNetwork.h"
 
 UHealthComponent::UHealthComponent()
 {
@@ -23,7 +22,7 @@ float UHealthComponent::GetCurrentHealth() const
 
 float UHealthComponent::GetMaxHealth() const
 {
-	return maxHealth;
+	return maxHealth; 
 }
 
 void UHealthComponent::IncreaseHealth(float Val)
