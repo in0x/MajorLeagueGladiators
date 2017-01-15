@@ -2,12 +2,16 @@
 
 #include "Prototype.h"
 #include "GunActor.h"
+#include "AmmoComponent.h"
+#include "GunProjectile.h"
 
 AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	ammoComponent = ObjectInitializer.CreateDefaultSubobject<UAmmoComponent>(this, TEXT("AmmoComponent"));
 }
 
 void AGunActor::BeginPlay()
@@ -32,12 +36,15 @@ void AGunActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bShooting)
+	if (bShooting && ammoComponent->PerformShot())
 	{
 		FTransform trafo;
 		projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
 
-		auto projectile = GetWorld()->SpawnActor<AGunProjectile>(gunProjectileClass, trafo);
+		auto projectile = GetWorld()->SpawnActor<AGunProjectile>(ammoComponent->GetProjectileType(), trafo);
+
+		checkf(projectile, TEXT("AGunProjectile spawned by AGunActor was null"));
+
 		projectile->GetStaticMeshComponent()->AddImpulse(GetActorRightVector() * projectileVelAccel);
 	}
 }
