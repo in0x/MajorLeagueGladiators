@@ -3,8 +3,9 @@
 #pragma once
 
 #include "VRExpansion/GrippableStaticMeshActor.h"
-#include "GunProjectile.h"
 #include "GunActor.generated.h"
+
+class UAmmoComponent;
 
 /**
  * 
@@ -23,9 +24,9 @@ public:
 	virtual void OnEndUsed() override;
 
 private:
-	UPROPERTY(EditAnywhere, Category="Gun")
-	TSubclassOf<AGunProjectile> gunProjectileClass;
-	
+	UPROPERTY(EditAnywhere)
+	UAmmoComponent* ammoComponent;
+
 	UPROPERTY(EditAnywhere, Category = "Gun")
 	float projectileVelAccel = 10000.f;
 
