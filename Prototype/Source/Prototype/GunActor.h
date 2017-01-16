@@ -23,6 +23,9 @@ public:
 	virtual void OnUsed() override;	
 	virtual void OnEndUsed() override;
 
+	UFUNCTION()
+	void Test();
+
 private:
 	UPROPERTY(EditAnywhere)
 	UAmmoComponent* ammoComponent;
