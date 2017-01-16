@@ -5,8 +5,6 @@
 #include "AmmoComponent.h"
 #include "GunProjectile.h"
 
-#include "EventBus.h"
-
 AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -19,8 +17,7 @@ AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 void AGunActor::BeginPlay()
 {
 	Super::BeginPlay();
-	UEventBus::Get().CustomEvent.AddDynamic(this, &AGunActor::Test);
-
+	
 	auto mesh = GetStaticMeshComponent()->GetStaticMesh();
 	if (mesh)
 	{
@@ -41,8 +38,6 @@ void AGunActor::Tick(float DeltaTime)
 
 	if (bShooting && ammoComponent->ConsumeAmmo())
 	{
-		UEventBus::Get().Fire(&UEventBus::CustomEvent);
-
 		FTransform trafo;
 		projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
 
@@ -62,11 +57,6 @@ void AGunActor::OnUsed()
 void AGunActor::OnEndUsed()
 {
 	bShooting = false;
-}
-
-void AGunActor::Test()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Event Triggered"));
 }
 
 

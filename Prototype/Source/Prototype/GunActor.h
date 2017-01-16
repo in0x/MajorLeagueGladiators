@@ -3,6 +3,7 @@
 #pragma once
 
 #include "VRExpansion/GrippableStaticMeshActor.h"
+#include "EventBus.h"
 #include "GunActor.generated.h"
 
 class UAmmoComponent;
@@ -22,9 +23,6 @@ public:
 
 	virtual void OnUsed() override;	
 	virtual void OnEndUsed() override;
-
-	UFUNCTION()
-	void Test();
 
 private:
 	UPROPERTY(EditAnywhere)
