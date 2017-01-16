@@ -2,7 +2,6 @@
 
 #include <typeinfo>
 #include <typeindex>
-
 #include "EventData.generated.h"
 
 USTRUCT()
@@ -10,29 +9,28 @@ struct FEventData
 {
 	GENERATED_BODY()
 private:
-	FEventData(const std::type_info& TypeId, void* Data);
+	FEventData(const std::type_info& TypeId, const void* Data);
 
 public:
 	FEventData();
 
 	template<class TYPE>
-	static FEventData Make()
+	static FEventData Make(const TYPE& Data)
 	{
-		return EventData(typeid(TYPE), &data);
+		return FEventData(typeid(TYPE), static_cast<const void*>(&Data));
 	}
 
 	template<class TYPE> 
 	const TYPE& GetData() const
 	{
 		checkf(std::type_index(typeid(TYPE)) == type, TEXT("Invalid Type used to access data."));
-		checkf(data != nullptr, TEXT("data is nullptr"));
-		return *static_cast<TYPE*>(data);
+		checkf(HasData(), TEXT("data is nullptr"));
+		return *static_cast<const TYPE*>(data);
 	}
 
-	bool HasData();
+	bool HasData() const;
 
 private:
 	std::type_index type;
-	void* data;
-
+	const void* data;
 };

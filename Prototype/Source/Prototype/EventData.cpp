@@ -1,18 +1,17 @@
 #include "Prototype.h"
-
 #include "EventData.h"
 
 FEventData::FEventData()
-	: type(typeid(void*))
+	: type(typeid(const void*))
 	, data(nullptr)
 {}
 
-FEventData::FEventData(const std::type_info& TypeId, void* Data)
+FEventData::FEventData(const std::type_info& TypeId, const void* Data)
 	: type(TypeId)
 	, data(Data)
 {}
 
-bool FEventData::HasData()
+bool FEventData::HasData() const
 {
 	return data != nullptr;
 }

@@ -19,7 +19,7 @@ public:
 	bool ConsumeAmmo();
 	void IncreaseAmmo(uint32 Amount);
 	TSubclassOf<AGunProjectile> GetProjectileType();
-
+	
 private:
 	UPROPERTY(EditAnywhere, Category = "Ammo")
 	TSubclassOf<AGunProjectile> gunProjectileClass;

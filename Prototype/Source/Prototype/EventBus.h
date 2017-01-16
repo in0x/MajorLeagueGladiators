@@ -3,7 +3,6 @@
 #pragma once
 
 #include "EventData.h"
-
 #include "EventBus.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEventDelegate);
