@@ -3,7 +3,6 @@
 #pragma once
 
 #include "VRExpansion/GrippableStaticMeshActor.h"
-#include "EventBus.h"
 #include "GunActor.generated.h"
 
 class UAmmoComponent;
