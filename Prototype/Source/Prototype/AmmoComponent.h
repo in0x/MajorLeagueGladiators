@@ -7,19 +7,17 @@
 
 class AGunProjectile;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROTOTYPE_API UAmmoComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	UAmmoComponent();
-	virtual void BeginPlay() override;
-	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
-
+	
 	// Returns wether the player still had ammo.
-	bool PerformShot();
-	void IncreaseAmmoCount(uint32 Amount);
+	bool ConsumeAmmo();
+	void IncreaseAmmo(uint32 Amount);
 	TSubclassOf<AGunProjectile> GetProjectileType();
 
 private:

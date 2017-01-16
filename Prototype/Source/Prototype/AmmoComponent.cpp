@@ -5,20 +5,10 @@
 
 UAmmoComponent::UAmmoComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UAmmoComponent::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void UAmmoComponent::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
-{
-	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
-}
-
-bool UAmmoComponent::PerformShot()
+bool UAmmoComponent::ConsumeAmmo()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("Ammo: %d / %d"), ammoCount, maxAmmo));
 
@@ -29,11 +19,8 @@ bool UAmmoComponent::PerformShot()
 	return true;
 }
 
-void UAmmoComponent::IncreaseAmmoCount(uint32 Amount)
+void UAmmoComponent::IncreaseAmmo(uint32 Amount)
 {
-	if (ammoCount == maxAmmo)
-		return;
-
 	ammoCount = FMath::Min(maxAmmo, ammoCount + Amount);
 }
 
