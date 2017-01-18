@@ -2,10 +2,26 @@
 
 #include "Prototype.h"
 #include "AmmoComponent.h"
+#include "EventBus.h"
+#include <tuple>
 
 UAmmoComponent::UAmmoComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UAmmoComponent::BeginPlay()
+{
+	UEventBus::Get().AmmoRefillEvent.AddLambda([this](const FEventData& data) 
+	{
+		auto ammoData = data.GetData<std::tuple<AActor*, uint32>>();
+	
+		if (GetOwner() == std::get<0>(ammoData))
+		{
+			IncreaseAmmo(std::get<1>(ammoData));
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Reload"));
+		}
+	});
 }
 
 bool UAmmoComponent::ConsumeAmmo()
