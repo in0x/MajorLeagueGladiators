@@ -12,5 +12,5 @@ UEventBus& UEventBus::Get()
 
 void UEventBus::Fire(PtrToMemberDelegate EventDelegate) const
 {
-	(this->*EventDelegate).Broadcast();
+	(this->*EventDelegate).Broadcast(FEventData());
 }
