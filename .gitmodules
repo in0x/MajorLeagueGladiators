@@ -1,0 +1,3 @@
+[submodule "Prototype/Content/MVRCFPS_Assets"]
+	path = Prototype/Content/MVRCFPS_Assets
+	url = git@github.com:in0x/MVRCFPS_Assets.git
