@@ -26,4 +26,6 @@ public:
 	}	
 
 	FEventDelegate CustomEvent;
+
+	FEventDelegate AmmoRefillEvent; // Sent with std::tuple<Actor*, uint32> -> TriggerActor and ammo amount
 };

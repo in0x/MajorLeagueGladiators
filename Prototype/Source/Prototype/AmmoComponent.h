@@ -14,7 +14,8 @@ class PROTOTYPE_API UAmmoComponent : public UActorComponent
 
 public:	
 	UAmmoComponent();
-	
+	void BeginPlay();
+
 	// Returns wether the player still had ammo.
 	bool ConsumeAmmo();
 	void IncreaseAmmo(uint32 Amount);
