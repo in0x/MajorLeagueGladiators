@@ -2,7 +2,7 @@
 #include "EventData.h"
 
 FEventData::FEventData()
-	: type(typeid(const void*))
+	: type(typeid(nullptr))
 	, data(nullptr)
 {}
 
