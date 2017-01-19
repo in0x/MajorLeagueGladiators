@@ -3,6 +3,8 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
+#include "MessageEndpoint.h"
+#include "MessageStructs.h"
 #include "AmmoComponent.generated.h"
 
 class AGunProjectile;
@@ -14,7 +16,6 @@ class PROTOTYPE_API UAmmoComponent : public UActorComponent
 
 public:	
 	UAmmoComponent();
-	void BeginPlay();
 
 	// Returns wether the player still had ammo.
 	bool ConsumeAmmo();
@@ -30,4 +31,8 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Ammo")
 	uint32 ammoCount;
+
+	FMessageEndpointPtr msgEndpoint;
+
+	void OnAmmoRefill(const FAmmoRefillMessage& Msg, const IMessageContextRef& Context);
 };
