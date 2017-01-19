@@ -3,19 +3,21 @@
 #include "Prototype.h"
 #include "AmmoPack.h"
 #include "TriggerZoneComponent.h"
-#include "EventBus.h"
-#include <tuple>
+#include "MessageStructs.h"
+#include "MessageEndpointBuilder.h"
 
 AAmmoPack::AAmmoPack()
 {
 	SetReplicates(true);
+	msgEndpoint = FMessageEndpoint::Builder("AmmoPackMessager").Build();
 }
 
 void AAmmoPack::Use(AActor* CollidingActor, UTriggerZoneComponent* trigger)
 {
 	if (trigger->GetTriggerType() == TriggerType::Ammo)
 	{
-		UEventBus::Get().Fire(&UEventBus::AmmoRefillEvent, std::make_tuple(CollidingActor, amountToRefill));
+		FAmmoRefillMessage msg = {CollidingActor, amountToRefill};
+		msgEndpoint->Publish<FAmmoRefillMessage>(&msg);
 		Destroy();
 	}
 }

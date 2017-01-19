@@ -2,26 +2,22 @@
 
 #include "Prototype.h"
 #include "AmmoComponent.h"
-#include "EventBus.h"
-#include <tuple>
+#include "MessageEndpointBuilder.h"
 
 UAmmoComponent::UAmmoComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	msgEndpoint = FMessageEndpoint::Builder("AmmoMessager").Handling<FAmmoRefillMessage>(this, &UAmmoComponent::OnAmmoRefill).Build();
+	msgEndpoint->Subscribe<FAmmoRefillMessage>();
 }
 
-void UAmmoComponent::BeginPlay()
+void UAmmoComponent::OnAmmoRefill(const FAmmoRefillMessage& Msg, const IMessageContextRef& Context)
 {
-	UEventBus::Get().AmmoRefillEvent.AddLambda([this](const FEventData& data) 
+	if (GetOwner() == Msg.TriggerActor)
 	{
-		auto ammoData = data.GetData<std::tuple<AActor*, uint32>>();
-	
-		if (GetOwner() == std::get<0>(ammoData))
-		{
-			IncreaseAmmo(std::get<1>(ammoData));
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Reload"));
-		}
-	});
+		IncreaseAmmo(Msg.Amount);
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Reload"));
+	}
 }
 
 bool UAmmoComponent::ConsumeAmmo()

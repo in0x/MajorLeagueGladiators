@@ -3,6 +3,7 @@
 #pragma once
 
 #include "UsableItem.h"
+#include "MessageEndpoint.h"
 #include "AmmoPack.generated.h"
 
 /**
@@ -20,4 +21,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	uint32 amountToRefill;
+
+	FMessageEndpointPtr msgEndpoint;
 };
