@@ -7,6 +7,7 @@
 AUsableItem::AUsableItem()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	SetReplicates(true);
 }
 
 void AUsableItem::BeginPlay()
