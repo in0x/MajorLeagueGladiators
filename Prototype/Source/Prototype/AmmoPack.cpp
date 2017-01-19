@@ -8,6 +8,7 @@
 
 AAmmoPack::AAmmoPack()
 {
+	SetReplicates(true);
 }
 
 void AAmmoPack::Use(AActor* CollidingActor, UTriggerZoneComponent* trigger)
@@ -15,6 +16,7 @@ void AAmmoPack::Use(AActor* CollidingActor, UTriggerZoneComponent* trigger)
 	if (trigger->GetTriggerType() == TriggerType::Ammo)
 	{
 		UEventBus::Get().Fire(&UEventBus::AmmoRefillEvent, std::make_tuple(CollidingActor, amountToRefill));
+		Destroy();
 	}
 }
 
