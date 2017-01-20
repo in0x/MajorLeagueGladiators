@@ -3,12 +3,18 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
+#include "MessageEndpoint.h"
+#include "Core.h"
 #include "HealthComponent.generated.h"
+
+struct FMsgHealthChanged;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROTOTYPE_API UHealthComponent : public USceneComponent
 {
 	GENERATED_BODY()
+		
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FloatDelegate, float, healthPercentage);
 
 public:	
 	UHealthComponent();
@@ -21,10 +27,15 @@ public:
 	void DecreaseHealth(float Val);
 	void SetHealthToMax();
 
+	FloatDelegate HealthChangedDelegate;
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Health")
 	float maxHealth;
 	
-	UPROPERTY(EditAnywhere, Replicated, Category = "Health")
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_CurrentHealth, Category = "Health")
 	float currentHealth;
+
+	UFUNCTION()
+	void OnRep_CurrentHealth();
 };
