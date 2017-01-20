@@ -8,9 +8,6 @@ class UTeleportComponent;
 class UHealthComponent;
 class APrototypePlayerController;
 
-/**
- *
- */
 UCLASS()
 class PROTOTYPE_API APlayerCharacter : public AVRSimpleCharacter
 {

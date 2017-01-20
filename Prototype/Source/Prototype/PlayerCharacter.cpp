@@ -6,7 +6,6 @@
 #include "TeleportComponent.h"
 #include "HealthComponent.h"
 #include "PrototypePlayerController.h"
-#include "PlayerHudWidget.h"
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -90,12 +89,7 @@ void APlayerCharacter::BecomeViewTarget(APlayerController* PC) {
 	//checks if the controller that became a viewController is my local controller, and add the HUD widget to this controller
 	if (PC == UGameplayStatics::GetPlayerController(GetWorld(), 0)) {
 		APrototypePlayerController* prototypePlayerController = CastChecked<APrototypePlayerController>(PC);
-		prototypePlayerController->InitHudWidget();
-		UPlayerHudWidget* currentWidget = prototypePlayerController->GetHudWidget();
-		if (currentWidget != nullptr) 
-		{
-			currentWidget->OnAttachPlayer(this);
-		}
+		prototypePlayerController->InitHudWidget(this);
 	}
 }
 
