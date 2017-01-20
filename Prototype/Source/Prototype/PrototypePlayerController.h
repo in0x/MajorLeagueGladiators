@@ -6,6 +6,8 @@
 #include "PrototypePlayerController.generated.h"
 
 class UPlayerHudWidget;
+class APlayerCharacter;
+class UClass;
 /**
  * 
  */
@@ -15,13 +17,9 @@ class PROTOTYPE_API APrototypePlayerController : public AVRPlayerController
 	GENERATED_BODY()
 public:
 	APrototypePlayerController();
-	UPlayerHudWidget* GetHudWidget()
-	{
-		return hudWidget;
-	};
-	void InitHudWidget();
+	void InitHudWidget(APlayerCharacter* CurrentPlayerCharacter);
 
 private:
-	class UClass* hudWidgetClass;
-	class UPlayerHudWidget* hudWidget;
+	UClass* hudWidgetClass;
+	UPlayerHudWidget* hudWidget;
 };
