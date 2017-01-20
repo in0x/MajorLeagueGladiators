@@ -85,12 +85,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 }
 
 void APlayerCharacter::BecomeViewTarget(APlayerController* PC) {
+	//NOTE: we might want to change this function to a onPosess function instead (if Actors change during game)
 	Super::BecomeViewTarget(PC);
 	//checks if the controller that became a viewController is my local controller, and add the HUD widget to this controller
 	if (PC == UGameplayStatics::GetPlayerController(GetWorld(), 0)) {
 		APrototypePlayerController* prototypePlayerController = CastChecked<APrototypePlayerController>(PC);
-		prototypePlayerController->initHudWidget();
-		UPlayerHudWidget* currentWidget = prototypePlayerController->getHudWidget();
+		prototypePlayerController->InitHudWidget();
+		UPlayerHudWidget* currentWidget = prototypePlayerController->GetHudWidget();
 		if (currentWidget != nullptr) 
 		{
 			currentWidget->OnAttachPlayer(this);

@@ -5,6 +5,7 @@
 #include "VRExpansion/VRPlayerController.h"
 #include "PrototypePlayerController.generated.h"
 
+class UPlayerHudWidget;
 /**
  * 
  */
@@ -12,15 +13,15 @@ UCLASS()
 class PROTOTYPE_API APrototypePlayerController : public AVRPlayerController
 {
 	GENERATED_BODY()
-private:
-	class UClass * m_hudWidgetClass;
-	class UPlayerHudWidget * m_hudWidget;
-
 public:
 	APrototypePlayerController();
-	UPlayerHudWidget* getHudWidget()
+	UPlayerHudWidget* GetHudWidget()
 	{
-		return m_hudWidget;
+		return hudWidget;
 	};
-	void initHudWidget();
+	void InitHudWidget();
+
+private:
+	class UClass* hudWidgetClass;
+	class UPlayerHudWidget* hudWidget;
 };

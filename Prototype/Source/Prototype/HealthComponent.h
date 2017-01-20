@@ -3,8 +3,6 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
-#include "MessageEndpoint.h"
-#include "Core.h"
 #include "HealthComponent.generated.h"
 
 struct FMsgHealthChanged;
@@ -21,6 +19,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	float GetCurrentHealth() const;
+	float GetCurrentHealthPercentage() const;
 	float GetMaxHealth() const;
 
 	void IncreaseHealth(float Val);
@@ -33,9 +32,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Health")
 	float maxHealth;
 	
-	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_CurrentHealth, Category = "Health")
+	UPROPERTY(EditAnywhere, ReplicatedUsing = onRep_CurrentHealth, Category = "Health")
 	float currentHealth;
 
 	UFUNCTION()
-	void OnRep_CurrentHealth();
+	void onRep_CurrentHealth();
 };
