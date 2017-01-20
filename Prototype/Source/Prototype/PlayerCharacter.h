@@ -5,6 +5,8 @@
 #include "PlayerCharacter.generated.h"
 
 class UTeleportComponent;
+class UHealthComponent;
+class APrototypePlayerController;
 
 /**
  *
@@ -30,7 +32,6 @@ public:
 	void OnTeleportReleased();
 	void OnSideGripButtonLeft();
 	void OnSideGripButtonRight();
-
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
 
@@ -43,7 +44,13 @@ private:
 	UPROPERTY(EditAnywhere)
 	UTeleportComponent* teleportComp;
 
+	UPROPERTY(EditAnywhere)
+	UHealthComponent* healthComp;
+
+	UPROPERTY(EditAnywhere)
 	USphereComponent* leftGrabSphere;
+
+	UPROPERTY(EditAnywhere)
 	USphereComponent* rightGrabSphere;
 
 	UFUNCTION(Server, WithValidation, reliable)
@@ -69,4 +76,6 @@ private:
 	
 	UFUNCTION(NetMulticast, reliable)
 	void performTeleport_NetMulticast(FVector Location, FRotator Rotation);
+
+	virtual void BecomeViewTarget(APlayerController* PC) override;
 };
