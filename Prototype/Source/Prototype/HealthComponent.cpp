@@ -15,17 +15,19 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UHealthComponent, currentHealth);
 }
 
-
-void UHealthComponent::OnRep_CurrentHealth()
+void UHealthComponent::onRep_CurrentHealth()
 {
-	// When this is called, bFlag already contains the new value. This
-	// just notifies you when it changes.
 	HealthChangedDelegate.Broadcast(currentHealth / maxHealth);
 }
 
 float UHealthComponent::GetCurrentHealth() const
 {
 	return currentHealth;
+}
+
+float UHealthComponent::GetCurrentHealthPercentage() const
+{
+	return currentHealth / maxHealth;
 }
 
 float UHealthComponent::GetMaxHealth() const
@@ -38,7 +40,7 @@ void UHealthComponent::IncreaseHealth(float Val)
 	checkf(Val > 0, TEXT("Health cannot be decreased by negative value."));
 	currentHealth += Val;
 	currentHealth = std::min(currentHealth, maxHealth);
-	HealthChangedDelegate.Broadcast(currentHealth / maxHealth);
+	HealthChangedDelegate.Broadcast(GetCurrentHealthPercentage());
 }
 
 void UHealthComponent::DecreaseHealth(float Val)
@@ -46,7 +48,7 @@ void UHealthComponent::DecreaseHealth(float Val)
 	checkf(Val > 0, TEXT("Health cannot be decreased by negative value."));
 	currentHealth -= Val;
 	currentHealth = std::max(0.f, currentHealth);
-	HealthChangedDelegate.Broadcast(currentHealth / maxHealth);
+	HealthChangedDelegate.Broadcast(GetCurrentHealthPercentage());
 }
 
 void UHealthComponent::SetHealthToMax()

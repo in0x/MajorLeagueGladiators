@@ -5,9 +5,6 @@
 #include "Blueprint/UserWidget.h"
 #include "PlayerHudWidget.generated.h"
 
-/**
- * 
- */
 class APlayerCharacter;
 
 UCLASS()
@@ -15,11 +12,11 @@ class PROTOTYPE_API UPlayerHudWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hud")
-		float healthPercentage = 1;
-	
 	void OnAttachPlayer(APlayerCharacter* PlayerCharacter);
 
+protected:
+	UPROPERTY(EditAnywhere, Category = "Hud")
+	float healthPercentage = 1;
 
 private:
 	UFUNCTION()
