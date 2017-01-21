@@ -3,23 +3,55 @@
 #include "Prototype.h"
 #include "AmmoPack.h"
 #include "TriggerZoneComponent.h"
-#include "MessageStructs.h"
+#include "Messages/MsgAmmoRefill.h"
+#include "Messages/MsgDropGrip.h"
 #include "MessageEndpointBuilder.h"
 
 AAmmoPack::AAmmoPack()
 {
 	SetReplicates(true);
-	msgEndpoint = FMessageEndpoint::Builder("AmmoPackMessager").Build();
+}
+
+void AAmmoPack::BeginPlay()
+{
+	Super::BeginPlay();
+
+	msgEndpoint = FMessageEndpoint::Builder("AmmoPackMessager");
+	checkf(msgEndpoint.IsValid(), TEXT("Ammo Pack Msg Endpoint invalid"));
+}
+
+void AAmmoPack::IUse(AActor* CollidingActor, TriggerType triggerType)
+{
+	if (triggerType == TriggerType::Ammo)
+	{
+		FMsgAmmoRefill* msg = new FMsgAmmoRefill();
+		msg->TriggerActor = CollidingActor;
+		msg->Amount = amountToRefill;
+		msgEndpoint->Publish<FMsgAmmoRefill>(msg);
+
+		FMsgDropGrip* dropMsg = new FMsgDropGrip;
+		dropMsg->ActorToDrop = this;
+		msgEndpoint->Publish<FMsgDropGrip>(dropMsg);
+
+		Destroy();
+	}
 }
 
 void AAmmoPack::Use(AActor* CollidingActor, UTriggerZoneComponent* trigger)
 {
-	if (trigger->GetTriggerType() == TriggerType::Ammo)
+	/*if (trigger->GetTriggerType() == TriggerType::Ammo)
 	{
-		FAmmoRefillMessage msg = {CollidingActor, amountToRefill};
-		msgEndpoint->Publish<FAmmoRefillMessage>(&msg);
+		FMsgAmmoRefill* msg = new FMsgAmmoRefill();
+		msg->TriggerActor = CollidingActor;
+		msg->Amount = amountToRefill;
+		msgEndpoint->Publish<FMsgAmmoRefill>(msg);
+		
+		FMsgDropGrip* dropMsg = new FMsgDropGrip;
+		dropMsg->ActorToDrop = this;
+		msgEndpoint->Publish<FMsgDropGrip>(dropMsg);
+
 		Destroy();
-	}
+	}*/
 }
 
 

@@ -23,8 +23,11 @@ public:
 	void BeginPlay();
 
 	TriggerType GetTriggerType();
+	void SetTriggerType(TriggerType type);
 
 private:
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* SelfComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIdx, bool bFromSweep, const FHitResult& Hit);
 
 	UPROPERTY(EditAnywhere)
 	TriggerType triggerType;

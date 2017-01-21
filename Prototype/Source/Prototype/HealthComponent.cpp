@@ -2,6 +2,8 @@
 
 #include "Prototype.h"
 #include "HealthComponent.h"
+#include "MessageEndpointBuilder.h"
+#include "Messages/MsgHealthRefill.h"
 
 UHealthComponent::UHealthComponent()
 {
@@ -13,6 +15,20 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UHealthComponent, currentHealth);
+}
+
+void UHealthComponent::BeginPlay()
+{
+	msgEndpoint = FMessageEndpoint::Builder("HealthMessager").Handling<FMsgHealthRefill>(this, &UHealthComponent::OnHealthRefill).Build();
+	msgEndpoint->Subscribe<FMsgHealthRefill>();
+}
+
+void UHealthComponent::OnHealthRefill(const FMsgHealthRefill& Msg, const IMessageContextRef& Context)
+{
+	if (GetOwner() == Msg.TriggerActor)
+	{
+		IncreaseHealth(static_cast<float>(Msg.Amount));
+	}
 }
 
 float UHealthComponent::GetCurrentHealth() const

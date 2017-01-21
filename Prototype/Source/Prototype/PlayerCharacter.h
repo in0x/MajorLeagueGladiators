@@ -43,8 +43,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	UTeleportComponent* teleportComp;
 
+	UPROPERTY(EditAnywhere)
 	USphereComponent* leftGrabSphere;
+	
+	UPROPERTY(EditAnywhere)
 	USphereComponent* rightGrabSphere;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> healthTriggerClass;
 
 	UFUNCTION(Server, WithValidation, reliable)
 	void leftHandGrab_Server();
