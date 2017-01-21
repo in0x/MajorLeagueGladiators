@@ -25,7 +25,7 @@ void UHealthComponent::BeginPlay()
 
 void UHealthComponent::OnHealthRefill(const FMsgHealthRefill& Msg, const IMessageContextRef& Context)
 {
-	if (GetOwner() == Msg.TriggerActor)
+	if (GetOwner() == Msg.TriggerActor || Msg.TriggerActor->IsAttachedTo(GetOwner()))
 	{
 		IncreaseHealth(static_cast<float>(Msg.Amount));
 	}
