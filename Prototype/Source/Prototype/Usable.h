@@ -15,5 +15,5 @@ class PROTOTYPE_API IUsable
 
 public:
 	UFUNCTION()
-	virtual void IUse(AActor* user, TriggerType triggerType) = 0;
+	virtual void Use(AActor* user, TriggerType triggerType) = 0;
 };

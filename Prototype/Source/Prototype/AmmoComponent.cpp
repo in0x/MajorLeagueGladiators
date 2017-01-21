@@ -20,11 +20,9 @@ void UAmmoComponent::BeginPlay()
 
 void UAmmoComponent::OnAmmoRefill(const FMsgAmmoRefill& Msg, const IMessageContextRef& Context)
 {
-	UE_LOG(DebugLog, Log, TEXT("Attempt Reload"));
 	if (GetOwner() == Msg.TriggerActor)
 	{
 		IncreaseAmmo(Msg.Amount);
-		UE_LOG(DebugLog, Log, TEXT("Reload"));
 	}
 }
 
