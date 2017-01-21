@@ -14,12 +14,12 @@ class PROTOTYPE_API AUsableItem : public AGrippableStaticMeshActor
 	
 public:	
 	AUsableItem();
-	virtual void BeginPlay() override;
+	/*virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
-	
-	UFUNCTION()
+	*/
+	/*UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* SelfComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIdx, bool bFromSweep, const FHitResult& Hit);
-
+	*/
 private:
 	// Called when the item collides with one of it's trigger zones.
 	virtual void Use(AActor* ColidingActor, UTriggerZoneComponent* trigger);

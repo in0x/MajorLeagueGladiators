@@ -3,10 +3,22 @@
 #include "Prototype.h"
 #include "VRControllerComponent.h"
 #include <algorithm>
+#include "Messages/MsgDropGrip.h"
+#include "MessageEndpointBuilder.h"
 
 UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {}
+
+void UVRControllerComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	msgEndpoint = FMessageEndpoint::Builder("ControllerMessager").Handling<FMsgDropGrip>(
+		this, &UVRControllerComponent::OnDropGripRequest);
+
+	checkf(msgEndpoint.IsValid(), TEXT("UVRControllerComponent Message Endpoint Invalid"));
+	msgEndpoint->Subscribe<FMsgDropGrip>();
+}
 
 /*
 NOTE(Phil)
@@ -136,4 +148,18 @@ void UVRControllerComponent::EndUseGrippedActors()
 		}
 	}
 }
+
+void UVRControllerComponent::OnDropGripRequest(const FMsgDropGrip& Msg, const IMessageContextRef& Context)
+{
+	auto actorGrip = GrippedActors.FindByPredicate([&](const auto& grip) 
+	{
+		return grip.Actor == Msg.ActorToDrop;
+	});
+
+	if (actorGrip)
+	{
+		DropGrip(*actorGrip, true);
+	}
+}
+
 

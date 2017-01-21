@@ -3,20 +3,28 @@
 #include "Prototype.h"
 #include "AmmoComponent.h"
 #include "MessageEndpointBuilder.h"
+#include "Messages/MsgAmmoRefill.h"
 
 UAmmoComponent::UAmmoComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	msgEndpoint = FMessageEndpoint::Builder("AmmoMessager").Handling<FAmmoRefillMessage>(this, &UAmmoComponent::OnAmmoRefill).Build();
-	msgEndpoint->Subscribe<FAmmoRefillMessage>();
 }
 
-void UAmmoComponent::OnAmmoRefill(const FAmmoRefillMessage& Msg, const IMessageContextRef& Context)
+void UAmmoComponent::BeginPlay()
 {
+	msgEndpoint = FMessageEndpoint::Builder("AmmoMessager").Handling<FMsgAmmoRefill>(this, &UAmmoComponent::OnAmmoRefill);
+
+	checkf(msgEndpoint.IsValid(), TEXT("Ammo Component Msg Endpoint invalid"));
+	msgEndpoint->Subscribe<FMsgAmmoRefill>();
+}
+
+void UAmmoComponent::OnAmmoRefill(const FMsgAmmoRefill& Msg, const IMessageContextRef& Context)
+{
+	UE_LOG(DebugLog, Log, TEXT("Attempt Reload"));
 	if (GetOwner() == Msg.TriggerActor)
 	{
 		IncreaseAmmo(Msg.Amount);
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Reload"));
+		UE_LOG(DebugLog, Log, TEXT("Reload"));
 	}
 }
 

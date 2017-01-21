@@ -4,10 +4,10 @@
 
 #include "Components/ActorComponent.h"
 #include "MessageEndpoint.h"
-#include "MessageStructs.h"
 #include "AmmoComponent.generated.h"
 
 class AGunProjectile;
+struct FMsgAmmoRefill;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROTOTYPE_API UAmmoComponent : public UActorComponent
@@ -16,6 +16,7 @@ class PROTOTYPE_API UAmmoComponent : public UActorComponent
 
 public:	
 	UAmmoComponent();
+	void BeginPlay();
 
 	// Returns wether the player still had ammo.
 	bool ConsumeAmmo();
@@ -34,5 +35,5 @@ private:
 
 	FMessageEndpointPtr msgEndpoint;
 
-	void OnAmmoRefill(const FAmmoRefillMessage& Msg, const IMessageContextRef& Context);
+	void OnAmmoRefill(const FMsgAmmoRefill& Msg, const IMessageContextRef& Context);
 };

@@ -4,6 +4,7 @@
 #include "PlayerCharacter.h"
 #include "VRControllerComponent.h"
 #include "TeleportComponent.h"
+#include "TriggerZoneComponent.h"
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -49,6 +50,24 @@ void APlayerCharacter::BeginPlay()
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("VR MODE"));
+	}
+
+	if (healthTriggerClass)
+	{
+		auto healthTrigger = GetWorld()->SpawnActor<AActor>(healthTriggerClass, FTransform());
+		healthTrigger->AttachToComponent(VRReplicatedCamera, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+		auto triggerComp = healthTrigger->GetComponentByClass(UTriggerZoneComponent::StaticClass());
+
+		healthTrigger->SetActorScale3D(FVector(0.3, 0.3, 0.3));
+
+		if (triggerComp)
+		{
+			CastChecked<UTriggerZoneComponent>(triggerComp)->SetTriggerType(TriggerType::Health);
+		}
+	}
+	else
+	{
+		UE_LOG(DebugLog, Warning, TEXT("No class set for playercharacter health trigger"))
 	}
 }
 
@@ -157,7 +176,7 @@ bool APlayerCharacter::leftHandGrab_Server_Validate()
 void APlayerCharacter::leftHandGrab_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(LeftMotionController)->UseGrippedActors();
-	CastChecked<UVRControllerComponent>(LeftMotionController)->GrabNearestActor(*leftGrabSphere);
+	bool gripped = CastChecked<UVRControllerComponent>(LeftMotionController)->GrabNearestActor(*leftGrabSphere);
 }
 
 bool APlayerCharacter::leftHandRelease_Server_Validate()
@@ -191,7 +210,7 @@ bool APlayerCharacter::rightHandGrab_Server_Validate()
 void APlayerCharacter::rightHandGrab_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(RightMotionController)->UseGrippedActors();
-	CastChecked<UVRControllerComponent>(RightMotionController)->GrabNearestActor(*rightGrabSphere);
+	bool gripped = CastChecked<UVRControllerComponent>(RightMotionController)->GrabNearestActor(*rightGrabSphere);
 }
 
 bool APlayerCharacter::rightHandRelease_Server_Validate()

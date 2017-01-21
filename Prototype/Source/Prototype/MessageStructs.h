@@ -7,6 +7,15 @@ struct FAmmoRefillMessage
 {
 	GENERATED_USTRUCT_BODY()
 
-	const AActor* TriggerActor;
+	AActor* TriggerActor;
+	int32 Amount;
+};
+
+USTRUCT()
+struct FHealthRefillMsg
+{
+	GENERATED_USTRUCT_BODY()
+
+	AActor* TriggerActor;
 	int32 Amount;
 };
