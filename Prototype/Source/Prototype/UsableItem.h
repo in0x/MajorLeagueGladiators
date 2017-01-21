@@ -3,24 +3,17 @@
 #pragma once
 
 #include "VRExpansion/GrippableStaticMeshActor.h"
+#include "Usable.h"
 #include "UsableItem.generated.h"
 
-class UTriggerZoneComponent;
-
 UCLASS()
-class PROTOTYPE_API AUsableItem : public AGrippableStaticMeshActor
+class PROTOTYPE_API AUsableItem : public AGrippableStaticMeshActor, public IUsable
 {
 	GENERATED_BODY()
 	
 public:	
 	AUsableItem();
-	/*virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
-	*/
-	/*UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* SelfComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIdx, bool bFromSweep, const FHitResult& Hit);
-	*/
-private:
-	// Called when the item collides with one of it's trigger zones.
-	virtual void Use(AActor* ColidingActor, UTriggerZoneComponent* trigger);
+
+	UFUNCTION()
+	virtual void Use(AActor* user, TriggerType triggerType) override;
 };

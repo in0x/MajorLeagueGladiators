@@ -31,16 +31,11 @@ void UTriggerZoneComponent::SetTriggerType(TriggerType type)
  
 void UTriggerZoneComponent::OnOverlapBegin(UPrimitiveComponent* SelfComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIdx, bool bFromSweep, const FHitResult& Hit)
 {
-	// Check for interface here
-	UE_LOG(DebugLog, Log, TEXT("UTriggerZoneComponent::OnOverlapBegin() %s"), *OtherComp->GetFName().ToString());
-
 	auto otherAsUsable = Cast<IUsable>(Other);
 
 	if (otherAsUsable)
 	{
-		UE_LOG(DebugLog, Log, TEXT("TriggerZone User"));
-
-		otherAsUsable->IUse(GetOwner(), GetTriggerType());
+		otherAsUsable->Use(GetOwner(), GetTriggerType());
 	}
 }
 

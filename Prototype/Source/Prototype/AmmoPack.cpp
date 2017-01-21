@@ -20,7 +20,7 @@ void AAmmoPack::BeginPlay()
 	checkf(msgEndpoint.IsValid(), TEXT("Ammo Pack Msg Endpoint invalid"));
 }
 
-void AAmmoPack::IUse(AActor* CollidingActor, TriggerType triggerType)
+void AAmmoPack::Use(AActor* CollidingActor, TriggerType triggerType)
 {
 	if (triggerType == TriggerType::Ammo)
 	{
@@ -36,22 +36,4 @@ void AAmmoPack::IUse(AActor* CollidingActor, TriggerType triggerType)
 		Destroy();
 	}
 }
-
-void AAmmoPack::Use(AActor* CollidingActor, UTriggerZoneComponent* trigger)
-{
-	/*if (trigger->GetTriggerType() == TriggerType::Ammo)
-	{
-		FMsgAmmoRefill* msg = new FMsgAmmoRefill();
-		msg->TriggerActor = CollidingActor;
-		msg->Amount = amountToRefill;
-		msgEndpoint->Publish<FMsgAmmoRefill>(msg);
-		
-		FMsgDropGrip* dropMsg = new FMsgDropGrip;
-		dropMsg->ActorToDrop = this;
-		msgEndpoint->Publish<FMsgDropGrip>(dropMsg);
-
-		Destroy();
-	}*/
-}
-
 
