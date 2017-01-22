@@ -7,6 +7,7 @@
 class UTeleportComponent;
 class UHealthComponent;
 class APrototypePlayerController;
+class UWidgetComponent;
 
 UCLASS()
 class PROTOTYPE_API APlayerCharacter : public AVRSimpleCharacter
@@ -53,6 +54,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> healthTriggerClass;
+
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* hudWidgetHealth;
 
 	UFUNCTION(Server, WithValidation, reliable)
 	void leftHandGrab_Server();
