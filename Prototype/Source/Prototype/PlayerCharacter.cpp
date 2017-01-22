@@ -7,6 +7,14 @@
 #include "TriggerZoneComponent.h"
 #include "HealthComponent.h"
 #include "PrototypePlayerController.h"
+#include "WidgetComponent.h"
+#include "PlayerHudWidget.h"
+#include "Runtime/UMG/Public/UMG.h"
+#include "Runtime/UMG/Public/UMGStyle.h"
+#include "Runtime/UMG/Public/Slate/SObjectWidget.h"
+#include "Runtime/UMG/Public/IUMGModule.h"
+#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
+
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -30,6 +38,8 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 
 	leftGrabSphere->SetupAttachment(LeftMotionController);
 	rightGrabSphere->SetupAttachment(RightMotionController);
+
+	hudWidgetHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 
 	teleportComp = ObjectInitializer.CreateDefaultSubobject<UTeleportComponent>(this, TEXT("TeleportComp"));
 	teleportComp->Disable();
@@ -74,6 +84,20 @@ void APlayerCharacter::BeginPlay()
 	{
 		UE_LOG(DebugLog, Warning, TEXT("No class set for playercharacter health trigger"))
 	}
+
+	hudWidgetHealth->AttachToComponent(VRReplicatedCamera, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true));
+	
+	// NOTE(Phil): I've hardcoded this for now since it'll have to be replaced anyway.
+	hudWidgetHealth->SetWorldScale3D(FVector(0.03, 0.03, 0.03));
+	auto relLoc = hudWidgetHealth->RelativeLocation;
+	relLoc.X -= 150;
+	relLoc.Z += 110;
+	relLoc.Y -= 5;
+	hudWidgetHealth->SetRelativeLocation(relLoc);
+
+	auto healthWidget = CastChecked<UPlayerHudWidget>(hudWidgetHealth->GetUserWidgetObject());
+	checkf(healthWidget, TEXT("HealthWidget isnt a UPlayerHudWidget, can't connect player"));
+	healthWidget->OnAttachPlayer(this);
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
