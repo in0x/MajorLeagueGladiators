@@ -6,16 +6,17 @@
 #include "HealthComponent.h"
 
 
-void UPlayerHudWidget::OnAttachPlayer(APlayerCharacter* currentPlayerCharacter) {
-	//setup delegates
+void UPlayerHudWidget::OnAttachPlayer(APlayerCharacter* currentPlayerCharacter) 
+{
 	UHealthComponent* curHealthComp = Cast<UHealthComponent>(currentPlayerCharacter->GetComponentByClass(UHealthComponent::StaticClass()));
 	if (curHealthComp != nullptr) 
 	{
 		curHealthComp->HealthChangedDelegate.AddDynamic(this, &UPlayerHudWidget::setCurrentHealthPercentage);
+		healthPercentage = curHealthComp->GetCurrentHealthPercentage();
 	}
 }
 
 void UPlayerHudWidget::setCurrentHealthPercentage(float Percentage) 
 {
-	this->healthPercentage = Percentage;
+	healthPercentage = Percentage;
 }
