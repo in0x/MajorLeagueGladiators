@@ -7,11 +7,14 @@
 #include "HealthComponent.generated.h"
 
 struct FMsgHealthRefill;
+struct FMsgHealthChanged;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROTOTYPE_API UHealthComponent : public USceneComponent
 {
 	GENERATED_BODY()
+		
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FloatDelegate, float, healthPercentage);
 
 public:	
 	UHealthComponent();
@@ -19,20 +22,26 @@ public:
 	void BeginPlay();
 
 	float GetCurrentHealth() const;
+	float GetCurrentHealthPercentage() const;
 	float GetMaxHealth() const;
 
 	void IncreaseHealth(float Val);
 	void DecreaseHealth(float Val);
 	void SetHealthToMax();
 
+	FloatDelegate HealthChangedDelegate;
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Health")
 	float maxHealth;
 	
-	UPROPERTY(EditAnywhere, Replicated, Category = "Health")
+	UPROPERTY(EditAnywhere, ReplicatedUsing = onRep_CurrentHealth, Category = "Health")
 	float currentHealth;
 
 	FMessageEndpointPtr msgEndpoint;
 
 	void OnHealthRefill(const FMsgHealthRefill& Msg, const IMessageContextRef& Context);
+
+	UFUNCTION()
+	void onRep_CurrentHealth();
 };

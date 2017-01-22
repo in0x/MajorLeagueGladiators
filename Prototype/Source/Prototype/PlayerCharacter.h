@@ -5,10 +5,9 @@
 #include "PlayerCharacter.generated.h"
 
 class UTeleportComponent;
+class UHealthComponent;
+class APrototypePlayerController;
 
-/**
- *
- */
 UCLASS()
 class PROTOTYPE_API APlayerCharacter : public AVRSimpleCharacter
 {
@@ -44,8 +43,11 @@ private:
 	UTeleportComponent* teleportComp;
 
 	UPROPERTY(EditAnywhere)
+	UHealthComponent* healthComp;
+
+	UPROPERTY(EditAnywhere)
 	USphereComponent* leftGrabSphere;
-	
+
 	UPROPERTY(EditAnywhere)
 	USphereComponent* rightGrabSphere;
 
@@ -75,4 +77,6 @@ private:
 	
 	UFUNCTION(NetMulticast, reliable)
 	void performTeleport_NetMulticast(FVector Location, FRotator Rotation);
+
+	virtual void BecomeViewTarget(APlayerController* PC) override;
 };

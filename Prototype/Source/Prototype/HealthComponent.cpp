@@ -31,9 +31,19 @@ void UHealthComponent::OnHealthRefill(const FMsgHealthRefill& Msg, const IMessag
 	}
 }
 
+void UHealthComponent::onRep_CurrentHealth()
+{
+	HealthChangedDelegate.Broadcast(currentHealth / maxHealth);
+}
+
 float UHealthComponent::GetCurrentHealth() const
 {
 	return currentHealth;
+}
+
+float UHealthComponent::GetCurrentHealthPercentage() const
+{
+	return currentHealth / maxHealth;
 }
 
 float UHealthComponent::GetMaxHealth() const
@@ -46,6 +56,7 @@ void UHealthComponent::IncreaseHealth(float Val)
 	checkf(Val > 0, TEXT("Health cannot be decreased by negative value."));
 	currentHealth += Val;
 	currentHealth = std::min(currentHealth, maxHealth);
+	HealthChangedDelegate.Broadcast(GetCurrentHealthPercentage());
 }
 
 void UHealthComponent::DecreaseHealth(float Val)
@@ -53,11 +64,13 @@ void UHealthComponent::DecreaseHealth(float Val)
 	checkf(Val > 0, TEXT("Health cannot be decreased by negative value."));
 	currentHealth -= Val;
 	currentHealth = std::max(0.f, currentHealth);
+	HealthChangedDelegate.Broadcast(GetCurrentHealthPercentage());
 }
 
 void UHealthComponent::SetHealthToMax()
 {
 	currentHealth = maxHealth;
+	HealthChangedDelegate.Broadcast(1.f);
 }
 
 
