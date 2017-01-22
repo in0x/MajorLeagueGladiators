@@ -5,6 +5,8 @@
 #include "VRControllerComponent.h"
 #include "TeleportComponent.h"
 #include "TriggerZoneComponent.h"
+#include "HealthComponent.h"
+#include "PrototypePlayerController.h"
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -13,6 +15,9 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 	)
 {
 	bUseControllerRotationPitch = true;
+
+	healthComp = ObjectInitializer.CreateDefaultSubobject<UHealthComponent>(this, "HealthComp");
+	healthComp->SetIsReplicated(true);
 
 	leftMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftMesh"));
 	rightMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightMesh"));
@@ -95,6 +100,18 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonRight);
+}
+
+void APlayerCharacter::BecomeViewTarget(APlayerController* PC) 
+{
+	//NOTE: we might want to change this function to a onPosess function instead (if Actors change during game)
+	Super::BecomeViewTarget(PC);
+
+	//checks if the controller that became a viewController is my local controller, and add the HUD widget to this controller
+	if (PC == UGameplayStatics::GetPlayerController(GetWorld(), 0)) {
+		APrototypePlayerController* prototypePlayerController = CastChecked<APrototypePlayerController>(PC);
+		prototypePlayerController->InitHudWidget(this);
+	}
 }
 
 void APlayerCharacter::MoveForward(float Value)
