@@ -33,10 +33,20 @@ void AActorSpawn::spawnActor()
 {
 	UWorld* world = GetWorld();
 	auto location = generateRandomSpawnLocation();
+	
+	auto rotation = randomStream.GetUnitVector().Rotation();
+	rotation.Pitch = 0;
+	rotation.Roll = 0;
+	
 	auto* actor = world->SpawnActor<AActor>(actorToSpawn,
 		location,
-		randomStream.GetUnitVector().Rotation()
+		rotation	
 		);
+
+	if (!actor)
+	{
+		return;
+	}
 
 	actor->SetReplicates(true);
 	actor->SetReplicateMovement(true);
