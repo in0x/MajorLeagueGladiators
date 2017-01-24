@@ -30,8 +30,10 @@ void UTeleportComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		{
 			elapsedCooldown = 0.f;
 		}
+
+		OnCooldownChange.Broadcast(elapsedCooldown);
 		return;
-	}
+	}	
 
 	if (!origin)
 		return;
@@ -63,7 +65,10 @@ TeleportResult UTeleportComponent::GetTeleportResult()
 {
 	if (origin)
 	{
-		elapsedCooldown = cooldown;
+		if (elapsedCooldown == 0.f)
+		{
+			elapsedCooldown = cooldown;
+		}
 		return TeleportResult{ tpHitResult.ImpactPoint, shouldTeleport };
 	}
 	else

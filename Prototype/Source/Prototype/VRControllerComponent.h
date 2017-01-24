@@ -21,7 +21,7 @@ public:
 	void DropNonInteractGrips();
 	void UseGrippedActors();
 	void EndUseGrippedActors();
-
+	
 private:
 
 	struct ActorGrabData

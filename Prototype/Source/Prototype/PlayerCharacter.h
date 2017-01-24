@@ -58,6 +58,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* hudWidgetHealth;
 
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* hudTeleportCD;
+
 	UFUNCTION(Server, WithValidation, reliable)
 	void leftHandGrab_Server();
 

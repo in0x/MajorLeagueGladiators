@@ -9,6 +9,8 @@
 class AGunProjectile;
 struct FMsgAmmoRefill;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(AmmoChangedDelegate, int32);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROTOTYPE_API UAmmoComponent : public UActorComponent
 {
@@ -22,7 +24,13 @@ public:
 	bool ConsumeAmmo();
 	void IncreaseAmmo(uint32 Amount);
 	TSubclassOf<AGunProjectile> GetProjectileType();
+
+	int32 GetAmmoCount() const;
 	
+	int32 GetMaxAmmoCount() const;
+	
+	AmmoChangedDelegate OnAmmoChanged;
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Ammo")
 	TSubclassOf<AGunProjectile> gunProjectileClass;
