@@ -5,7 +5,8 @@
 
 AActorSpawn::AActorSpawn(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-	, initialSpawnTime(.2f)
+	, spawnRadius(0.0f)
+	, initialSpawnTime(0.2f)
 {	
 	SetRootComponent(ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootComponet")));
 	randomStream.Initialize(randomSeed);
@@ -43,7 +44,9 @@ void AActorSpawn::spawnActor()
 
 FVector AActorSpawn::generateRandomSpawnLocation()
 {
-	float distance = spawnRadius * randomStream.GetFraction();
+	const float horizontalDistance = spawnRadius * randomStream.GetFraction();
+	FVector randVec = randomStream.GetUnitVector() * horizontalDistance;
+	randVec.Z = 0;
 
-	return RootComponent->GetComponentLocation() + randomStream.GetUnitVector() * distance;
+	return RootComponent->GetComponentLocation() + randVec;		
 }
