@@ -6,6 +6,8 @@
 #include "GunActor.generated.h"
 
 class UAmmoComponent;
+class UTextWidget;
+class UWidgetComponent;
 
 /**
  * 
@@ -25,6 +27,9 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
+	UWidgetComponent* ammoCountWidget;
+
+	UPROPERTY(EditAnywhere)
 	UAmmoComponent* ammoComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Gun")
@@ -35,6 +40,6 @@ private:
 	float shotFrequency = 0.1f;
 
 	UStaticMeshSocket* projectileSpawnSocket;
-	
+	UTextWidget* textWidget;
 	bool bShooting;
 };
