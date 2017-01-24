@@ -2,6 +2,8 @@
 
 #include "Prototype.h"
 #include "HealthComponent.h"
+#include "MessageEndpointBuilder.h"
+#include "Messages/MsgHealthRefill.h"
 
 UHealthComponent::UHealthComponent()
 {
@@ -15,9 +17,33 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UHealthComponent, currentHealth);
 }
 
+void UHealthComponent::BeginPlay()
+{
+	msgEndpoint = FMessageEndpoint::Builder("HealthMessager").Handling<FMsgHealthRefill>(this, &UHealthComponent::OnHealthRefill).Build();
+	msgEndpoint->Subscribe<FMsgHealthRefill>();
+}
+
+void UHealthComponent::OnHealthRefill(const FMsgHealthRefill& Msg, const IMessageContextRef& Context)
+{
+	if (GetOwner() == Msg.TriggerActor || Msg.TriggerActor->IsAttachedTo(GetOwner()))
+	{
+		IncreaseHealth(static_cast<float>(Msg.Amount));
+	}
+}
+
+void UHealthComponent::onRep_CurrentHealth()
+{
+	HealthChangedDelegate.Broadcast(currentHealth / maxHealth);
+}
+
 float UHealthComponent::GetCurrentHealth() const
 {
 	return currentHealth;
+}
+
+float UHealthComponent::GetCurrentHealthPercentage() const
+{
+	return currentHealth / maxHealth;
 }
 
 float UHealthComponent::GetMaxHealth() const
@@ -30,6 +56,7 @@ void UHealthComponent::IncreaseHealth(float Val)
 	checkf(Val > 0, TEXT("Health cannot be decreased by negative value."));
 	currentHealth += Val;
 	currentHealth = std::min(currentHealth, maxHealth);
+	HealthChangedDelegate.Broadcast(GetCurrentHealthPercentage());
 }
 
 void UHealthComponent::DecreaseHealth(float Val)
@@ -37,11 +64,13 @@ void UHealthComponent::DecreaseHealth(float Val)
 	checkf(Val > 0, TEXT("Health cannot be decreased by negative value."));
 	currentHealth -= Val;
 	currentHealth = std::max(0.f, currentHealth);
+	HealthChangedDelegate.Broadcast(GetCurrentHealthPercentage());
 }
 
 void UHealthComponent::SetHealthToMax()
 {
 	currentHealth = maxHealth;
+	HealthChangedDelegate.Broadcast(1.f);
 }
 
 

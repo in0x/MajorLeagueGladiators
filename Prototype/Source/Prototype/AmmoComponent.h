@@ -3,9 +3,11 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
+#include "MessageEndpoint.h"
 #include "AmmoComponent.generated.h"
 
 class AGunProjectile;
+struct FMsgAmmoRefill;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROTOTYPE_API UAmmoComponent : public UActorComponent
@@ -14,7 +16,8 @@ class PROTOTYPE_API UAmmoComponent : public UActorComponent
 
 public:	
 	UAmmoComponent();
-	
+	void BeginPlay();
+
 	// Returns wether the player still had ammo.
 	bool ConsumeAmmo();
 	void IncreaseAmmo(uint32 Amount);
@@ -29,4 +32,8 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Ammo")
 	uint32 ammoCount;
+
+	FMessageEndpointPtr msgEndpoint;
+
+	void OnAmmoRefill(const FMsgAmmoRefill& Msg, const IMessageContextRef& Context);
 };

@@ -4,6 +4,17 @@
 #include "PlayerCharacter.h"
 #include "VRControllerComponent.h"
 #include "TeleportComponent.h"
+#include "TriggerZoneComponent.h"
+#include "HealthComponent.h"
+#include "PrototypePlayerController.h"
+#include "WidgetComponent.h"
+#include "PlayerHudWidget.h"
+#include "Runtime/UMG/Public/UMG.h"
+#include "Runtime/UMG/Public/UMGStyle.h"
+#include "Runtime/UMG/Public/Slate/SObjectWidget.h"
+#include "Runtime/UMG/Public/IUMGModule.h"
+#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
+
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -12,6 +23,9 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 	)
 {
 	bUseControllerRotationPitch = true;
+
+	healthComp = ObjectInitializer.CreateDefaultSubobject<UHealthComponent>(this, "HealthComp");
+	healthComp->SetIsReplicated(true);
 
 	leftMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftMesh"));
 	rightMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightMesh"));
@@ -24,6 +38,8 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 
 	leftGrabSphere->SetupAttachment(LeftMotionController);
 	rightGrabSphere->SetupAttachment(RightMotionController);
+
+	hudWidgetHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 
 	teleportComp = ObjectInitializer.CreateDefaultSubobject<UTeleportComponent>(this, TEXT("TeleportComp"));
 	teleportComp->Disable();
@@ -50,6 +66,37 @@ void APlayerCharacter::BeginPlay()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("VR MODE"));
 	}
+
+	if (healthTriggerClass)
+	{
+		auto healthTrigger = GetWorld()->SpawnActor<AActor>(healthTriggerClass, FTransform());
+		healthTrigger->AttachToComponent(VRReplicatedCamera, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+		auto triggerComp = healthTrigger->GetComponentByClass(UTriggerZoneComponent::StaticClass());
+
+		healthTrigger->SetActorScale3D(FVector(0.3, 0.3, 0.3));
+
+		if (triggerComp)
+		{
+			CastChecked<UTriggerZoneComponent>(triggerComp)->SetTriggerType(TriggerType::Health);
+		}
+	}
+	else
+	{
+		UE_LOG(DebugLog, Warning, TEXT("No class set for playercharacter health trigger"))
+	}
+
+	hudWidgetHealth->AttachToComponent(VRReplicatedCamera, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true));
+	
+	// NOTE(Phil): I've hardcoded this for now since it'll have to be replaced anyway.
+	hudWidgetHealth->SetWorldScale3D(FVector(0.03, 0.03, 0.03));
+	auto relLoc = hudWidgetHealth->RelativeLocation;
+	relLoc.X -= 150;
+	relLoc.Z += 110;
+	relLoc.Y -= 5;
+	hudWidgetHealth->SetRelativeLocation(relLoc);
+
+	auto healthWidget = CastChecked<UPlayerHudWidget>(hudWidgetHealth->GetUserWidgetObject());
+	healthWidget->OnAttachPlayer(this);
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -76,6 +123,18 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonRight);
+}
+
+void APlayerCharacter::BecomeViewTarget(APlayerController* PC) 
+{
+	//NOTE: we might want to change this function to a onPosess function instead (if Actors change during game)
+	Super::BecomeViewTarget(PC);
+
+	//checks if the controller that became a viewController is my local controller, and add the HUD widget to this controller
+	if (PC == UGameplayStatics::GetPlayerController(GetWorld(), 0)) {
+		APrototypePlayerController* prototypePlayerController = CastChecked<APrototypePlayerController>(PC);
+		prototypePlayerController->InitHudWidget(this);
+	}
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -156,8 +215,9 @@ bool APlayerCharacter::leftHandGrab_Server_Validate()
 
 void APlayerCharacter::leftHandGrab_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(LeftMotionController)->UseGrippedActors();
-	CastChecked<UVRControllerComponent>(LeftMotionController)->GrabNearestActor(*leftGrabSphere);
+	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
+	leftController->UseGrippedActors();
+	leftController->GrabNearestActor(*leftGrabSphere);
 }
 
 bool APlayerCharacter::leftHandRelease_Server_Validate()
@@ -167,8 +227,9 @@ bool APlayerCharacter::leftHandRelease_Server_Validate()
 
 void APlayerCharacter::leftHandRelease_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(LeftMotionController)->EndUseGrippedActors();
-	CastChecked<UVRControllerComponent>(LeftMotionController)->DropManipulationGrips();
+	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
+	leftController->EndUseGrippedActors();
+	leftController->DropNonInteractGrips();
 }
 
 bool APlayerCharacter::leftHandDrop_Server_Validate()
@@ -178,8 +239,9 @@ bool APlayerCharacter::leftHandDrop_Server_Validate()
 
 void APlayerCharacter::leftHandDrop_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
-	CastChecked<UVRControllerComponent>(LeftMotionController)->DropAllGrips();
+	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
+	leftController->EndUseGrippedActors();
+	leftController->DropAllGrips();
 }
 
 // Right hand.
@@ -190,8 +252,9 @@ bool APlayerCharacter::rightHandGrab_Server_Validate()
 
 void APlayerCharacter::rightHandGrab_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->UseGrippedActors();
-	CastChecked<UVRControllerComponent>(RightMotionController)->GrabNearestActor(*rightGrabSphere);
+	UVRControllerComponent* rightController = CastChecked<UVRControllerComponent>(RightMotionController);
+	rightController->UseGrippedActors();
+	rightController->GrabNearestActor(*rightGrabSphere);
 }
 
 bool APlayerCharacter::rightHandRelease_Server_Validate()
@@ -201,8 +264,9 @@ bool APlayerCharacter::rightHandRelease_Server_Validate()
 
 void APlayerCharacter::rightHandRelease_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
-	CastChecked<UVRControllerComponent>(RightMotionController)->DropManipulationGrips();
+	UVRControllerComponent* rightController = CastChecked<UVRControllerComponent>(RightMotionController);
+	rightController->EndUseGrippedActors();
+	rightController->DropNonInteractGrips();
 }
 
 bool APlayerCharacter::rightHandDrop_Server_Validate()
@@ -212,8 +276,9 @@ bool APlayerCharacter::rightHandDrop_Server_Validate()
 
 void APlayerCharacter::rightHandDrop_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
-	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
+	UVRControllerComponent* rightController = CastChecked<UVRControllerComponent>(RightMotionController);
+	rightController->EndUseGrippedActors();
+	rightController->DropAllGrips();
 }
 
 bool APlayerCharacter::requestTeleport_Server_Validate(FVector Location, FRotator Rotation)
