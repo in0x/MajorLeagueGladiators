@@ -11,6 +11,8 @@ struct TeleportResult
 	bool ShouldTeleport;
 };
 
+DECLARE_MULTICAST_DELEGATE_OneParam(CooldownChangeDelegate, float);
+
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
 class PROTOTYPE_API UTeleportComponent : public UPrimitiveComponent
 {
@@ -24,6 +26,8 @@ public:
 	void Enable(USceneComponent* TeleportOrigin);
 	TeleportResult GetTeleportResult();
 	void Disable();
+
+	CooldownChangeDelegate OnCooldownChange;
 
 private:
 	UPROPERTY(EditAnywhere)

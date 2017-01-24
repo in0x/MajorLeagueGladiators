@@ -19,6 +19,16 @@ void UAmmoComponent::BeginPlay()
 	msgEndpoint->Subscribe<FMsgAmmoRefill>();
 }
 
+int32 UAmmoComponent::GetAmmoCount() const
+{
+	return static_cast<int32>(ammoCount);
+}
+
+int32 UAmmoComponent::GetMaxAmmoCount() const
+{
+	return static_cast<int32>(maxAmmo);
+}
+
 void UAmmoComponent::OnAmmoRefill(const FMsgAmmoRefill& Msg, const IMessageContextRef& Context)
 {
 	if (GetOwner() == Msg.TriggerActor)
@@ -29,18 +39,18 @@ void UAmmoComponent::OnAmmoRefill(const FMsgAmmoRefill& Msg, const IMessageConte
 
 bool UAmmoComponent::ConsumeAmmo()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("Ammo: %d / %d"), ammoCount, maxAmmo));
-
 	if (ammoCount == 0)
 		return false;
 
 	ammoCount--;
+	OnAmmoChanged.Broadcast(ammoCount);
 	return true;
 }
 
 void UAmmoComponent::IncreaseAmmo(uint32 Amount)
 {
 	ammoCount = FMath::Min(maxAmmo, ammoCount + Amount);
+	OnAmmoChanged.Broadcast(ammoCount);
 }
 
 TSubclassOf<AGunProjectile> UAmmoComponent::GetProjectileType()
