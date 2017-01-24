@@ -70,18 +70,19 @@ void UVRControllerComponent::DropAllGrips()
 	}
 }
 
-void UVRControllerComponent::DropManipulationGrips()
+void UVRControllerComponent::DropNonInteractGrips()
 {
 	for (int i = GrippedActors.Num() - 1; i >= 0; --i)
 	{
-		/*
-		NOTE(Phil): Following the conventions used by the Dev of VRExpansion,
-		the grip's collision type decides how interactions work.
-		Only ManipulationGrips are dropped when the trigger is released.
-		Other GripCollisiontypes should require another action to detach
-		(such as weapon grips).
-		*/
-		if (GrippedActors[i].GripCollisionType.GetValue() == EGripCollisionType::ManipulationGrip)
+		IVRGripInterface* vrGrip;
+		vrGrip = Cast<IVRGripInterface>(GrippedActors[i].Actor);
+
+		if (!vrGrip) 
+		{
+			vrGrip = Cast<IVRGripInterface>(GrippedActors[i].Actor->GetRootComponent());
+		}
+
+		if (!vrGrip->IsInteractible_Implementation())
 		{
 			DropGrip(GrippedActors[i], true);
 		}

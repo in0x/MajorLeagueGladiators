@@ -228,7 +228,7 @@ bool APlayerCharacter::leftHandRelease_Server_Validate()
 void APlayerCharacter::leftHandRelease_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(LeftMotionController)->EndUseGrippedActors();
-	CastChecked<UVRControllerComponent>(LeftMotionController)->DropManipulationGrips();
+	CastChecked<UVRControllerComponent>(LeftMotionController)->DropNonInteractGrips();
 }
 
 bool APlayerCharacter::leftHandDrop_Server_Validate()
@@ -262,7 +262,7 @@ bool APlayerCharacter::rightHandRelease_Server_Validate()
 void APlayerCharacter::rightHandRelease_Server_Implementation()
 {
 	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
-	CastChecked<UVRControllerComponent>(RightMotionController)->DropManipulationGrips();
+	CastChecked<UVRControllerComponent>(RightMotionController)->DropNonInteractGrips();
 }
 
 bool APlayerCharacter::rightHandDrop_Server_Validate()
