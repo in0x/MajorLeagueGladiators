@@ -13,6 +13,11 @@ AActorSpawn::AActorSpawn(const FObjectInitializer& ObjectInitializer)
 
 void AActorSpawn::SetRespawnTimer(float IntervalInSeconds)
 {
+	if (Role < ROLE_Authority)
+	{
+		return;
+	}
+
 	FTimerManager& timer = GetWorldTimerManager();
 	timer.SetTimer(spawnTimerHandle, this, &AActorSpawn::spawnActor, IntervalInSeconds, true);
 }
@@ -26,13 +31,19 @@ void AActorSpawn::BeginPlay()
 void AActorSpawn::spawnActor()
 {
 	UWorld* world = GetWorld();
-	world->SpawnActor<AActor>(actorToSpawn,
-		generateRandomSpawnLocation(),
+	auto location = generateRandomSpawnLocation();
+	auto* actor = world->SpawnActor<AActor>(actorToSpawn,
+		location,
 		randomStream.GetUnitVector().Rotation()
 		);
+
+	actor->SetReplicates(true);
+	actor->SetReplicateMovement(true);
 }
 
 FVector AActorSpawn::generateRandomSpawnLocation()
 {
-	return RootComponent->GetComponentLocation() + randomStream.GetUnitVector() * spawnRadius;
+	float distance = spawnRadius * randomStream.GetFraction();
+
+	return RootComponent->GetComponentLocation() + randomStream.GetUnitVector() * distance;
 }
