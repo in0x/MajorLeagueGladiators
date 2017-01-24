@@ -64,6 +64,7 @@ void UHealthComponent::DecreaseHealth(float Val)
 	checkf(Val > 0, TEXT("Health cannot be decreased by negative value."));
 	currentHealth -= Val;
 	currentHealth = std::max(0.f, currentHealth);
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("Health: %f / %f"), currentHealth, maxHealth));
 	HealthChangedDelegate.Broadcast(GetCurrentHealthPercentage());
 }
 
