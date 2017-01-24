@@ -4,6 +4,8 @@
 #include "GunActor.h"
 #include "AmmoComponent.h"
 #include "GunProjectile.h"
+#include "TextWidget.h"
+#include "WidgetComponent.h"
 
 AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -12,6 +14,8 @@ AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	ammoComponent = ObjectInitializer.CreateDefaultSubobject<UAmmoComponent>(this, TEXT("AmmoComponent"));
+	ammoCountWidget = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("AmmoCounterWidget"));
+	ammoCountWidget->SetupAttachment(GetStaticMeshComponent(), FName(TEXT("UI"), EFindName::FNAME_Find));
 }
 
 void AGunActor::BeginPlay()
@@ -29,6 +33,14 @@ void AGunActor::BeginPlay()
 		}
 	}
 
+	textWidget = CastChecked<UTextWidget>(ammoCountWidget->GetUserWidgetObject());
+	textWidget->SetText(FString::FromInt(ammoComponent->GetAmmoCount()));
+	
+	ammoComponent->OnAmmoChanged.AddLambda([this](int32 newCount) 
+	{
+		textWidget->SetText(FString::FromInt(newCount));
+	});
+	
 	SetActorTickInterval(shotFrequency);
 }
 
@@ -42,9 +54,7 @@ void AGunActor::Tick(float DeltaTime)
 		projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
 
 		auto projectile = GetWorld()->SpawnActor<AGunProjectile>(ammoComponent->GetProjectileType(), trafo);
-
 		checkf(projectile, TEXT("AGunProjectile spawned by AGunActor was null"));
-
 		projectile->GetStaticMeshComponent()->AddImpulse(GetActorRightVector() * projectileVelAccel);
 	}
 }

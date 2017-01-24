@@ -9,12 +9,7 @@
 #include "PrototypePlayerController.h"
 #include "WidgetComponent.h"
 #include "PlayerHudWidget.h"
-#include "Runtime/UMG/Public/UMG.h"
-#include "Runtime/UMG/Public/UMGStyle.h"
-#include "Runtime/UMG/Public/Slate/SObjectWidget.h"
-#include "Runtime/UMG/Public/IUMGModule.h"
-#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
-
+#include "TextWidget.h"
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -40,7 +35,8 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 	rightGrabSphere->SetupAttachment(RightMotionController);
 
 	hudWidgetHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
-
+	hudTeleportCD = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HudTeleportCD"));
+	
 	teleportComp = ObjectInitializer.CreateDefaultSubobject<UTeleportComponent>(this, TEXT("TeleportComp"));
 	teleportComp->Disable();
 }
@@ -97,6 +93,16 @@ void APlayerCharacter::BeginPlay()
 
 	auto healthWidget = CastChecked<UPlayerHudWidget>(hudWidgetHealth->GetUserWidgetObject());
 	healthWidget->OnAttachPlayer(this);
+
+	// NOTE(Phil): Again, hardcoded, we need to figure out a better way to do this.
+	hudTeleportCD->AttachToComponent(leftMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), FName(TEXT("Touch"), EFindName::FNAME_Find));
+	hudTeleportCD->SetRelativeRotation(FRotator(-70, -96, -70)); // Y, X, Z
+	hudTeleportCD->SetRelativeScale3D(FVector(0.3, 0.3, 0.3));
+
+	teleportComp->OnCooldownChange.AddLambda([textWidget = CastChecked<UTextWidget>(hudTeleportCD->GetUserWidgetObject())](float CurrentCD)
+	{
+		textWidget->SetText(FString::FromInt(static_cast<int>(FMath::RoundFromZero(CurrentCD))));
+	});
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
