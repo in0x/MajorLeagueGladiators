@@ -96,7 +96,6 @@ void APlayerCharacter::BeginPlay()
 	hudWidgetHealth->SetRelativeLocation(relLoc);
 
 	auto healthWidget = CastChecked<UPlayerHudWidget>(hudWidgetHealth->GetUserWidgetObject());
-	checkf(healthWidget, TEXT("HealthWidget isnt a UPlayerHudWidget, can't connect player"));
 	healthWidget->OnAttachPlayer(this);
 }
 
@@ -216,8 +215,9 @@ bool APlayerCharacter::leftHandGrab_Server_Validate()
 
 void APlayerCharacter::leftHandGrab_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(LeftMotionController)->UseGrippedActors();
-	bool gripped = CastChecked<UVRControllerComponent>(LeftMotionController)->GrabNearestActor(*leftGrabSphere);
+	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
+	leftController->UseGrippedActors();
+	leftController->GrabNearestActor(*leftGrabSphere);
 }
 
 bool APlayerCharacter::leftHandRelease_Server_Validate()
@@ -227,8 +227,9 @@ bool APlayerCharacter::leftHandRelease_Server_Validate()
 
 void APlayerCharacter::leftHandRelease_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(LeftMotionController)->EndUseGrippedActors();
-	CastChecked<UVRControllerComponent>(LeftMotionController)->DropNonInteractGrips();
+	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
+	leftController->EndUseGrippedActors();
+	leftController->DropNonInteractGrips();
 }
 
 bool APlayerCharacter::leftHandDrop_Server_Validate()
@@ -238,8 +239,9 @@ bool APlayerCharacter::leftHandDrop_Server_Validate()
 
 void APlayerCharacter::leftHandDrop_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
-	CastChecked<UVRControllerComponent>(LeftMotionController)->DropAllGrips();
+	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
+	leftController->EndUseGrippedActors();
+	leftController->DropAllGrips();
 }
 
 // Right hand.
@@ -250,8 +252,9 @@ bool APlayerCharacter::rightHandGrab_Server_Validate()
 
 void APlayerCharacter::rightHandGrab_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->UseGrippedActors();
-	bool gripped = CastChecked<UVRControllerComponent>(RightMotionController)->GrabNearestActor(*rightGrabSphere);
+	UVRControllerComponent* rightController = CastChecked<UVRControllerComponent>(RightMotionController);
+	rightController->UseGrippedActors();
+	rightController->GrabNearestActor(*rightGrabSphere);
 }
 
 bool APlayerCharacter::rightHandRelease_Server_Validate()
@@ -261,8 +264,9 @@ bool APlayerCharacter::rightHandRelease_Server_Validate()
 
 void APlayerCharacter::rightHandRelease_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
-	CastChecked<UVRControllerComponent>(RightMotionController)->DropNonInteractGrips();
+	UVRControllerComponent* rightController = CastChecked<UVRControllerComponent>(RightMotionController);
+	rightController->EndUseGrippedActors();
+	rightController->DropNonInteractGrips();
 }
 
 bool APlayerCharacter::rightHandDrop_Server_Validate()
@@ -272,8 +276,9 @@ bool APlayerCharacter::rightHandDrop_Server_Validate()
 
 void APlayerCharacter::rightHandDrop_Server_Implementation()
 {
-	CastChecked<UVRControllerComponent>(RightMotionController)->EndUseGrippedActors();
-	CastChecked<UVRControllerComponent>(RightMotionController)->DropAllGrips();
+	UVRControllerComponent* rightController = CastChecked<UVRControllerComponent>(RightMotionController);
+	rightController->EndUseGrippedActors();
+	rightController->DropAllGrips();
 }
 
 bool APlayerCharacter::requestTeleport_Server_Validate(FVector Location, FRotator Rotation)

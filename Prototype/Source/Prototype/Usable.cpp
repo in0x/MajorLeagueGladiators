@@ -5,6 +5,4 @@
 
 UUsable::UUsable(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-{
-
-}
+{}

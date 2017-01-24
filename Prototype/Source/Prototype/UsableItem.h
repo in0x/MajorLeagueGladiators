@@ -15,5 +15,5 @@ public:
 	AUsableItem();
 
 	UFUNCTION()
-	virtual void Use(AActor* user, TriggerType triggerType) override;
+	virtual void Use(AActor* User, TriggerType Type) override;
 };

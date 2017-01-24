@@ -5,8 +5,6 @@
 
 AUsableItem::AUsableItem()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
 	auto meshComp = GetStaticMeshComponent();
 
 	if (meshComp)
@@ -18,7 +16,7 @@ AUsableItem::AUsableItem()
 	SetReplicates(true);
 }
 
-void AUsableItem::Use(AActor* CollidingActor, TriggerType triggerType)
+void AUsableItem::Use(AActor* User, TriggerType Type)
 {
 	UE_LOG(DebugLog, Warning, TEXT("Executing base Use in AUsableItem"));
 }

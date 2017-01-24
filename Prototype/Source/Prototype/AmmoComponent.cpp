@@ -12,6 +12,7 @@ UAmmoComponent::UAmmoComponent()
 
 void UAmmoComponent::BeginPlay()
 {
+	Super::BeginPlay();
 	msgEndpoint = FMessageEndpoint::Builder("AmmoMessager").Handling<FMsgAmmoRefill>(this, &UAmmoComponent::OnAmmoRefill);
 
 	checkf(msgEndpoint.IsValid(), TEXT("Ammo Component Msg Endpoint invalid"));
