@@ -152,15 +152,7 @@ void UVRControllerComponent::EndUseGrippedActors()
 
 void UVRControllerComponent::OnDropGripRequest(const FMsgDropGrip& Msg, const IMessageContextRef& Context)
 {
-	auto actorGrip = GrippedActors.FindByPredicate([&](const auto& grip) 
-	{
-		return grip.Actor == Msg.ActorToDrop;
-	});
-
-	if (actorGrip)
-	{
-		DropGrip(*actorGrip, true);
-	}
+	DropActor(Msg.ActorToDrop, true);
 }
 
 
