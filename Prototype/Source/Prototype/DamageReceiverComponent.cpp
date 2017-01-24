@@ -46,22 +46,25 @@ void UDamageReceiverComponent::handlePointDamage(AActor* DamagedActor, float Dam
 												UPrimitiveComponent* HitComponent, FName BoneName, FVector ShotFromDirection, 
 												const UDamageType* DamageType, AActor* DamageCauser)
 {
-	float minDistance = std::numeric_limits<float>::max();
-	UHealthComponent* closest = nullptr;
+	UE_LOG(DebugLog, Warning, TEXT("Number of Healthcomponents: %d"), healthComponents.Num());
+	if (healthComponents.Num() > 1) {
+		float minDistance = std::numeric_limits<float>::max();
+		UHealthComponent* closest = nullptr;
 
-	for (auto healthComp : healthComponents)
-	{
-		float distance = (healthComp->GetComponentLocation() - HitLocation).Size();
-
-		if (distance < minDistance)
+		for (auto healthComp : healthComponents)
 		{
-			minDistance = distance;
-			closest = healthComp;
-		}
-	}
+			float distance = (healthComp->GetComponentLocation() - HitLocation).Size();
 
-	if (closest)
-	{
-		closest->DecreaseHealth(Damage);
+			if (distance < minDistance)
+			{
+				minDistance = distance;
+				closest = healthComp;
+			}
+		}
+
+		if (closest)
+		{
+			closest->DecreaseHealth(Damage);
+		}
 	}
 }
