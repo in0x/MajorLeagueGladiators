@@ -9,12 +9,6 @@
 #include "PrototypePlayerController.h"
 #include "WidgetComponent.h"
 #include "PlayerHudWidget.h"
-#include "Runtime/UMG/Public/UMG.h"
-#include "Runtime/UMG/Public/UMGStyle.h"
-#include "Runtime/UMG/Public/Slate/SObjectWidget.h"
-#include "Runtime/UMG/Public/IUMGModule.h"
-#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
-
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
