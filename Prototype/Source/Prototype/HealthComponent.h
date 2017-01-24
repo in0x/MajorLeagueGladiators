@@ -29,6 +29,7 @@ public:
 	void DecreaseHealth(float Val);
 	void SetHealthToMax();
 
+	UPROPERTY(BlueprintAssignable, Category = "Health")
 	FloatDelegate HealthChangedDelegate;
 
 private:
