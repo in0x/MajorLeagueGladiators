@@ -18,7 +18,7 @@ public:
 	void BeginPlay();
 	bool GrabNearestActor(const USphereComponent& GrabSphere);
 	void DropAllGrips();
-	void DropManipulationGrips();
+	void DropNonInteractGrips();
 	void UseGrippedActors();
 	void EndUseGrippedActors();
 
