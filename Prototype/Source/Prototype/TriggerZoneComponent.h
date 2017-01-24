@@ -22,7 +22,7 @@ public:
 	UTriggerZoneComponent();
 	void BeginPlay();
 
-	TriggerType GetTriggerType();
+	TriggerType GetTriggerType() const;
 	void SetTriggerType(TriggerType type);
 
 private:

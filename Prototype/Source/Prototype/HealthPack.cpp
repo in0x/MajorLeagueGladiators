@@ -26,12 +26,12 @@ void AHealthPack::BeginPlay()
 	msgEndpoint = FMessageEndpoint::Builder("HealthPackMessager").Build();
 }
 
-void AHealthPack::Use(AActor* CollidingActor, TriggerType triggerType)
+void AHealthPack::Use(AActor* User, TriggerType Type)
 {
-	if (triggerType == TriggerType::Health)
+	if (Type == TriggerType::Health)
 	{
 		FMsgHealthRefill* healthMsg = new FMsgHealthRefill;
-		healthMsg->TriggerActor = CollidingActor;
+		healthMsg->TriggerActor = User;
 		healthMsg->Amount = amountToRefill;
 		msgEndpoint->Publish<FMsgHealthRefill>(healthMsg);
 

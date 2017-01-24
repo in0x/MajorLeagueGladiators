@@ -20,12 +20,12 @@ void AAmmoPack::BeginPlay()
 	checkf(msgEndpoint.IsValid(), TEXT("Ammo Pack Msg Endpoint invalid"));
 }
 
-void AAmmoPack::Use(AActor* CollidingActor, TriggerType triggerType)
+void AAmmoPack::Use(AActor* User, TriggerType Type)
 {
-	if (triggerType == TriggerType::Ammo)
+	if (Type == TriggerType::Ammo)
 	{
 		FMsgAmmoRefill* msg = new FMsgAmmoRefill();
-		msg->TriggerActor = CollidingActor;
+		msg->TriggerActor = User;
 		msg->Amount = amountToRefill;
 		msgEndpoint->Publish<FMsgAmmoRefill>(msg);
 

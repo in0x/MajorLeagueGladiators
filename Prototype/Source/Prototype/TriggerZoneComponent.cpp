@@ -15,11 +15,12 @@ UTriggerZoneComponent::UTriggerZoneComponent()
 
 void UTriggerZoneComponent::BeginPlay()
 {
+	Super::BeginPlay();
 	auto mesh = GetStaticMesh();
 	checkf(mesh, TEXT("TriggerZoneComponent requires a mesh")); 
 }
 
-TriggerType UTriggerZoneComponent::GetTriggerType()
+TriggerType UTriggerZoneComponent::GetTriggerType() const
 {
 	return triggerType;
 }
