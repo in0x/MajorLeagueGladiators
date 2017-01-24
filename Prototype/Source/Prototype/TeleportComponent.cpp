@@ -12,16 +12,30 @@ UTeleportComponent::UTeleportComponent(const FObjectInitializer& ObjectInitializ
 void UTeleportComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	this->SetActive(false);
 }
 
 void UTeleportComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	/*
+	NOTE(Phil): I'm managing the cooldown because I can't
+	manually change the elapsed time on an FTimerHandle.
+	*/
+	if (elapsedCooldown > 0.f)
+	{
+		elapsedCooldown -= DeltaTime;
+
+		if (elapsedCooldown < 0.f)
+		{
+			elapsedCooldown = 0.f;
+		}
+		return;
+	}
+
 	if (!origin)
 		return;
-
+	
 	shouldTeleport = UGameplayStatics::PredictProjectilePath(
 		GetWorld(),
 		tpHitResult,
@@ -42,19 +56,18 @@ void UTeleportComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 void UTeleportComponent::Enable(USceneComponent* TeleportOrigin)
 {
 	origin = TeleportOrigin;
-	Activate();
+	//Activate();
 }
 
-TeleportResult UTeleportComponent::GetTeleportResult() const
+TeleportResult UTeleportComponent::GetTeleportResult()
 {
 	if (origin)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Returning Data"));
+		elapsedCooldown = cooldown;
 		return TeleportResult{ tpHitResult.ImpactPoint, shouldTeleport };
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Returning Default"));
 		return TeleportResult{};
 	}
 }
@@ -62,6 +75,6 @@ TeleportResult UTeleportComponent::GetTeleportResult() const
 void UTeleportComponent::Disable()
 {
 	origin = nullptr;
-	Deactivate();
+	//Deactivate();
 }
 
