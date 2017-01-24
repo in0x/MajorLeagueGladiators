@@ -5,10 +5,10 @@
 #include "PlayerCharacter.generated.h"
 
 class UTeleportComponent;
+class UHealthComponent;
+class APrototypePlayerController;
+class UWidgetComponent;
 
-/**
- *
- */
 UCLASS()
 class PROTOTYPE_API APlayerCharacter : public AVRSimpleCharacter
 {
@@ -43,8 +43,20 @@ private:
 	UPROPERTY(EditAnywhere)
 	UTeleportComponent* teleportComp;
 
+	UPROPERTY(EditAnywhere)
+	UHealthComponent* healthComp;
+
+	UPROPERTY(EditAnywhere)
 	USphereComponent* leftGrabSphere;
+
+	UPROPERTY(EditAnywhere)
 	USphereComponent* rightGrabSphere;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> healthTriggerClass;
+
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* hudWidgetHealth;
 
 	UFUNCTION(Server, WithValidation, reliable)
 	void leftHandGrab_Server();
@@ -69,4 +81,6 @@ private:
 	
 	UFUNCTION(NetMulticast, reliable)
 	void performTeleport_NetMulticast(FVector Location, FRotator Rotation);
+
+	virtual void BecomeViewTarget(APlayerController* PC) override;
 };

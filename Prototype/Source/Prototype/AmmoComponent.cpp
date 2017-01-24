@@ -2,10 +2,29 @@
 
 #include "Prototype.h"
 #include "AmmoComponent.h"
+#include "MessageEndpointBuilder.h"
+#include "Messages/MsgAmmoRefill.h"
 
 UAmmoComponent::UAmmoComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UAmmoComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	msgEndpoint = FMessageEndpoint::Builder("AmmoMessager").Handling<FMsgAmmoRefill>(this, &UAmmoComponent::OnAmmoRefill);
+
+	checkf(msgEndpoint.IsValid(), TEXT("Ammo Component Msg Endpoint invalid"));
+	msgEndpoint->Subscribe<FMsgAmmoRefill>();
+}
+
+void UAmmoComponent::OnAmmoRefill(const FMsgAmmoRefill& Msg, const IMessageContextRef& Context)
+{
+	if (GetOwner() == Msg.TriggerActor)
+	{
+		IncreaseAmmo(Msg.Amount);
+	}
 }
 
 bool UAmmoComponent::ConsumeAmmo()

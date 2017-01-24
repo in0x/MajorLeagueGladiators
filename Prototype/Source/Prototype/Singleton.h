@@ -19,10 +19,4 @@ public:
 	USingleton(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	static USingleton& Get();
-
-	UEventBus& GetEventBus() { return *eventBus; }
-
-private:
-	UPROPERTY()
-	UEventBus* eventBus;
 };
