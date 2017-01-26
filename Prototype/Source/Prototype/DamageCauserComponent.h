@@ -16,7 +16,15 @@ public:
 	
 private:
 	UFUNCTION() void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+	void onCooldownReset();
 
 	UPROPERTY(EditAnywhere, Category="Damage")
 	float damageAppliedOnHit;
+
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	float timeBeforeCanDamageAgainSeconds = 0.5;
+
+	FTimerHandle cooldownTimerHandle;
+
+	bool bCanCauseDamage;
 };
