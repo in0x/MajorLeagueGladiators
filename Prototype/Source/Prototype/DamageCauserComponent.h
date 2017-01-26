@@ -15,7 +15,9 @@ public:
 	virtual void BeginPlay() override;	
 
 private:
-	UFUNCTION() void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+	UFUNCTION() 
+	void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+	
 	void onCooldownReset();
 
 	UPROPERTY(EditAnywhere, Category="Damage")
