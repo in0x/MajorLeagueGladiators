@@ -30,11 +30,19 @@ void UDamageReceiverComponent::BeginPlay()
 
 bool UDamageReceiverComponent::CanBeDamagedBy(const UDamageType* DamageType) const
 {
-	return damageableBy.Contains(DamageType);
+	return damageableBy.ContainsByPredicate([&DamageType](TSubclassOf<UDamageType> currentDamageType)
+	{
+		return DamageType->GetClass() == *currentDamageType;
+	});
 }
 
 void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+	if (!CanBeDamagedBy(DamageType))
+	{
+		return;
+	}
+
 	UHealthComponent* healthComp = healthComponents[0];
 
 	if (healthComp)
