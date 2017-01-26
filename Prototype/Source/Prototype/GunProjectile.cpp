@@ -12,6 +12,16 @@ AGunProjectile::AGunProjectile()
 	bStaticMeshReplicateMovement = true;
 }
 
+void AGunProjectile::BeginPlay()
+{
+	OnActorHit.AddDynamic(this, &AGunProjectile::OnHit);
+}
+
+void AGunProjectile::OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Destroy();
+}
+
 void AGunProjectile::Tick(float DeltaTimeS)
 {
 	timeAliveS += DeltaTimeS;
