@@ -24,7 +24,6 @@ AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 void AGunActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AGunActor, ammoCountWidget);
 }	
 
 void AGunActor::BeginPlay()

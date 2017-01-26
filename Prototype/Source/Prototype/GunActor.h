@@ -26,7 +26,7 @@ public:
 	virtual void OnEndUsed() override;
 
 private:
-	UPROPERTY(EditAnywhere, Replicated)
+	UPROPERTY(EditAnywhere)
 	UWidgetComponent* ammoCountWidget;
 
 	UPROPERTY(EditAnywhere)
