@@ -10,6 +10,7 @@
 #include "WidgetComponent.h"
 #include "PlayerHudWidget.h"
 #include "TextWidget.h"
+#include "DamageReceiverComponent.h"
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -19,14 +20,19 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 {
 	bUseControllerRotationPitch = true;
 
-	healthComp = ObjectInitializer.CreateDefaultSubobject<UHealthComponent>(this, "HealthComp");
+	healthComp = ObjectInitializer.CreateDefaultSubobject<UHealthComponent>(this, TEXT("HealthComp"));
 	healthComp->SetIsReplicated(true);
+
+	dmgReceiverComp = ObjectInitializer.CreateDefaultSubobject<UDamageReceiverComponent>(this, TEXT("DmgReceiverComp"));
 
 	leftMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftMesh"));
 	rightMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightMesh"));
 
+	bodyMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh"));
+
 	leftMesh->SetupAttachment(LeftMotionController);
 	rightMesh->SetupAttachment(RightMotionController);
+	bodyMesh->SetupAttachment(VRRootReference);
 
 	leftGrabSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("LeftGrabSphere"));
 	rightGrabSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("RightGrabSphere"));
