@@ -29,18 +29,38 @@ void AActorSpawn::BeginPlay()
 	SetRespawnTimer(initialSpawnTime);
 }
 
+void AActorSpawn::EndPlay(EEndPlayReason::Type EndPlayReason)
+{
+	for (AActor* actor : spawnedActors)
+	{
+		actor->OnEndPlay.RemoveDynamic(this, &AActorSpawn::OnSpawnedActorEndPlay);
+	}
+
+	spawnedActors.Empty();
+}
+
+bool AActorSpawn::HasSpawnLimit() const
+{
+	return maxSpawnActors != 0;
+}
+
+bool AActorSpawn::IsAllowedToSpawn() const
+{
+	return spawnedActors.Num() < maxSpawnActors || !HasSpawnLimit();
+}
+
 void AActorSpawn::spawnActor()
 {
-	UWorld* world = GetWorld();
-	auto location = generateRandomSpawnLocation();
+	if (!IsAllowedToSpawn())
+	{
+		return;
+	}
+
+	UWorld* world = GetWorld();		
 	
-	auto rotation = randomStream.GetUnitVector().Rotation();
-	rotation.Pitch = 0;
-	rotation.Roll = 0;
-	
-	auto* actor = world->SpawnActor<AActor>(actorToSpawn,
-		location,
-		rotation	
+	AActor* actor = world->SpawnActor<AActor>(actorToSpawn,
+		generateRandomSpawnLocation(),
+		generateRandomRotator()
 		);
 
 	if (!actor)
@@ -48,8 +68,25 @@ void AActorSpawn::spawnActor()
 		return;
 	}
 
+	spawnedActors.Add(actor);
+	actor->OnEndPlay.AddDynamic(this, &AActorSpawn::OnSpawnedActorEndPlay);
+
 	actor->SetReplicates(true);
 	actor->SetReplicateMovement(true);
+}
+
+void AActorSpawn::OnSpawnedActorEndPlay(AActor* Actor, EEndPlayReason::Type EndPlayReason)
+{
+	Actor->OnEndPlay.RemoveDynamic(this, &AActorSpawn::OnSpawnedActorEndPlay);
+	spawnedActors.RemoveSingleSwap(Actor);
+}
+
+FRotator AActorSpawn::generateRandomRotator()
+{
+	FRotator rotation = randomStream.GetUnitVector().Rotation();
+	rotation.Pitch = 0;
+	rotation.Roll = 0;
+	return rotation;
 }
 
 FVector AActorSpawn::generateRandomSpawnLocation()
