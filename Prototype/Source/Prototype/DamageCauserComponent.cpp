@@ -16,6 +16,5 @@ void UDamageCauserComponent::BeginPlay()
 
 void UDamageCauserComponent::OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
 {
-	auto gunDamageType = TSubclassOf<UDamageType>(UDamageType::StaticClass());	
-	UGameplayStatics::ApplyPointDamage(OtherActor, damageAppliedOnHit, NormalImpulse, Hit, nullptr, SelfActor, gunDamageType);
+	UGameplayStatics::ApplyPointDamage(OtherActor, damageAppliedOnHit, NormalImpulse, Hit, nullptr, SelfActor, damageType);
 }

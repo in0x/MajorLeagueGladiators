@@ -15,7 +15,8 @@ class PROTOTYPE_API UDamageReceiverComponent : public UActorComponent
 public:	
 	UDamageReceiverComponent();
 	virtual void BeginPlay() override;
-	
+
+	bool CanBeDamagedBy(const UDamageType* DamageType) const;
 private:
 	UFUNCTION()
 	void handleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
@@ -25,4 +26,7 @@ private:
 									   FName BoneName, FVector ShotFromDirection, const UDamageType* DamageType, AActor* DamageCauser);
 	
 	TArray<UHealthComponent*> healthComponents;
+
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	TArray<TSubclassOf<UDamageType>> damageableBy;
 };

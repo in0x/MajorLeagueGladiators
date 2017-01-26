@@ -13,10 +13,13 @@ class PROTOTYPE_API UDamageCauserComponent : public UActorComponent
 public:	
 	UDamageCauserComponent();
 	virtual void BeginPlay() override;	
-	
+
 private:
 	UFUNCTION() void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 
 	UPROPERTY(EditAnywhere, Category="Damage")
 	float damageAppliedOnHit;
+
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	TSubclassOf<UDamageType> damageType;
 };
