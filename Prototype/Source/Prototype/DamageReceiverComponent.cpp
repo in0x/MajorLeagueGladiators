@@ -28,6 +28,11 @@ void UDamageReceiverComponent::BeginPlay()
 	}
 }
 
+bool UDamageReceiverComponent::CanBeDamagedBy(const UDamageType* DamageType) const
+{
+	return damageableBy.Contains(DamageType);
+}
+
 void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	UHealthComponent* healthComp = healthComponents[0];
@@ -46,6 +51,11 @@ void UDamageReceiverComponent::handlePointDamage(AActor* DamagedActor, float Dam
 												UPrimitiveComponent* HitComponent, FName BoneName, FVector ShotFromDirection, 
 												const UDamageType* DamageType, AActor* DamageCauser)
 {
+	if (!CanBeDamagedBy(DamageType))
+	{
+		return;
+	}
+
 	if (healthComponents.Num() > 1) {
 		float minDistance = std::numeric_limits<float>::max();
 		UHealthComponent* closest = nullptr;
