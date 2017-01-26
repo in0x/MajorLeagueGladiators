@@ -21,12 +21,14 @@ public:
 	void BeginPlay();
 
 	// Returns wether the player still had ammo.
-	bool ConsumeAmmo();
-	void IncreaseAmmo(uint32 Amount);
-	TSubclassOf<AGunProjectile> GetProjectileType();
-
-	int32 GetAmmoCount() const;
+	UFUNCTION(NetMulticast, reliable)
+	void ConsumeAmmo_NetMulticast();
 	
+	UFUNCTION(NetMulticast, reliable)
+	void IncreaseAmmo_NetMulticast(uint32 Amount);
+	
+	TSubclassOf<AGunProjectile> GetProjectileType();
+	int32 GetAmmoCount() const;
 	int32 GetMaxAmmoCount() const;
 	
 	AmmoChangedDelegate OnAmmoChanged;

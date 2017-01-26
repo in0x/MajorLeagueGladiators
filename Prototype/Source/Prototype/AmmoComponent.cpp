@@ -8,6 +8,7 @@
 UAmmoComponent::UAmmoComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicated(true);
 }
 
 void UAmmoComponent::BeginPlay()
@@ -33,21 +34,17 @@ void UAmmoComponent::OnAmmoRefill(const FMsgAmmoRefill& Msg, const IMessageConte
 {
 	if (GetOwner() == Msg.TriggerActor)
 	{
-		IncreaseAmmo(Msg.Amount);
+		IncreaseAmmo_NetMulticast(Msg.Amount);
 	}
 }
 
-bool UAmmoComponent::ConsumeAmmo()
+void UAmmoComponent::ConsumeAmmo_NetMulticast_Implementation()
 {
-	if (ammoCount == 0)
-		return false;
-
 	ammoCount--;
 	OnAmmoChanged.Broadcast(ammoCount);
-	return true;
 }
 
-void UAmmoComponent::IncreaseAmmo(uint32 Amount)
+void UAmmoComponent::IncreaseAmmo_NetMulticast_Implementation(uint32 Amount)
 {
 	ammoCount = FMath::Min(maxAmmo, ammoCount + Amount);
 	OnAmmoChanged.Broadcast(ammoCount);

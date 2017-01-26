@@ -21,12 +21,12 @@ public:
 	AGunActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void OnUsed() override;	
 	virtual void OnEndUsed() override;
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Replicated)
 	UWidgetComponent* ammoCountWidget;
 
 	UPROPERTY(EditAnywhere)
