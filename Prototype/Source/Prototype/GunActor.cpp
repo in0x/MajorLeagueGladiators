@@ -12,11 +12,20 @@ AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+	SetReplicates(true);
 
 	ammoComponent = ObjectInitializer.CreateDefaultSubobject<UAmmoComponent>(this, TEXT("AmmoComponent"));
+	
 	ammoCountWidget = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("AmmoCounterWidget"));
 	ammoCountWidget->SetupAttachment(GetStaticMeshComponent(), FName(TEXT("UI"), EFindName::FNAME_Find));
+	ammoCountWidget->SetIsReplicated(true);
 }
+
+void AGunActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AGunActor, ammoCountWidget);
+}	
 
 void AGunActor::BeginPlay()
 {
@@ -48,8 +57,9 @@ void AGunActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bShooting && ammoComponent->ConsumeAmmo())
+	if (bShooting && ammoComponent->GetAmmoCount() > 0)
 	{
+		ammoComponent->ConsumeAmmo_NetMulticast();
 		FTransform trafo;
 		projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
 

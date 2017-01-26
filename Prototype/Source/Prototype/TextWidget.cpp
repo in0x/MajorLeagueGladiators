@@ -2,7 +2,3 @@
 
 #include "Prototype.h"
 #include "TextWidget.h"
-
-
-
-
