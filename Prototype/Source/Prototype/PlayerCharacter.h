@@ -8,6 +8,7 @@ class UTeleportComponent;
 class UHealthComponent;
 class APrototypePlayerController;
 class UWidgetComponent;
+class UDamageReceiverComponent;
 
 UCLASS()
 class PROTOTYPE_API APlayerCharacter : public AVRSimpleCharacter
@@ -47,10 +48,16 @@ private:
 	UHealthComponent* healthComp;
 
 	UPROPERTY(EditAnywhere)
+	UDamageReceiverComponent* dmgReceiverComp;
+
+	UPROPERTY(EditAnywhere)
 	USphereComponent* leftGrabSphere;
 
 	UPROPERTY(EditAnywhere)
 	USphereComponent* rightGrabSphere;
+
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* bodyMesh;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> healthTriggerClass;
