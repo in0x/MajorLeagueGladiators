@@ -14,6 +14,7 @@ AGunProjectile::AGunProjectile()
 
 void AGunProjectile::BeginPlay()
 {
+	Super::BeginPlay();
 	OnActorHit.AddDynamic(this, &AGunProjectile::OnHit);
 }
 

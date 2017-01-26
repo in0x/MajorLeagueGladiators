@@ -23,8 +23,7 @@ void UDamageCauserComponent::OnHit(AActor* SelfActor, AActor* OtherActor, FVecto
 	bCanCauseDamage = false;
 	GetOwner()->GetWorldTimerManager().SetTimer(cooldownTimerHandle, this, &UDamageCauserComponent::onCooldownReset, timeBeforeCanDamageAgainSeconds, false);
 
-	auto gunDamageType = TSubclassOf<UDamageType>(UDamageType::StaticClass());	
-	UGameplayStatics::ApplyPointDamage(OtherActor, damageAppliedOnHit, NormalImpulse, Hit, nullptr, SelfActor, gunDamageType);
+	UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, nullptr, SelfActor, damageType);
 }
 
 void UDamageCauserComponent::onCooldownReset()
