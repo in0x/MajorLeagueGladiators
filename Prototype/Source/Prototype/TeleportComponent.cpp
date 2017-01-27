@@ -44,7 +44,7 @@ void UTeleportComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		positions,
 		lastTraceDest,
 		origin->GetComponentLocation(),
-		origin->GetForwardVector() * 500,
+		origin->GetForwardVector() * 750,
 		true,
 		0,
 		queryTypes,

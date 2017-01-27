@@ -152,7 +152,18 @@ void UVRControllerComponent::EndUseGrippedActors()
 
 void UVRControllerComponent::OnDropGripRequest(const FMsgDropGrip& Msg, const IMessageContextRef& Context)
 {
-	DropActor(Msg.ActorToDrop, true);
+	/*for (int i = 0; i < GrippedActors.Num(); i++)
+	{
+		if (GrippedActors[i].Actor == Msg.ActorToDrop)
+		{
+			handleDropGripRequest_NetMulticast(i);
+		}
+	}*/
 }
 
+void UVRControllerComponent::handleDropGripRequest_NetMulticast_Implementation(int32 GripIndex)
+{
+	UE_LOG(DebugLog, Log, TEXT(__FUNCTION__ "not implemented"));
+	//DropGrip(GrippedActors[GripIndex], true);
+}
 

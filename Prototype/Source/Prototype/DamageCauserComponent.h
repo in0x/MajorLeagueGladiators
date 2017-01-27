@@ -5,7 +5,7 @@
 #include "Components/ActorComponent.h"
 #include "DamageCauserComponent.generated.h"
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROTOTYPE_API UDamageCauserComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -15,9 +15,10 @@ public:
 	virtual void BeginPlay() override;	
 
 private:
-	UFUNCTION() 
-	void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
-	
+
+	UFUNCTION()
+	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+
 	void onCooldownReset();
 
 	UPROPERTY(EditAnywhere, Category="Damage")
