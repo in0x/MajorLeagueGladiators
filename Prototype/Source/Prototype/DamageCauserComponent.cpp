@@ -12,18 +12,12 @@ UDamageCauserComponent::UDamageCauserComponent()
 void UDamageCauserComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	GetOwner()->OnActorHit.AddDynamic(this, &UDamageCauserComponent::OnHit);
+	GetOwner()->OnActorBeginOverlap.AddDynamic(this, &UDamageCauserComponent::OnBeginOverlap);
 }
 
-void UDamageCauserComponent::OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
+void UDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	if (!bCanCauseDamage || !OtherActor->bCanBeDamaged)
-		return;
-
-	bCanCauseDamage = false;
-	GetOwner()->GetWorldTimerManager().SetTimer(cooldownTimerHandle, this, &UDamageCauserComponent::onCooldownReset, timeBeforeCanDamageAgainSeconds, false);
-
-	UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, nullptr, SelfActor, damageType);
+	UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, nullptr, OverlappedActor, damageType);
 }
 
 void UDamageCauserComponent::onCooldownReset()

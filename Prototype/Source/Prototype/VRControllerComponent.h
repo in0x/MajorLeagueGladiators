@@ -33,5 +33,8 @@ private:
 	ActorGrabData getNearestGrabableActor(const USphereComponent& GrabSphere) const;
 	void OnDropGripRequest(const FMsgDropGrip& Msg, const IMessageContextRef& Context);
 
+	UFUNCTION(NetMulticast, Reliable) // Temporary solution, needs to be refacted.
+	void handleDropGripRequest_NetMulticast(int32 GripIndex);
+
 	FMessageEndpointPtr msgEndpoint;
 };

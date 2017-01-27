@@ -10,6 +10,14 @@
 AAmmoPack::AAmmoPack()
 {
 	SetReplicates(true);
+	bStaticMeshReplicateMovement = true;
+	auto mesh = GetStaticMeshComponent();
+
+	if (mesh)
+	{
+		mesh->bGenerateOverlapEvents = true;
+		mesh->bMultiBodyOverlap = true;
+	}
 }
 
 void AAmmoPack::BeginPlay()
@@ -33,7 +41,9 @@ void AAmmoPack::Use(AActor* User, TriggerType Type)
 		dropMsg->ActorToDrop = this;
 		msgEndpoint->Publish<FMsgDropGrip>(dropMsg);
 
-		Destroy();
+		//Destroy();
+		FVector trashLocation(0, 0, -300);
+		TeleportTo(trashLocation, FRotator());
 	}
 }
 

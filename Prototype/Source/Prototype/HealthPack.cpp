@@ -10,7 +10,7 @@
 AHealthPack::AHealthPack()
 {
 	SetReplicates(true);
-
+	bStaticMeshReplicateMovement = true;
 	auto mesh = GetStaticMeshComponent();
 
 	if (mesh)
@@ -39,6 +39,8 @@ void AHealthPack::Use(AActor* User, TriggerType Type)
 		dropMsg->ActorToDrop = this;
 		msgEndpoint->Publish<FMsgDropGrip>(dropMsg);
 
-		Destroy();
+		//Destroy();
+		FVector trashLocation(0, 0, -300);
+		TeleportTo(trashLocation, FRotator());
 	}
 }

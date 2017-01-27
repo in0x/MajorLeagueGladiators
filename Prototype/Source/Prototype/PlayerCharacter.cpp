@@ -32,7 +32,7 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 
 	leftMesh->SetupAttachment(LeftMotionController);
 	rightMesh->SetupAttachment(RightMotionController);
-	bodyMesh->SetupAttachment(VRRootReference);
+	bodyMesh->SetupAttachment(VRReplicatedCamera);
 
 	leftGrabSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("LeftGrabSphere"));
 	rightGrabSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("RightGrabSphere"));
