@@ -41,6 +41,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	float initialSpawnTime;	
 
+	UPROPERTY(EditAnywhere)
+	float maxSpawnTimeVariance;
+
 	/*Max amount of spawned actors that can be alive. 0 Stands for infinite*/
 	UPROPERTY(EditAnywhere)
 	int32 maxSpawnActors;

@@ -15,7 +15,7 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UHealthComponent, currentHealth);
-}
+}	
 
 void UHealthComponent::BeginPlay()
 {
