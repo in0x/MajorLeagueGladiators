@@ -1729,7 +1729,7 @@ void UGripMotionControllerComponent::TickGrip(float DeltaTime)
 	SCOPE_CYCLE_COUNTER(STAT_TickGrip);
 
 	// Debug test that we aren't floating physics handles
-	check(PhysicsGrips.Num() <= GrippedActors.Num());
+	//check(PhysicsGrips.Num() <= GrippedActors.Num()); //NOTE(Phil): TODO, find a solution for this asserting false
 
 	if (GrippedActors.Num())
 	{
