@@ -20,7 +20,7 @@ void AActorSpawn::SetRespawnTimer(float IntervalInSeconds)
 	}
 
 	FTimerManager& timer = GetWorldTimerManager();
-	timer.SetTimer(spawnTimerHandle, this, &AActorSpawn::spawnActor, IntervalInSeconds, true);
+	timer.SetTimer(spawnTimerHandle, this, &AActorSpawn::spawnActor, IntervalInSeconds, false);
 }
 
 void AActorSpawn::BeginPlay()
@@ -73,6 +73,8 @@ void AActorSpawn::spawnActor()
 
 	actor->SetReplicates(true);
 	actor->SetReplicateMovement(true);
+
+	SetRespawnTimer(initialSpawnTime + randomStream.FRandRange(0, maxSpawnTimeVariance));
 }
 
 void AActorSpawn::OnSpawnedActorEndPlay(AActor* Actor, EEndPlayReason::Type EndPlayReason)
