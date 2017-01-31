@@ -11,6 +11,8 @@
 #include "PlayerHudWidget.h"
 #include "TextWidget.h"
 #include "DamageReceiverComponent.h"
+#include "MessageEndpointBuilder.h"
+#include "Messages/MsgStartGame.h"
 
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -89,15 +91,6 @@ void APlayerCharacter::BeginPlay()
 		UE_LOG(DebugLog, Warning, TEXT("No class set for playercharacter health trigger"))
 	}
 
-	//hudWidgetHealth->AttachToComponent(VRReplicatedCamera, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true));
-	
-	// NOTE(Phil): I've hardcoded this for now since it'll have to be replaced anyway.
-	/*hudWidgetHealth->SetWorldScale3D(FVector(0.03, 0.03, 0.03));
-	auto relLoc = hudWidgetHealth->RelativeLocation;
-	relLoc.X -= 150;
-	relLoc.Z += 110;
-	relLoc.Y -= 5;
-	hudWidgetHealth->SetRelativeLocation(relLoc);*/
 	auto healthWidget = CastChecked<UPlayerHudWidget>(hudWidgetHealth->GetUserWidgetObject());
 	healthWidget->OnAttachPlayer(this);
 
@@ -110,6 +103,9 @@ void APlayerCharacter::BeginPlay()
 	{
 		textWidget->SetText(FString::FromInt(static_cast<int>(FMath::RoundFromZero(CurrentCD))));
 	});
+
+	msgEndpoint = FMessageEndpoint::Builder("PlayerMessager");
+	checkf(msgEndpoint.IsValid(), TEXT("Player Msg Endpoint invalid"));
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -136,6 +132,17 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnSideGripButtonRight);
+
+	PlayerInputComponent->BindAction("StartGame", EInputEvent::IE_Pressed, this, &APlayerCharacter::OnStartGame);
+}
+
+void APlayerCharacter::OnStartGame()
+{
+	if (HasAuthority())
+	{
+		FMsgStartGame* msg = new FMsgStartGame;
+		msgEndpoint->Publish<FMsgStartGame>(msg);
+	}
 }
 
 void APlayerCharacter::BecomeViewTarget(APlayerController* PC) 

@@ -1,6 +1,9 @@
 #pragma once
 
+#include "MessageEndpoint.h"
 #include "ActorSpawn.generated.h"
+
+struct FMsgStartGame;
 
 UCLASS()
 class AActorSpawn : public AActor
@@ -13,7 +16,6 @@ public:
 	void SetRespawnTimer(float IntervalInSeconds);
 
 	virtual void BeginPlay() override;
-
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 
 	bool HasSpawnLimit() const;
@@ -56,4 +58,8 @@ private:
 	FRandomStream randomStream;
 
 	FTimerHandle spawnTimerHandle;
+
+	FMessageEndpointPtr msgEndpoint;
+	void OnStartGame(const FMsgStartGame& Msg, const IMessageContextRef& Context);
+	bool bEnabled = false;
 };
