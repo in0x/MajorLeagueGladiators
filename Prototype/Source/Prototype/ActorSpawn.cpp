@@ -1,7 +1,7 @@
 #include "Prototype.h"
-
 #include "ActorSpawn.h"
-
+#include "MessageEndpointBuilder.h"
+#include "Messages/MsgStartGame.h"
 
 AActorSpawn::AActorSpawn(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -9,7 +9,6 @@ AActorSpawn::AActorSpawn(const FObjectInitializer& ObjectInitializer)
 	, initialSpawnTime(0.2f)
 {	
 	SetRootComponent(ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootComponet")));
-	randomStream.Initialize(randomSeed);
 }
 
 void AActorSpawn::SetRespawnTimer(float IntervalInSeconds)
@@ -19,6 +18,7 @@ void AActorSpawn::SetRespawnTimer(float IntervalInSeconds)
 		return;
 	}
 
+	randomStream.Initialize(FMath::Rand());
 	FTimerManager& timer = GetWorldTimerManager();
 	timer.SetTimer(spawnTimerHandle, this, &AActorSpawn::spawnActor, IntervalInSeconds, false);
 }
@@ -26,7 +26,20 @@ void AActorSpawn::SetRespawnTimer(float IntervalInSeconds)
 void AActorSpawn::BeginPlay()
 {
 	Super::BeginPlay();
-	SetRespawnTimer(initialSpawnTime);
+
+	msgEndpoint = FMessageEndpoint::Builder("SpawnMessager").Handling<FMsgStartGame>(this, &AActorSpawn::OnStartGame);
+	checkf(msgEndpoint.IsValid(), TEXT("ActorSpawn Msg Endpoint invalid"));
+	msgEndpoint->Subscribe<FMsgStartGame>();
+}
+
+void AActorSpawn::OnStartGame(const FMsgStartGame& Msg, const IMessageContextRef& Context)
+{
+	if (bEnabled)
+		return;
+
+	bEnabled = true;
+	UE_LOG(DebugLog, Log, TEXT("StartGame recieved, begin spawning"));
+	SetRespawnTimer(randomStream.FRandRange(0, maxSpawnTimeVariance + initialSpawnTime));
 }
 
 void AActorSpawn::EndPlay(EEndPlayReason::Type EndPlayReason)
@@ -74,7 +87,8 @@ void AActorSpawn::spawnActor()
 	actor->SetReplicates(true);
 	actor->SetReplicateMovement(true);
 
-	SetRespawnTimer(initialSpawnTime + randomStream.FRandRange(0, maxSpawnTimeVariance));
+	float spawnTime = initialSpawnTime + randomStream.FRandRange(0, maxSpawnTimeVariance);
+	SetRespawnTimer(spawnTime);
 }
 
 void AActorSpawn::OnSpawnedActorEndPlay(AActor* Actor, EEndPlayReason::Type EndPlayReason)
