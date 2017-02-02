@@ -17,6 +17,9 @@ IVRGripInterface implementers can be queried using Closest[Primary|Secondary]Slo
 */
 bool UVRControllerComponent::GrabNearestActor(const USphereComponent& GrabSphere)
 {	
+	if (GrippedActors.Num() > 0)
+		return false;
+
 	auto grabData = getNearestGrabableActor(GrabSphere);
 	
 	if (!grabData.pActorToGrip)
