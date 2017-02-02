@@ -1725,11 +1725,14 @@ void UGripMotionControllerComponent::GetGripWorldTransform(float DeltaTime,FTran
 
 void UGripMotionControllerComponent::TickGrip(float DeltaTime)
 {
-
 	SCOPE_CYCLE_COUNTER(STAT_TickGrip);
 
 	// Debug test that we aren't floating physics handles
 	//check(PhysicsGrips.Num() <= GrippedActors.Num()); //NOTE(Phil): TODO, find a solution for this asserting false
+	if (PhysicsGrips.Num() > GrippedActors.Num())
+	{
+		UE_LOG(DebugLog, Error, TEXT("PhysicsGrips.Num() = %d <= GrippedActors.Num() = %d"), PhysicsGrips.Num(), GrippedActors.Num());
+	}
 
 	if (GrippedActors.Num())
 	{
