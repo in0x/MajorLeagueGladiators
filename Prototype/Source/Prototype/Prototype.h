@@ -16,11 +16,19 @@
 #include "VRExpansion/VRPathFollowingComponent.h"
 #include "VRExpansion/VRPlayerController.h"
 #include "VRExpansion/VRGripInterface.h"
-#include "Runtime/Launch/Resources/Version.h"
+
+// UNREAL
 #include "PhysXIncludes.h"
+#include "UnrealNetwork.h"
+#include "MessageEndpointBuilder.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "Runtime/Engine/Private/EnginePrivate.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
-#include "UnrealNetwork.h"
+#include "Runtime/UMG/Public/UMG.h"
+#include "Runtime/UMG/Public/UMGStyle.h"
+#include "Runtime/UMG/Public/Slate/SObjectWidget.h"
+#include "Runtime/UMG/Public/IUMGModule.h"
+#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
 
 // STL
 #include <algorithm>
