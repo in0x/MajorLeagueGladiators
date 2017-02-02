@@ -1,8 +1,8 @@
 #include "Prototype.h"
 #include "HandMotionController.h"
-#include "PlayerCharacter.h"
+#include "MlgPlayerCharacter.h"
 
-HandMotionController::HandMotionController(APlayerCharacter* PlayerCharacter)
+HandMotionController::HandMotionController(AMlgPlayerCharacter* PlayerCharacter)
 	: playerChar(PlayerCharacter)
 {
 	IModularFeatures::Get().RegisterModularFeature(IMotionController::GetModularFeatureName(), this);

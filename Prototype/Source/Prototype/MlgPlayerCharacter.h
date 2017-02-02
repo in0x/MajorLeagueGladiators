@@ -2,20 +2,20 @@
 
 #include "VRExpansion/VRSimpleCharacter.h"
 #include "HandMotionController.h"
-#include "PlayerCharacter.generated.h"
+#include "MlgPlayerCharacter.generated.h"
 
 class UTeleportComponent;
 class UHealthComponent;
-class APrototypePlayerController;
+class AMlgPlayerController;
 class UWidgetComponent;
 class UDamageReceiverComponent;
 
 UCLASS()
-class PROTOTYPE_API APlayerCharacter : public AVRSimpleCharacter
+class PROTOTYPE_API AMlgPlayerCharacter : public AVRSimpleCharacter
 {
 	GENERATED_BODY()
 public:
-	APlayerCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;

@@ -3,12 +3,12 @@
 #pragma once
 
 #include "VRExpansion/VRPlayerController.h"
-#include "PrototypePlayerController.generated.h"
+#include "MlgPlayerController.generated.h"
 
 UCLASS()
-class PROTOTYPE_API APrototypePlayerController : public AVRPlayerController
+class PROTOTYPE_API AMlgPlayerController : public AVRPlayerController
 {
 	GENERATED_BODY()
 public:
-	APrototypePlayerController();
+	AMlgPlayerController();
 };

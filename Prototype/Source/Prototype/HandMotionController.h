@@ -1,7 +1,7 @@
 #pragma once
 #include "IMotionController.h"
 
-class APlayerCharacter;
+class AMlgPlayerCharacter;
 
 /*
 * NOTE(Phil)
@@ -12,17 +12,17 @@ class APlayerCharacter;
 * MotionController features without having a Vive connected. Instead of getting
 * the MotionController's position from SteamVR, they are simply placed relative
 * to the PlayerCharacter by this class. An instance of this class is owned by 
-* APlayerCharacter.
+* AMlgPlayerCharacter.
 */
 class PROTOTYPE_API HandMotionController :  public IMotionController
 {
 public:
-	HandMotionController(APlayerCharacter* PlayerCharacter);
+	HandMotionController(AMlgPlayerCharacter* PlayerCharacter);
 	virtual ~HandMotionController();
 	
 	virtual bool GetControllerOrientationAndPosition(int32 ControllerIndex, EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const override;
 	virtual ETrackingStatus GetControllerTrackingStatus(int32 ControllerIndex, EControllerHand DeviceHand) const override;
 	
 private:
-	APlayerCharacter* playerChar;
+	AMlgPlayerCharacter* playerChar;
 };
