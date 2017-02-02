@@ -19,13 +19,11 @@ class PROTOTYPE_API UAmmoComponent : public UActorComponent
 public:	
 	UAmmoComponent();
 	void BeginPlay();
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	// Returns wether the player still had ammo.
-	UFUNCTION(NetMulticast, reliable)
-	void ConsumeAmmo_NetMulticast();
-	
-	UFUNCTION(NetMulticast, reliable)
-	void IncreaseAmmo_NetMulticast(uint32 Amount);
+	void ConsumeAmmo();
+	void IncreaseAmmo(int32 Amount);
 	
 	TSubclassOf<AGunProjectile> GetProjectileType();
 	int32 GetAmmoCount() const;
@@ -38,10 +36,13 @@ private:
 	TSubclassOf<AGunProjectile> gunProjectileClass;
 	
 	UPROPERTY(EditAnywhere, Category = "Ammo")
-	uint32 maxAmmo;
-	
-	UPROPERTY(EditAnywhere, Category = "Ammo")
-	uint32 ammoCount;
+	int32 maxAmmo;
+
+	UFUNCTION()
+	void onRep_ammoCount();
+
+	UPROPERTY(EditAnywhere, ReplicatedUsing=onRep_ammoCount, Category = "Ammo")
+	int32 ammoCount;
 
 	FMessageEndpointPtr msgEndpoint;
 
