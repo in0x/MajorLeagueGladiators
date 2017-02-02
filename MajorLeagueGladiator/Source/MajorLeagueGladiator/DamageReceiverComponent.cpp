@@ -3,6 +3,8 @@
 #include "MajorLeagueGladiator.h"
 #include "DamageReceiverComponent.h"
 #include "HealthComponent.h"
+#include "MessageEndpointBuilder.h"
+#include "Messages/MsgDamageReceived.h"
 
 UDamageReceiverComponent::UDamageReceiverComponent()
 {
@@ -26,6 +28,9 @@ void UDamageReceiverComponent::BeginPlay()
 			healthComponents.Add(CastChecked<UHealthComponent>(healthComp));
 		}
 	}
+
+	msgEndpoint = FMessageEndpoint::Builder("DamageReceiverMessager");
+	checkf(msgEndpoint.IsValid(), TEXT("Damage Receiver Msg Endpoint invalid"));
 }
 
 bool UDamageReceiverComponent::CanBeDamagedBy(const UDamageType* DamageType) const
@@ -43,6 +48,13 @@ void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, 
 		return;
 	}
 
+	FMsgDamageReceived* msg = new FMsgDamageReceived();
+	msg->DamagedActor = DamagedActor;
+	msg->Damage = Damage;
+	msg->InstigatedBy = InstigatedBy;
+	msg->DamageCauser = DamageCauser;
+	msgEndpoint->Publish<FMsgDamageReceived>(msg);
+
 	UHealthComponent* healthComp = healthComponents[0];
 
 	if (healthComp)
@@ -53,6 +65,8 @@ void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, 
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Couldnt find HealthComponent, cant apply damage"));
 	}
+
+
 }
 
 void UDamageReceiverComponent::handlePointDamage(AActor* DamagedActor, float Damage, AController* InstigatedBy, FVector HitLocation, 
