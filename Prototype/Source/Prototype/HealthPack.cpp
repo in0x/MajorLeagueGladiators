@@ -3,9 +3,7 @@
 #include "Prototype.h"
 #include "HealthPack.h"
 #include "TriggerZoneComponent.h"
-#include "MessageEndpointBuilder.h"
 #include "Messages/MsgHealthRefill.h"
-#include "Messages/MsgDropGrip.h"
 
 AHealthPack::AHealthPack()
 {
@@ -35,11 +33,6 @@ void AHealthPack::Use(AActor* User, TriggerType Type)
 		healthMsg->Amount = amountToRefill;
 		msgEndpoint->Publish<FMsgHealthRefill>(healthMsg);
 
-		FMsgDropGrip* dropMsg = new FMsgDropGrip;
-		dropMsg->ActorToDrop = this;
-		msgEndpoint->Publish<FMsgDropGrip>(dropMsg);
-
-		//Destroy();
 		FVector trashLocation(0, 0, -300);
 		TeleportTo(trashLocation, FRotator());
 	}

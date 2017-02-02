@@ -3,7 +3,6 @@
 #pragma once
 
 #include "VRExpansion/GripMotionControllerComponent.h"
-#include "MessageEndpoint.h"
 #include "VRControllerComponent.generated.h"
 
 struct FMsgDropGrip;
@@ -15,7 +14,6 @@ class PROTOTYPE_API UVRControllerComponent : public UGripMotionControllerCompone
 
 public:
 	UVRControllerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	void BeginPlay();
 	bool GrabNearestActor(const USphereComponent& GrabSphere);
 	void DropAllGrips();
 	void DropNonInteractGrips();
@@ -31,10 +29,4 @@ private:
 	};
 
 	ActorGrabData getNearestGrabableActor(const USphereComponent& GrabSphere) const;
-	void OnDropGripRequest(const FMsgDropGrip& Msg, const IMessageContextRef& Context);
-
-	UFUNCTION(NetMulticast, Reliable) // Temporary solution, needs to be refacted.
-	void handleDropGripRequest_NetMulticast(int32 GripIndex);
-
-	FMessageEndpointPtr msgEndpoint;
 };

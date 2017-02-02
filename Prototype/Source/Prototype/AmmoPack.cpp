@@ -4,8 +4,6 @@
 #include "AmmoPack.h"
 #include "TriggerZoneComponent.h"
 #include "Messages/MsgAmmoRefill.h"
-#include "Messages/MsgDropGrip.h"
-#include "MessageEndpointBuilder.h"
 
 AAmmoPack::AAmmoPack()
 {
@@ -37,11 +35,6 @@ void AAmmoPack::Use(AActor* User, TriggerType Type)
 		msg->Amount = amountToRefill;
 		msgEndpoint->Publish<FMsgAmmoRefill>(msg);
 
-		FMsgDropGrip* dropMsg = new FMsgDropGrip;
-		dropMsg->ActorToDrop = this;
-		msgEndpoint->Publish<FMsgDropGrip>(dropMsg);
-
-		//Destroy();
 		FVector trashLocation(0, 0, -300);
 		TeleportTo(trashLocation, FRotator());
 	}
