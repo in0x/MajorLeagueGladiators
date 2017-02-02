@@ -2,7 +2,6 @@
 
 #include "Prototype.h"
 #include "AmmoComponent.h"
-#include "MessageEndpointBuilder.h"
 #include "Messages/MsgAmmoRefill.h"
 
 UAmmoComponent::UAmmoComponent()
@@ -20,31 +19,45 @@ void UAmmoComponent::BeginPlay()
 	msgEndpoint->Subscribe<FMsgAmmoRefill>();
 }
 
+void UAmmoComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UAmmoComponent, ammoCount);
+}
+
+void UAmmoComponent::onRep_ammoCount()
+{
+	OnAmmoChanged.Broadcast(ammoCount);
+}
+
 int32 UAmmoComponent::GetAmmoCount() const
 {
-	return static_cast<int32>(ammoCount);
+	return ammoCount;
 }
 
 int32 UAmmoComponent::GetMaxAmmoCount() const
 {
-	return static_cast<int32>(maxAmmo);
+	return maxAmmo;
 }
 
 void UAmmoComponent::OnAmmoRefill(const FMsgAmmoRefill& Msg, const IMessageContextRef& Context)
 {
 	if (GetOwner() == Msg.TriggerActor)
 	{
-		IncreaseAmmo_NetMulticast(Msg.Amount);
+		IncreaseAmmo(Msg.Amount);
 	}
 }
 
-void UAmmoComponent::ConsumeAmmo_NetMulticast_Implementation()
+void UAmmoComponent::ConsumeAmmo()
 {
+	if (ammoCount == 0)
+		return;
+
 	ammoCount--;
 	OnAmmoChanged.Broadcast(ammoCount);
 }
 
-void UAmmoComponent::IncreaseAmmo_NetMulticast_Implementation(uint32 Amount)
+void UAmmoComponent::IncreaseAmmo(int32 Amount)
 {
 	ammoCount = FMath::Min(maxAmmo, ammoCount + Amount);
 	OnAmmoChanged.Broadcast(ammoCount);
