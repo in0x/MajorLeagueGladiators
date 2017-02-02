@@ -23,7 +23,8 @@ void UDamageVisualizerComponent::BeginPlay()
 	if (meshComponent)
 	{
 		UMaterialInterface* matIface = meshComponent->GetMaterial(0);
-		matInstance = Cast<UMaterialInstanceDynamic>(matIface);
+		matInstance = UMaterialInstanceDynamic::Create(matIface, nullptr);
+		meshComponent->SetMaterial(0, matIface);
 	}
 
 	msgEndpoint = FMessageEndpoint::Builder("DamageReceiverMessager").Handling<FMsgDamageReceived>(this, &UDamageVisualizerComponent::onDamageReceived);
@@ -46,10 +47,13 @@ void UDamageVisualizerComponent::startDamageVisualization()
 {
 	if (matInstance)
 	{
-		matInstance->SetScalarParameterValue(FName("DoDamage"), 1.0f);
 
-		FTimerManager& timer = GetOwner()->GetWorldTimerManager();
-		timer.SetTimer(spawnTimerHandle, this, &UDamageVisualizerComponent::stopDamageVisualization, 1.0f, false);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, GetOwner()->GetTransform(), false);
+
+		//matInstance->SetScalarParameterValue(FName("DoDamage"), 1.0f);
+
+		//FTimerManager& timer = GetOwner()->GetWorldTimerManager();
+		//timer.SetTimer(spawnTimerHandle, this, &UDamageVisualizerComponent::stopDamageVisualization, 1.0f, false);
 	}
 	else
 	{
