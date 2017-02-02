@@ -21,7 +21,10 @@ public:
 
 private:
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Visualizer")
+	UParticleSystem* particleSystem;
+
+	UPROPERTY(EditAnywhere, Category = "Visualizer")
 	UStaticMeshComponent* meshComponent;
 
 	UMaterialInstanceDynamic* matInstance;
