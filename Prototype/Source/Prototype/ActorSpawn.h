@@ -1,9 +1,6 @@
 #pragma once
 
-#include "MessageEndpoint.h"
 #include "ActorSpawn.generated.h"
-
-struct FMsgStartGame;
 
 UCLASS()
 class AActorSpawn : public AActor
@@ -58,8 +55,4 @@ private:
 	FRandomStream randomStream;
 
 	FTimerHandle spawnTimerHandle;
-
-	FMessageEndpointPtr msgEndpoint;
-	void OnStartGame(const FMsgStartGame& Msg, const IMessageContextRef& Context);
-	bool bEnabled = false;
 };

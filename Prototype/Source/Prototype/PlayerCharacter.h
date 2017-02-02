@@ -2,7 +2,6 @@
 
 #include "VRExpansion/VRSimpleCharacter.h"
 #include "HandMotionController.h"
-#include "MessageEndpoint.h"
 #include "PlayerCharacter.generated.h"
 
 class UTeleportComponent;
@@ -32,12 +31,9 @@ public:
 	void OnTeleportReleased();
 	void OnSideGripButtonLeft();
 	void OnSideGripButtonRight();
-	void OnStartGame();
-
+	
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
-
-	FMessageEndpointPtr msgEndpoint;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* leftMesh;

@@ -1,7 +1,5 @@
 #include "Prototype.h"
 #include "ActorSpawn.h"
-#include "MessageEndpointBuilder.h"
-#include "Messages/MsgStartGame.h"
 
 AActorSpawn::AActorSpawn(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -26,20 +24,6 @@ void AActorSpawn::SetRespawnTimer(float IntervalInSeconds)
 void AActorSpawn::BeginPlay()
 {
 	Super::BeginPlay();
-
-	msgEndpoint = FMessageEndpoint::Builder("SpawnMessager").Handling<FMsgStartGame>(this, &AActorSpawn::OnStartGame);
-	checkf(msgEndpoint.IsValid(), TEXT("ActorSpawn Msg Endpoint invalid"));
-	msgEndpoint->Subscribe<FMsgStartGame>();
-}
-
-void AActorSpawn::OnStartGame(const FMsgStartGame& Msg, const IMessageContextRef& Context)
-{
-	if (bEnabled)
-		return;
-
-	bEnabled = true;
-	UE_LOG(DebugLog, Log, TEXT("StartGame recieved, begin spawning"));
-	SetRespawnTimer(randomStream.FRandRange(0, maxSpawnTimeVariance + initialSpawnTime));
 }
 
 void AActorSpawn::EndPlay(EEndPlayReason::Type EndPlayReason)
