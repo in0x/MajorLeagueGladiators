@@ -27,6 +27,7 @@ private:
 
 	FRotator generateRandomRotator();
 	FVector generateRandomSpawnLocation();
+	float generateRandomSpawnTime();
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> actorToSpawn;
@@ -38,10 +39,10 @@ private:
 	int32 randomSeed;
 
 	UPROPERTY(EditAnywhere)
-	float initialSpawnTime;	
+	float minSpawnTime;
 
 	UPROPERTY(EditAnywhere)
-	float maxSpawnTimeVariance;
+	float maxSpawnTime;
 
 	/*Max amount of spawned actors that can be alive. 0 Stands for infinite*/
 	UPROPERTY(EditAnywhere)
