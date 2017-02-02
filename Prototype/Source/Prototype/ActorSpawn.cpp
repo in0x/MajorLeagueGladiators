@@ -4,7 +4,8 @@
 AActorSpawn::AActorSpawn(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, spawnRadius(0.0f)
-	, initialSpawnTime(0.2f)
+	, minSpawnTime(0.2f)
+	, maxSpawnTime(5.0f)
 {	
 	SetRootComponent(ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootComponet")));
 }
@@ -16,7 +17,6 @@ void AActorSpawn::SetRespawnTimer(float IntervalInSeconds)
 		return;
 	}
 
-	randomStream.Initialize(FMath::Rand());
 	FTimerManager& timer = GetWorldTimerManager();
 	timer.SetTimer(spawnTimerHandle, this, &AActorSpawn::spawnActor, IntervalInSeconds, false);
 }
@@ -24,6 +24,8 @@ void AActorSpawn::SetRespawnTimer(float IntervalInSeconds)
 void AActorSpawn::BeginPlay()
 {
 	Super::BeginPlay();
+	randomStream.Initialize(randomSeed == 0 ? FMath::Rand() : randomSeed);
+	SetRespawnTimer(generateRandomSpawnTime());
 }
 
 void AActorSpawn::EndPlay(EEndPlayReason::Type EndPlayReason)
@@ -48,6 +50,8 @@ bool AActorSpawn::IsAllowedToSpawn() const
 
 void AActorSpawn::spawnActor()
 {
+	SetRespawnTimer(generateRandomSpawnTime());
+
 	if (!IsAllowedToSpawn())
 	{
 		return;
@@ -70,9 +74,11 @@ void AActorSpawn::spawnActor()
 
 	actor->SetReplicates(true);
 	actor->SetReplicateMovement(true);
+}
 
-	float spawnTime = initialSpawnTime + randomStream.FRandRange(0, maxSpawnTimeVariance);
-	SetRespawnTimer(spawnTime);
+float AActorSpawn::generateRandomSpawnTime()
+{
+	return randomStream.FRandRange(minSpawnTime, maxSpawnTime);
 }
 
 void AActorSpawn::OnSpawnedActorEndPlay(AActor* Actor, EEndPlayReason::Type EndPlayReason)
