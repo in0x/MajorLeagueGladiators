@@ -44,6 +44,7 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer /
 	hudWidgetHealth->SetupAttachment(VRReplicatedCamera);
 	
 	hudTeleportCD = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HudTeleportCD"));
+	hudTeleportCD->SetupAttachment(leftMesh, FName(TEXT("Touch"), EFindName::FNAME_Find));
 	
 	teleportComp = ObjectInitializer.CreateDefaultSubobject<UTeleportComponent>(this, TEXT("TeleportComp"));
 	teleportComp->Disable();
@@ -92,11 +93,6 @@ void APlayerCharacter::BeginPlay()
 	auto healthWidget = CastChecked<UPlayerHudWidget>(hudWidgetHealth->GetUserWidgetObject());
 	healthWidget->OnAttachPlayer(this);
 
-	// NOTE(Phil): Again, hardcoded, we need to figure out a better way to do this.
-	hudTeleportCD->AttachToComponent(leftMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), FName(TEXT("Touch"), EFindName::FNAME_Find));
-	hudTeleportCD->SetRelativeRotation(FRotator(-70, -96, -70)); // Y, X, Z
-	hudTeleportCD->SetRelativeScale3D(FVector(0.3, 0.3, 0.3));
-
 	teleportComp->OnCooldownChange.AddLambda([textWidget = CastChecked<UTextWidget>(hudTeleportCD->GetUserWidgetObject())](float CurrentCD)
 	{
 		textWidget->SetText(FString::FromInt(static_cast<int>(FMath::RoundFromZero(CurrentCD))));
@@ -131,14 +127,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::BecomeViewTarget(APlayerController* PC) 
 {
-	//NOTE: we might want to change this function to a onPosess function instead (if Actors change during game)
 	Super::BecomeViewTarget(PC);
-
-	//checks if the controller that became a viewController is my local controller, and add the HUD widget to this controller
-	if (PC == UGameplayStatics::GetPlayerController(GetWorld(), 0)) {
-		APrototypePlayerController* prototypePlayerController = CastChecked<APrototypePlayerController>(PC);
-		prototypePlayerController->InitHudWidget(this);
-	}
 }
 
 void APlayerCharacter::MoveForward(float Value)
