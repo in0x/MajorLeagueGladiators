@@ -21,9 +21,18 @@ public:
 
 private:
 
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* meshComponent;
+
+	UMaterialInstanceDynamic* matInstance;
+
 	FMessageEndpointPtr msgEndpoint;
 
-	void OnDamageReceived(const FMsgDamageReceived& Msg, const IMessageContextRef& Context);
+	FTimerHandle spawnTimerHandle;
+
+	void onDamageReceived(const FMsgDamageReceived& Msg, const IMessageContextRef& Context);
 		
-	
+	void startDamageVisualization();
+
+	void stopDamageVisualization();
 };

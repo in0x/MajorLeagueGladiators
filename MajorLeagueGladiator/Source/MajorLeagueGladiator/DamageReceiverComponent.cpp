@@ -43,6 +43,7 @@ bool UDamageReceiverComponent::CanBeDamagedBy(const UDamageType* DamageType) con
 
 void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UDamageReceiverComponent::handleDamage"));
 	if (!CanBeDamagedBy(DamageType))
 	{
 		return;
