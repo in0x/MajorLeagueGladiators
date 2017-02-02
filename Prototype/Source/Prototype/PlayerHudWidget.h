@@ -5,14 +5,14 @@
 #include "Blueprint/UserWidget.h"
 #include "PlayerHudWidget.generated.h"
 
-class APlayerCharacter;
+class AMlgPlayerCharacter;
 
 UCLASS()
 class PROTOTYPE_API UPlayerHudWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	void OnAttachPlayer(APlayerCharacter* PlayerCharacter);
+	void OnAttachPlayer(AMlgPlayerCharacter* PlayerCharacter);
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Hud")

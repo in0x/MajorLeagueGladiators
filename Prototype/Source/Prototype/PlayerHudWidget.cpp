@@ -2,11 +2,11 @@
 
 #include "Prototype.h"
 #include "PlayerHudWidget.h"
-#include "PlayerCharacter.h"
+#include "MlgPlayerCharacter.h"
 #include "HealthComponent.h"
 
 
-void UPlayerHudWidget::OnAttachPlayer(APlayerCharacter* PlayerCharacter)
+void UPlayerHudWidget::OnAttachPlayer(AMlgPlayerCharacter* PlayerCharacter)
 {
 	UHealthComponent* curHealthComp = Cast<UHealthComponent>(PlayerCharacter->GetComponentByClass(UHealthComponent::StaticClass()));
 	if (curHealthComp != nullptr) 
