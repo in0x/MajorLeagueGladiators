@@ -2,7 +2,6 @@
 
 #include "Prototype.h"
 #include "HealthComponent.h"
-#include "MessageEndpointBuilder.h"
 #include "Messages/MsgHealthRefill.h"
 
 UHealthComponent::UHealthComponent()
