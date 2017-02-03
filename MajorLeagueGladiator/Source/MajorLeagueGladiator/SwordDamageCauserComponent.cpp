@@ -4,19 +4,19 @@
 #include "SwordDamageCauserComponent.h"
 
 USwordDamageCauserComponent::USwordDamageCauserComponent()
+	: oldSwingSpeed(FVector::ZeroVector)
+	, threshholdDoDamageSquared(16)
+	, threshholdBonusDamageSquared(36)
+	, bonusDamageFactor(1.5f)
+	, slashVelocityLearnRate(0.1f)
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	oldSwingSpeed = FVector::ZeroVector;
-	threshholdDoDamageSquared = 16;
-	threshholdBonusDamageSquared = 36;
-	bonusDamageFactor = 1.5f;
-	slashDetectionAlpha = 0.1f;
 }
 
 void USwordDamageCauserComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	FVector newSwordState = GetOwner()->GetVelocity();
-	oldSwingSpeed = oldSwingSpeed * (1.0f - slashDetectionAlpha) + DeltaTime * (newSwordState * slashDetectionAlpha);
+	oldSwingSpeed = oldSwingSpeed * (1.0f - slashVelocityLearnRate) + (DeltaTime * newSwordState) * slashVelocityLearnRate;
 }
 
 float USwordDamageCauserComponent::CalculateDamage()
