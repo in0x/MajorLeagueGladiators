@@ -3,10 +3,9 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
-#include "MessageEndpoint.h"
 #include "DamageVisualizerComponent.generated.h"
 
-struct FMsgDamageReceived;
+class UDamageReceiverComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROTOTYPE_API UDamageVisualizerComponent : public UActorComponent
@@ -27,15 +26,21 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Visualizer")
 	UStaticMeshComponent* meshComponent;
 
+	UDamageReceiverComponent* damageReceiver;
+
+	TArray<UParticleSystemComponent*> particleSystemInstances;
+
 	UMaterialInstanceDynamic* matInstance;
 
-	FMessageEndpointPtr msgEndpoint;
+	FTimerHandle spawnTimerHandle; //maybe optional?
 
-	FTimerHandle spawnTimerHandle;
+	UFUNCTION()
+	void onDamageReceived(AActor* DamagedActor);
 
-	void onDamageReceived(const FMsgDamageReceived& Msg, const IMessageContextRef& Context);
+	UFUNCTION()
+	void onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation);
 		
-	void startDamageVisualization();
+	void startDamageVisualization(const FTransform& visualizationOrigin);
 
 	void stopDamageVisualization();
 };

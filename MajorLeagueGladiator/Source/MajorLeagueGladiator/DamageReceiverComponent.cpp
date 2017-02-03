@@ -3,8 +3,6 @@
 #include "MajorLeagueGladiator.h"
 #include "DamageReceiverComponent.h"
 #include "HealthComponent.h"
-#include "MessageEndpointBuilder.h"
-#include "Messages/MsgDamageReceived.h"
 
 UDamageReceiverComponent::UDamageReceiverComponent()
 {
@@ -28,9 +26,6 @@ void UDamageReceiverComponent::BeginPlay()
 			healthComponents.Add(CastChecked<UHealthComponent>(healthComp));
 		}
 	}
-
-	msgEndpoint = FMessageEndpoint::Builder("DamageReceiverMessager");
-	checkf(msgEndpoint.IsValid(), TEXT("Damage Receiver Msg Endpoint invalid"));
 }
 
 bool UDamageReceiverComponent::CanBeDamagedBy(const UDamageType* DamageType) const
@@ -43,18 +38,12 @@ bool UDamageReceiverComponent::CanBeDamagedBy(const UDamageType* DamageType) con
 
 void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UDamageReceiverComponent::handleDamage"));
 	if (!CanBeDamagedBy(DamageType))
 	{
 		return;
 	}
 
-	FMsgDamageReceived* msg = new FMsgDamageReceived();
-	msg->DamagedActor = DamagedActor;
-	msg->Damage = Damage;
-	msg->InstigatedBy = InstigatedBy;
-	msg->DamageCauser = DamageCauser;
-	msgEndpoint->Publish<FMsgDamageReceived>(msg);
+	OnDamageReceived.Broadcast(DamagedActor);
 
 	UHealthComponent* healthComp = healthComponents[0];
 
@@ -78,6 +67,8 @@ void UDamageReceiverComponent::handlePointDamage(AActor* DamagedActor, float Dam
 	{
 		return;
 	}
+
+	OnPointDamageReceived.Broadcast(DamagedActor, HitLocation);
 
 	if (healthComponents.Num() > 1) {
 		float minDistance = std::numeric_limits<float>::max();
