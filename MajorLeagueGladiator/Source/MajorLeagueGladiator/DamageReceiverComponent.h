@@ -3,12 +3,12 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
-#include "MessageEndpoint.h"
 #include "DamageReceiverComponent.generated.h"
 
 class UHealthComponent;
 
-//DECLARE_MULTICAST_DELEGATE_OneParam(DamagedReceivedDelegate, int32);
+DECLARE_MULTICAST_DELEGATE_OneParam(DamageReceivedDelegate, AActor*);
+DECLARE_MULTICAST_DELEGATE_TwoParams(PointDamageReceivedDelegate, AActor*, const FVector&);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MAJORLEAGUEGLADIATOR_API UDamageReceiverComponent : public UActorComponent
@@ -20,6 +20,9 @@ public:
 	virtual void BeginPlay() override;
 
 	bool CanBeDamagedBy(const UDamageType* DamageType) const;
+
+	DamageReceivedDelegate OnDamageReceived;
+	PointDamageReceivedDelegate OnPointDamageReceived;
 
 private:
 	UFUNCTION()
@@ -33,6 +36,4 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Damage")
 	TArray<TSubclassOf<UDamageType>> damageableBy;
-
-	FMessageEndpointPtr msgEndpoint;
 };

@@ -2,9 +2,7 @@
 
 #include "Prototype.h"
 #include "DamageVisualizerComponent.h"
-#include "MessageEndpointBuilder.h"
-#include "Messages/MsgDamageReceived.h"
-
+#include "DamageReceiverComponent.h"
 
 UDamageVisualizerComponent::UDamageVisualizerComponent()
 {
@@ -27,33 +25,43 @@ void UDamageVisualizerComponent::BeginPlay()
 		meshComponent->SetMaterial(0, matIface);
 	}
 
-	msgEndpoint = FMessageEndpoint::Builder("DamageReceiverMessager").Handling<FMsgDamageReceived>(this, &UDamageVisualizerComponent::onDamageReceived);
+	damageReceiver = GetOwner()->FindComponentByClass<UDamageReceiverComponent>();
 
-	checkf(msgEndpoint.IsValid(), TEXT("Damage Visualizer Component Msg Endpoint invalid"));
-	msgEndpoint->Subscribe<FMsgDamageReceived>();
-}
-
-void UDamageVisualizerComponent::onDamageReceived(const FMsgDamageReceived& Msg, const IMessageContextRef& Context)
-{
-	if (Msg.DamagedActor == GetOwner())
+	if (damageReceiver)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UDamageVisualizerComponent got FMsgDamageReceived."));
-
-		startDamageVisualization();
+		damageReceiver->OnDamageReceived.AddUObject(this, &UDamageVisualizerComponent::onDamageReceived);
+		damageReceiver->OnPointDamageReceived.AddUObject(this, &UDamageVisualizerComponent::onPointDamageReceived);
 	}
 }
 
-void UDamageVisualizerComponent::startDamageVisualization()
+void UDamageVisualizerComponent::onDamageReceived(AActor* DamagedActor)
+{
+	FTransform visualizationOrigin;
+
+	startDamageVisualization(visualizationOrigin);
+}
+
+void UDamageVisualizerComponent::onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation)
+{
+	FTransform visualizationOrigin(HitLocation);
+
+	startDamageVisualization(visualizationOrigin);
+}
+
+void UDamageVisualizerComponent::startDamageVisualization(const FTransform& visualizationOrigin)
 {
 	if (matInstance)
 	{
 
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, GetOwner()->GetTransform(), false);
-
+		auto ps = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, GetOwner()->GetTransform(), false); //visualizationOrigin
+		particleSystemInstances.Add(ps);
+		/*ps->Deactivate();
+		ps->Destroy();*/
 		//matInstance->SetScalarParameterValue(FName("DoDamage"), 1.0f);
 
-		//FTimerManager& timer = GetOwner()->GetWorldTimerManager();
-		//timer.SetTimer(spawnTimerHandle, this, &UDamageVisualizerComponent::stopDamageVisualization, 1.0f, false);
+		FTimerManager& timer = GetOwner()->GetWorldTimerManager();
+		FTimerHandle timerHandle;
+		timer.SetTimer(timerHandle, this, &UDamageVisualizerComponent::stopDamageVisualization, 2.0f, false);
 	}
 	else
 	{
@@ -66,7 +74,11 @@ void UDamageVisualizerComponent::stopDamageVisualization()
 {
 	if (matInstance)
 	{
-		matInstance->SetScalarParameterValue(FName("DoDamage"), 0.0f);
+		auto ps = particleSystemInstances.Pop();
+		ps->Deactivate();
+		ps->DestroyComponent();
+
+		//matInstance->SetScalarParameterValue(FName("DoDamage"), 0.0f);
 	}
 	else
 	{

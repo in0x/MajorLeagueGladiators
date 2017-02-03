@@ -12,4 +12,7 @@ struct FMsgDamageReceived
 	const UDamageType* DamageType;
 	AController* InstigatedBy;
 	AActor* DamageCauser;
+
+	FVector HitLocation;
+	FVector ShotFromDirection;
 };
