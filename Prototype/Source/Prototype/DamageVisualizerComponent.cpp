@@ -13,24 +13,25 @@ void UDamageVisualizerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!targetMeshComponent)
-	{
-		targetMeshComponent = CastChecked<UStaticMeshComponent>(GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-	}
+	UStaticMeshComponent* targetMeshComponent = GetOwner()->FindComponentByClass<UStaticMeshComponent>();
 
 	if (targetMeshComponent)
 	{
-		UMaterialInterface* matIface = targetMeshComponent->GetMaterial(0);
+		UMaterialInterface* matIface = targetMeshComponent->GetMaterial(0); //Currently should only have one.
 		matInstance = UMaterialInstanceDynamic::Create(matIface, targetMeshComponent); //GetOwner()
 		targetMeshComponent->SetMaterial(0, matInstance);
 	}
 
-	damageReceiver = GetOwner()->FindComponentByClass<UDamageReceiverComponent>();
+	UDamageReceiverComponent* damageReceiver = GetOwner()->FindComponentByClass<UDamageReceiverComponent>();
 
 	if (damageReceiver)
 	{
 		damageReceiver->OnDamageReceived.AddUObject(this, &UDamageVisualizerComponent::onDamageReceived);
 		damageReceiver->OnPointDamageReceived.AddUObject(this, &UDamageVisualizerComponent::onPointDamageReceived);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UDamageReceiverComponent missing."));
 	}
 }
 
@@ -40,26 +41,28 @@ void UDamageVisualizerComponent::BeginPlay()
 
 void UDamageVisualizerComponent::onDamageReceived(AActor* DamagedActor)
 {
-	startMaterialVisualization();
 
-	//Only temporary:
+	startMaterialVisualization_NetMulticast();
+
+	//Only temporary: later call only in onPointDamage function
 	FTransform trans = GetOwner()->GetTransform();
 	trans.AddToTranslation(FVector(0, 50, 0));
-	startParticleSystemVisualization(trans);
+	startParticleSystemVisualization_NetMulticast(trans);
 }
 
 void UDamageVisualizerComponent::onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation)
 {
 	FTransform visualizationOrigin(HitLocation);
 
-	startParticleSystemVisualization(visualizationOrigin);
+	startParticleSystemVisualization_NetMulticast(visualizationOrigin);
 }
 
 /////////////////////////////
 // Visualization Functions //
 /////////////////////////////
 
-void UDamageVisualizerComponent::startMaterialVisualization()
+//Make Net Multicast Function
+void UDamageVisualizerComponent::startMaterialVisualization_NetMulticast_Implementation()
 {
 	if (matInstance)
 	{
@@ -71,20 +74,20 @@ void UDamageVisualizerComponent::startMaterialVisualization()
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UDamageVisualizerComponent::startDamageVisualization: NO Material Instance!"));
+		UE_LOG(LogTemp, Warning, TEXT("UDamageVisualizerComponent::startDamageVisualization: NO Material Instance!"));
 	}
 }
 
-void UDamageVisualizerComponent::startParticleSystemVisualization(const FTransform& visualizationOrigin)
+void UDamageVisualizerComponent::startParticleSystemVisualization_NetMulticast_Implementation(const FTransform& visualizationTransform)
 {
 
-	auto ps = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, visualizationOrigin, true);
+	auto ps = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, visualizationTransform, true);
 	ps->Activate();
 	particleSystemInstances.Add(ps);
 
 	FTimerManager& timer = GetOwner()->GetWorldTimerManager();
 	FTimerHandle timerHandle;
-	timer.SetTimer(timerHandle, this, &UDamageVisualizerComponent::stopParticleSystemVisualization, 2.0f, false);
+	timer.SetTimer(timerHandle, this, &UDamageVisualizerComponent::stopParticleSystemVisualization, particleSystemVisualizationDuration, false);
 }
 
 void UDamageVisualizerComponent::stopMaterialVisualization()
@@ -95,7 +98,7 @@ void UDamageVisualizerComponent::stopMaterialVisualization()
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UDamageVisualizerComponent::startDamageVisualization: NO Material Instance!"));
+		UE_LOG(LogTemp, Warning, TEXT("UDamageVisualizerComponent::startDamageVisualization: NO Material Instance!"));
 	}
 }
 
