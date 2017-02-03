@@ -24,7 +24,13 @@ private:
 	UParticleSystem* particleSystem;
 
 	UPROPERTY(EditAnywhere, Category = "Visualizer")
-	UStaticMeshComponent* meshComponent;
+	UStaticMeshComponent* targetMeshComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Visualizer")
+	float materialVisualizationDuration;
+
+	UPROPERTY(EditAnywhere, Category = "Visualizer")
+		float particleSystemVisualizationDuration;
 
 	UDamageReceiverComponent* damageReceiver;
 
@@ -39,8 +45,12 @@ private:
 
 	UFUNCTION()
 	void onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation);
-		
-	void startDamageVisualization(const FTransform& visualizationOrigin);
+	
+	void startMaterialVisualization();
 
-	void stopDamageVisualization();
+	void startParticleSystemVisualization(const FTransform& visualizationOrigin);
+
+	void stopMaterialVisualization();
+
+	void stopParticleSystemVisualization();
 };
