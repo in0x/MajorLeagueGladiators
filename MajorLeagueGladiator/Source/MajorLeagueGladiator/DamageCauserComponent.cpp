@@ -6,7 +6,6 @@
 UDamageCauserComponent::UDamageCauserComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	bCanCauseDamage = true;
 }
 
 void UDamageCauserComponent::BeginPlay()
@@ -17,10 +16,10 @@ void UDamageCauserComponent::BeginPlay()
 
 void UDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, nullptr, OverlappedActor, damageType);
+	DoOverlapAction(OverlappedActor,OtherActor);
 }
 
-void UDamageCauserComponent::onCooldownReset()
+void UDamageCauserComponent::DoOverlapAction(AActor* OverlappedActor, AActor* OtherActor) 
 {
-	bCanCauseDamage = true;
+	UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, nullptr, OverlappedActor, damageType);
 }

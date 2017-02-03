@@ -15,22 +15,15 @@ public:
 	virtual void BeginPlay() override;	
 
 private:
-
 	UFUNCTION()
 	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
-	void onCooldownReset();
-
-	UPROPERTY(EditAnywhere, Category="Damage")
-	float damageAppliedOnHit;
+protected:
+	UPROPERTY(EditAnywhere, Category = "Damage")
+		float damageAppliedOnHit;
 
 	UPROPERTY(EditAnywhere, Category = "Damage")
-	TSubclassOf<UDamageType> damageType;
+		TSubclassOf<UDamageType> damageType;
 
-	UPROPERTY(EditAnywhere, Category = "Damage")
-	float timeBeforeCanDamageAgainSeconds = 0.5;
-
-	FTimerHandle cooldownTimerHandle;
-
-	bool bCanCauseDamage;
+	virtual void DoOverlapAction(AActor* OverlappedActor, AActor* OtherActor);
 };
