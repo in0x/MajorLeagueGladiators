@@ -12,7 +12,6 @@ AGameplayAbilityTargetActor_MotionControl::AGameplayAbilityTargetActor_MotionCon
 }
 
 
-
 void AGameplayAbilityTargetActor_MotionControl::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
@@ -26,27 +25,64 @@ void AGameplayAbilityTargetActor_MotionControl::StartTargeting(UGameplayAbility*
 
 void AGameplayAbilityTargetActor_MotionControl::ConfirmTargetingAndContinue()
 {
+	check(ShouldProduceTargetData());
+
+	if (SourceActor)
+	{
+		bDebug = false;		
+		FGameplayAbilityTargetDataHandle Handle = StartLocation.MakeTargetDataHandleFromHitResult(OwningAbility, hitresult);
+
+		TargetDataReadyDelegate.Broadcast(Handle);
+	}
 }
 
 void AGameplayAbilityTargetActor_MotionControl::Tick(float DeltaSeconds)
 {
-	FVector targetPos = calculateTargetPosition();
-	SetActorLocation(targetPos);
+	hitresult = calculateHitResult();
+	FVector EndPoint = hitresult.Component.IsValid() ? hitresult.ImpactPoint : hitresult.TraceEnd;
+
+	SetActorLocationAndRotation(EndPoint,SourceActor->GetActorRotation());
 }
 
-FVector AGameplayAbilityTargetActor_MotionControl::getPointingDirection() const
+//TODO: Use Strategy Pattern for this
+FHitResult AGameplayAbilityTargetActor_MotionControl::calculateHitResult() const
 {
 	//TODO: (FS) Use Interfaced instead of hardcoded casting
 	AMlgPlayerCharacter* playerCharacter = Cast<AMlgPlayerCharacter>(SourceActor);
 	if (!playerCharacter)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Is not a Mlg Player Character"));
-		return FVector::ZeroVector;
+		return FHitResult();
 	}
-	playerCharacter->LeftMotionController->GetForwardVector();
-}
 
-FVector AGameplayAbilityTargetActor_MotionControl::calculateTargetPosition() const
-{
-	return FVector();
+	const USceneComponent* projectileThrowingComponent = playerCharacter->LeftMotionController;
+
+	const FVector direction = projectileThrowingComponent->GetForwardVector();
+	const FVector location = projectileThrowingComponent->GetComponentLocation();
+	const float velocity = 750.f;
+
+	static const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{ UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic) };
+
+	FHitResult result;
+	FVector lastTraceDest;
+	FHitResult tpHitResult;
+	TArray<FVector> positions;
+
+	UGameplayStatics::PredictProjectilePath(
+		GetWorld(),
+		result,
+		positions,
+		lastTraceDest,
+		location,
+		direction * velocity,
+		true,
+		0,
+		queryTypes,
+		false,
+		TArray<AActor*>(),
+		EDrawDebugTrace::ForOneFrame,
+		1.f
+		);
+
+	return result;
 }

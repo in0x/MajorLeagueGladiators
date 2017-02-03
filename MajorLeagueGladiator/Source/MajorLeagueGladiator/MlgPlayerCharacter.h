@@ -2,6 +2,7 @@
 
 #include "VRExpansion/VRSimpleCharacter.h"
 #include "HandMotionController.h"
+#include "AbilitySystemInterface.h"
 #include "MlgPlayerCharacter.generated.h"
 
 class UTeleportComponent;
@@ -9,9 +10,11 @@ class UHealthComponent;
 class AMlgPlayerController;
 class UWidgetComponent;
 class UDamageReceiverComponent;
+class UAbilitySystemComponent;
+class UGameplayAbilitySet;
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AMlgPlayerCharacter : public AVRSimpleCharacter
+class MAJORLEAGUEGLADIATOR_API AMlgPlayerCharacter : public AVRSimpleCharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 public:
@@ -19,6 +22,7 @@ public:
 	
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	virtual void PostInitializeComponents() override;
 	
 	void MoveForward(float Value);
 	void MoveRight(float Value);
@@ -68,6 +72,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* hudTeleportCD;
 
+	UPROPERTY(EditAnywhere)
+	UAbilitySystemComponent* abilitySystemComponent;
+
+	UPROPERTY(EditAnywhere)
+	UGameplayAbilitySet* gameplayAbilitySet;
+
 	UFUNCTION(Server, WithValidation, reliable)
 	void leftHandGrab_Server();
 
@@ -93,4 +103,6 @@ private:
 	void performTeleport_NetMulticast(FVector Location, FRotator Rotation);
 
 	virtual void BecomeViewTarget(APlayerController* PC) override;
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const { return abilitySystemComponent; }
 };

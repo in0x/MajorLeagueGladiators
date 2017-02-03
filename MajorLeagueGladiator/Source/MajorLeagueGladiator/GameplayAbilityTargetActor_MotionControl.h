@@ -19,5 +19,6 @@ public:
 
 private:
 	FVector getPointingDirection() const;
-	FVector calculateTargetPosition() const;
+	FHitResult calculateHitResult() const;
+	FHitResult hitresult;
 };
