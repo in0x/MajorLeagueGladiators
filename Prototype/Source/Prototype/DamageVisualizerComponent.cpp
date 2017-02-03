@@ -13,17 +13,16 @@ void UDamageVisualizerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!meshComponent)
+	if (!targetMeshComponent)
 	{
-		meshComponent = CastChecked<UStaticMeshComponent>(GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass()));
+		targetMeshComponent = CastChecked<UStaticMeshComponent>(GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass()));
 	}
 
-	if (meshComponent)
+	if (targetMeshComponent)
 	{
-		UMaterialInterface* matIface = meshComponent->GetMaterial(0);
-		matInstance = UMaterialInstanceDynamic::Create(matIface, meshComponent); //meshComponent/GetOwner()
-		meshComponent->SetMaterial(0, matInstance);
-		//matInstance = Cast<UMaterialInstanceDynamic>(meshComponent->GetMaterial(0));
+		UMaterialInterface* matIface = targetMeshComponent->GetMaterial(0);
+		matInstance = UMaterialInstanceDynamic::Create(matIface, targetMeshComponent); //GetOwner()
+		targetMeshComponent->SetMaterial(0, matInstance);
 	}
 
 	damageReceiver = GetOwner()->FindComponentByClass<UDamageReceiverComponent>();
@@ -35,53 +34,74 @@ void UDamageVisualizerComponent::BeginPlay()
 	}
 }
 
+//////////////////////////////
+// Damage Receive Functions //
+//////////////////////////////
+
 void UDamageVisualizerComponent::onDamageReceived(AActor* DamagedActor)
 {
-	FTransform visualizationOrigin;
+	startMaterialVisualization();
 
-	startDamageVisualization(visualizationOrigin);
+	//Only temporary:
+	FTransform trans = GetOwner()->GetTransform();
+	trans.AddToTranslation(FVector(0, 50, 0));
+	startParticleSystemVisualization(trans);
 }
 
 void UDamageVisualizerComponent::onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation)
 {
 	FTransform visualizationOrigin(HitLocation);
 
-	startDamageVisualization(visualizationOrigin);
+	startParticleSystemVisualization(visualizationOrigin);
 }
 
-void UDamageVisualizerComponent::startDamageVisualization(const FTransform& visualizationOrigin)
+/////////////////////////////
+// Visualization Functions //
+/////////////////////////////
+
+void UDamageVisualizerComponent::startMaterialVisualization()
 {
 	if (matInstance)
 	{
-		auto ps = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, GetOwner()->GetTransform(), false); //visualizationOrigin
-		particleSystemInstances.Add(ps);
-
-		matInstance->SetScalarParameterValue(FName("Param1"), 1.0f);
+		matInstance->SetScalarParameterValue(FName("DamageValue"), 1.0f);
 
 		FTimerManager& timer = GetOwner()->GetWorldTimerManager();
 		FTimerHandle timerHandle;
-		timer.SetTimer(timerHandle, this, &UDamageVisualizerComponent::stopDamageVisualization, 2.0f, false);
+		timer.SetTimer(timerHandle, this, &UDamageVisualizerComponent::stopMaterialVisualization, materialVisualizationDuration, false);
 	}
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UDamageVisualizerComponent::startDamageVisualization: NO Material Instance!"));
 	}
-	
 }
 
-void UDamageVisualizerComponent::stopDamageVisualization()
+void UDamageVisualizerComponent::startParticleSystemVisualization(const FTransform& visualizationOrigin)
+{
+
+	auto ps = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, visualizationOrigin, true);
+	ps->Activate();
+	particleSystemInstances.Add(ps);
+
+	FTimerManager& timer = GetOwner()->GetWorldTimerManager();
+	FTimerHandle timerHandle;
+	timer.SetTimer(timerHandle, this, &UDamageVisualizerComponent::stopParticleSystemVisualization, 2.0f, false);
+}
+
+void UDamageVisualizerComponent::stopMaterialVisualization()
 {
 	if (matInstance)
 	{
-		auto ps = particleSystemInstances.Pop();
-		ps->Deactivate();
-		ps->DestroyComponent();
-
-		matInstance->SetScalarParameterValue(FName("Param1"), 0.0f);
+		matInstance->SetScalarParameterValue(FName("DamageValue"), 0.0f);
 	}
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UDamageVisualizerComponent::startDamageVisualization: NO Material Instance!"));
 	}
-	
+}
+
+void UDamageVisualizerComponent::stopParticleSystemVisualization()
+{
+	auto ps = particleSystemInstances.Pop();
+	ps->Deactivate();
+	ps->DestroyComponent();
 }
