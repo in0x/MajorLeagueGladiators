@@ -17,13 +17,14 @@ public:
 private:
 	UFUNCTION()
 	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+	
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	float damageAppliedOnHit;
+
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	TSubclassOf<UDamageType> damageType;
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Damage")
-		float damageAppliedOnHit;
-
-	UPROPERTY(EditAnywhere, Category = "Damage")
-		TSubclassOf<UDamageType> damageType;
-
-	virtual void DoOverlapAction(AActor* OverlappedActor, AActor* OtherActor);
+	virtual bool CanDoDamage();
+	virtual float CalculateDamage();
 };

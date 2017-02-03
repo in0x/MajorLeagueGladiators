@@ -19,10 +19,18 @@ public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction) override;
 	
 protected:
-	virtual void DoOverlapAction(AActor* OverlappedActor, AActor* OtherActor) override;
-
+	virtual bool CanDoDamage() override;
+	virtual float CalculateDamage() override;
 private:
 	float damageScaleFactor;
 	FVector oldSwingSpeed;
 	bool bCanCauseDamage;
+
+	UPROPERTY(EditAnywhere)
+	int threshholdDoDamageSquared;
+
+	UPROPERTY(EditAnywhere)
+	int threshholdBonusDamageSquared;
+
+	float calcBonusDamageFactor();
 };
