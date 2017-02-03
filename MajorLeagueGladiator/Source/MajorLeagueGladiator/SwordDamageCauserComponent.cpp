@@ -6,9 +6,9 @@
 USwordDamageCauserComponent::USwordDamageCauserComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	bCanCauseDamage = false;
-	damageScaleFactor = 1;
 	oldSwingSpeed = FVector::ZeroVector;
+	threshholdDoDamageSquared = 16;
+	threshholdBonusDamageSquared = 36;
 }
 
 void USwordDamageCauserComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction)
@@ -17,11 +17,17 @@ void USwordDamageCauserComponent::TickComponent(float DeltaTime, enum ELevelTick
 	oldSwingSpeed = oldSwingSpeed * 0.9f + DeltaTime * newSwordState * 0.1f;
 }
 
-void USwordDamageCauserComponent::DoOverlapAction(AActor* OverlappedActor, AActor* OtherActor)
+float USwordDamageCauserComponent::CalculateDamage()
 {
-	if (oldSwingSpeed.Size() > 4)
-	{
-		UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, nullptr, OverlappedActor, damageType);
-	}
+	return Super::CalculateDamage() * calcBonusDamageFactor();
 }
 
+bool USwordDamageCauserComponent::CanDoDamage()
+{
+	return oldSwingSpeed.SizeSquared() > threshholdDoDamageSquared;
+}
+
+float USwordDamageCauserComponent::calcBonusDamageFactor()
+{
+	return oldSwingSpeed.SizeSquared() > threshholdBonusDamageSquared ? 1.5f : 1.0f;
+}

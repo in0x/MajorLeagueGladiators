@@ -16,10 +16,19 @@ void UDamageCauserComponent::BeginPlay()
 
 void UDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	DoOverlapAction(OverlappedActor,OtherActor);
+	if (CanDoDamage())
+	{
+		float damage = CalculateDamage();
+		UGameplayStatics::ApplyDamage(OtherActor, damage, nullptr, OverlappedActor, damageType);
+	}
 }
 
-void UDamageCauserComponent::DoOverlapAction(AActor* OverlappedActor, AActor* OtherActor) 
+bool UDamageCauserComponent::CanDoDamage()
 {
-	UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, nullptr, OverlappedActor, damageType);
+	return true;
+}
+
+float UDamageCauserComponent::CalculateDamage()
+{
+	return damageAppliedOnHit;
 }
