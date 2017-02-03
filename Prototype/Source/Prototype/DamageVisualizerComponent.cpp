@@ -21,8 +21,9 @@ void UDamageVisualizerComponent::BeginPlay()
 	if (meshComponent)
 	{
 		UMaterialInterface* matIface = meshComponent->GetMaterial(0);
-		matInstance = UMaterialInstanceDynamic::Create(matIface, nullptr);
-		meshComponent->SetMaterial(0, matIface);
+		matInstance = UMaterialInstanceDynamic::Create(matIface, meshComponent); //meshComponent/GetOwner()
+		meshComponent->SetMaterial(0, matInstance);
+		//matInstance = Cast<UMaterialInstanceDynamic>(meshComponent->GetMaterial(0));
 	}
 
 	damageReceiver = GetOwner()->FindComponentByClass<UDamageReceiverComponent>();
@@ -52,12 +53,10 @@ void UDamageVisualizerComponent::startDamageVisualization(const FTransform& visu
 {
 	if (matInstance)
 	{
-
 		auto ps = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, GetOwner()->GetTransform(), false); //visualizationOrigin
 		particleSystemInstances.Add(ps);
-		/*ps->Deactivate();
-		ps->Destroy();*/
-		//matInstance->SetScalarParameterValue(FName("DoDamage"), 1.0f);
+
+		matInstance->SetScalarParameterValue(FName("Param1"), 1.0f);
 
 		FTimerManager& timer = GetOwner()->GetWorldTimerManager();
 		FTimerHandle timerHandle;
@@ -78,7 +77,7 @@ void UDamageVisualizerComponent::stopDamageVisualization()
 		ps->Deactivate();
 		ps->DestroyComponent();
 
-		//matInstance->SetScalarParameterValue(FName("DoDamage"), 0.0f);
+		matInstance->SetScalarParameterValue(FName("Param1"), 0.0f);
 	}
 	else
 	{
