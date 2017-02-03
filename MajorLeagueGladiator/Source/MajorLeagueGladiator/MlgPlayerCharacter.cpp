@@ -11,6 +11,9 @@
 #include "PlayerHudWidget.h"
 #include "TextWidget.h"
 #include "DamageReceiverComponent.h"
+#include "AbilitySystemComponent.h"
+#include "GameplayAbilitySet.h"
+#include "TargetingGameplayAbility.h"
 
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -48,6 +51,28 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	
 	teleportComp = ObjectInitializer.CreateDefaultSubobject<UTeleportComponent>(this, TEXT("TeleportComp"));
 	teleportComp->Disable();
+
+	abilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAbilitySystemComponent>(this, TEXT("GameplayTasks"));
+
+	//Change to blueprint to add own abilities
+	gameplayAbilitySet = ObjectInitializer.CreateDefaultSubobject<UGameplayAbilitySet>(this, TEXT("GameplayAbilitySet"));
+}
+
+void AMlgPlayerCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	//TODO (FS) Network Stuff error handling
+	//For Testing
+	FGameplayAbilityBindInfo mockAbility;
+	mockAbility.Command = EGameplayAbilityInputBinds::Ability1;
+	mockAbility.GameplayAbilityClass = UTargetingGameplayAbility::StaticClass();
+
+	gameplayAbilitySet->Abilities.Add(mockAbility);
+
+
+	//TODO (FS) Maybe Possible in Constructor
+	gameplayAbilitySet->GiveAbilities(abilitySystemComponent);
 }
 
 void AMlgPlayerCharacter::BeginPlay()
@@ -123,6 +148,35 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
+
+	//Binds skill confirmation and canceling, but not skills themselves
+	abilitySystemComponent->BindToInputComponent(PlayerInputComponent);
+
+	//Bind each Skill induvidually
+	for (const FGameplayAbilityBindInfo& BindInfo : gameplayAbilitySet->Abilities)
+	{
+		if (!BindInfo.GameplayAbilityClass)
+		{
+			UE_LOG(LogAbilitySystem, Warning, TEXT("GameplayAbilityClass %d not set"), (int32)BindInfo.Command);
+			continue;
+		}
+
+		FGameplayAbilitySpec spec(
+			BindInfo.GameplayAbilityClass->GetDefaultObject<UGameplayAbility>(), 1, (int32)BindInfo.Command);
+		
+		int32 AbilityID = (int32)BindInfo.Command;
+
+		FGameplayAbiliyInputBinds inputBinds(
+			FString::Printf(TEXT("ConfirmTargetting_%s_%s"), *GetName(), *BindInfo.GameplayAbilityClass->GetName()),
+			FString::Printf(TEXT("CancelTargetting_%s_%s"), *GetName(), *BindInfo.GameplayAbilityClass->GetName()),
+			"EGameplayAbilityInputBinds",
+			AbilityID, 
+			AbilityID
+			);
+
+		abilitySystemComponent->BindAbilityActivationToInputComponent(PlayerInputComponent, inputBinds);		
+	}
+
 }
 
 void AMlgPlayerCharacter::BecomeViewTarget(APlayerController* PC) 
