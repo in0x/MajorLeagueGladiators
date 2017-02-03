@@ -14,8 +14,10 @@ public class MajorLeagueGladiator : ModuleRules
 			new string[] {
                 "HeadMountedDisplay/Public",
                 "Runtime/Engine/Classes/Kismet",
-                "Runtime/Engine/Private/PhysicsEngine"
-			}
+                "Runtime/Engine/Private/PhysicsEngine",
+                "Runtime/GameplayAbilities",
+                "Runtime/GameplayTasks"
+            }
 		);
 
         PublicDependencyModuleNames.AddRange(
@@ -32,7 +34,10 @@ public class MajorLeagueGladiator : ModuleRules
                 "ShaderCore",
                 "NetworkReplayStreaming",
                 "AIModule",
-                "ProceduralMeshComponent"
+                "ProceduralMeshComponent",
+                "GameplayAbilities",
+                "GameplayTasks",
+                "GameplayTags"
             });
 
         PrivateDependencyModuleNames.AddRange(
