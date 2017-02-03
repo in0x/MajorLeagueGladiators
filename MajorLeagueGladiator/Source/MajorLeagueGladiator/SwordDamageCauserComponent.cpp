@@ -9,12 +9,14 @@ USwordDamageCauserComponent::USwordDamageCauserComponent()
 	oldSwingSpeed = FVector::ZeroVector;
 	threshholdDoDamageSquared = 16;
 	threshholdBonusDamageSquared = 36;
+	bonusDamageFactor = 1.5f;
+	slashDetectionAlpha = 0.1f;
 }
 
-void USwordDamageCauserComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction)
+void USwordDamageCauserComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	FVector newSwordState = GetOwner()->GetVelocity();
-	oldSwingSpeed = oldSwingSpeed * 0.9f + DeltaTime * newSwordState * 0.1f;
+	oldSwingSpeed = oldSwingSpeed * (1.0f - slashDetectionAlpha) + DeltaTime * (newSwordState * slashDetectionAlpha);
 }
 
 float USwordDamageCauserComponent::CalculateDamage()
@@ -29,5 +31,5 @@ bool USwordDamageCauserComponent::CanDoDamage()
 
 float USwordDamageCauserComponent::calcBonusDamageFactor()
 {
-	return oldSwingSpeed.SizeSquared() > threshholdBonusDamageSquared ? 1.5f : 1.0f;
+	return oldSwingSpeed.SizeSquared() > threshholdBonusDamageSquared ? bonusDamageFactor : 1.0f;
 }
