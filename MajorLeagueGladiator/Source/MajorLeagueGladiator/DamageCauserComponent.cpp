@@ -4,6 +4,7 @@
 #include "DamageCauserComponent.h"
 
 UDamageCauserComponent::UDamageCauserComponent()
+	: damageAppliedOnHit(0)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }

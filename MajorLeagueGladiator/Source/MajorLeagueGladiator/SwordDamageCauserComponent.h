@@ -30,9 +30,10 @@ private:
 	UPROPERTY(EditAnywhere)
 	float bonusDamageFactor;
 
-	// 1 = only use current velocity*deltaTime, 0.1 = use 0.1 of current and 0.9 of previous velocity*deltaTime
+	// between 0 and 1
+	// defines how fast new sword speed influences overall speedvalue
 	UPROPERTY(EditAnywhere)
-	float slashDetectionAlpha; 
+	float slashVelocityLearnRate; 
 
 	float calcBonusDamageFactor();
 };
