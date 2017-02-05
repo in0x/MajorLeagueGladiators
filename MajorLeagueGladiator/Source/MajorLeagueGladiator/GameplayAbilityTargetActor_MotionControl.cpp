@@ -9,6 +9,7 @@ AGameplayAbilityTargetActor_MotionControl::AGameplayAbilityTargetActor_MotionCon
 
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 }
 
 
