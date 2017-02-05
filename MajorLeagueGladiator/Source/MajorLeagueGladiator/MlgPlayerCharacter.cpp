@@ -164,8 +164,8 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		int32 AbilityID = (int32)BindInfo.Command;
 
 		FGameplayAbiliyInputBinds inputBinds(
-			FString::Printf(TEXT("ConfirmTargetting_%s_%s"), *GetName(), *BindInfo.GameplayAbilityClass->GetName()),
-			FString::Printf(TEXT("CancelTargetting_%s_%s"), *GetName(), *BindInfo.GameplayAbilityClass->GetName()),
+			FString::Printf(TEXT("ConfirmAbility%d"), AbilityID),
+			FString::Printf(TEXT("CancelAbility%d"), AbilityID),
 			"EGameplayAbilityInputBinds",
 			AbilityID, 
 			AbilityID
