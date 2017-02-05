@@ -53,31 +53,24 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	teleportComp->Disable();
 
 	abilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAbilitySystemComponent>(this, TEXT("GameplayTasks"));
+	abilitySystemComponent->SetIsReplicated(true);
 
 	//Change to blueprint to add own abilities
 	gameplayAbilitySet = ObjectInitializer.CreateDefaultSubobject<UGameplayAbilitySet>(this, TEXT("GameplayAbilitySet"));
-}
 
-void AMlgPlayerCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-	//TODO (FS) Network Stuff error handling
-	//For Testing
 	FGameplayAbilityBindInfo mockAbility;
 	mockAbility.Command = EGameplayAbilityInputBinds::Ability1;
 	mockAbility.GameplayAbilityClass = UTargetingGameplayAbility::StaticClass();
 
 	gameplayAbilitySet->Abilities.Add(mockAbility);
-
-
-	//TODO (FS) Maybe Possible in Constructor
-	gameplayAbilitySet->GiveAbilities(abilitySystemComponent);
 }
 
 void AMlgPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	// SUPER IMPORTANT, must be called, when playercontroller status changes (in this case we are sure that we now possess a Controller so its different than before)
+	// Though we might move it to a different place
+	abilitySystemComponent->RefreshAbilityActorInfo();
 
 	// If no HMD is connected, setup non VR mode.
 	if (!GEngine->HMDDevice.IsValid() || !GEngine->HMDDevice->IsHMDConnected()) 
@@ -122,6 +115,10 @@ void AMlgPlayerCharacter::BeginPlay()
 	{
 		textWidget->SetText(FString::FromInt(static_cast<int>(FMath::RoundFromZero(CurrentCD))));
 	});
+	if (Role >= ROLE_Authority)
+	{
+		gameplayAbilitySet->GiveAbilities(abilitySystemComponent);
+	}
 }
 
 void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -176,6 +173,8 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 		abilitySystemComponent->BindAbilityActivationToInputComponent(PlayerInputComponent, inputBinds);		
 	}
+
+	
 
 }
 
