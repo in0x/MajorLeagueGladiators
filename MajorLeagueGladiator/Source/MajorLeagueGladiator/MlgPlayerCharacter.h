@@ -22,7 +22,6 @@ public:
 	
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	virtual void PostInitializeComponents() override;
 	
 	void MoveForward(float Value);
 	void MoveRight(float Value);
