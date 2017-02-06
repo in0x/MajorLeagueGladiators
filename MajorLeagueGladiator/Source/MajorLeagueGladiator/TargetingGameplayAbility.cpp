@@ -24,11 +24,12 @@ void UTargetingGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Ability Activated"));
 	auto* task = UAbilityTask_WaitTargetData::WaitTargetData(this, "Task", EGameplayTargetingConfirmation::UserConfirmed, AGameplayAbilityTargetActor_MotionControl::StaticClass());
+
 	task->ValidData.AddDynamic(this, &UTargetingGameplayAbility::OnDataReceived);
+
 	AGameplayAbilityTargetActor* SpawnedActor = nullptr;
 	task->BeginSpawningActor(this, AGameplayAbilityTargetActor_MotionControl::StaticClass(), SpawnedActor);
 	task->FinishSpawningActor(this, SpawnedActor);
-	task->Activate();
 }
 
 void UTargetingGameplayAbility::OnDataReceived(const FGameplayAbilityTargetDataHandle& Data)
