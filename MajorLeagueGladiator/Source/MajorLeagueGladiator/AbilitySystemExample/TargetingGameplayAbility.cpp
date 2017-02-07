@@ -22,6 +22,7 @@ void UTargetingGameplayAbility::InputReleased(const FGameplayAbilitySpecHandle H
 void UTargetingGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Ability Activated"));
 	auto* task = UAbilityTask_WaitTargetData::WaitTargetData(this, "Task", EGameplayTargetingConfirmation::UserConfirmed, AGameplayAbilityTargetActor_MotionControl::StaticClass());
 

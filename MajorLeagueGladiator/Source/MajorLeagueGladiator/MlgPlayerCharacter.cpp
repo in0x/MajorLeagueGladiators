@@ -13,7 +13,7 @@
 #include "DamageReceiverComponent.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayAbilitySet.h"
-#include "AbilitySystemExample/TargetingGameplayAbility.h"
+#include "Abilities/GravityGunAbility.h"
 
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -56,22 +56,19 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	abilitySystemComponent->SetIsReplicated(true);
 
 	//Change to blueprint to add own abilities
-	//gameplayAbilitySet = ObjectInitializer.CreateDefaultSubobject<UGameplayAbilitySet>(this, TEXT("GameplayAbilitySet"));
+	gameplayAbilitySet = ObjectInitializer.CreateDefaultSubobject<UGameplayAbilitySet>(this, TEXT("GameplayAbilitySet"));
 
-	//// Serves as an example can be removed without consequences (unless this is actually used)
-	//// We might want to have a different way on how to add abilities in the future
-	//FGameplayAbilityBindInfo mockAbility;
-	//mockAbility.Command = EGameplayAbilityInputBinds::Ability1;
-	//mockAbility.GameplayAbilityClass = UTargetingGameplayAbility::StaticClass();
-	//gameplayAbilitySet->Abilities.Add(mockAbility);
+	// Serves as an example can be removed without consequences (unless this is actually used)
+	// We might want to have a different way on how to add abilities in the future
+	FGameplayAbilityBindInfo mockAbility;
+	mockAbility.Command = EGameplayAbilityInputBinds::Ability1;
+	mockAbility.GameplayAbilityClass = UGravityGunAbility::StaticClass();
+	gameplayAbilitySet->Abilities.Add(mockAbility);
 }
 
 void AMlgPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	// SUPER IMPORTANT, must be called, when playercontroller status changes (in this case we are sure that we now possess a Controller so its different than before)
-	// Though we might move it to a different place
-	abilitySystemComponent->RefreshAbilityActorInfo();
 
 	// If no HMD is connected, setup non VR mode.
 	if (!g_IsVREnabled())
@@ -109,10 +106,6 @@ void AMlgPlayerCharacter::BeginPlay()
 	{
 		textWidget->SetText(FString::FromInt(static_cast<int>(FMath::RoundFromZero(CurrentCD))));
 	});
-	//if (Role >= ROLE_Authority)
-	//{
-	//	gameplayAbilitySet->GiveAbilities(abilitySystemComponent);
-	//}
 }
 
 void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -139,6 +132,9 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
+
+	PlayerInputComponent->BindAction("OnTestInputButton1", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnTestInputButton1);
+	PlayerInputComponent->BindAction("OnTestInputButton2", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnTestInputButton2);
 
 	//Binds skill confirmation and canceling, but not skills themselves
 	//abilitySystemComponent->BindToInputComponent(PlayerInputComponent);
@@ -168,13 +164,41 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	//	abilitySystemComponent->BindAbilityActivationToInputComponent(PlayerInputComponent, inputBinds);		
 	//}
 
+	// SUPER IMPORTANT, must be called, when playercontroller status changes (in this case we are sure that we now possess a Controller so its different than before)
+	// Though we might move it to a different place
+	abilitySystemComponent->RefreshAbilityActorInfo();
 	
+}
 
+void AMlgPlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	abilitySystemComponent->RefreshAbilityActorInfo();
+	if (Role >= ROLE_Authority)
+	{
+		gameplayAbilitySet->GiveAbilities(abilitySystemComponent);
+	}
 }
 
 void AMlgPlayerCharacter::BecomeViewTarget(APlayerController* PC) 
 {
 	Super::BecomeViewTarget(PC);
+}
+
+
+void AMlgPlayerCharacter::OnTestInputButton1()
+{
+	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
+	float d = leftController->GetGripDistance();
+	leftController->SetGripDistance(d + 100);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("extend left"));
+}
+void AMlgPlayerCharacter::OnTestInputButton2()
+{
+	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
+	float d = leftController->GetGripDistance();
+	leftController->SetGripDistance(d - 100);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("short left"));
 }
 
 void AMlgPlayerCharacter::MoveForward(float Value)
