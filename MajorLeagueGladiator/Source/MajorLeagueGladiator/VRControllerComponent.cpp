@@ -7,14 +7,7 @@ UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectI
 	: Super(ObjectInitializer)
 {}
 
-/*
-NOTE(Phil)
-We now try to find a primary socket in range for gripping first. If we dont find a
-socket, we simply attach the Actor as it is at the time of the overlap.
-VRExpansion supports gripping sockets, however, the sockets need to be 
-named either VRGripP (Primary) or VRGripS(Secondary). 
-IVRGripInterface implementers can be queried using Closest[Primary|Secondary]SlotinRange.  
-*/
+
 bool UVRControllerComponent::GrabNearestActor(const USphereComponent& GrabSphere)
 {	
 	if (GrippedActors.Num() > 0)
@@ -27,28 +20,7 @@ bool UVRControllerComponent::GrabNearestActor(const USphereComponent& GrabSphere
 		return false;
 	}
 
-	IVRGripInterface* gripComp = grabData.pIVRGrip;
-	AActor* closest = grabData.pActorToGrip;
-	FTransform gripTrafo = closest->GetTransform();
-
-	if (gripComp)
-	{
-		bool foundSlot;
-		FTransform slotTrafo;
-
-		gripComp->ClosestPrimarySlotInRange_Implementation(GetComponentLocation(), foundSlot, slotTrafo);
-
-		if (foundSlot)
-		{
-			slotTrafo = UKismetMathLibrary::ConvertTransformToRelative(slotTrafo, closest->GetActorTransform());
-			slotTrafo.SetScale3D(gripTrafo.GetScale3D());
-			GripActor(closest, slotTrafo, true, FName(), gripComp->SlotGripType_Implementation());
-			return true;
-		}
-	}
-	gripTrafo.SetLocation(GetComponentLocation());
-	GripActor(closest, gripTrafo, false, FName(), gripComp->FreeGripType_Implementation());
-	
+	GrabActorImpl(grabData);
 	return true;
 }
 
@@ -141,3 +113,84 @@ void UVRControllerComponent::EndUseGrippedActors()
 }
 
 
+bool UVRControllerComponent::TryGrabActor(AActor* Actor)
+{
+	if (GrippedActors.Num() > 0)
+		return false;
+
+	IVRGripInterface* gripInterface = Cast<IVRGripInterface>(Actor->GetRootComponent());
+	if (!gripInterface)
+	{
+		gripInterface = Cast<IVRGripInterface>(Actor);
+		if (gripInterface == nullptr)
+		{
+			return false;
+		}
+	}
+
+	GrabActorImpl({ Actor, gripInterface });
+	return true;
+}
+
+void UVRControllerComponent::SetGripDistance(float NewDistance, int GripIndex)
+{
+	check(NewDistance >= 0);
+	check(GripIndex >= 0);
+	check(GripIndex < GrippedActors.Num());
+
+	FTransform currentTransform = GrippedActors[GripIndex].RelativeTransform;
+
+	FVector translationVector = currentTransform.GetTranslation();
+
+	if (translationVector.IsNearlyZero())
+	{
+		translationVector = FVector(1, 0, 0);
+	}
+	else
+	{
+		translationVector.Normalize();
+	}
+	
+	GrippedActors[GripIndex].RelativeTransform.SetTranslation(translationVector * NewDistance);
+}
+
+float UVRControllerComponent::GetGripDistance(int GripIndex) const
+{
+	check(GripIndex >= 0);
+	check(GripIndex < GrippedActors.Num());
+	FVector translation = GrippedActors[GripIndex].RelativeTransform.GetTranslation();
+
+	return translation.IsNearlyZero() ? 0 : translation.Size();
+}
+/*
+NOTE(Phil)
+We now try to find a primary socket in range for gripping first. If we dont find a
+socket, we simply attach the Actor as it is at the time of the overlap.
+VRExpansion supports gripping sockets, however, the sockets need to be
+named either VRGripP (Primary) or VRGripS(Secondary).
+IVRGripInterface implementers can be queried using Closest[Primary|Secondary]SlotinRange.
+*/
+void UVRControllerComponent::GrabActorImpl(ActorGrabData GrabData)
+{
+	check(GrabData.pActorToGrip);
+	check(GrabData.pIVRGrip);
+	check(GrippedActors.Num() == 0);
+
+	bool foundSlot;
+	FTransform slotTrafo;
+
+	GrabData.pIVRGrip->ClosestPrimarySlotInRange_Implementation(GetComponentLocation(), foundSlot, slotTrafo);
+	FTransform actorTransform = GrabData.pActorToGrip->GetTransform();
+
+	if (foundSlot)
+	{
+		slotTrafo = UKismetMathLibrary::ConvertTransformToRelative(slotTrafo, actorTransform);
+		slotTrafo.SetScale3D(actorTransform.GetScale3D());
+		GripActor(GrabData.pActorToGrip, slotTrafo, true, FName(), GrabData.pIVRGrip->SlotGripType_Implementation());
+	}
+	else
+	{
+		actorTransform.SetLocation(GetComponentLocation());
+		GripActor(GrabData.pActorToGrip, actorTransform, false, FName(), GrabData.pIVRGrip->FreeGripType_Implementation());
+	}
+}

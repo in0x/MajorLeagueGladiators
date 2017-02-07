@@ -22,7 +22,8 @@ public:
 	
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	
+	virtual void PossessedBy(AController* NewController) override;
+
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void OnLeftTriggerClicked();
@@ -34,7 +35,9 @@ public:
 	void OnTeleportReleased();
 	void OnSideGripButtonLeft();
 	void OnSideGripButtonRight();
-	
+
+	void OnTestInputButton1();
+	void OnTestInputButton2();
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
 
@@ -74,7 +77,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	UAbilitySystemComponent* abilitySystemComponent;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Instanced)
 	UGameplayAbilitySet* gameplayAbilitySet;
 
 	UFUNCTION(Server, WithValidation, reliable)

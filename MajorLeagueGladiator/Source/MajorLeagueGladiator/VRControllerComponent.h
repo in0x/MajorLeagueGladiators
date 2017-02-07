@@ -19,7 +19,11 @@ public:
 	void DropNonInteractGrips();
 	void UseGrippedActors();
 	void EndUseGrippedActors();
-	
+
+	bool TryGrabActor(AActor* Actor);
+
+	void SetGripDistance(float NewDistance, int GripIndex = 0);
+	float GetGripDistance(int GripIndex = 0) const;
 private:
 
 	struct ActorGrabData
@@ -29,4 +33,5 @@ private:
 	};
 
 	ActorGrabData getNearestGrabableActor(const USphereComponent& GrabSphere) const;
+	void GrabActorImpl(ActorGrabData GrabData);
 };
