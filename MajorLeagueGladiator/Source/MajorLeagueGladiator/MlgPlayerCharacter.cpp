@@ -13,7 +13,7 @@
 #include "DamageReceiverComponent.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayAbilitySet.h"
-#include "TargetingGameplayAbility.h"
+#include "AbilitySystemExample/TargetingGameplayAbility.h"
 
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -58,10 +58,11 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	//Change to blueprint to add own abilities
 	gameplayAbilitySet = ObjectInitializer.CreateDefaultSubobject<UGameplayAbilitySet>(this, TEXT("GameplayAbilitySet"));
 
+	// Serves as an example can be removed without consequences (unless this is actually used)
+	// We might want to have a different way on how to add abilities in the future
 	FGameplayAbilityBindInfo mockAbility;
 	mockAbility.Command = EGameplayAbilityInputBinds::Ability1;
 	mockAbility.GameplayAbilityClass = UTargetingGameplayAbility::StaticClass();
-
 	gameplayAbilitySet->Abilities.Add(mockAbility);
 }
 

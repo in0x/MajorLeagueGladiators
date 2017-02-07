@@ -5,7 +5,7 @@
 
 #include "Abilities/Tasks/AbilityTask_WaitTargetData.h"
 
-#include "GameplayAbilityTargetActor_MotionControl.h"
+#include "AbilitySystemExample/GameplayAbilityTargetActor_MotionControl.h"
 
 
 void UTargetingGameplayAbility::InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
