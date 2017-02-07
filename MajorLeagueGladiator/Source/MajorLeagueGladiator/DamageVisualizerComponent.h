@@ -8,7 +8,7 @@
 class UDamageReceiverComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PROTOTYPE_API UDamageVisualizerComponent : public UActorComponent
+class MAJORLEAGUEGLADIATOR_API UDamageVisualizerComponent : public UActorComponent
 {
 	GENERATED_BODY()
 

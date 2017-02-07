@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Prototype.h"
+#include "MajorLeagueGladiator.h"
 #include "DamageVisualizerComponent.h"
 #include "DamageReceiverComponent.h"
 
