@@ -8,7 +8,7 @@ AMlgPlayerController::AMlgPlayerController()
 	const static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> helperShortLeft(TEXT("/Game/RumbleFiles/RumbleShortLeft"));
 	const static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> helperShortRight(TEXT("/Game/RumbleFiles/RumbleShortRight"));
 
-	rumbleShortLeft = NewObject<UForceFeedbackEffect>(helperShortLeft.Object);
-	rumbleShortRight = NewObject<UForceFeedbackEffect>(helperShortRight.Object);
+	rumbleShortLeft = helperShortLeft.Object;
+	rumbleShortRight = helperShortRight.Object;
 }
 
