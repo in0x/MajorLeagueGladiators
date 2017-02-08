@@ -2,6 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "VRControllerComponent.h"
+#include "MlgPlayerController.h"
 
 UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -110,6 +111,11 @@ void UVRControllerComponent::EndUseGrippedActors()
 			gripActor->OnEndUsed();
 		}
 	}
+}
+
+AMlgPlayerController* UVRControllerComponent::getMlgPlayerController()
+{
+	return CastChecked<AMlgPlayerController>(CastChecked<APawn>(GetOwner())->Controller);
 }
 
 

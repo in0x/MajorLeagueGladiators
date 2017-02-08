@@ -5,9 +5,8 @@
 
 AMlgPlayerController::AMlgPlayerController()
 {
-	static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> myRumble(TEXT("/Game/RumbleFiles/ControllerRumble"));
+	const static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> myRumble(TEXT("/Game/RumbleFiles/ControllerRumble")) ;
 	
-	rumbleTest = myRumble.Object;
-
+	rumbleTest = NewObject<UForceFeedbackEffect>(myRumble.Object);
 }
 
