@@ -22,7 +22,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
 	void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation);
 
-	AMlgPlayerController* getCurrentGrippedController();
+	AMlgPlayerController* getMlgPlayerController();
 private:
 	AMlgPlayerController* currentGrippedController;
 };

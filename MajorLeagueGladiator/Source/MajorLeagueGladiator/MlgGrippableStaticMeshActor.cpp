@@ -17,7 +17,7 @@ void AMlgGrippableStaticMeshActor::OnGripRelease_Implementation(UGripMotionContr
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Releasesd Lucas"));
 }
 
-AMlgPlayerController* AMlgGrippableStaticMeshActor::getCurrentGrippedController() 
+AMlgPlayerController* AMlgGrippableStaticMeshActor::getMlgPlayerController()
 {
 	return currentGrippedController;
 }
