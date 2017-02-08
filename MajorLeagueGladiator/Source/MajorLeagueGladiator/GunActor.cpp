@@ -58,7 +58,7 @@ void AGunActor::Tick(float DeltaTime)
 
 	if (bShooting && ammoComponent->GetAmmoCount() > 0)
 	{
-		ammoComponent->ConsumeAmmo();
+		ammoComponent->ConsumeAmmo(); 
 		FTransform trafo;
 		projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
 

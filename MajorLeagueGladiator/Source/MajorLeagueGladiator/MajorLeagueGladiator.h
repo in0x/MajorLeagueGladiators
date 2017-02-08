@@ -37,3 +37,5 @@
 
 // LOG
 DECLARE_LOG_CATEGORY_EXTERN(DebugLog, Log, All);
+
+bool g_IsVREnabled();
