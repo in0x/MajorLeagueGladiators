@@ -67,14 +67,10 @@ void AGunActor::Tick(float DeltaTime)
 		checkf(projectile, TEXT("AGunProjectile spawned by AGunActor was null"));
 		projectile->GetStaticMeshComponent()->AddImpulse(GetActorRightVector() * projectileVelAccel);
 
-		AMlgGrippableStaticMeshActor* owner = Cast<AMlgGrippableStaticMeshActor>(GetOwner());
-		if (owner != nullptr) 
+		auto* controller = this->getMlgPlayerController();
+		if (controller != nullptr) 
 		{
-			AMlgPlayerController* controller = owner->getMlgPlayerController();
-			if (controller != nullptr) 
-			{
-				controller->ClientPlayForceFeedback(controller->rumbleShortRight, false, FName("rumbleRight"));
-			}
+			controller->ClientPlayForceFeedback(controller->rumbleShortRight, false, FName("rumbleRight"));
 		}
 	}
 }
