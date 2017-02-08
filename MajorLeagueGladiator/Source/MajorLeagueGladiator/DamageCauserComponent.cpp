@@ -24,13 +24,14 @@ void UDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* Oth
 		float damage = CalculateDamage();
 		UGameplayStatics::ApplyDamage(OtherActor, damage, nullptr, OverlappedActor, damageType);
 		
+		// rumble code
 		AMlgGrippableStaticMeshActor* owner = Cast<AMlgGrippableStaticMeshActor>(GetOwner());
 		if (owner != nullptr) 
 		{
 			AMlgPlayerController* controller = owner->getMlgPlayerController();
 			if (controller != nullptr) 
 			{
-				controller->ClientPlayForceFeedback(controller->rumbleTest, false, FName());
+				controller->ClientPlayForceFeedback(controller->rumbleShortRight, false, FName("rumbleRight"));
 			}
 		}
 	}
