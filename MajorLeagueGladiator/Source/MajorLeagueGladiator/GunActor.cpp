@@ -6,6 +6,7 @@
 #include "GunProjectile.h"
 #include "TextWidget.h"
 #include "WidgetComponent.h"
+#include "MlgPlayerController.h"
 
 AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

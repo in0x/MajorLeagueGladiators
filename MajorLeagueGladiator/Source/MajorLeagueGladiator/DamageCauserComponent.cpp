@@ -31,6 +31,15 @@ void UDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* Oth
 			AMlgPlayerController* controller = owner->getMlgPlayerController();
 			if (controller != nullptr) 
 			{
+				//check if hit object is part of myself, then we do not rumble
+				APawn* otherPlayer = Cast<APawn>(OtherActor);
+				if (otherPlayer != nullptr)
+				{
+					if (otherPlayer->Controller == controller)
+					{
+						return;
+					}
+				}
 				controller->ClientPlayForceFeedback(controller->rumbleShortRight, false, FName("rumbleRight"));
 			}
 		}
