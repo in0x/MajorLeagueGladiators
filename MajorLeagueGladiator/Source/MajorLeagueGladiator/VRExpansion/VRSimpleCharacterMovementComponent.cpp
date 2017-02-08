@@ -815,10 +815,16 @@ void UVRSimpleCharacterMovementComponent::TickComponent(float DeltaTime, enum EL
 
 	if (AVRSimpleCharacter * owningChar = Cast<AVRSimpleCharacter>(GetOwner()))
 	{
-		if (VRRootCapsule)
+		if (VRRootCapsule && g_IsVREnabled()) // NOTE(Phil): Adding g_IsVrEnabled() here is required for proper body height in debug mode 
+		{
 			owningChar->VRSceneComponent->SetRelativeLocation(FVector(0, 0, -VRRootCapsule->GetUnscaledCapsuleHalfHeight()));
-
-		owningChar->GenerateOffsetToWorld();
+		}
+		else
+		{
+			owningChar->VRSceneComponent->SetRelativeLocation(FVector(0, 0, 0));
+		}
+		
+		owningChar->GenerateOffsetToWorld(); 
 	}
 }
 

@@ -74,19 +74,9 @@ void AMlgPlayerCharacter::BeginPlay()
 	abilitySystemComponent->RefreshAbilityActorInfo();
 
 	// If no HMD is connected, setup non VR mode.
-	if (!GEngine->HMDDevice.IsValid() || !GEngine->HMDDevice->IsHMDConnected()) 
+	if (!g_IsVREnabled())
 	{
 		pHandMotionController = std::make_unique<HandMotionController>(this);
-
-		// Set Capsule collider dimensions so that the player has an actual height in non VR mode.
-		// Having this set in VR Mode causes the HMD to be offset too far from the floor.
-		/*auto capsule = CastChecked<UCapsuleComponent>(GetRootComponent());
-		capsule->SetCapsuleRadius(20.f);
-		capsule->SetCapsuleHalfHeight(96.f);*/
-
-		VRSceneComponent->SetRelativeLocation(FVector(0, 0, 0));
-		//VRSceneComponent->SetWorldLocation(capsule->GetComponentLocation() + FVector(0.f, 0.f, 96.f));
-
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("NON VR MODE"));
 	}	
 	else

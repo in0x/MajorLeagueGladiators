@@ -9,7 +9,6 @@ AVRSimpleCharacter::AVRSimpleCharacter(const FObjectInitializer& ObjectInitializ
  : Super(ObjectInitializer.DoNotCreateDefaultSubobject(ACharacter::MeshComponentName).SetDefaultSubobjectClass<UVRSimpleCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 
 {
-
 	// Remove the movement jitter with slow speeds
 	this->ReplicatedMovement.LocationQuantizationLevel = EVectorQuantization::RoundTwoDecimals;
 
@@ -27,7 +26,7 @@ AVRSimpleCharacter::AVRSimpleCharacter(const FObjectInitializer& ObjectInitializ
 	VRSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("VR Scene Component"));
 
 	if (VRSceneComponent)
-	{
+	{ 
 		VRSceneComponent->SetupAttachment(RootComponent);
 		VRSceneComponent->SetRelativeLocation(FVector(0, 0, -96));
 	}
@@ -35,12 +34,11 @@ AVRSimpleCharacter::AVRSimpleCharacter(const FObjectInitializer& ObjectInitializ
 	VRReplicatedCamera = CreateDefaultSubobject<UReplicatedVRCameraComponent>(TEXT("VR Replicated Camera"));
 	if (VRReplicatedCamera && VRSceneComponent)
 	{
-
-
-
 		VRReplicatedCamera->SetupAttachment(VRSceneComponent);
-	//	VRReplicatedCamera->AddTickPrerequisiteComponent(VRMovementReference);
+		//VRReplicatedCamera->AddTickPrerequisiteComponent(VRMovementReference);
+		
 		VRReplicatedCamera->bOffsetByHMD = true;
+		
 		//VRReplicatedCamera->SetupAttachment(RootComponent);
 	}
 
@@ -57,6 +55,7 @@ AVRSimpleCharacter::AVRSimpleCharacter(const FObjectInitializer& ObjectInitializ
 		// Moved this to be root relative as the camera late updates were killing how it worked
 		//ParentRelativeAttachment->SetupAttachment(RootComponent);
 		ParentRelativeAttachment->SetupAttachment(VRSceneComponent);
+
 		ParentRelativeAttachment->bOffsetByHMD = true;
 	}
 
@@ -69,26 +68,28 @@ AVRSimpleCharacter::AVRSimpleCharacter(const FObjectInitializer& ObjectInitializ
 		}
 		//LeftMotionController->SetupAttachment(RootComponent);
 		LeftMotionController->Hand = EControllerHand::Left;
+		
 		LeftMotionController->bOffsetByHMD = true;
+		
 		// Keep the controllers ticking after movement
 		if (VRReplicatedCamera)
 		{
 			LeftMotionController->AddTickPrerequisiteComponent(VRMovementReference);
 		}
-
-
 	}
 
 	RightMotionController = CreateDefaultSubobject<UGripMotionControllerComponent>(TEXT("Right Grip Motion Controller"));
 	if (RightMotionController)
-	{
+	{	
 		if (VRSceneComponent)
 		{
 			RightMotionController->SetupAttachment(VRSceneComponent);
 		}
 		//RightMotionController->SetupAttachment(RootComponent);
 		RightMotionController->Hand = EControllerHand::Right;
+		
 		RightMotionController->bOffsetByHMD = true;
+		
 		// Keep the controllers ticking after movement
 		if (VRReplicatedCamera)
 		{
