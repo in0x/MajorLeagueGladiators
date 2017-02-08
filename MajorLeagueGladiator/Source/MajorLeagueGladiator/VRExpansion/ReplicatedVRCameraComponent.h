@@ -20,14 +20,24 @@ class MAJORLEAGUEGLADIATOR_API UReplicatedVRCameraComponent : public UCameraComp
 	/** Whether or not this component is currently on the network server*/
 	bool bIsServer;
 
-	// Whether to ever replicate position
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "VRExpansionLibrary")
-	//bool bReplicateTransform;
+//public:
+	// If to use HMD offset
+	bool bOffsetByHMD;
 
+//protected:
 
 	/** Sets lock to hmd automatically based on if the camera is currently locally controlled or not */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
 		uint32 bAutoSetLockToHmd : 1;
+
+	// Would have to offset controllers by same amount or will feel off
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
+	//bool bUseVRNeckOffset;
+
+	/** An optional extra transform to adjust the final view without moving the component, in the camera's local space, sets additive offset */
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
+	//FTransform VRNeckOffset;
+
 
 	UFUNCTION(BlueprintCallable, Category = Camera)
 		virtual void GetCameraView(float DeltaTime, FMinimalViewInfo& DesiredView) override;

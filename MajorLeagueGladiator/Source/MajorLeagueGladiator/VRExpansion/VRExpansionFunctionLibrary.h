@@ -49,6 +49,17 @@ namespace EAsyncBlueprintResultSwitch
 }
 
 UENUM(BlueprintType)
+enum class EBPWorldType : uint8
+{
+	wNone,		// An untyped world, in most cases this will be the vestigial worlds of streamed in sub-levels
+	wGame,		// The game world
+	wEditor,	// A world being edited in the editor
+	wPIE,		// A Play In Editor world
+	wPreview,	// A preview world for an editor tool
+	wInactive	// An editor world that was loaded but not currently being edited in the level editor
+};
+
+UENUM(BlueprintType)
 enum class EVRDeviceProperty_String : uint8
 {
 	Prop_TrackingSystemName_String				= 0, ////
@@ -196,7 +207,6 @@ public:
 	{
 		// Took this from UnityVRToolkit, no shame, I liked it
 		FRotationMatrix HeadMat(HMDRotation);
-
 		FVector forward = HeadMat.GetScaledAxis(EAxis::X);
 		FVector forwardLeveled = forward;
 		forwardLeveled.Z = 0;
@@ -216,6 +226,7 @@ public:
 		return FRotationMatrix::MakeFromXZ(finalForward, FVector::UpVector).Rotator();
 	}
 
+
 	// Gets whether an HMD device is connected
 	UFUNCTION(BlueprintPure, Category = "VRExpansionFunctions", meta = (bIgnoreSelf = "true", DisplayName = "GetIsHMDConnected"))
 	static bool GetIsHMDConnected();
@@ -223,6 +234,10 @@ public:
 	// Gets whether an HMD device is connected
 	UFUNCTION(BlueprintPure, Category = "VRExpansionFunctions", meta = (bIgnoreSelf = "true", DisplayName = "GetHMDType"))
 	static EBPHMDDeviceType GetHMDType();
+
+	// Gets whether the game is running in VRPreview or is a non editor build game (returns true for either). // NOTE(Phil): Removed this because it was causing linker errors
+	/*UFUNCTION(BlueprintPure, Category = "VRExpansionFunctions", meta = (bIgnoreSelf = "true", DisplayName = "IsInVREditorPreviewOrGame"))
+	static bool IsInVREditorPreviewOrGame();*/
 
 	// Gets whether an HMD device is connected
 	UFUNCTION(BlueprintPure, Category = "VRExpansionFunctions", meta = (bIgnoreSelf = "true", DisplayName = "GetIsActorMovable"))

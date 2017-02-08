@@ -115,11 +115,3 @@ FBPInteractionSettings UGrippableBoxComponent::GetInteractionSettings_Implementa
 {
 	return VRGripInterfaceSettings.InteractionSettings;
 }
-
-void UGrippableBoxComponent::OnGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation)
-{
-}
-
-void UGrippableBoxComponent::OnGripRelease_Implementation(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation)
-{
-}

@@ -4,9 +4,6 @@
 #include "Engine.h"
 
 #include "PhysicsPublic.h"
-
-#include "PhysXIncludes.h"
-
 #if WITH_PHYSX
 #include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
 #endif // WITH_PHYSX
@@ -91,6 +88,7 @@ Interactive Collision With Physics = Held items can be offset by geometry, uses 
 Interactive Collision With Sweep = Held items can be offset by geometry, uses sweep for the offset, pushes physics simulating objects, no weight
 Sweep With Physics = Only sweeps movement, will not be offset by geomtry, still pushes physics simulating objects, no weight
 Physics Only = Does not sweep at all (does not trigger OnHitEvents), still pushes physics simulating objects, no weight
+Custom grip is to be handled by the object itself, it just sends the TickGrip event every frame but doesn't move the object.
 */
 UENUM(Blueprintable)
 enum EGripCollisionType
@@ -101,7 +99,8 @@ enum EGripCollisionType
 	InteractiveHybridCollisionWithSweep,
 	SweepWithPhysics,
 	PhysicsOnly,
-	ManipulationGrip
+	ManipulationGrip,
+	CustomGrip
 };
 
 // This needs to be updated as the original gets changed, that or hope they make the original blueprint accessible.
@@ -144,7 +143,8 @@ enum EGripMovementReplicationSettings
 {
 	KeepOriginalMovement,
 	ForceServerSideMovement,
-	ForceClientSideMovement
+	ForceClientSideMovement,
+	LocalOnly_Not_Replicated
 };
 
 // Grip Target Type
@@ -174,29 +174,29 @@ struct MAJORLEAGUEGLADIATOR_API FBPInteractionSettings
 public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		bool bLimitsInLocalSpace;
+		uint32 bLimitsInLocalSpace:1;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "LinearSettings")
-		bool bLimitX;
+		uint32 bLimitX:1;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "LinearSettings")
-		bool bLimitY;
+		uint32 bLimitY:1;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "LinearSettings")
-		bool bLimitZ;
+		uint32 bLimitZ:1;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AngularSettings")
-		bool bLimitPitch;
+		uint32 bLimitPitch:1;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AngularSettings")
-		bool bLimitYaw;
+		uint32 bLimitYaw:1;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AngularSettings")
-		bool bLimitRoll;
+		uint32 bLimitRoll:1;
 
 	// Doesn't work totally correctly without using the ConvertToControllerRelativeTransform node in the motion controller
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AngularSettings")
-		bool bIgnoreHandRotation;
+		uint32 bIgnoreHandRotation:1;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "LinearSettings")
 		FVector InitialLinearTranslation;
@@ -250,9 +250,12 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		TEnumAsByte<EGripTargetType> GripTargetType;
 	UPROPERTY(BlueprintReadOnly)
+		UObject * GrippedObject;
+	/*UPROPERTY(BlueprintReadOnly)
 		AActor * Actor;
 	UPROPERTY(BlueprintReadOnly)
 		UPrimitiveComponent * Component;
+		*/
 	UPROPERTY(BlueprintReadOnly)
 		TEnumAsByte<EGripCollisionType> GripCollisionType;
 	UPROPERTY(BlueprintReadWrite)
@@ -302,15 +305,13 @@ public:
 	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess)
 	{
 		Ar << GripTargetType;
-		Ar << Actor;
-		Ar << Component;
+		Ar << GrippedObject;
+		//Ar << Actor;
+		//Ar << Component;
 		Ar << GripCollisionType;
 		Ar << GripLateUpdateSetting;
 
-
-
 		Ar << RelativeTransform;
-
 
 		Ar << GripMovementReplicationSetting;
 
@@ -358,24 +359,35 @@ public:
 		}
 
 		// Don't bother replicated physics grip types if the grip type doesn't support it.
-		if (GripCollisionType == EGripCollisionType::InteractiveCollisionWithPhysics || GripCollisionType == EGripCollisionType::InteractiveHybridCollisionWithSweep /*|| GripCollisionType == EGripCollisionType::InteractiveCollisionWithVelocity*/)
-		{
-			Ar << Damping;
-			Ar << Stiffness;
-		}
+		/*if (GripCollisionType == EGripCollisionType::InteractiveCollisionWithPhysics || 
+			GripCollisionType == EGripCollisionType::InteractiveHybridCollisionWithSweep || 
+			GripCollisionType == EGripCollisionType::ManipulationGrip ||
+			GripCollisionType == EGripCollisionType::CustomGrip)
+		{*/
+		// Now always replicating these two, in case people want to pass in custom values using it
+		Ar << Damping;
+		Ar << Stiffness;
+		/*}*/
 
 		bOutSuccess = true;
 		return true;
+	}
+
+	FORCEINLINE AActor * GetGrippedActor() const
+	{
+		return Cast<AActor>(GrippedObject);
+	}
+
+	FORCEINLINE UPrimitiveComponent * GetGrippedComponent() const
+	{
+		return Cast<UPrimitiveComponent>(GrippedObject);
 	}
 
 	//Check if a grip is the same as another, the only things I check for are the actor / component
 	//This is here for the Find() function from TArray
 	FORCEINLINE bool operator==(const FBPActorGripInformation &Other) const
 	{
-		if (Actor && Actor == Other.Actor)
-			return true;
-
-		if (Component && Component == Other.Component)
+		if (GrippedObject && GrippedObject == Other.GrippedObject)
 			return true;
 
 		return false;
@@ -383,7 +395,7 @@ public:
 
 	FORCEINLINE bool operator==(const AActor * Other) const
 	{
-		if (Other && Actor && Actor == Other)
+		if (Other && GrippedObject && GrippedObject == Other)
 			return true;
 
 		return false;
@@ -391,7 +403,7 @@ public:
 
 	FORCEINLINE bool operator==(const UPrimitiveComponent * Other) const
 	{
-		if (Other && Component && Component == Other)
+		if (Other && GrippedObject && GrippedObject == Other)
 			return true;
 
 		return false;
@@ -400,7 +412,7 @@ public:
 
 	FORCEINLINE bool operator==(const UObject * Other) const
 	{
-		if (Other && ((Component && Component == Other) || (Actor && Actor == Other)))
+		if (Other && GrippedObject == Other)
 			return true;
 
 		return false;
@@ -411,8 +423,9 @@ public:
 		GripTargetType = EGripTargetType::ActorGrip;
 		Damping = 200.0f;
 		Stiffness = 1500.0f;
-		Component = nullptr;
-		Actor = nullptr;
+		GrippedObject = nullptr;
+		//Component = nullptr;
+		//Actor = nullptr;
 		bColliding = false;
 		GripCollisionType = EGripCollisionType::InteractiveCollisionWithSweep;
 		GripLateUpdateSetting = EGripLateUpdateSettings::NotWhenCollidingOrDoubleGripping;
@@ -522,9 +535,11 @@ struct MAJORLEAGUEGLADIATOR_API FBPActorPhysicsHandleInformation
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintReadOnly)
-		AActor * Actor;
-	UPROPERTY(BlueprintReadOnly)
-		UPrimitiveComponent * Component;
+		UObject * HandledObject;
+	//UPROPERTY(BlueprintReadOnly)
+	//	AActor * Actor;
+	//UPROPERTY(BlueprintReadOnly)
+	//	UPrimitiveComponent * Component;
 
 	/** Physics scene index of the body we are grabbing. */
 	int32 SceneIndex;
@@ -538,15 +553,16 @@ public:
 	FBPActorPhysicsHandleInformation()
 	{
 		HandleData = NULL;
-		KinActorData = NULL;
-		Actor = nullptr;
-		Component = nullptr;
+		KinActorData = NULL;		
+		HandledObject = nullptr;
+		//Actor = nullptr;
+		//Component = nullptr;
 		COMPosition = physx::PxTransform(U2PVector(FVector::ZeroVector));
 	}
 
 	FORCEINLINE bool operator==(const FBPActorGripInformation & Other) const
 	{
-		if (Actor && Actor == Other.Actor || Component && Component == Other.Component)
+		if (HandledObject && HandledObject == Other.GrippedObject)
 			return true;
 
 		return false;

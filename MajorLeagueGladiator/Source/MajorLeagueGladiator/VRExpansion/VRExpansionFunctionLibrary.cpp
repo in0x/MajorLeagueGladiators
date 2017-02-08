@@ -1,5 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "MajorLeagueGladiator.h"
+
+//#if WITH_EDITOR // NOTE(Phil): Removed this because it was causing linker errors
+//#include "Editor/UnrealEd/Classes/Editor/EditorEngine.h"
+//#endif
+
 #include "VRExpansionFunctionLibrary.h"
 
 //General Log
@@ -247,6 +252,20 @@ EBPHMDDeviceType UVRExpansionFunctionLibrary::GetHMDType()
 	return EBPHMDDeviceType::DT_Unknown;
 }
 
+
+//bool UVRExpansionFunctionLibrary::IsInVREditorPreviewOrGame() // NOTE(Phil): Removed this because it was causing linker errors
+//{
+//#if WITH_EDITOR
+//	if (GIsEditor)
+//	{
+//		UEditorEngine* EdEngine = Cast<UEditorEngine>(GEngine);
+//		return EdEngine->bUseVRPreviewForPlayWorld;
+//	}
+//#endif
+//
+//	// Is not an editor build, default to true here
+//	return true;
+//}
 
 bool UVRExpansionFunctionLibrary::GetVRControllerPropertyString(TEnumAsByte<EVRControllerProperty_String> PropertyToRetrieve, int32 DeviceID, FString & StringValue)
 {
@@ -523,7 +542,7 @@ UTexture2D * UVRExpansionFunctionLibrary::GetVRDeviceModelAndTexture(UObject* Wo
 		TArray<FVector2D> UV0;
 		TArray<FColor> vertexColors;
 		TArray<FProcMeshTangent> tangents;
-
+		
 		vr::HmdVector3_t vPosition;
 		vr::HmdVector3_t vNormal;
 		for (uint32_t i = 0; i < RenderModel->unVertexCount; ++i)

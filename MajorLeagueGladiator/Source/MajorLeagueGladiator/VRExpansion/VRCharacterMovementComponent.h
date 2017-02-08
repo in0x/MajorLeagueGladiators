@@ -54,8 +54,9 @@ public:
 	//UPROPERTY(BlueprintReadOnly, Transient, Category = VRMovement)
 	//UCapsuleComponent * VRCameraCollider;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRCharacterMovementComponent")
-	bool bAllowWalkingThroughWalls;
+	// Removing, it makes less sense now with optional secondary collision settings
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRCharacterMovementComponent")
+	//bool bAllowWalkingThroughWalls;
 
 	// Allow merging movement replication (may cause issues when >10 players due to capsule location
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRCharacterMovementComponent")
@@ -83,8 +84,9 @@ public:
 	*/
 	virtual bool TryToLeaveNavWalking() override;
 	
+	
 	virtual void PhysNavWalking(float deltaTime, int32 Iterations) override;
-	void ProcessLanded(const FHitResult& Hit, float remainingTime, int32 Iterations) override;
+	virtual void ProcessLanded(const FHitResult& Hit, float remainingTime, int32 Iterations) override;
 
 	FORCEINLINE FVector GetActorFeetLocation() const { return VRRootCapsule ? (VRRootCapsule->GetVRLocation() - FVector(0, 0, UpdatedComponent->Bounds.BoxExtent.Z)) : UpdatedComponent ? (UpdatedComponent->GetComponentLocation() - FVector(0, 0, UpdatedComponent->Bounds.BoxExtent.Z)) : FNavigationSystem::InvalidLocation; }
 	virtual FBasedPosition GetActorFeetLocationBased() const override
@@ -154,35 +156,35 @@ public:
 	bool SafeMoveUpdatedComponent(const FVector& Delta, const FRotator& NewRotation, bool bSweep, FHitResult& OutHit, ETeleportType Teleport = ETeleportType::None);
 	
 	// This is here to force it to call the correct SafeMoveUpdatedComponent functions for floor movement
-	void MoveAlongFloor(const FVector& InVelocity, float DeltaSeconds, FStepDownResult* OutStepDownResult) override;
+	virtual void MoveAlongFloor(const FVector& InVelocity, float DeltaSeconds, FStepDownResult* OutStepDownResult) override;
 
 	// Modify for correct location
-	void ApplyRepulsionForce(float DeltaSeconds) override;
+	virtual void ApplyRepulsionForce(float DeltaSeconds) override;
 
 	// Update BaseOffset to be zero
-	void UpdateBasedMovement(float DeltaSeconds) override;
+	virtual void UpdateBasedMovement(float DeltaSeconds) override;
 
 	// Stop subtracting the capsules half height
-	FVector GetImpartedMovementBaseVelocity() const override;
+	virtual FVector GetImpartedMovementBaseVelocity() const override;
 
 	// Cheating at the relative collision detection
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction);
 
 	// Need to fill our capsule component variable here and override the default tick ordering
-	void SetUpdatedComponent(USceneComponent* NewUpdatedComponent) override;
+	virtual void SetUpdatedComponent(USceneComponent* NewUpdatedComponent) override;
 
 	// Correct an offset sweep test
-	void ReplicateMoveToServer(float DeltaTime, const FVector& NewAcceleration) override;
+	virtual void ReplicateMoveToServer(float DeltaTime, const FVector& NewAcceleration) override;
 
 	// Always called with the capsulecomponent location, no idea why it doesn't just get it inside it already
 	// Had to force it within the function to use VRLocation instead.
-	void FindFloor(const FVector& CapsuleLocation, FFindFloorResult& OutFloorResult, bool bZeroDelta, const FHitResult* DownwardSweepResult) const override;
+	virtual void FindFloor(const FVector& CapsuleLocation, FFindFloorResult& OutFloorResult, bool bZeroDelta, const FHitResult* DownwardSweepResult) const override;
 
 	// Need to use actual capsule location for step up
 	bool StepUp(const FVector& GravDir, const FVector& Delta, const FHitResult &InHit, FStepDownResult* OutStepDownResult);
 
 	// Skip physics channels when looking for floor
-	bool FloorSweepTest(
+	virtual bool FloorSweepTest(
 		FHitResult& OutHit,
 		const FVector& Start,
 		const FVector& End,
@@ -193,18 +195,21 @@ public:
 		) const override;
 
 	// Multiple changes to support relative motion and ledge sweeps
-	void PhysWalking(float deltaTime, int32 Iterations) override;
+	virtual void PhysWalking(float deltaTime, int32 Iterations) override;
 	
 	
-	// Phys Falling uses this, 
-	bool ShouldCheckForValidLandingSpot(float DeltaTime, const FVector& Delta, const FHitResult& Hit) const override;
-	
-	// Is valid landing spot takes care of this
-	//void PhysFalling(float deltaTime, int32 Iterations) override;
+	// Need to use VR location, was defaulting to actor
+	virtual bool ShouldCheckForValidLandingSpot(float DeltaTime, const FVector& Delta, const FHitResult& Hit) const override;
+
+	// Overriding the physfalling because valid landing spots were computed incorrectly.
+	virtual void PhysFalling(float deltaTime, int32 Iterations) override;
 
 	// Just calls find floor
 	/** Verify that the supplied hit result is a valid landing spot when falling. */
 	//virtual bool IsValidLandingSpot(const FVector& CapsuleLocation, const FHitResult& Hit) const override;
+
+	// Making sure that impulses are correct
+	virtual void CapsuleTouched(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 };
 
 
@@ -228,6 +233,100 @@ public:
 		VRCapsuleRotation = FRotator::ZeroRotator;
 		RequestedVelocity = FVector::ZeroVector;
 	}
+
+	bool CanCombineWith(const FSavedMovePtr& NewMove, ACharacter* Character, float MaxDelta) const override
+	{
+		if (bForceNoCombine || NewMove->bForceNoCombine)
+		{
+			return false;
+		}
+
+		FSavedMove_VRCharacter * nMove = (FSavedMove_VRCharacter *)NewMove.Get();
+
+		if (!nMove || (!LFDiff.IsNearlyZero() && !nMove->LFDiff.IsNearlyZero()) || (!RequestedVelocity.IsNearlyZero() && !nMove->RequestedVelocity.IsNearlyZero()))
+			return false;
+
+		// Cannot combine moves which contain root motion for now.
+		// @fixme laurent - we should be able to combine most of them though, but current scheme of resetting pawn location and resimulating forward doesn't work.
+		// as we don't want to tick montage twice (so we don't fire events twice). So we need to rearchitecture this so we tick only the second part of the move, and reuse the first part.
+		if ((RootMotionMontage != NULL) || (NewMove->RootMotionMontage != NULL))
+		{
+			return false;
+		}
+
+		if (NewMove->Acceleration.IsZero())
+		{
+			if (!Acceleration.IsZero())
+			{
+				return false;
+			}
+
+			if (!StartVelocity.IsZero() || !NewMove->StartVelocity.IsZero())
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if (NewMove->DeltaTime + DeltaTime >= MaxDelta)
+			{
+				return false;
+			}
+
+			if (!FVector::Coincident(AccelNormal, NewMove->AccelNormal, AccelDotThresholdCombine))
+			{
+				return false;
+			}
+		}
+
+		if (bPressedJump || NewMove->bPressedJump)
+		{
+			return false;
+		}
+
+		if (bWantsToCrouch != NewMove->bWantsToCrouch)
+		{
+			return false;
+		}
+
+		if (StartBase != NewMove->StartBase)
+		{
+			return false;
+		}
+
+		if (StartBoneName != NewMove->StartBoneName)
+		{
+			return false;
+		}
+
+		if (MovementMode != NewMove->MovementMode)
+		{
+			return false;
+		}
+
+		if (StartCapsuleRadius != NewMove->StartCapsuleRadius)
+		{
+			return false;
+		}
+
+		if (StartCapsuleHalfHeight != NewMove->StartCapsuleHalfHeight)
+		{
+			return false;
+		}
+
+		if (!StartBaseRotation.Equals(NewMove->StartBaseRotation)) // only if base hasn't rotated
+		{
+			return false;
+		}
+
+		if (CustomTimeDilation != NewMove->CustomTimeDilation)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 };
 
 // Need this for capsule location replication

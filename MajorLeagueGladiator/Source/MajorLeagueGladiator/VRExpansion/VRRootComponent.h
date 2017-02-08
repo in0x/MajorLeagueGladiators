@@ -1,3 +1,4 @@
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -17,7 +18,7 @@ class MAJORLEAGUEGLADIATOR_API UVRRootComponent : public UCapsuleComponent//USha
 public:
 	friend class FDrawCylinderSceneProxy;
 
-	void GenerateOffsetToWorld(bool bUpdateBounds = true);
+	FORCEINLINE void GenerateOffsetToWorld(bool bUpdateBounds = true);
 
 	/*FVector GetVROffsetFromLocationAndRotation(FVector Location, const FQuat &Rotation)
 	{
@@ -27,31 +28,31 @@ public:
 		return testComponentToWorld.TransformPosition(FVector(curCameraLoc.X, curCameraLoc.Y, CapsuleHalfHeight) + CamRotOffset.RotateVector(VRCapsuleOffset));
 	}*/
 
-	UFUNCTION(BlueprintPure, Category = "MotionController")
+	UFUNCTION(BlueprintPure, Category = "VRCharacter|VRLocations")
 	FVector GetVRForwardVector()
 	{
 		return OffsetComponentToWorld.GetRotation().GetForwardVector();
 	}
 
-	UFUNCTION(BlueprintPure, Category = "MotionController")
+	UFUNCTION(BlueprintPure, Category = "VRCharacter|VRLocations")
 	FVector GetVRRightVector()
 	{
 		return OffsetComponentToWorld.GetRotation().GetRightVector();
 	}
 
-	UFUNCTION(BlueprintPure, Category = "MotionController")
+	UFUNCTION(BlueprintPure, Category = "VRCharacter|VRLocations")
 	FVector GetVRUpVector()
 	{
 		return OffsetComponentToWorld.GetRotation().GetUpVector();
 	}
 
-	UFUNCTION(BlueprintPure, Category = "MotionController")
+	UFUNCTION(BlueprintPure, Category = "VRCharacter|VRLocations")
 	FVector GetVRLocation()
 	{
 		return OffsetComponentToWorld.GetLocation();
 	}
 
-	UFUNCTION(BlueprintPure, Category = "MotionController")
+	UFUNCTION(BlueprintPure, Category = "VRCharacter|VRLocations")
 	FRotator GetVRRotation()
 	{
 		return OffsetComponentToWorld.GetRotation().Rotator();
@@ -106,9 +107,6 @@ public:
 		else
 			return GetCollisionObjectType();
 	}
-
-	FVector curCapsuleLoc;
-	FRotator curCapsuleRot;
 
 	FVector curCameraLoc;
 	FRotator curCameraRot;
