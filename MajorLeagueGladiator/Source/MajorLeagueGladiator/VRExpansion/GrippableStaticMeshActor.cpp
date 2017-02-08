@@ -118,13 +118,3 @@ FBPInteractionSettings AGrippableStaticMeshActor::GetInteractionSettings_Impleme
 {
 	return VRGripInterfaceSettings.InteractionSettings;
 }
-
-void AGrippableStaticMeshActor::OnGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Gripped"));
-}
-
-void AGrippableStaticMeshActor::OnGripRelease_Implementation(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Grip Release"));
-}

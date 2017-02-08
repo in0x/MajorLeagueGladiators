@@ -17,6 +17,9 @@ class MAJORLEAGUEGLADIATOR_API UParentRelativeAttachmentComponent : public UScen
 
 	FRotator LastRot;
 
+	// If to use HMD offset
+	bool bOffsetByHMD;
+
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
 	bool IsLocallyControlled() const

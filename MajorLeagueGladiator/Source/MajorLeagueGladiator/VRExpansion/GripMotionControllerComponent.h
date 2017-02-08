@@ -23,26 +23,11 @@ DECLARE_STATS_GROUP(TEXT("TICKGrip"), STATGROUP_TickGrip, STATCAT_Advanced);
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = MotionController)
 class MAJORLEAGUEGLADIATOR_API UGripMotionControllerComponent : public UPrimitiveComponent
 {
-	// BETA /////////
-	/*FCalculateCustomPhysics OnCalculateCustomPhysics;
 
-	static FVector FVectorMoveTowards(FVector Current, FVector Target, float maxDistanceDelta)
-	{
-		FVector a = Target - Current;
-		float magnitude = a.Size();
-
-		if (magnitude <= maxDistanceDelta || magnitude == 0.0f)
-		{
-			return Target;
-		}
-
-		return Current + a / magnitude * maxDistanceDelta;
-	}
-
-	void SubstepTick(float DeltaTime, FBodyInstance* BdyInstance);*/
-
-	// BETA /////////
-
+public:
+	bool bOffsetByHMD;
+	FVector LastLocationForLateUpdate;
+private:
 
 	GENERATED_UCLASS_BODY()
 	~UGripMotionControllerComponent();
@@ -70,6 +55,9 @@ class MAJORLEAGUEGLADIATOR_API UGripMotionControllerComponent : public UPrimitiv
 		return bTracked;
 	}
 
+	// Used to set the difference since last tick for TickGrip()
+	FVector LastControllerLocation; 
+
 	// Custom version of the component sweep function to remove that aggravating warning epic is throwing about skeletal mesh components.
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 	virtual void OnUnregister() override;
@@ -78,6 +66,28 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "VRGrip", ReplicatedUsing = OnRep_GrippedActors)
 	TArray<FBPActorGripInformation> GrippedActors;
+
+	UPROPERTY(BlueprintReadOnly, Category = "VRGrip")
+	TArray<FBPActorGripInformation> LocallyGrippedActors;
+
+	// Enable this to send the TickGrip event every tick even for non custom grip types - has a slight performance hit
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGrip")
+	bool bAlwaysSendTickGrip;
+
+	// Recreates a grip in situations where a relevant variable may have been changed
+	FORCEINLINE void ReCreateGrip(FBPActorGripInformation & GripInfo)
+	{
+		int HandleIndex = 0;
+
+		if (GetPhysicsGripIndex(GripInfo, HandleIndex))
+		{
+			DestroyPhysicsHandle(PhysicsGrips[HandleIndex].SceneIndex, &PhysicsGrips[HandleIndex].HandleData, &PhysicsGrips[HandleIndex].KinActorData);
+			PhysicsGrips.RemoveAt(HandleIndex);
+		}
+
+		// Grip Type or replication was changed
+		NotifyGrip(GripInfo);
+	}
 
 	UFUNCTION()
 	virtual void OnRep_GrippedActors(TArray<FBPActorGripInformation> OriginalArrayState)
@@ -90,6 +100,14 @@ public:
 			{
 				// Is a new grip entry
 				NotifyGrip(GrippedActors[i]);
+			}
+			else // Check to see if the important bits got changed (instant drop / pickup can cause this)
+			{
+				if (OriginalArrayState[FoundIndex].GripCollisionType != GrippedActors[i].GripCollisionType ||
+					OriginalArrayState[FoundIndex].GripMovementReplicationSetting != GrippedActors[i].GripMovementReplicationSetting)
+				{
+					ReCreateGrip(GrippedActors[i]);
+				}
 			}
 		}
 
@@ -262,6 +280,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "VRGrip")
 		void GetPhysicsVelocities(const FBPActorGripInformation &Grip, FVector &AngularVelocity, FVector &LinearVelocity);
 
+	// Set the Grip Collision Type of a grip
+	UFUNCTION(BlueprintCallable, Category = "VRGrip", meta = (ExpandEnumAsExecs = "Result"))
+		void SetGripCollisionType(
+			const FBPActorGripInformation &Grip,
+			TEnumAsByte<EBPVRResultSwitch::Type> &Result,
+			TEnumAsByte<EGripCollisionType> NewGripCollisionType = EGripCollisionType::InteractiveCollisionWithPhysics
+			);
+
+
 	// Set the late update setting of a grip
 	UFUNCTION(BlueprintCallable, Category = "VRGrip", meta = (ExpandEnumAsExecs = "Result"))
 		void SetGripLateUpdateSetting(
@@ -307,8 +334,11 @@ public:
 	// Running the gripping logic in its own function as the main tick was getting bloated
 	FORCEINLINE void TickGrip(float DeltaTime);
 
+	// Splitting logic into seperate function
+	void HandleGripArray(TArray<FBPActorGripInformation> &GrippedObjects, const FTransform & ParentTransform, const FVector &MotionControllerLocDelta, float DeltaTime, bool bReplicatedArray = false);
+
 	// Gets the world transform of a grip, modified by secondary grips and interaction settings
-	FORCEINLINE void GetGripWorldTransform(float DeltaTime,FTransform & WorldTransform, const FTransform &ParentTransform, FBPActorGripInformation &Grip, AActor * actor, UPrimitiveComponent * root);
+	FORCEINLINE void GetGripWorldTransform(float DeltaTime,FTransform & WorldTransform, const FTransform &ParentTransform, FBPActorGripInformation &Grip, AActor * actor, UPrimitiveComponent * root, bool bRootHasInterface, bool bActorHasInterface);
 
 	// Handle modifying the transform per the grip interaction settings, returns final world transform
 	FORCEINLINE FTransform HandleInteractionSettings(float DeltaTime, const FTransform & ParentTransform, UPrimitiveComponent * root, FBPInteractionSettings InteractionSettings, FBPActorGripInformation & GripInfo);
@@ -357,6 +387,14 @@ public:
 			}
 		}
 
+		for (int i = 0; i < LocallyGrippedActors.Num(); ++i)
+		{
+			if (LocallyGrippedActors[i] == ObjectToCheck)
+			{
+				return true;
+			}
+		}
+
 		return false;
 	}
 
@@ -370,6 +408,14 @@ public:
 		for (int i = 0; i < GrippedActors.Num(); ++i)
 		{
 			if (GrippedActors[i] == ActorToCheck)
+			{
+				return true;
+			}
+		}
+
+		for (int i = 0; i < LocallyGrippedActors.Num(); ++i)
+		{
+			if (LocallyGrippedActors[i] == ActorToCheck)
 			{
 				return true;
 			}
@@ -393,6 +439,14 @@ public:
 			}
 		}
 
+		for (int i = 0; i < LocallyGrippedActors.Num(); ++i)
+		{
+			if (LocallyGrippedActors[i] == ComponentToCheck)
+			{
+				return true;
+			}
+		}
+
 		return false;
 	}
 
@@ -408,6 +462,15 @@ public:
 			if(GrippedActors[i].bHasSecondaryAttachment && GrippedActors[i].SecondaryAttachment == ComponentToCheck)
 			{
 				Grip = GrippedActors[i];
+				return true;
+			}
+		}
+
+		for (int i = 0; i < LocallyGrippedActors.Num(); ++i)
+		{
+			if (LocallyGrippedActors[i].bHasSecondaryAttachment && LocallyGrippedActors[i].SecondaryAttachment == ComponentToCheck)
+			{
+				Grip = LocallyGrippedActors[i];
 				return true;
 			}
 		}
@@ -456,7 +519,7 @@ public:
 	bool SetUpPhysicsHandle(const FBPActorGripInformation &NewGrip);
 	bool DestroyPhysicsHandle(const FBPActorGripInformation &Grip);
 	void UpdatePhysicsHandleTransform(const FBPActorGripInformation &GrippedActor, const FTransform& NewTransform);
-	bool GetPhysicsJointLength(const FBPActorGripInformation &GrippedActor, FVector & LocOut);
+	bool GetPhysicsJointLength(const FBPActorGripInformation &GrippedActor, UPrimitiveComponent * rootComp, FVector & LocOut);
 
 	TArray<FBPActorPhysicsHandleInformation> PhysicsGrips;
 	FBPActorPhysicsHandleInformation * GetPhysicsGrip(const FBPActorGripInformation & GripInfo);
@@ -475,7 +538,7 @@ private:
 	//bool bIsServer;
 
 	/** If true, the Position and Orientation args will contain the most recent controller state */
-	virtual bool PollControllerState(FVector& Position, FRotator& Orientation);
+	bool PollControllerState(FVector& Position, FRotator& Orientation);
 
 	/** View extension object that can persist on the render thread without the motion controller component */
 	class FViewExtension : public ISceneViewExtension, public TSharedFromThis<FViewExtension, ESPMode::ThreadSafe>
@@ -515,6 +578,8 @@ private:
 
 		/** Walks the component hierarchy gathering scene proxies */
 		void GatherLateUpdatePrimitives(USceneComponent* Component, TArray<LateUpdatePrimitiveInfo>& Primitives);
+		FORCEINLINE void ProcessGripArrayLateUpdatePrimitives(TArray<FBPActorGripInformation> & GripArray);
+
 		/** Primitives that need late update before rendering */
 		TArray<LateUpdatePrimitiveInfo> LateUpdatePrimitives;
 	};

@@ -56,14 +56,14 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	abilitySystemComponent->SetIsReplicated(true);
 
 	//Change to blueprint to add own abilities
-	gameplayAbilitySet = ObjectInitializer.CreateDefaultSubobject<UGameplayAbilitySet>(this, TEXT("GameplayAbilitySet"));
+	//gameplayAbilitySet = ObjectInitializer.CreateDefaultSubobject<UGameplayAbilitySet>(this, TEXT("GameplayAbilitySet"));
 
-	// Serves as an example can be removed without consequences (unless this is actually used)
-	// We might want to have a different way on how to add abilities in the future
-	FGameplayAbilityBindInfo mockAbility;
-	mockAbility.Command = EGameplayAbilityInputBinds::Ability1;
-	mockAbility.GameplayAbilityClass = UTargetingGameplayAbility::StaticClass();
-	gameplayAbilitySet->Abilities.Add(mockAbility);
+	//// Serves as an example can be removed without consequences (unless this is actually used)
+	//// We might want to have a different way on how to add abilities in the future
+	//FGameplayAbilityBindInfo mockAbility;
+	//mockAbility.Command = EGameplayAbilityInputBinds::Ability1;
+	//mockAbility.GameplayAbilityClass = UTargetingGameplayAbility::StaticClass();
+	//gameplayAbilitySet->Abilities.Add(mockAbility);
 }
 
 void AMlgPlayerCharacter::BeginPlay()
@@ -80,9 +80,12 @@ void AMlgPlayerCharacter::BeginPlay()
 
 		// Set Capsule collider dimensions so that the player has an actual height in non VR mode.
 		// Having this set in VR Mode causes the HMD to be offset too far from the floor.
-		auto capsule = CastChecked<UCapsuleComponent>(GetRootComponent());
+		/*auto capsule = CastChecked<UCapsuleComponent>(GetRootComponent());
 		capsule->SetCapsuleRadius(20.f);
-		capsule->SetCapsuleHalfHeight(96.f);
+		capsule->SetCapsuleHalfHeight(96.f);*/
+
+		VRSceneComponent->SetRelativeLocation(FVector(0, 0, 0));
+		//VRSceneComponent->SetWorldLocation(capsule->GetComponentLocation() + FVector(0.f, 0.f, 96.f));
 
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("NON VR MODE"));
 	}	
@@ -116,10 +119,10 @@ void AMlgPlayerCharacter::BeginPlay()
 	{
 		textWidget->SetText(FString::FromInt(static_cast<int>(FMath::RoundFromZero(CurrentCD))));
 	});
-	if (Role >= ROLE_Authority)
-	{
-		gameplayAbilitySet->GiveAbilities(abilitySystemComponent);
-	}
+	//if (Role >= ROLE_Authority)
+	//{
+	//	gameplayAbilitySet->GiveAbilities(abilitySystemComponent);
+	//}
 }
 
 void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -148,32 +151,32 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
 
 	//Binds skill confirmation and canceling, but not skills themselves
-	abilitySystemComponent->BindToInputComponent(PlayerInputComponent);
+	//abilitySystemComponent->BindToInputComponent(PlayerInputComponent);
 
-	//Bind each Skill induvidually
-	for (const FGameplayAbilityBindInfo& BindInfo : gameplayAbilitySet->Abilities)
-	{
-		if (!BindInfo.GameplayAbilityClass)
-		{
-			UE_LOG(LogAbilitySystem, Warning, TEXT("GameplayAbilityClass %d not set"), (int32)BindInfo.Command);
-			continue;
-		}
+	////Bind each Skill induvidually
+	//for (const FGameplayAbilityBindInfo& BindInfo : gameplayAbilitySet->Abilities)
+	//{
+	//	if (!BindInfo.GameplayAbilityClass)
+	//	{
+	//		UE_LOG(LogAbilitySystem, Warning, TEXT("GameplayAbilityClass %d not set"), (int32)BindInfo.Command);
+	//		continue;
+	//	}
 
-		FGameplayAbilitySpec spec(
-			BindInfo.GameplayAbilityClass->GetDefaultObject<UGameplayAbility>(), 1, (int32)BindInfo.Command);
-		
-		int32 AbilityID = (int32)BindInfo.Command;
+	//	FGameplayAbilitySpec spec(
+	//		BindInfo.GameplayAbilityClass->GetDefaultObject<UGameplayAbility>(), 1, (int32)BindInfo.Command);
+	//	
+	//	int32 AbilityID = (int32)BindInfo.Command;
 
-		FGameplayAbiliyInputBinds inputBinds(
-			FString::Printf(TEXT("ConfirmAbility%d"), AbilityID),
-			FString::Printf(TEXT("CancelAbility%d"), AbilityID),
-			"EGameplayAbilityInputBinds",
-			AbilityID, 
-			AbilityID
-			);
+	//	FGameplayAbiliyInputBinds inputBinds(
+	//		FString::Printf(TEXT("ConfirmAbility%d"), AbilityID),
+	//		FString::Printf(TEXT("CancelAbility%d"), AbilityID),
+	//		"EGameplayAbilityInputBinds",
+	//		AbilityID, 
+	//		AbilityID
+	//		);
 
-		abilitySystemComponent->BindAbilityActivationToInputComponent(PlayerInputComponent, inputBinds);		
-	}
+	//	abilitySystemComponent->BindAbilityActivationToInputComponent(PlayerInputComponent, inputBinds);		
+	//}
 
 	
 

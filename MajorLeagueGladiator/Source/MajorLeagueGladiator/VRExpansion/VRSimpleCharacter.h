@@ -4,9 +4,10 @@
 #include "VRBPDatatypes.h"
 #include "GripMotionControllerComponent.h"
 #include "VRExpansionFunctionLibrary.h"
-#include "ReplicatedVRCameraComponent.h"
+#include "VRSimpleCharacterMovementComponent.h"
 #include "ParentRelativeAttachmentComponent.h"
-#include "VRRootComponent.h"
+#include "ReplicatedVRCameraComponent.h"
+//#include "VRSimpleRootComponent.h"
 #include "Runtime/Launch/Resources/Version.h"
 #include "VRSimpleCharacter.generated.h"
 
@@ -19,17 +20,57 @@ class MAJORLEAGUEGLADIATOR_API AVRSimpleCharacter : public ACharacter
 public:
 	AVRSimpleCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "VRExpansionLibrary")
+		FTransform OffsetComponentToWorld;
+
+	FORCEINLINE void GenerateOffsetToWorld();
+
+	UFUNCTION(BlueprintPure, Category = "SimpleVRCharacter|VRLocations")
+		FVector GetVRForwardVector()
+	{
+		return OffsetComponentToWorld.GetRotation().GetForwardVector();
+	}
+
+	UFUNCTION(BlueprintPure, Category = "SimpleVRCharacter|VRLocations")
+		FVector GetVRRightVector()
+	{
+		return OffsetComponentToWorld.GetRotation().GetRightVector();
+	}
+
+	UFUNCTION(BlueprintPure, Category = "SimpleVRCharacter|VRLocations")
+		FVector GetVRUpVector()
+	{
+		return OffsetComponentToWorld.GetRotation().GetUpVector();
+	}
+
+	UFUNCTION(BlueprintPure, Category = "SimpleVRCharacter|VRLocations")
+		FVector GetVRLocation()
+	{
+		return OffsetComponentToWorld.GetLocation();
+	}
+
+	UFUNCTION(BlueprintPure, Category = "SimpleVRCharacter|VRLocations")
+		FRotator GetVRRotation()
+	{
+		return OffsetComponentToWorld.GetRotation().Rotator();
+	}
+
 	// Overriding teleport so that it auto calls my controllers re-positioning
 	virtual bool TeleportTo(const FVector& DestLocation, const FRotator& DestRotation, bool bIsATest = false, bool bNoCheck = false) override;
 
-	UPROPERTY(Category = VRSimpleCharacter, VisibleAnywhere, Transient, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))	
-	UCapsuleComponent * VRRootReference;
+	UPROPERTY(Category = VRSimpleCharacter, VisibleAnywhere, Transient, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UVRSimpleCharacterMovementComponent * VRMovementReference;
 
-	//UPROPERTY(Category = VRSimpleCharacter, VisibleAnywhere, Transient, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	//UVRSimpleCharacterMovementComponent * VRMovementReference;
+	UPROPERTY(Category = VRSimpleCharacter, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent * VRSceneComponent;
 
 	UPROPERTY(Category = VRSimpleCharacter, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UReplicatedVRCameraComponent * VRReplicatedCamera;
+
+	// Worry about this later
+	//UPROPERTY(Category = VRSimpleCharacter, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	//UCapsuleComponent * VRHeadCollider;
 
 	UPROPERTY(Category = VRSimpleCharacter, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UParentRelativeAttachmentComponent * ParentRelativeAttachment;

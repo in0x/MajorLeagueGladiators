@@ -65,11 +65,11 @@ void UVRControllerComponent::DropNonInteractGrips()
 	for (int i = GrippedActors.Num() - 1; i >= 0; --i)
 	{
 		IVRGripInterface* vrGrip;
-		vrGrip = Cast<IVRGripInterface>(GrippedActors[i].Actor);
+		vrGrip = Cast<IVRGripInterface>(CastChecked<AActor>(GrippedActors[i].GrippedObject));
 
 		if (!vrGrip) 
 		{
-			vrGrip = Cast<IVRGripInterface>(GrippedActors[i].Actor->GetRootComponent());
+			vrGrip = Cast<IVRGripInterface>(CastChecked<AActor>(GrippedActors[i].GrippedObject)->GetRootComponent());
 		}
 
 		if (!vrGrip->IsInteractible_Implementation())
@@ -118,7 +118,7 @@ void UVRControllerComponent::UseGrippedActors()
 {
 	for (auto& grip : GrippedActors)
 	{
-		auto gripActor = Cast<IVRGripInterface>(grip.Actor);
+		auto gripActor = Cast<IVRGripInterface>(CastChecked<AActor>(grip.GrippedObject));
 
 		if (gripActor)
 		{
@@ -131,7 +131,7 @@ void UVRControllerComponent::EndUseGrippedActors()
 {
 	for (auto& grip : GrippedActors)
 	{
-		auto gripActor = Cast<IVRGripInterface>(grip.Actor);
+		auto gripActor = Cast<IVRGripInterface>(CastChecked<AActor>(grip.GrippedObject));
 
 		if (gripActor)
 		{

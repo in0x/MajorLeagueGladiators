@@ -4,7 +4,7 @@
 
 #include "Engine.h"
 
-// PROTOTYPE
+// VREXPANSION
 #include "VRExpansion/VRBPDatatypes.h"
 #include "VRExpansion/GripMotionControllerComponent.h"
 #include "VRExpansion/VRExpansionFunctionLibrary.h"
@@ -16,6 +16,7 @@
 #include "VRExpansion/VRPathFollowingComponent.h"
 #include "VRExpansion/VRPlayerController.h"
 #include "VRExpansion/VRGripInterface.h"
+#include "VRExpansion/VRSimpleCharacter.h"
 
 // UNREAL
 #include "PhysXIncludes.h"

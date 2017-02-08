@@ -3,6 +3,8 @@
 #include "MajorLeagueGladiator.h"
 #include "Runtime/Engine/Private/EnginePrivate.h"
 
+#include "PhysicsPublic.h"
+
 #if WITH_PHYSX
 #include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
 #endif // WITH_PHYSX
@@ -253,8 +255,6 @@ UVRRootComponent::UVRRootComponent(const FObjectInitializer& ObjectInitializer)
 	lastCameraRot = FRotator::ZeroRotator;
 	curCameraRot = FRotator::ZeroRotator;
 	curCameraLoc = FVector::ZeroVector;
-	curCapsuleLoc = FVector::ZeroVector;
-	curCapsuleRot = FRotator::ZeroRotator;
 	TargetPrimitiveComponent = NULL;
 	//VRCameraCollider = NULL;
 
@@ -313,15 +313,11 @@ void UVRRootComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, 
 			FQuat curRot;
 			GEngine->HMDDevice->GetCurrentOrientationAndPosition(curRot, curCameraLoc);
 			curCameraRot = curRot.Rotator();
-			curCapsuleRot = curCameraRot;
-			curCapsuleLoc = curCameraLoc;
 		}
 		else if (TargetPrimitiveComponent)
 		{
 			curCameraRot = TargetPrimitiveComponent->RelativeRotation;
 			curCameraLoc = TargetPrimitiveComponent->RelativeLocation;
-			curCapsuleRot = curCameraRot;
-			curCapsuleLoc = curCameraLoc;
 		}
 		else
 		{
@@ -330,14 +326,10 @@ void UVRRootComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, 
 		}
 
 		// Can adjust the relative tolerances to remove jitter and some update processing
-		if (!(curCameraLoc - lastCameraLoc).IsNearlyZero(0.001f) || !(curCameraRot - lastCameraRot).IsNearlyZero(0.001f))
+		if (!(curCameraLoc - lastCameraLoc).IsNearlyZero(0.01f) || !(curCameraRot - lastCameraRot).IsNearlyZero(0.01f))
 		{
 			// Also calculate vector of movement for the movement component
 			FVector LastPosition = OffsetComponentToWorld.GetLocation();
-			FVector lastCapsuleLoc = curCapsuleLoc;
-
-			curCapsuleRot = curCameraRot;
-			curCapsuleLoc = curCameraLoc;
 
 			GenerateOffsetToWorld(false);
 
@@ -349,34 +341,23 @@ void UVRRootComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, 
 			Params.bFindInitialOverlaps = true;
 
 			bool bBlockingHit = GetWorld()->SweepSingleByChannel(OutHit, LastPosition, OffsetComponentToWorld.GetLocation(), FQuat(0.0f, 0.0f, 0.0f, 1.0f), GetVRCollisionObjectType(), GetCollisionShape(), Params, ResponseParam);
-		
 			// If we had a valid blocking hit
+
 			if (bBlockingHit && OutHit.Component.IsValid() && !OutHit.Component->IsSimulatingPhysics())
 			{
-			//	if (OutHit.bStartPenetrating && OutHit.PenetrationDepth != 0.0f)
-			//	{
-			//		curCapsuleLoc += OutHit.ImpactNormal * OutHit.PenetrationDepth;
-			//	}
-			//	else
-			//	{
-					//curCapsuleRot = lastCameraRot;
-					curCapsuleLoc = FMath::Lerp(lastCapsuleLoc, curCapsuleLoc, OutHit.Time);
-			//	}
-
 				bHadRelativeMovement = true;
 			}
 			else
 				bHadRelativeMovement = false;
 
+			lastCameraLoc = curCameraLoc;
+			lastCameraRot = curCameraRot;
 
 			OnUpdateTransform(EUpdateTransformFlags::None, ETeleportType::None);
 			DifferenceFromLastFrame = (OffsetComponentToWorld.GetLocation() - LastPosition);// .GetSafeNormal2D();
 		}
 		else
 			bHadRelativeMovement = false;
-
-		lastCameraLoc = curCameraLoc;
-		lastCameraRot = curCameraRot;
 	}
 	else
 	{
@@ -400,10 +381,11 @@ void UVRRootComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, 
 
 void UVRRootComponent::GenerateOffsetToWorld(bool bUpdateBounds)
 {
-	FRotator CamRotOffset = UVRExpansionFunctionLibrary::GetHMDPureYaw_I(curCapsuleRot);
-	OffsetComponentToWorld = FTransform(CamRotOffset.Quaternion(), FVector(curCapsuleLoc.X, curCapsuleLoc.Y, CapsuleHalfHeight) + CamRotOffset.RotateVector(VRCapsuleOffset), FVector(1.0f)) * ComponentToWorld;
+	FRotator CamRotOffset = UVRExpansionFunctionLibrary::GetHMDPureYaw_I(curCameraRot);
 
-	if(bUpdateBounds)
+	OffsetComponentToWorld = FTransform(CamRotOffset.Quaternion(), FVector(curCameraLoc.X, curCameraLoc.Y, CapsuleHalfHeight) + CamRotOffset.RotateVector(VRCapsuleOffset), FVector(1.0f)) * ComponentToWorld;
+
+	if (bUpdateBounds)
 		UpdateBounds();
 }
 
