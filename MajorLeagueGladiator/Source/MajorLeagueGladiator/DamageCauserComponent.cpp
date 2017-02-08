@@ -2,6 +2,8 @@
 
 #include "MajorLeagueGladiator.h"
 #include "DamageCauserComponent.h"
+#include "MlgGrippableStaticMeshActor.h"
+#include "MlgPlayerController.h"
 
 UDamageCauserComponent::UDamageCauserComponent()
 	: damageAppliedOnHit(0)
@@ -21,6 +23,15 @@ void UDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* Oth
 	{
 		float damage = CalculateDamage();
 		UGameplayStatics::ApplyDamage(OtherActor, damage, nullptr, OverlappedActor, damageType);
+		AMlgGrippableStaticMeshActor* owner = Cast<AMlgGrippableStaticMeshActor>(GetOwner());
+		if (owner != nullptr) 
+		{
+			AMlgPlayerController* controller = owner->getCurrentGrippedController();
+			if (controller != nullptr) 
+			{
+				controller->ClientPlayForceFeedback(controller->rumbleTest, false, FName());
+			}
+		}
 	}
 }
 

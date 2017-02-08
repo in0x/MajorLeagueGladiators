@@ -6,6 +6,7 @@
 #include "VRControllerComponent.generated.h"
 
 struct FMsgDropGrip;
+class AMlgPlayerController;
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
 class MAJORLEAGUEGLADIATOR_API UVRControllerComponent : public UGripMotionControllerComponent
@@ -19,10 +20,10 @@ public:
 	void DropNonInteractGrips();
 	void UseGrippedActors();
 	void EndUseGrippedActors();
-
 	bool TryGrabActor(AActor* Actor);
-
 	bool LaunchActor(float Velocity, bool IgnoreWeight);
+	AMlgPlayerController* getMlgPlayerController();
+
 private:
 
 	struct ActorGrabData

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "VRExpansion/GrippableStaticMeshActor.h"
+#include "MlgGrippableStaticMeshActor.h"
 #include "GunActor.generated.h"
 
 class UAmmoComponent;
@@ -13,7 +13,7 @@ class UWidgetComponent;
  * 
  */
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AGunActor : public AGrippableStaticMeshActor
+class MAJORLEAGUEGLADIATOR_API AGunActor : public AMlgGrippableStaticMeshActor
 {
 	GENERATED_BODY()
 	

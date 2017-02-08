@@ -8,6 +8,8 @@
 /**
  * 
  */
+class AMlgPlayerController;
+
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
 class MAJORLEAGUEGLADIATOR_API AMlgGrippableStaticMeshActor : public AGrippableStaticMeshActor
 {
@@ -16,4 +18,11 @@ class MAJORLEAGUEGLADIATOR_API AMlgGrippableStaticMeshActor : public AGrippableS
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
 	void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
+	void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation);
+
+	AMlgPlayerController* getCurrentGrippedController();
+private:
+	AMlgPlayerController* currentGrippedController;
 };
