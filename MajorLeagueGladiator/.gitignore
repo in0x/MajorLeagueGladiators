@@ -70,4 +70,6 @@ Content/Assets_Proto
 *.swo
 .ctrlp_cache/
 
+_ReSharper.Caches/**
+
 
