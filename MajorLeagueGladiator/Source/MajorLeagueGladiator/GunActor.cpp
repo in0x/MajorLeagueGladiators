@@ -65,7 +65,7 @@ void AGunActor::Tick(float DeltaTime)
 
 		auto projectile = GetWorld()->SpawnActor<AGunProjectile>(ammoComponent->GetProjectileType(), trafo);
 		checkf(projectile, TEXT("AGunProjectile spawned by AGunActor was null"));
-		projectile->GetStaticMeshComponent()->AddImpulse(GetActorRightVector() * projectileVelAccel);
+		projectile->GetStaticMeshComponent()->AddImpulse(trafo.GetRotation().GetForwardVector() * projectileVelAccel);
 
 		auto* controller = this->GetMlgPlayerController();
 		if (controller != nullptr) 
