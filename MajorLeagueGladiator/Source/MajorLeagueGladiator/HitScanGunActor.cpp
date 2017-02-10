@@ -4,11 +4,6 @@
 #include "HitScanGunActor.h"
 #include "DamageTypes/PlayerDamage.h"
 
-namespace
-{
-	FBPActorGripInformation gripInfo;
-}
-
 AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -41,6 +36,7 @@ void AHitScanGunActor::OnUsed()
 	if (bApplyingRecoil) // Gun hasn't reset yet.
 		return;
 
+	currentAnimDuration = recoilAnimBackDuration;
 	shoot();
 	bApplyingRecoil = true;
 	shotAudioComponent->Play();
@@ -89,15 +85,6 @@ void AHitScanGunActor::shoot()
 	}
 }
 
-namespace
-{
-	float animTime = 0.1f;
-	float elapsedAnimTime = 0.f;
-	float recoilOrigin = 0.f;
-	float recoilTarget = -30.f;
-	TEnumAsByte<EBPVRResultSwitch::Type> result;
-}
-
 void AHitScanGunActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -106,14 +93,15 @@ void AHitScanGunActor::Tick(float DeltaTime)
 	{
 		elapsedAnimTime += DeltaTime;
 
-		auto recoil = FMath::Lerp(FVector(0, recoilOrigin, 0), FVector(0, recoilTarget, 0), elapsedAnimTime / animTime);
+		auto recoil = FMath::Lerp(FVector(0, recoilOrigin, 0), FVector(0, recoilTarget, 0), elapsedAnimTime / currentAnimDuration);
 
+		TEnumAsByte<EBPVRResultSwitch::Type> result;
 		FTransform addTrafo;
 		addTrafo.AddToTranslation(recoil);
 
 		grippingController->SetGripAdditionTransform(gripInfo, result, addTrafo, true);
 
-		if (elapsedAnimTime >= animTime)
+		if (elapsedAnimTime >= currentAnimDuration)
 		{
 			elapsedAnimTime = 0.f;
 
@@ -121,6 +109,7 @@ void AHitScanGunActor::Tick(float DeltaTime)
 			{
 				recoilOrigin = recoilTarget;
 				recoilTarget = 0.f;
+				currentAnimDuration = recoilAnimForwardDuration;
 			}
 			else // Gun is back at original position 
 			{
