@@ -24,9 +24,10 @@ void AAbilityTask_PullTargetActor::Tick(float DeltaTime)
 
 	const float pullDistance = PullSpeed * DeltaTime;
 
-	const FVector newLocation = endLocation + dirVector * pullDistance;
+	//const FVector newLocation = endLocation + dirVector * pullDistance;
 
-	TargetRootComponent->SetWorldLocation(newLocation);
+	//TargetRootComponent->SetWorldLocation(newLocation);
+	TargetRootComponent->MoveComponent(dirVector * pullDistance, TargetRootComponent->GetComponentQuat(), true);
 
 	DrawDebugDirectionalArrow(TargetRootComponent->GetWorld(), targetLocation, endLocation, 1.0f, FColor::Green);
 

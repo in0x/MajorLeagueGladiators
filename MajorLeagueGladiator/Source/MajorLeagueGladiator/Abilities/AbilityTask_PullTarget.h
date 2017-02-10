@@ -18,9 +18,12 @@ public:
 	static UAbilityTask_PullTarget* Create(UObject* WorldContextObject, FName TaskName, AActor* TargetActor, USceneComponent* EndLocation, float PullSpeed, float MinDistanceThreshold);
 
 	virtual void Activate() override;
-	void OnDestroy(bool AbilityEnded);
+	void OnDestroy(bool AbilityEnded) override;
 
 	FAbilityTaskPullTargetSuccessDelegate OnSuccess;
+
+	UFUNCTION(reliable, NetMulticast)
+	void SetActorGravity_NetMulticast(AActor* Actor, bool GravityEnabled);
 private:
 	AAbilityTask_PullTargetActor* spawnedActor;
 

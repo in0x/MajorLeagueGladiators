@@ -29,22 +29,14 @@ UAbilityTask_PullTarget* UAbilityTask_PullTarget::Create(UObject* WorldContextOb
 void UAbilityTask_PullTarget::Activate()
 {
 	spawnedActor->FinishSpawning(FTransform::Identity);
-	UPrimitiveComponent* rootComp = Cast<UPrimitiveComponent>(targetActor->GetRootComponent());
-	if (rootComp)
-	{
-		rootComp->SetEnableGravity(false);
-	}
+	SetActorGravity_NetMulticast(targetActor.Get(), false);
+	
 }
 
 void UAbilityTask_PullTarget::OnLocationReachedCallback()
 {
 	spawnedActor->Destroy();
-	check(targetActor.IsValid());
-	UPrimitiveComponent* rootComp = Cast<UPrimitiveComponent>(targetActor->GetRootComponent());
-	if (rootComp)
-	{
-		rootComp->SetEnableGravity(true);
-	}	
+	check(targetActor.IsValid())
 
 	OnSuccess.Broadcast(targetActor.Get());
 
@@ -53,10 +45,20 @@ void UAbilityTask_PullTarget::OnLocationReachedCallback()
 
 void UAbilityTask_PullTarget::OnDestroy(bool AbilityEnded)
 {
+	SetActorGravity_NetMulticast(targetActor.Get(), true);
 	if (spawnedActor)
 	{
 		spawnedActor->Destroy();
 	}
 
 	Super::OnDestroy(AbilityEnded);
+}
+
+void UAbilityTask_PullTarget::SetActorGravity_NetMulticast_Implementation(AActor* Actor, bool GravityEnabled)
+{
+	UPrimitiveComponent* rootComp = Cast<UPrimitiveComponent>(Actor->GetRootComponent());
+	if (rootComp)
+	{
+		rootComp->SetEnableGravity(GravityEnabled);
+	}
 }

@@ -132,36 +132,6 @@ bool UVRControllerComponent::TryGrabActor(AActor* Actor)
 	return true;
 }
 
-void UVRControllerComponent::SetGripDistance(float NewDistance, int GripIndex)
-{
-	check(NewDistance >= 0);
-	check(GripIndex >= 0);
-	check(GripIndex < GrippedActors.Num());
-
-	FTransform currentTransform = GrippedActors[GripIndex].RelativeTransform;
-
-	FVector translationVector = currentTransform.GetTranslation();
-
-	if (translationVector.IsNearlyZero())
-	{
-		translationVector = FVector(1, 0, 0);
-	}
-	else
-	{
-		translationVector.Normalize();
-	}
-	
-	GrippedActors[GripIndex].RelativeTransform.SetTranslation(translationVector * NewDistance);
-}
-
-float UVRControllerComponent::GetGripDistance(int GripIndex) const
-{
-	check(GripIndex >= 0);
-	check(GripIndex < GrippedActors.Num());
-	FVector translation = GrippedActors[GripIndex].RelativeTransform.GetTranslation();
-
-	return translation.IsNearlyZero() ? 0 : translation.Size();
-}
 /*
 NOTE(Phil)
 We now try to find a primary socket in range for gripping first. If we dont find a

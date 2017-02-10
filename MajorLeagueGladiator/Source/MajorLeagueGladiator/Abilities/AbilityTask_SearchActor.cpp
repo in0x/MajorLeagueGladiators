@@ -6,7 +6,6 @@
 
 // Sets default values
 AAbilityTask_SearchActor::AAbilityTask_SearchActor()
- : relativeTargetingDirection(1,0,0)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -48,8 +47,13 @@ void AAbilityTask_SearchActor::Tick(float DeltaTime)
 		return;
 	}
 
-	OnActorFound.Execute(result.Actor.Get());
+	TargetDataReadyDelegate.Broadcast(MakeDataHandle(result));
 
+}
+
+bool AAbilityTask_SearchActor::IsConfirmTargetingAllowed()
+{
+	return false;
 }
 
 bool AAbilityTask_SearchActor::IsValidActor(const AActor& Actor) const
@@ -57,9 +61,10 @@ bool AAbilityTask_SearchActor::IsValidActor(const AActor& Actor) const
 	return Actor.Implements<UVRGripInterface>();
 }
 
-void AAbilityTask_SearchActor::SetRelativeTargetingDirection(FVector newRelativeTargetingDirection)
+FGameplayAbilityTargetDataHandle AAbilityTask_SearchActor::MakeDataHandle(const FHitResult& HitResult)
 {
-	relativeTargetingDirection = newRelativeTargetingDirection;
-	relativeTargetingDirection.Normalize();
+	return FGameplayAbilityTargetDataHandle(
+		new FGameplayAbilityTargetData_SingleTargetHit(HitResult)
+		);
 }
 

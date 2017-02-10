@@ -133,40 +133,45 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
 
-	PlayerInputComponent->BindAction("OnTestInputButton1", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnTestInputButton1);
-	PlayerInputComponent->BindAction("OnTestInputButton2", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnTestInputButton2);
-
 	//Binds skill confirmation and canceling, but not skills themselves
-	//abilitySystemComponent->BindToInputComponent(PlayerInputComponent);
-
-	////Bind each Skill induvidually
-	//for (const FGameplayAbilityBindInfo& BindInfo : gameplayAbilitySet->Abilities)
-	//{
-	//	if (!BindInfo.GameplayAbilityClass)
-	//	{
-	//		UE_LOG(LogAbilitySystem, Warning, TEXT("GameplayAbilityClass %d not set"), (int32)BindInfo.Command);
-	//		continue;
-	//	}
-
-	//	FGameplayAbilitySpec spec(
-	//		BindInfo.GameplayAbilityClass->GetDefaultObject<UGameplayAbility>(), 1, (int32)BindInfo.Command);
-	//	
-	//	int32 AbilityID = (int32)BindInfo.Command;
-
-	//	FGameplayAbiliyInputBinds inputBinds(
-	//		FString::Printf(TEXT("ConfirmAbility%d"), AbilityID),
-	//		FString::Printf(TEXT("CancelAbility%d"), AbilityID),
-	//		"EGameplayAbilityInputBinds",
-	//		AbilityID, 
-	//		AbilityID
-	//		);
-
-	//	abilitySystemComponent->BindAbilityActivationToInputComponent(PlayerInputComponent, inputBinds);		
-	//}
+	abilitySystemComponent->BindToInputComponent(PlayerInputComponent);
 
 	// SUPER IMPORTANT, must be called, when playercontroller status changes (in this case we are sure that we now possess a Controller so its different than before)
 	// Though we might move it to a different place
 	abilitySystemComponent->RefreshAbilityActorInfo();
+
+	if(gameplayAbilitySet == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("gameplayAbilitySet is null"));
+		return;
+	}
+
+	//Bind each Skill induvidually
+	for (const FGameplayAbilityBindInfo& BindInfo : gameplayAbilitySet->Abilities)
+	{
+		if (!BindInfo.GameplayAbilityClass)
+		{
+			UE_LOG(LogAbilitySystem, Warning, TEXT("GameplayAbilityClass %d not set"), (int32)BindInfo.Command);
+			continue;
+		}
+
+		FGameplayAbilitySpec spec(
+			BindInfo.GameplayAbilityClass->GetDefaultObject<UGameplayAbility>(), 1, (int32)BindInfo.Command);
+		
+		int32 AbilityID = (int32)BindInfo.Command;
+
+		FGameplayAbiliyInputBinds inputBinds(
+			FString::Printf(TEXT("ConfirmAbility%d"), AbilityID),
+			FString::Printf(TEXT("CancelAbility%d"), AbilityID),
+			"EGameplayAbilityInputBinds",
+			AbilityID, 
+			AbilityID
+			);
+
+		abilitySystemComponent->BindAbilityActivationToInputComponent(PlayerInputComponent, inputBinds);		
+	}
+
+	
 	
 }
 
@@ -183,22 +188,6 @@ void AMlgPlayerCharacter::PossessedBy(AController* NewController)
 void AMlgPlayerCharacter::BecomeViewTarget(APlayerController* PC) 
 {
 	Super::BecomeViewTarget(PC);
-}
-
-
-void AMlgPlayerCharacter::OnTestInputButton1()
-{
-	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
-	float d = leftController->GetGripDistance();
-	leftController->SetGripDistance(d + 100);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("extend left"));
-}
-void AMlgPlayerCharacter::OnTestInputButton2()
-{
-	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
-	float d = leftController->GetGripDistance();
-	leftController->SetGripDistance(d - 100);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("short left"));
 }
 
 void AMlgPlayerCharacter::MoveForward(float Value)

@@ -22,8 +22,10 @@ private:
 	void SearchAndPull();
 	void LaunchGrippedActor();
 
-	void OnActorFound(AActor* Actor);
-	void OnActorPullFinished(AActor* Actor);
+	UFUNCTION()
+	void OnSearchSuccessful(const FGameplayAbilityTargetDataHandle& Data);
+
+	void OnActorPullFinished(AActor* pulledActor);
 
 	bool HasGrippedActor() const;
 
@@ -32,4 +34,6 @@ private:
 
 	UPROPERTY()
 	UVRControllerComponent* gripController;
+
+
 };
