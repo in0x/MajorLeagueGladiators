@@ -10,9 +10,22 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
+	SetReplicates(true);
+	bReplicateMovement = true;
+	bStaticMeshReplicateMovement = true;
+
+	GetStaticMeshComponent()->SetIsReplicated(true);
+
 	shotAudioComponent = ObjectInitializer.CreateDefaultSubobject<UAudioComponent>(this, TEXT("ShotAudioComponent"));
+	shotAudioComponent->SetIsReplicated(true);
+
 	laserMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LaserMeshComponent"));
 	laserMesh->SetupAttachment(GetStaticMeshComponent(), FName("ProjectileSpawn"));
+}
+
+void AHitScanGunActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
 void AHitScanGunActor::BeginPlay()
@@ -36,8 +49,14 @@ void AHitScanGunActor::OnUsed()
 	if (bApplyingRecoil) // Gun hasn't reset yet.
 		return;
 
-	currentAnimDuration = recoilAnimBackDuration;
 	shoot();
+
+	playerShotEffect_NetMulticast();
+}
+
+void AHitScanGunActor::playerShotEffect_NetMulticast_Implementation()
+{
+	currentAnimDuration = recoilAnimBackDuration;
 	bApplyingRecoil = true;
 	shotAudioComponent->Play();
 }
