@@ -20,9 +20,13 @@ public:
 	virtual void OnUsed() override;
 	virtual void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation) override;
 	virtual void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	void shoot();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void playerShotEffect_NetMulticast();
 
 	UPROPERTY(EditAnywhere)
 	UAudioComponent* shotAudioComponent;
@@ -58,5 +62,6 @@ private:
 	
 	FBPActorGripInformation gripInfo;
 
+	UPROPERTY(Replicated)
 	bool bApplyingRecoil;
 };
