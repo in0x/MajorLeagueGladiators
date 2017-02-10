@@ -22,23 +22,41 @@ public:
 	virtual void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation) override;
 
 private:
+	void shoot();
 
-	UPROPERTY(EditAnywhere)
-	float shotRange;
-
-	UPROPERTY(EditAnywhere)
-	float damage;
-	
 	UPROPERTY(EditAnywhere)
 	UAudioComponent* shotAudioComponent;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* laserMesh;
-
-	void shoot();
 	
+	UPROPERTY(EditAnywhere)
+	float shotRange;
+
+	UPROPERTY(EditAnywhere)
+	float damage;
+
+	UPROPERTY(EditAnywhere)
+	float recoilAnimBackDuration = 0.5f;
+
+	UPROPERTY(EditAnywhere)
+	float recoilAnimForwardDuration = 0.5f;
+
+	float currentAnimDuration;
+
+	float elapsedAnimTime = 0.f;
+
+	float recoilOrigin = 0.f;
+
+	// How far the gun should move back after firing.
+	UPROPERTY(EditAnywhere)
+	float recoilTarget = -30.f;
+
 	UStaticMeshSocket* shotOriginSocket;
+	
 	UGripMotionControllerComponent* grippingController;
+	
+	FBPActorGripInformation gripInfo;
 
 	bool bApplyingRecoil;
 };
