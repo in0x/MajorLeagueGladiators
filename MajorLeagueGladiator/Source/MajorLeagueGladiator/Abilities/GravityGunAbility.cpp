@@ -6,11 +6,14 @@
 #include "AbilityTask_Search.h"
 #include "AbilityTask_SearchActor.h"
 #include "AbilityTask_PullTarget.h"
+#include "AbilityTask_WaitTargetData.h"
+#include "AbilityTask_PullTargetActor.h"
 
 
 UGravityGunAbility::UGravityGunAbility(const FObjectInitializer& ObjectInitializer)
+	: gripController(nullptr)
 {
-	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::ServerInitiated;
+	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;
 }
 
@@ -20,7 +23,7 @@ void UGravityGunAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, 
 	{
 		currentTask->ExternalCancel();
 	}
-	EndAbility(Handle, ActorInfo, ActivationInfo, false);
+	EndAbility(Handle, ActorInfo, ActivationInfo, true);
 }
 
 void UGravityGunAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData * TriggerEventData)
@@ -38,24 +41,32 @@ void UGravityGunAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 void UGravityGunAbility::SearchAndPull()
 {
-	UAbilityTask_Search* searchTask = UAbilityTask_Search::Create(this, "Search Task");
-	AAbilityTask_SearchActor* spawnedActor;
-	searchTask->BeginSpawningActor(this, AAbilityTask_SearchActor::StaticClass(), spawnedActor);
-	searchTask->OnSuccess.AddUObject(this, &UGravityGunAbility::OnActorFound);
+	UAbilityTask_WaitTargetData* searchTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Search Task", EGameplayTargetingConfirmation::Custom, AAbilityTask_SearchActor::StaticClass());
+	searchTask->ValidData.AddDynamic(this, &UGravityGunAbility::OnSearchSuccessful);
+	currentTask = searchTask;
 
-	spawnedActor->TargetingSceneComponent = gripController;
-	spawnedActor->maxRange = 1000;
-	spawnedActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
+
+	AGameplayAbilityTargetActor* spawnedActor;
+	if (!searchTask->BeginSpawningActor(this, AAbilityTask_SearchActor::StaticClass(), spawnedActor))
+	{
+		return;
+	}	
+
+	AAbilityTask_SearchActor* searchActor = CastChecked<AAbilityTask_SearchActor>(spawnedActor);
+
+	searchActor->TargetingSceneComponent = gripController;
+	searchActor->maxRange = 1000;
+	searchActor->IgnoredActors.Add(GetOwningActorFromActorInfo());	
 
 	searchTask->FinishSpawningActor(this, spawnedActor);
-	currentTask = searchTask;
+
 }
 
 void UGravityGunAbility::LaunchGrippedActor()
 {
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
 	{
-		AActor* actorToLaunch = gripController->GrippedActors[0].Actor;
+		AActor* actorToLaunch = CastChecked<AActor>(gripController->GrippedActors[0].GrippedObject);
 		gripController->DropAllGrips();
 
 		UPrimitiveComponent* rootComp = Cast<UPrimitiveComponent>(actorToLaunch->GetRootComponent());
@@ -67,25 +78,32 @@ void UGravityGunAbility::LaunchGrippedActor()
 		}
 		
 	}
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false);
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
 }
 
-void UGravityGunAbility::OnActorFound(AActor* Actor)
+void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
-	UAbilityTask_PullTarget* pullTask = UAbilityTask_PullTarget::Create(this, "Pull Actor Task", Actor, gripController, 100, 10);
-	pullTask->Activate();
-	pullTask->OnSuccess.AddUObject(this, &UGravityGunAbility::OnActorPullFinished);
-	currentTask = pullTask;
+	AActor* foundActor = Data.Data[0]->GetActors()[0].Get();
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Start Pulling"));
+
+	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
+	{
+		UAbilityTask_PullTarget* pullTask = UAbilityTask_PullTarget::Create(this, "Pull Actor Task", foundActor, gripController, 100, 10);
+		pullTask->Activate();
+		pullTask->OnSuccess.AddUObject(this, &UGravityGunAbility::OnActorPullFinished);
+		currentTask = pullTask;
+	}
+
 }
 
-void UGravityGunAbility::OnActorPullFinished(AActor* Actor)
+void UGravityGunAbility::OnActorPullFinished(AActor* pulledActor)
 {
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
 	{
-		gripController->TryGrabActor(Actor);
+		gripController->TryGrabActor(pulledActor);
 	}
 
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false);
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
 }
 
 void UGravityGunAbility::SetGripControllerFromOwner()

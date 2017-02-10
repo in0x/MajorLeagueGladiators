@@ -14,6 +14,7 @@ AUsableItem::AUsableItem()
 	}
 
 	SetReplicates(true);
+	bReplicateMovement = true;
 }
 
 void AUsableItem::Use(AActor* User, TriggerType Type)
