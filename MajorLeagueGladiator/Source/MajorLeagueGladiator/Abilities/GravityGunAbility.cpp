@@ -86,13 +86,11 @@ void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHand
 	AActor* foundActor = Data.Data[0]->GetActors()[0].Get();
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Start Pulling"));
 
-	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
-	{
-		UAbilityTask_PullTarget* pullTask = UAbilityTask_PullTarget::Create(this, "Pull Actor Task", foundActor, gripController, 100, 10);
-		pullTask->Activate();
-		pullTask->OnSuccess.AddUObject(this, &UGravityGunAbility::OnActorPullFinished);
-		currentTask = pullTask;
-	}
+	//This gets spawned on server and client, if he started the ability so that he has a prediction	
+	UAbilityTask_PullTarget* pullTask = UAbilityTask_PullTarget::Create(this, "Pull Actor Task", foundActor, gripController, 100, 10);
+	pullTask->Activate();
+	pullTask->OnSuccess.AddUObject(this, &UGravityGunAbility::OnActorPullFinished);
+	currentTask = pullTask;
 
 }
 
