@@ -4,12 +4,26 @@
 #include "HitScanGunActor.h"
 #include "DamageTypes/PlayerDamage.h"
 
-AHitScanGunActor::AHitScanGunActor()
+namespace
 {
+	FBPActorGripInformation gripInfo;
+}
+
+AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	shotAudioComponent = ObjectInitializer.CreateDefaultSubobject<UAudioComponent>(this, TEXT("ShotAudioComponent"));
+	laserMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LaserMeshComponent"));
+	laserMesh->SetupAttachment(GetStaticMeshComponent(), FName("ProjectileSpawn"));
 }
 
 void AHitScanGunActor::BeginPlay()
 {
+	Super::BeginPlay();
+
 	auto mesh = GetStaticMeshComponent()->GetStaticMesh();
 	if (mesh)
 	{
@@ -24,7 +38,23 @@ void AHitScanGunActor::BeginPlay()
 
 void AHitScanGunActor::OnUsed()
 {
+	if (bApplyingRecoil) // Gun hasn't reset yet.
+		return;
+
 	shoot();
+	bApplyingRecoil = true;
+	shotAudioComponent->Play();
+}
+
+void AHitScanGunActor::OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) 
+{
+	grippingController = GrippingController;
+	gripInfo = GripInformation;
+}
+
+void AHitScanGunActor::OnGripRelease(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation& GripInformation) 
+{
+	grippingController = nullptr;
 }
 
 void AHitScanGunActor::shoot() 
@@ -58,6 +88,50 @@ void AHitScanGunActor::shoot()
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("shot"));
 	}
 }
+
+namespace
+{
+	float animTime = 0.1f;
+	float elapsedAnimTime = 0.f;
+	float recoilOrigin = 0.f;
+	float recoilTarget = -30.f;
+	TEnumAsByte<EBPVRResultSwitch::Type> result;
+}
+
+void AHitScanGunActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bApplyingRecoil)
+	{
+		elapsedAnimTime += DeltaTime;
+
+		auto recoil = FMath::Lerp(FVector(0, recoilOrigin, 0), FVector(0, recoilTarget, 0), elapsedAnimTime / animTime);
+
+		FTransform addTrafo;
+		addTrafo.AddToTranslation(recoil);
+
+		grippingController->SetGripAdditionTransform(gripInfo, result, addTrafo, true);
+
+		if (elapsedAnimTime >= animTime)
+		{
+			elapsedAnimTime = 0.f;
+
+			if (recoilTarget < 0) // Gun finished moving back
+			{
+				recoilOrigin = recoilTarget;
+				recoilTarget = 0.f;
+			}
+			else // Gun is back at original position 
+			{
+				recoilTarget = recoilOrigin;
+				recoilOrigin = 0.f;
+				bApplyingRecoil = false;
+			}
+		}
+	}
+}
+
 
 
 
