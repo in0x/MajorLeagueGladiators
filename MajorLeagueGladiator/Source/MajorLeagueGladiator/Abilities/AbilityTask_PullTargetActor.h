@@ -23,7 +23,7 @@ public:
 	TWeakObjectPtr<USceneComponent> EndLocationSceneComponent;
 
 	UPROPERTY()
-	TWeakObjectPtr<USceneComponent> TargetRootComponent;
+	TWeakObjectPtr<UPrimitiveComponent> TargetRootComponent;
 
 	FOnLocationReachedDelegate OnLocationReached;
 
