@@ -12,8 +12,6 @@
 #include "TextWidget.h"
 #include "DamageReceiverComponent.h"
 #include "AbilitySystemComponent.h"
-#include "GameplayAbilitySet.h"
-#include "Abilities/GravityGunAbility.h"
 #include "Abilities/MlgAbilitySet.h"
 
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
