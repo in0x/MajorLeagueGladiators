@@ -30,6 +30,10 @@ void UAbilityTask_PullTarget::Activate()
 {
 	spawnedActor->FinishSpawning(FTransform::Identity);
 	SetActorGravity_NetMulticast(targetActor.Get(), false);
+	if(UPrimitiveComponent* comp = Cast<UPrimitiveComponent>(targetActor->GetRootComponent()))
+	{
+		comp->MoveIgnoreActors.Add(spawnedActor->EndLocationSceneComponent->GetOwner());
+	}
 	
 }
 
@@ -38,9 +42,8 @@ void UAbilityTask_PullTarget::OnLocationReachedCallback()
 	spawnedActor->Destroy();
 	check(targetActor.IsValid())
 
-	OnSuccess.Broadcast(targetActor.Get());
-
 	EndTask();
+	OnSuccess.Broadcast(targetActor.Get());	
 }
 
 void UAbilityTask_PullTarget::OnDestroy(bool AbilityEnded)
@@ -49,6 +52,11 @@ void UAbilityTask_PullTarget::OnDestroy(bool AbilityEnded)
 	if (spawnedActor)
 	{
 		spawnedActor->Destroy();
+	}
+
+	if (UPrimitiveComponent* comp = Cast<UPrimitiveComponent>(targetActor->GetRootComponent()))
+	{
+		comp->ClearMoveIgnoreActors();
 	}
 
 	Super::OnDestroy(AbilityEnded);

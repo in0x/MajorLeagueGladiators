@@ -164,3 +164,29 @@ void UVRControllerComponent::GrabActorImpl(ActorGrabData GrabData)
 		GripActor(GrabData.pActorToGrip, actorTransform, false, FName(), GrabData.pIVRGrip->FreeGripType_Implementation());
 	}
 }
+
+bool UVRControllerComponent::LaunchActor(float Velocity, bool IgnoreWeight)
+{
+	if(GrippedActors.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Tried to launch Actor but not actor was present"));
+		return false;
+	}
+	AActor* grippedActor = CastChecked<AActor>(GrippedActors[0].GrippedObject);
+
+	
+
+	UPrimitiveComponent* rootComp = CastChecked<UPrimitiveComponent>(grippedActor->GetRootComponent());
+
+	//Temporarly disable Collision with this Actor so I don't shoot against myself
+	rootComp->MoveIgnoreActors.Add(GetOwner());
+
+	FTimerManager& timer = GetWorld()->GetTimerManager();
+	FTimerHandle timerhandle;
+
+	timer.SetTimer(timerhandle, rootComp, &UPrimitiveComponent::ClearMoveIgnoreActors, 0.5f, false);
+
+	DropGrip(GrippedActors[0], true);
+	rootComp->AddImpulse(GetForwardVector() * Velocity, NAME_None, IgnoreWeight);
+	return true;
+}

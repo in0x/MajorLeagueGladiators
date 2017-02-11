@@ -26,12 +26,19 @@ void AAbilityTask_PullTargetActor::Tick(float DeltaTime)
 
 	//const FVector newLocation = endLocation + dirVector * pullDistance;
 
-	//TargetRootComponent->SetWorldLocation(newLocation);
-	TargetRootComponent->MoveComponent(dirVector * pullDistance, TargetRootComponent->GetComponentQuat(), true);
+	UPrimitiveComponent* primitveRoot = Cast<UPrimitiveComponent>(TargetRootComponent.Get());
+	if(primitveRoot)
+	{
+		primitveRoot->SetAllPhysicsLinearVelocity(dirVector * PullSpeed);
+	}
+	else
+	{
+		TargetRootComponent->MoveComponent(dirVector * pullDistance, TargetRootComponent->GetComponentQuat(), true);
+	}
 
 	DrawDebugDirectionalArrow(TargetRootComponent->GetWorld(), targetLocation, endLocation, 1.0f, FColor::Green);
 
-	if (distance - pullDistance < MinDistanceThreshold)
+	if (distance - pullDistance < MinDistanceThreshold && Role >= ROLE_Authority)
 	{
 		OnLocationReached.ExecuteIfBound();
 	}
