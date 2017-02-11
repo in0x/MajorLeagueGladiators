@@ -14,7 +14,7 @@ UAbilityTask_PullTarget* UAbilityTask_PullTarget::Create(UObject* WorldContextOb
 
 	SpawnedActor->PullSpeed = PullSpeed;
 	SpawnedActor->EndLocationSceneComponent = EndLocation;	
-	SpawnedActor->TargetRootComponent = TargetActor->GetRootComponent();
+	SpawnedActor->TargetRootComponent = CastChecked<UPrimitiveComponent>(TargetActor->GetRootComponent());
 	SpawnedActor->MinDistanceThreshold = MinDistanceThreshold;
 
 	SpawnedActor->OnLocationReached.BindUObject(result, &UAbilityTask_PullTarget::OnLocationReachedCallback);

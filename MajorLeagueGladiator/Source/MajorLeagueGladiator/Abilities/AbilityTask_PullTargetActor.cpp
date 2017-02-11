@@ -6,6 +6,8 @@
 
 // Sets default values
 AAbilityTask_PullTargetActor::AAbilityTask_PullTargetActor()
+	: PullSpeed(500)
+	, MinDistanceThreshold(100)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -23,18 +25,8 @@ void AAbilityTask_PullTargetActor::Tick(float DeltaTime)
 	const FVector dirVector = distanceVec / distance;
 
 	const float pullDistance = PullSpeed * DeltaTime;
-
-	//const FVector newLocation = endLocation + dirVector * pullDistance;
-
-	UPrimitiveComponent* primitveRoot = Cast<UPrimitiveComponent>(TargetRootComponent.Get());
-	if(primitveRoot)
-	{
-		primitveRoot->SetAllPhysicsLinearVelocity(dirVector * PullSpeed);
-	}
-	else
-	{
-		TargetRootComponent->MoveComponent(dirVector * pullDistance, TargetRootComponent->GetComponentQuat(), true);
-	}
+	
+	TargetRootComponent->SetAllPhysicsLinearVelocity(dirVector * PullSpeed);
 
 	DrawDebugDirectionalArrow(TargetRootComponent->GetWorld(), targetLocation, endLocation, 1.0f, FColor::Green);
 
