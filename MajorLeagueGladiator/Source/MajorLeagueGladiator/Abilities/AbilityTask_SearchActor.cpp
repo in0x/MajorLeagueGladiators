@@ -4,20 +4,18 @@
 #include "AbilityTask_SearchActor.h"
 
 
-// Sets default values
+
 AAbilityTask_SearchActor::AAbilityTask_SearchActor()
+	: maxRange(1000)
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-// Called when the game starts or when spawned
 void AAbilityTask_SearchActor::BeginPlay()
 {
 	Super::BeginPlay();	
 }
 
-// Called every frame
 void AAbilityTask_SearchActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

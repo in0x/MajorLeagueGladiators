@@ -30,11 +30,9 @@ void UAbilityTask_PullTarget::Activate()
 {
 	spawnedActor->FinishSpawning(FTransform::Identity);
 	SetActorGravity_NetMulticast(targetActor.Get(), false);
-	if(UPrimitiveComponent* comp = Cast<UPrimitiveComponent>(targetActor->GetRootComponent()))
-	{
-		comp->MoveIgnoreActors.Add(spawnedActor->EndLocationSceneComponent->GetOwner());
-	}
-	
+
+	UPrimitiveComponent* rootComponent = CastChecked<UPrimitiveComponent>(targetActor->GetRootComponent());	
+	rootComponent->MoveIgnoreActors.Add(spawnedActor->EndLocationSceneComponent->GetOwner());	
 }
 
 void UAbilityTask_PullTarget::OnLocationReachedCallback()
@@ -54,19 +52,15 @@ void UAbilityTask_PullTarget::OnDestroy(bool AbilityEnded)
 		spawnedActor->Destroy();
 	}
 
-	if (UPrimitiveComponent* comp = Cast<UPrimitiveComponent>(targetActor->GetRootComponent()))
-	{
-		comp->ClearMoveIgnoreActors();
-	}
+	UPrimitiveComponent* rootComponent = CastChecked<UPrimitiveComponent>(targetActor->GetRootComponent());	
+	rootComponent->ClearMoveIgnoreActors();
+	
 
 	Super::OnDestroy(AbilityEnded);
 }
 
 void UAbilityTask_PullTarget::SetActorGravity_NetMulticast_Implementation(AActor* Actor, bool GravityEnabled)
 {
-	UPrimitiveComponent* rootComp = Cast<UPrimitiveComponent>(Actor->GetRootComponent());
-	if (rootComp)
-	{
-		rootComp->SetEnableGravity(GravityEnabled);
-	}
+	UPrimitiveComponent* rootComponent = CastChecked<UPrimitiveComponent>(Actor->GetRootComponent());
+	rootComponent->SetEnableGravity(GravityEnabled);
 }

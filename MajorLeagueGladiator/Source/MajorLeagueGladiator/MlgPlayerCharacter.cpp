@@ -129,14 +129,14 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	// Though we might move it to a different place
 	abilitySystemComponent->RefreshAbilityActorInfo();
 
-	const UMlgAbilitySet* AbilitySet = GetOrLoadAbilitySet();
-	if (!AbilitySet)
+	const UMlgAbilitySet* abilitySet = GetOrLoadAbilitySet();
+	if (!abilitySet)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Ability Set Is null. GiveAbilities has not been called."));
 	}
 	else
 	{
-		AbilitySet->BindAbilitiesToInput(PlayerInputComponent, abilitySystemComponent);
+		abilitySet->BindAbilitiesToInput(PlayerInputComponent, abilitySystemComponent);
 	}
 	
 }
@@ -148,10 +148,10 @@ void AMlgPlayerCharacter::PossessedBy(AController* NewController)
 	if (Role >= ROLE_Authority)
 	{
 		
-		const UMlgAbilitySet* AbilitySet = GetOrLoadAbilitySet();
-		if(AbilitySet)
+		const UMlgAbilitySet* abilitySet = GetOrLoadAbilitySet();
+		if(abilitySet)
 		{
-			AbilitySet->GiveAbilities(abilitySystemComponent);
+			abilitySet->GiveAbilities(abilitySystemComponent);
 		}
 		else
 		{
@@ -163,12 +163,12 @@ void AMlgPlayerCharacter::PossessedBy(AController* NewController)
 
 const UMlgAbilitySet* AMlgPlayerCharacter::GetOrLoadAbilitySet()
 {
-	if(!abilitySet)
+	if(!cachedAbilitySet)
 	{
-		abilitySet = abilitySetClass.LoadSynchronous()->GetDefaultObject<UMlgAbilitySet>();
+		cachedAbilitySet = abilitySetClass.LoadSynchronous()->GetDefaultObject<UMlgAbilitySet>();
 	}
 	
-	return abilitySet;
+	return cachedAbilitySet;
 }
 
 void AMlgPlayerCharacter::BecomeViewTarget(APlayerController* PC) 
