@@ -66,23 +66,20 @@ void UGravityGunAbility::LaunchGrippedActor()
 {
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
 	{
-		AActor* actorToLaunch = CastChecked<AActor>(gripController->GrippedActors[0].GrippedObject);
-		gripController->DropAllGrips();
-
-		UPrimitiveComponent* rootComp = Cast<UPrimitiveComponent>(actorToLaunch->GetRootComponent());
-		if (rootComp)
-		{
-			//should also probably ignore the player char so it doesn't bounce of it's own hands
-			bool ignoreMass = true;
-			rootComp->AddImpulse(rootComp->GetForwardVector() * 1000, NAME_None, ignoreMass);
-		}
-		
+		gripController->LaunchActor(1000, true);		
 	}
+
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
 }
 
 void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
+	if(GetOwningActorFromActorInfo()->Role < ROLE_Authority)
+	{
+		currentTask.Reset();
+		return;
+	}
+
 	AActor* foundActor = Data.Data[0]->GetActors()[0].Get();
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Start Pulling"));
 

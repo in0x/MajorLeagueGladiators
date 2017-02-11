@@ -22,8 +22,7 @@ public:
 
 	bool TryGrabActor(AActor* Actor);
 
-	void SetGripDistance(float NewDistance, int GripIndex = 0);
-	float GetGripDistance(int GripIndex = 0) const;
+	bool LaunchActor(float Velocity, bool IgnoreWeight);
 private:
 
 	struct ActorGrabData
