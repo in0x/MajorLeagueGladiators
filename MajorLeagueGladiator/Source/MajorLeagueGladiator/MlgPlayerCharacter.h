@@ -12,6 +12,7 @@ class UWidgetComponent;
 class UDamageReceiverComponent;
 class UAbilitySystemComponent;
 class UGameplayAbilitySet;
+class UMlgAbilitySet;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgPlayerCharacter : public AVRSimpleCharacter, public IAbilitySystemInterface
@@ -36,8 +37,6 @@ public:
 	void OnSideGripButtonLeft();
 	void OnSideGripButtonRight();
 
-	void OnTestInputButton1();
-	void OnTestInputButton2();
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
 
@@ -77,8 +76,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	UAbilitySystemComponent* abilitySystemComponent;
 
-	UPROPERTY(EditAnywhere, Instanced)
-	UGameplayAbilitySet* gameplayAbilitySet;
+	UPROPERTY(EditAnywhere)
+	TAssetSubclassOf<UMlgAbilitySet> abilitySetClass;
+
+	//Store ability Set reference
+	UPROPERTY(Transient)
+	const UMlgAbilitySet* abilitySet;
+
+	const UMlgAbilitySet* GetOrLoadAbilitySet();
 
 	UFUNCTION(Server, WithValidation, reliable)
 	void leftHandGrab_Server();
