@@ -39,5 +39,5 @@ private:
 
 	bool IsValidActor(const AActor& Actor) const;
 	
-	FGameplayAbilityTargetDataHandle MakeDataHandle(const FHitResult& HitResult);
+	static FGameplayAbilityTargetDataHandle MakeDataHandle(const FHitResult& HitResult);
 };

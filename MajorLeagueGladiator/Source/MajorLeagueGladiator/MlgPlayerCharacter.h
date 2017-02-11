@@ -79,9 +79,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	TAssetSubclassOf<UMlgAbilitySet> abilitySetClass;
 
-	//Store ability Set reference
 	UPROPERTY(Transient)
-	const UMlgAbilitySet* abilitySet;
+	const UMlgAbilitySet* cachedAbilitySet;
 
 	const UMlgAbilitySet* GetOrLoadAbilitySet();
 
