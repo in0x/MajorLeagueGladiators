@@ -14,6 +14,7 @@
 #include "AbilitySystemComponent.h"
 #include "GameplayAbilitySet.h"
 #include "Abilities/GravityGunAbility.h"
+#include "Abilities/MlgAbilitySet.h"
 
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
@@ -55,15 +56,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	abilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAbilitySystemComponent>(this, TEXT("GameplayTasks"));
 	abilitySystemComponent->SetIsReplicated(true);
 
-	//Change to blueprint to add own abilities
-	gameplayAbilitySet = ObjectInitializer.CreateDefaultSubobject<UGameplayAbilitySet>(this, TEXT("GameplayAbilitySet"));
-
-	// Serves as an example can be removed without consequences (unless this is actually used)
-	// We might want to have a different way on how to add abilities in the future
-	FGameplayAbilityBindInfo mockAbility;
-	mockAbility.Command = EGameplayAbilityInputBinds::Ability1;
-	mockAbility.GameplayAbilityClass = UGravityGunAbility::StaticClass();
-	gameplayAbilitySet->Abilities.Add(mockAbility);
+	abilitySetClass = UMlgAbilitySet::StaticClass();
 }
 
 void AMlgPlayerCharacter::BeginPlay()
@@ -133,45 +126,20 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
 
-	//Binds skill confirmation and canceling, but not skills themselves
-	abilitySystemComponent->BindToInputComponent(PlayerInputComponent);
 
 	// SUPER IMPORTANT, must be called, when playercontroller status changes (in this case we are sure that we now possess a Controller so its different than before)
 	// Though we might move it to a different place
 	abilitySystemComponent->RefreshAbilityActorInfo();
 
-	if(gameplayAbilitySet == nullptr)
+	const UMlgAbilitySet* AbilitySet = GetOrLoadAbilitySet();
+	if (!AbilitySet)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("gameplayAbilitySet is null"));
-		return;
+		UE_LOG(LogTemp, Warning, TEXT("Ability Set Is null. GiveAbilities has not been called."));
 	}
-
-	//Bind each Skill induvidually
-	for (const FGameplayAbilityBindInfo& BindInfo : gameplayAbilitySet->Abilities)
+	else
 	{
-		if (!BindInfo.GameplayAbilityClass)
-		{
-			UE_LOG(LogAbilitySystem, Warning, TEXT("GameplayAbilityClass %d not set"), (int32)BindInfo.Command);
-			continue;
-		}
-
-		FGameplayAbilitySpec spec(
-			BindInfo.GameplayAbilityClass->GetDefaultObject<UGameplayAbility>(), 1, (int32)BindInfo.Command);
-		
-		int32 AbilityID = (int32)BindInfo.Command;
-
-		FGameplayAbiliyInputBinds inputBinds(
-			FString::Printf(TEXT("ConfirmAbility%d"), AbilityID),
-			FString::Printf(TEXT("CancelAbility%d"), AbilityID),
-			"EGameplayAbilityInputBinds",
-			AbilityID, 
-			AbilityID
-			);
-
-		abilitySystemComponent->BindAbilityActivationToInputComponent(PlayerInputComponent, inputBinds);		
+		AbilitySet->BindAbilitiesToInput(PlayerInputComponent, abilitySystemComponent);
 	}
-
-	
 	
 }
 
@@ -181,8 +149,28 @@ void AMlgPlayerCharacter::PossessedBy(AController* NewController)
 	abilitySystemComponent->RefreshAbilityActorInfo();
 	if (Role >= ROLE_Authority)
 	{
-		gameplayAbilitySet->GiveAbilities(abilitySystemComponent);
+		
+		const UMlgAbilitySet* AbilitySet = GetOrLoadAbilitySet();
+		if(AbilitySet)
+		{
+			AbilitySet->GiveAbilities(abilitySystemComponent);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Ability Set Is null. GiveAbilities has not been called."));
+		}
+		
 	}
+}
+
+const UMlgAbilitySet* AMlgPlayerCharacter::GetOrLoadAbilitySet()
+{
+	if(!abilitySet)
+	{
+		abilitySet = abilitySetClass.LoadSynchronous()->GetDefaultObject<UMlgAbilitySet>();
+	}
+	
+	return abilitySet;
 }
 
 void AMlgPlayerCharacter::BecomeViewTarget(APlayerController* PC) 
