@@ -19,7 +19,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnUsed() override;
 	virtual void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation) override;
-	virtual void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
@@ -54,7 +53,7 @@ private:
 
 	// How far the gun should move back after firing.
 	UPROPERTY(EditAnywhere)
-	float recoilTarget;
+	float recoilDistance;
 
 	UStaticMeshSocket* shotOriginSocket;
 	
@@ -62,6 +61,5 @@ private:
 	
 	FBPActorGripInformation gripInfo;
 
-	UPROPERTY(Replicated)
 	bool bApplyingRecoil;
 };

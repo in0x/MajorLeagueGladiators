@@ -10,7 +10,7 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	, recoilAnimForwardDuration(0.5f)
 	, elapsedAnimTime(0.f)
 	, recoilOrigin(0.f)
-	, recoilTarget(-30.f)
+	, recoilDistance(-30.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -72,11 +72,6 @@ void AHitScanGunActor::OnGrip(UGripMotionControllerComponent* GrippingController
 	gripInfo = GripInformation;
 }
 
-void AHitScanGunActor::OnGripRelease(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation& GripInformation) 
-{
-	grippingController = nullptr;
-}
-
 void AHitScanGunActor::shoot() 
 {
 	FTransform trafo;
@@ -100,8 +95,7 @@ void AHitScanGunActor::shoot()
 	auto* world = GetWorld();
 	
 	world->LineTraceSingleByObjectType(result, start, end, queryTypes, CollisionParams);
-	DrawDebugLine(world, start, end, FColor::Red);
-
+	
 	if (result.bBlockingHit)
 	{
 		UGameplayStatics::ApplyDamage(result.GetActor(), damage, nullptr, this, UPlayerDamage::StaticClass());
@@ -117,7 +111,7 @@ void AHitScanGunActor::Tick(float DeltaTime)
 	{
 		elapsedAnimTime += DeltaTime;
 
-		auto recoil = FMath::Lerp(FVector(0, recoilOrigin, 0), FVector(0, recoilTarget, 0), elapsedAnimTime / currentAnimDuration);
+		auto recoil = FMath::Lerp(FVector(0, recoilOrigin, 0), FVector(0, recoilDistance, 0), elapsedAnimTime / currentAnimDuration);
 
 		TEnumAsByte<EBPVRResultSwitch::Type> result;
 		FTransform addTrafo;
@@ -129,15 +123,15 @@ void AHitScanGunActor::Tick(float DeltaTime)
 		{
 			elapsedAnimTime = 0.f;
 
-			if (recoilTarget < 0) // Gun finished moving back
+			if (recoilDistance < 0) // Gun finished moving back
 			{
-				recoilOrigin = recoilTarget;
-				recoilTarget = 0.f;
+				recoilOrigin = recoilDistance;
+				recoilDistance = 0.f;
 				currentAnimDuration = recoilAnimForwardDuration;
 			}
 			else // Gun is back at original position 
 			{
-				recoilTarget = recoilOrigin;
+				recoilDistance = recoilOrigin;
 				recoilOrigin = 0.f;
 				bApplyingRecoil = false;
 			}
