@@ -28,11 +28,6 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	laserMesh->SetupAttachment(GetStaticMeshComponent(), FName("ProjectileSpawn"));
 }
 
-void AHitScanGunActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-}
-
 void AHitScanGunActor::BeginPlay()
 {
 	Super::BeginPlay();
