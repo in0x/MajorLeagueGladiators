@@ -19,8 +19,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnUsed() override;
 	virtual void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation) override;
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
+	
 private:
 	void shoot();
 
