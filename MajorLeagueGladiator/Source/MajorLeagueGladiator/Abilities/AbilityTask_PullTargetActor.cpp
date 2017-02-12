@@ -22,18 +22,17 @@ void AAbilityTask_PullTargetActor::Tick(float DeltaTime)
 
 	const FVector distanceVec = endLocation - targetLocation;
 	const float distance = distanceVec.Size();
-	const FVector dirVector = distanceVec / distance;
 
-	const float pullDistance = PullSpeed * DeltaTime;
-	
-	TargetRootComponent->SetAllPhysicsLinearVelocity(dirVector * PullSpeed);
-
-	DrawDebugDirectionalArrow(TargetRootComponent->GetWorld(), targetLocation, endLocation, 1.0f, FColor::Green);
-
-	if (distance - pullDistance < MinDistanceThreshold && Role >= ROLE_Authority)
+	if (distance < MinDistanceThreshold && Role >= ROLE_Authority)
 	{
 		OnLocationReached.ExecuteIfBound();
 	}
+	else
+	{
+		const FVector dirVector = distanceVec / distance;
+		TargetRootComponent->SetAllPhysicsLinearVelocity(dirVector * PullSpeed);
 
+		DrawDebugDirectionalArrow(TargetRootComponent->GetWorld(), targetLocation, endLocation, 1.0f, FColor::Green);
+	}
 }
 

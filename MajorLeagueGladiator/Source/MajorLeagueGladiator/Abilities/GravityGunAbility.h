@@ -51,6 +51,4 @@ private:
 
 	UPROPERTY()
 	UVRControllerComponent* gripController;
-
-
 };

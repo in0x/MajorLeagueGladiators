@@ -3,17 +3,10 @@
 #include "MajorLeagueGladiator.h"
 #include "AbilityTask_SearchActor.h"
 
-
-
 AAbilityTask_SearchActor::AAbilityTask_SearchActor()
-	: maxRange(1000)
+	: MaxRange(1000)
 {
 	PrimaryActorTick.bCanEverTick = true;
-}
-
-void AAbilityTask_SearchActor::BeginPlay()
-{
-	Super::BeginPlay();	
 }
 
 void AAbilityTask_SearchActor::Tick(float DeltaTime)
@@ -21,8 +14,8 @@ void AAbilityTask_SearchActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	const FVector direction = TargetingSceneComponent->GetForwardVector();
-	const FVector location = TargetingSceneComponent->GetComponentLocation();
-	const FVector end = location + direction * maxRange;
+	const FVector rayCastBegin = TargetingSceneComponent->GetComponentLocation();
+	const FVector rayCastEnd = rayCastBegin + direction * MaxRange;
 
 	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic),
@@ -36,17 +29,16 @@ void AAbilityTask_SearchActor::Tick(float DeltaTime)
 
 	UWorld* world = GetWorld();
 
-	world->LineTraceSingleByObjectType(result, location, end, queryTypes, CollisionParams);
-	DrawDebugLine(world, location, end, FColor::Green);
+	world->LineTraceSingleByObjectType(result, rayCastBegin, rayCastEnd, queryTypes, CollisionParams);
+	DrawDebugLine(world, rayCastBegin, rayCastEnd, FColor::Green);
 	
 
-	if (!result.Actor.IsValid() || !IsValidActor(*result.Actor))
+	if (!result.Actor.IsValid() || !IsPullable(*result.Actor))
 	{
 		return;
 	}
 
 	TargetDataReadyDelegate.Broadcast(MakeDataHandle(result));
-
 }
 
 bool AAbilityTask_SearchActor::IsConfirmTargetingAllowed()
@@ -54,7 +46,7 @@ bool AAbilityTask_SearchActor::IsConfirmTargetingAllowed()
 	return false;
 }
 
-bool AAbilityTask_SearchActor::IsValidActor(const AActor& Actor) const
+bool AAbilityTask_SearchActor::IsPullable(const AActor& Actor) const
 {
 	return Actor.Implements<UVRGripInterface>();
 }
