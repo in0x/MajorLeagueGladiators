@@ -22,6 +22,7 @@ bool UVRControllerComponent::GrabNearestActor(const USphereComponent& GrabSphere
 	}
 
 	GrabActorImpl(grabData);
+	
 	return true;
 }
 
