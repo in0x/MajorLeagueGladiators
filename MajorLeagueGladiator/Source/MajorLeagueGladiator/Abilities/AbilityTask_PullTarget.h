@@ -30,6 +30,5 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<AActor> targetActor;
 
-	void OnLocationReachedCallback();
-	
+	void OnLocationReachedCallback();	
 };

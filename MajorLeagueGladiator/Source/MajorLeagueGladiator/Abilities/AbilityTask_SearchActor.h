@@ -2,13 +2,8 @@
 
 #pragma once
 
-
 #include "GameplayAbilityTargetActor.h"
-
-
 #include "AbilityTask_SearchActor.generated.h"
-
-DECLARE_DELEGATE_OneParam(FOnActorFoundDelegate, AActor*);
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AAbilityTask_SearchActor : public AGameplayAbilityTargetActor
@@ -18,13 +13,9 @@ class MAJORLEAGUEGLADIATOR_API AAbilityTask_SearchActor : public AGameplayAbilit
 public:	
 	AAbilityTask_SearchActor();
 
-	virtual void BeginPlay() override;
-	
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual bool IsConfirmTargetingAllowed() override;
-
-	FOnActorFoundDelegate OnActorFound;
 
 	UPROPERTY()
 	TWeakObjectPtr<USceneComponent> TargetingSceneComponent;
@@ -33,11 +24,11 @@ public:
 	TArray<TWeakObjectPtr<AActor>> IgnoredActors;
 
 	UPROPERTY()
-	float maxRange;
+	float MaxRange;
 
 private:
 
-	bool IsValidActor(const AActor& Actor) const;
+	bool IsPullable(const AActor& Actor) const;
 	
 	static FGameplayAbilityTargetDataHandle MakeDataHandle(const FHitResult& HitResult);
 };

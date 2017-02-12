@@ -13,10 +13,8 @@ class MAJORLEAGUEGLADIATOR_API AAbilityTask_PullTargetActor : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AAbilityTask_PullTargetActor();
 
-	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY()

@@ -21,18 +21,13 @@ void UMlgAbilitySet::GiveAbilities(UAbilitySystemComponent* AbilitySystemCompone
 	
 	for (const FAbilityBindInfo& BindInfo : Abilities)
 	{
-		if (BindInfo.GameplayAbilityClass)
-		{	
 
-			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(
-				BindInfo.GameplayAbilityClass->GetDefaultObject<UGameplayAbility>(),
-				LEVEL_1,
-				static_cast<int32>(BindInfo.Command)));
-		}
-		else
-		{			
-			UE_LOG(LogAbilitySystem, Warning, TEXT("GameplayAbilityClass %d not set"), static_cast<int32>(BindInfo.Command));						
-		}
+		checkf (BindInfo.GameplayAbilityClass, TEXT("GameplayAbilityClass %d not set"), static_cast<int32>(BindInfo.Command))			
+
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(
+			BindInfo.GameplayAbilityClass->GetDefaultObject<UGameplayAbility>(),
+			LEVEL_1,
+			static_cast<int32>(BindInfo.Command)));		
 	}
 }
 
