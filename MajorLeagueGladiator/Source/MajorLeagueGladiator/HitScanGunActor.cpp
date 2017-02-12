@@ -6,6 +6,11 @@
 
 AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
+	, recoilAnimBackDuration(0.5f)
+	, recoilAnimForwardDuration(0.5f)
+	, elapsedAnimTime(0.f)
+	, recoilOrigin(0.f)
+	, recoilTarget(-30.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -51,10 +56,10 @@ void AHitScanGunActor::OnUsed()
 
 	shoot();
 
-	playerShotEffect_NetMulticast();
+	playShotEffect_NetMulticast();
 }
 
-void AHitScanGunActor::playerShotEffect_NetMulticast_Implementation()
+void AHitScanGunActor::playShotEffect_NetMulticast_Implementation()
 {
 	currentAnimDuration = recoilAnimBackDuration;
 	bApplyingRecoil = true;
