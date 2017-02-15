@@ -11,6 +11,11 @@ class MAJORLEAGUEGLADIATOR_API AMlgPlayerController : public AVRPlayerController
 	GENERATED_BODY()
 public:
 	AMlgPlayerController();
+
+	UForceFeedbackEffect* GetRumbleShortLeft();
+	UForceFeedbackEffect* GetRumbleShortRight();
+
+private:
 	UForceFeedbackEffect* rumbleShortLeft;
 	UForceFeedbackEffect* rumbleShortRight;
 };

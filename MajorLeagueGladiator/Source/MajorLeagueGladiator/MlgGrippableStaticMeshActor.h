@@ -16,13 +16,15 @@ class MAJORLEAGUEGLADIATOR_API AMlgGrippableStaticMeshActor : public AGrippableS
 	GENERATED_BODY()
 	
 public:
-	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
-	void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation);
+	AMlgGrippableStaticMeshActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
-	void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation);
+	void OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation);
 
-	AMlgPlayerController* getMlgPlayerController();
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
+	void OnGripRelease(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation& GripInformation);
+
+	AMlgPlayerController* GetMlgPlayerController();
 private:
 	AMlgPlayerController* currentGrippedController;
 };

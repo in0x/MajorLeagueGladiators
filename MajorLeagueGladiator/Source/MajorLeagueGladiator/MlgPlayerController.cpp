@@ -12,3 +12,12 @@ AMlgPlayerController::AMlgPlayerController()
 	rumbleShortRight = helperShortRight.Object;
 }
 
+UForceFeedbackEffect* AMlgPlayerController::GetRumbleShortLeft()
+{
+	return rumbleShortLeft;
+}
+
+UForceFeedbackEffect* AMlgPlayerController::GetRumbleShortRight()
+{
+	return rumbleShortRight;
+}
