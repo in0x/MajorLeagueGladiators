@@ -67,10 +67,10 @@ void AGunActor::Tick(float DeltaTime)
 		checkf(projectile, TEXT("AGunProjectile spawned by AGunActor was null"));
 		projectile->GetStaticMeshComponent()->AddImpulse(GetActorRightVector() * projectileVelAccel);
 
-		auto* controller = this->getMlgPlayerController();
+		auto* controller = this->GetMlgPlayerController();
 		if (controller != nullptr) 
 		{
-			controller->ClientPlayForceFeedback(controller->rumbleShortRight, false, FName("rumbleRight"));
+			controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
 		}
 	}
 }

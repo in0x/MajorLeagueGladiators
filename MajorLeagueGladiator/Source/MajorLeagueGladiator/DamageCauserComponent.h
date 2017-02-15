@@ -24,6 +24,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Damage")
 	TSubclassOf<UDamageType> damageType;
 
+	void doRumbleRight(AActor* OtherActor);
+
 protected:
 	virtual bool CanDoDamage();
 	virtual float CalculateDamage();

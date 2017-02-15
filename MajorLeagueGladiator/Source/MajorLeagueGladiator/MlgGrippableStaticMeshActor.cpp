@@ -4,20 +4,22 @@
 #include "MlgGrippableStaticMeshActor.h"
 #include "VRControllerComponent.h"
 
-void AMlgGrippableStaticMeshActor::OnGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation)
+AMlgGrippableStaticMeshActor::AMlgGrippableStaticMeshActor(const FObjectInitializer& ObjectInitializer) {
+	bReplicateMovement = true;
+}
+
+void AMlgGrippableStaticMeshActor::OnGrip_Implementation(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation)
 {
 	UVRControllerComponent* comp = Cast<UVRControllerComponent>(GrippingController);
-	currentGrippedController = comp->getMlgPlayerController();
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Gripped Lucas"));
+	currentGrippedController = comp->GetMlgPlayerController();
 }
 
-void AMlgGrippableStaticMeshActor::OnGripRelease_Implementation(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation)
+void AMlgGrippableStaticMeshActor::OnGripRelease_Implementation(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation& GripInformation)
 {
 	currentGrippedController = nullptr;
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Releasesd Lucas"));
 }
 
-AMlgPlayerController* AMlgGrippableStaticMeshActor::getMlgPlayerController()
+AMlgPlayerController* AMlgGrippableStaticMeshActor::GetMlgPlayerController()
 {
 	return currentGrippedController;
 }

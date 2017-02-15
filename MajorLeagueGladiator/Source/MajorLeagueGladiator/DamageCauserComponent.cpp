@@ -23,26 +23,7 @@ void UDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* Oth
 	{
 		float damage = CalculateDamage();
 		UGameplayStatics::ApplyDamage(OtherActor, damage, nullptr, OverlappedActor, damageType);
-		
-		// rumble code
-		AMlgGrippableStaticMeshActor* owner = Cast<AMlgGrippableStaticMeshActor>(GetOwner());
-		if (owner != nullptr) 
-		{
-			AMlgPlayerController* controller = owner->getMlgPlayerController();
-			if (controller != nullptr) 
-			{
-				//check if hit object is part of myself, then we do not rumble
-				APawn* otherPlayer = Cast<APawn>(OtherActor);
-				if (otherPlayer != nullptr)
-				{
-					if (otherPlayer->Controller == controller)
-					{
-						return;
-					}
-				}
-				controller->ClientPlayForceFeedback(controller->rumbleShortRight, false, FName("rumbleRight"));
-			}
-		}
+		doRumbleRight(OtherActor);
 	}
 }
 
@@ -54,4 +35,26 @@ bool UDamageCauserComponent::CanDoDamage()
 float UDamageCauserComponent::CalculateDamage()
 {
 	return damageAppliedOnHit;
+}
+
+void UDamageCauserComponent::doRumbleRight(AActor* OtherActor)
+{
+	AMlgGrippableStaticMeshActor* owner = Cast<AMlgGrippableStaticMeshActor>(GetOwner());
+	if (owner != nullptr)
+	{
+		AMlgPlayerController* controller = owner->GetMlgPlayerController();
+		if (controller != nullptr)
+		{
+			//check if hit object is part of myself, then we do not rumble
+			APawn* otherPlayer = Cast<APawn>(OtherActor);
+			if (otherPlayer != nullptr)
+			{
+				if (otherPlayer->Controller == controller)
+				{
+					return;
+				}
+			}
+			controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
+		}
+	}
 }

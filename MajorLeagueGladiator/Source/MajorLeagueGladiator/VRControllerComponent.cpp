@@ -113,7 +113,7 @@ void UVRControllerComponent::EndUseGrippedActors()
 	}
 }
 
-AMlgPlayerController* UVRControllerComponent::getMlgPlayerController()
+AMlgPlayerController* UVRControllerComponent::GetMlgPlayerController()
 {
 	return CastChecked<AMlgPlayerController>(CastChecked<APawn>(GetOwner())->Controller);
 }
