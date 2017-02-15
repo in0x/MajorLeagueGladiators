@@ -43,7 +43,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	rightGrabSphere->SetupAttachment(RightMotionController);
 
 	hudHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
-	hudHealth->SetupAttachment(VRReplicatedCamera);
+	hudHealth->SetupAttachment(leftMesh, FName(TEXT("Touch")));
 	
 	hudTeleportCD = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HudTeleportCD"));
 	hudTeleportCD->SetupAttachment(leftMesh, FName(TEXT("Touch"), EFindName::FNAME_Find));
