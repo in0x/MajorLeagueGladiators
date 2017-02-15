@@ -18,11 +18,9 @@ class MAJORLEAGUEGLADIATOR_API AMlgGrippableStaticMeshActor : public AGrippableS
 public:
 	AMlgGrippableStaticMeshActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
-	void OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation);
+	virtual void OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) override;
 
-	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
-	void OnGripRelease(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation& GripInformation);
+	virtual void OnGripRelease(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation& GripInformation) override;
 
 	AMlgPlayerController* GetMlgPlayerController();
 private:
