@@ -8,14 +8,16 @@ AMlgGrippableStaticMeshActor::AMlgGrippableStaticMeshActor(const FObjectInitiali
 	bReplicateMovement = true;
 }
 
-void AMlgGrippableStaticMeshActor::OnGrip_Implementation(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation)
+void AMlgGrippableStaticMeshActor::OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation)
 {
+	Super::OnGrip(GrippingController, GripInformation);
 	UVRControllerComponent* comp = Cast<UVRControllerComponent>(GrippingController);
 	currentGrippedController = comp->GetMlgPlayerController();
 }
 
-void AMlgGrippableStaticMeshActor::OnGripRelease_Implementation(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation& GripInformation)
+void AMlgGrippableStaticMeshActor::OnGripRelease(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation& GripInformation)
 {
+	Super::OnGripRelease(ReleasingController, GripInformation);
 	currentGrippedController = nullptr;
 }
 
