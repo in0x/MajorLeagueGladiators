@@ -116,7 +116,10 @@ void UVRControllerComponent::EndUseGrippedActors()
 
 AMlgPlayerController* UVRControllerComponent::GetMlgPlayerController()
 {
-	return CastChecked<AMlgPlayerController>(CastChecked<APawn>(GetOwner())->Controller);
+	AActor* owner = GetOwner();
+	APawn* ownerPawn = CastChecked<APawn>(owner);
+	AController* controller = ownerPawn->GetController();
+	return CastChecked<AMlgPlayerController>(controller,ECastCheckedType::NullAllowed);
 }
 
 
@@ -172,7 +175,7 @@ void UVRControllerComponent::GrabActorImpl(ActorGrabData GrabData)
 	}
 }
 
-bool UVRControllerComponent::LaunchActor(float Velocity, bool IgnoreWeight)
+bool UVRControllerComponent::LaunchActor(FVector Velocity, bool IgnoreWeight)
 {
 	if(GrippedActors.Num() == 0)
 	{
@@ -193,6 +196,6 @@ bool UVRControllerComponent::LaunchActor(float Velocity, bool IgnoreWeight)
 	timer.SetTimer(timerhandle, rootComp, &UPrimitiveComponent::ClearMoveIgnoreActors, TimeUntilClearMoveIgnore, false);
 
 	DropGrip(GrippedActors[0], true);
-	rootComp->AddImpulse(GetForwardVector() * Velocity, NAME_None, IgnoreWeight);
+	rootComp->AddImpulse(Velocity, NAME_None, IgnoreWeight);
 	return true;
 }

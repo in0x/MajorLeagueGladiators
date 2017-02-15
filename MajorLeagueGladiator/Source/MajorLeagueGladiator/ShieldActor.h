@@ -12,7 +12,8 @@ UCLASS()
 class MAJORLEAGUEGLADIATOR_API AShieldActor : public AMlgGrippableStaticMeshActor
 {
 	GENERATED_BODY()
-	
+public:
+	AShieldActor();
 	
 	
 	

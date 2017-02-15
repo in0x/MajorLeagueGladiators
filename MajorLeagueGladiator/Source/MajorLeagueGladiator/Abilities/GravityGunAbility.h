@@ -51,4 +51,7 @@ private:
 
 	UPROPERTY()
 	UVRControllerComponent* gripController;
+
+	UPROPERTY()
+	UMeshComponent* gripControllerMesh;
 };

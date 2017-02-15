@@ -47,6 +47,7 @@ void UShieldAbility::PushAwayCloseActors()
 
 	searchActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
 	searchActor->StartLocation.SourceComponent = gripControllerMesh;
+	searchActor->StartLocation.SourceSocketName = "Aim";
 
 	searchActor->SetHalfExtent({ 100,100,100 });
 	searchActor->LocationOffsetFromPositon = { 100,0,0 };
@@ -82,8 +83,19 @@ void UShieldAbility::SpawnShield()
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority && shieldActorClass)
 	{
 		FActorSpawnParameters spawnParameters;
-		shieldActor = GetWorld()->SpawnActor<AShieldActor>(shieldActorClass, GetOwningActorFromActorInfo()->GetTransform());
-		gripController->TryGrabActor(shieldActor);
+		shieldActor = GetWorld()->SpawnActor<AShieldActor>(shieldActorClass, GetOwningActorFromActorInfo()->GetTransform());		
+		
+		FTransform gripTransform = gripControllerMesh->GetSocketTransform("Aim");
+		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Yellow, TEXT("shield"));
+		gripController->GripActor(shieldActor, 
+			gripTransform,
+			false,
+			"Ability",
+			EGripCollisionType::InteractiveCollisionWithPhysics,
+			EGripLateUpdateSettings::NotWhenCollidingOrDoubleGripping,
+			EGripMovementReplicationSettings::ForceClientSideMovement,
+			1500.0f * 10,
+			200.0f);
 	}
 }
 
