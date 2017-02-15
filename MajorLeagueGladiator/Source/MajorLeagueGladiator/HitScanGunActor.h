@@ -26,8 +26,8 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void playShotEffect_NetMulticast();
 
-	UPROPERTY(EditAnywhere)
-	UChildActorComponent* boltAction;
+	//UPROPERTY(EditAnywhere)
+	//UChildActorComponent* boltAction;
 
 	UPROPERTY(EditAnywhere)
 	UAudioComponent* shotAudioComponent;
