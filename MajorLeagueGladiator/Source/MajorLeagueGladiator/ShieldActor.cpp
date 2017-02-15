@@ -3,9 +3,6 @@
 #include "MajorLeagueGladiator.h"
 #include "ShieldActor.h"
 
-
-
-
 AShieldActor::AShieldActor()
 {
 	bReplicates = true;
