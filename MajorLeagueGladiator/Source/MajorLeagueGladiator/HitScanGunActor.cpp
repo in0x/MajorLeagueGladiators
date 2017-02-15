@@ -3,6 +3,9 @@
 #include "MajorLeagueGladiator.h"
 #include "HitScanGunActor.h"
 #include "DamageTypes/PlayerDamage.h"
+#include "AmmoComponent.h"
+#include "WidgetComponent.h"
+#include "TextWidget.h"
 
 AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -37,6 +40,11 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	scopeMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("ScopeMesh"));
 	scopeMesh->SetupAttachment(GetRootComponent(), FName("UI"));
 
+	ammoComponent = ObjectInitializer.CreateDefaultSubobject<UAmmoComponent>(this, TEXT("AmmoComponent"));
+
+	ammoCountWidget = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("AmmoCounterWidget"));
+	ammoCountWidget->SetupAttachment(GetRootComponent(), FName(TEXT("UI")));
+	ammoCountWidget->SetIsReplicated(true);
 } 
 
 void AHitScanGunActor::BeginPlay()
@@ -57,13 +65,22 @@ void AHitScanGunActor::BeginPlay()
 	auto instance = UMaterialInstanceDynamic::Create(scopeMesh->GetMaterial(0), scopeMesh);
 	instance->SetTextureParameterValue(FName("ScopeTex"), sceneCapture->TextureTarget);
 	scopeMesh->SetMaterial(0, instance);
+
+	textWidget = CastChecked<UTextWidget>(ammoCountWidget->GetUserWidgetObject());
+	textWidget->SetText(FString::FromInt(ammoComponent->GetAmmoCount()));
+
+	ammoComponent->OnAmmoChanged.AddLambda([this](int32 newCount)
+	{
+		textWidget->SetText(FString::FromInt(newCount));
+	});
 }
 
 void AHitScanGunActor::OnUsed()
 {
-	if (bApplyingRecoil) // Gun hasn't reset yet.
+	if (bApplyingRecoil || ammoComponent->GetAmmoCount() <= 0) // Gun hasn't reset yet.
 		return;
 
+	ammoComponent->ConsumeAmmo();
 	shoot();
 
 	playShotEffect_NetMulticast();

@@ -6,6 +6,9 @@
 #include "HitScanGunActor.generated.h"
 
 class UGripMotionControllerComponent;
+class UAmmoComponent;
+class UTextWidget;
+class UWidgetComponent;
 struct FBPActorGripInformation;
 
 UCLASS()
@@ -40,7 +43,15 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* laserMesh;
+
+	UPROPERTY(EditAnywhere)
+	UAmmoComponent* ammoComponent;
+
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* ammoCountWidget;
 	
+	UTextWidget* textWidget;
+
 	UPROPERTY(EditAnywhere)
 	float shotRange;
 
