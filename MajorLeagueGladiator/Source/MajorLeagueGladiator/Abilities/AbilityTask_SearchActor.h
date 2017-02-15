@@ -18,9 +18,6 @@ public:
 	virtual bool IsConfirmTargetingAllowed() override;
 
 	UPROPERTY()
-	TWeakObjectPtr<USceneComponent> TargetingSceneComponent;
-
-	UPROPERTY()
 	TArray<TWeakObjectPtr<AActor>> IgnoredActors;
 
 	UPROPERTY()

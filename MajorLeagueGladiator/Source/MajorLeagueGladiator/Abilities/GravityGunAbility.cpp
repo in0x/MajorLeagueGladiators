@@ -57,12 +57,14 @@ void UGravityGunAbility::SearchAndPull()
 
 	AAbilityTask_SearchActor* searchActor = CastChecked<AAbilityTask_SearchActor>(spawnedActor);
 
-	searchActor->TargetingSceneComponent = gripController;
+	searchActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
+	searchActor->StartLocation.SourceComponent = gripControllerMesh;
+	searchActor->StartLocation.SourceSocketName = "Aim";
+
 	searchActor->MaxRange = PullRange;
 	searchActor->IgnoredActors.Add(GetOwningActorFromActorInfo());	
 
 	searchTask->FinishSpawningActor(this, spawnedActor);
-
 }
 
 void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHandle& Data)
@@ -96,7 +98,8 @@ void UGravityGunAbility::LaunchGrippedActor()
 {
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
 	{
-		gripController->LaunchActor(LaunchVelocity, true);
+		FVector velocity = gripControllerMesh->GetSocketRotation("Aim").Vector() * LaunchVelocity;
+		gripController->LaunchActor(velocity, true);
 	}
 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
@@ -108,6 +111,7 @@ void UGravityGunAbility::SetGripControllerFromOwner()
 	AMlgPlayerCharacter* mlgPlayerCharacter = CastChecked<AMlgPlayerCharacter>(owner);
 
 	gripController = CastChecked<UVRControllerComponent>(mlgPlayerCharacter->LeftMotionController);
+	gripControllerMesh = mlgPlayerCharacter->GetMotionControllerMesh(EControllerHand::Left);
 }
 
 bool UGravityGunAbility::HasGrippedActor() const

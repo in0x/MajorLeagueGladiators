@@ -6,3 +6,7 @@
 
 
 
+AShieldActor::AShieldActor()
+{
+	bReplicates = true;
+}

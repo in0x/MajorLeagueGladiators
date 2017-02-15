@@ -13,8 +13,11 @@ void AAbilityTask_SearchActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	const FVector direction = TargetingSceneComponent->GetForwardVector();
-	const FVector rayCastBegin = TargetingSceneComponent->GetComponentLocation();
+	const FTransform targetTrans = StartLocation.GetTargetingTransform();
+
+	const FVector direction = targetTrans.GetRotation().Vector();
+	
+	const FVector rayCastBegin = targetTrans.GetLocation();
 	const FVector rayCastEnd = rayCastBegin + direction * MaxRange;
 
 	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{

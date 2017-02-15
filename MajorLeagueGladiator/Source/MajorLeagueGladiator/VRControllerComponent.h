@@ -21,7 +21,7 @@ public:
 	void UseGrippedActors();
 	void EndUseGrippedActors();
 	bool TryGrabActor(AActor* Actor);
-	bool LaunchActor(float Velocity, bool IgnoreWeight);
+	bool LaunchActor(FVector Velocity, bool IgnoreWeight);
 	AMlgPlayerController* GetMlgPlayerController();
 
 private:
