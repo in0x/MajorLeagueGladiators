@@ -26,7 +26,7 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void playShotEffect_NetMulticast();
 
-	//UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere) // Removed until we upgrade to 4.15
 	//UChildActorComponent* boltAction;
 
 	UPROPERTY(EditAnywhere)

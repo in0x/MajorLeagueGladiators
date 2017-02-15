@@ -27,7 +27,7 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	laserMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LaserMeshComponent"));
 	laserMesh->SetupAttachment(GetStaticMeshComponent(), FName("ProjectileSpawn"));
 
-	/*boltAction = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, TEXT("BoltAction"));
+	/*boltAction = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, TEXT("BoltAction")); // Removed until we upgrade to 4.15
 	boltAction->SetupAttachment(GetRootComponent(), FName("BoltAction"));
 
 	static ConstructorHelpers::FObjectFinder<UBlueprint> BoltActionBP(TEXT("/Game/BluePrints/BoltActionBP"));
