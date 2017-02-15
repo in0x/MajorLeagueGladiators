@@ -42,7 +42,7 @@ struct FAbilityBindInfo
 
 // Define here what ability input corresponds to which ability class
 // This is pretty similar to GameplayAbilitySet, but altered for our purposes
-UCLASS()
+UCLASS(Blueprintable)
 class MAJORLEAGUEGLADIATOR_API UMlgAbilitySet : public UDataAsset
 {
 	GENERATED_BODY()

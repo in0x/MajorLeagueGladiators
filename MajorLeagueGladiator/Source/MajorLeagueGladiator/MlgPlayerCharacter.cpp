@@ -228,6 +228,20 @@ void AMlgPlayerCharacter::OnSideGripButtonRight()
 	rightHandDrop_Server();
 }
 
+UStaticMeshComponent* AMlgPlayerCharacter::GetMotionControllerMesh(EControllerHand hand)
+{
+	switch (hand)
+	{
+	case EControllerHand::Left:
+		return leftMesh;
+	case EControllerHand::Right:
+		return rightMesh;
+	default:
+		checkNoEntry();
+		return nullptr;
+	}
+}
+
 void AMlgPlayerCharacter::OnTeleportReleased()
 {
 	auto result = teleportComp->GetTeleportResult();
