@@ -30,6 +30,12 @@ private:
 	//UChildActorComponent* boltAction;
 
 	UPROPERTY(EditAnywhere)
+	USceneCaptureComponent2D* sceneCapture;
+
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* scopeMesh;
+
+	UPROPERTY(EditAnywhere)
 	UAudioComponent* shotAudioComponent;
 
 	UPROPERTY(EditAnywhere)

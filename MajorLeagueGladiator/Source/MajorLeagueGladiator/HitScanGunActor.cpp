@@ -32,6 +32,11 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 
 	static ConstructorHelpers::FObjectFinder<UBlueprint> BoltActionBP(TEXT("/Game/BluePrints/BoltActionBP"));
 	boltAction->SetChildActorClass(*BoltActionBP.Object->GeneratedClass);*/
+
+	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
+	scopeMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("ScopeMesh"));
+	scopeMesh->SetupAttachment(GetRootComponent(), FName("UI"));
+
 } 
 
 void AHitScanGunActor::BeginPlay()
@@ -48,6 +53,10 @@ void AHitScanGunActor::BeginPlay()
 			UE_LOG(DebugLog, Warning, TEXT("HitscanGun Mesh does not have a 'ProjectileSpawn' socket, shots will originate from incorrect position"));
 		}
 	}
+
+	auto instance = UMaterialInstanceDynamic::Create(scopeMesh->GetMaterial(0), scopeMesh);
+	instance->SetTextureParameterValue(FName("ScopeTex"), sceneCapture->TextureTarget);
+	scopeMesh->SetMaterial(0, instance);
 }
 
 void AHitScanGunActor::OnUsed()
