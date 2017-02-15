@@ -23,7 +23,8 @@ ABoltAction::ABoltAction(const FObjectInitializer& ObjectInitializer)
 	baseMesh->SetSimulatePhysics(true);
 	baseMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	baseMesh->bGenerateOverlapEvents = true;
-	
+	baseMesh->SetupAttachment(GetRootComponent());
+
 	constraint = ObjectInitializer.CreateDefaultSubobject<UPhysicsConstraintComponent>(this, TEXT("Constraint"));
 
 	FConstraintInstance constraintInst;
@@ -55,6 +56,7 @@ ABoltAction::ABoltAction(const FObjectInitializer& ObjectInitializer)
 void ABoltAction::BeginPlay()
 {
 	Super::BeginPlay();
+	constraint->ConstraintInstance.AngularRotationOffset = FRotator::ZeroRotator;
 }
 
 // NOTE(Phil) Lock when not gripped, unlock when gripped (Y axis) -> should fix drifting (this is also why you wanted the actor to inherit from IVRGripInterface)

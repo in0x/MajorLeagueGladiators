@@ -26,12 +26,21 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 
 	laserMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LaserMeshComponent"));
 	laserMesh->SetupAttachment(GetStaticMeshComponent(), FName("ProjectileSpawn"));
-}
+
+	boltAction = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, TEXT("BoltAction"));
+	boltAction->SetupAttachment(GetRootComponent(), FName("BoltAction"));
+
+	static ConstructorHelpers::FObjectFinder<UBlueprint> BoltActionBP(TEXT("/Game/BluePrints/BoltActionBP"));
+	
+	// NOTE(Phil): This is a workaround until we upgrade to 4.15, 
+	// which fixes the memory corruption bug this prevents.
+	boltAction->SetChildActorClass(*BoltActionBP.Object->GeneratedClass); 
+} 
 
 void AHitScanGunActor::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	auto mesh = GetStaticMeshComponent()->GetStaticMesh();
 	if (mesh)
 	{
@@ -39,7 +48,7 @@ void AHitScanGunActor::BeginPlay()
 
 		if (!shotOriginSocket)
 		{
-			UE_LOG(DebugLog, Warning, TEXT("Gun Mesh does not have a 'ProjectileSpawn' socket, shots will originate from incorrect position"));
+			UE_LOG(DebugLog, Warning, TEXT("HitscanGun Mesh does not have a 'ProjectileSpawn' socket, shots will originate from incorrect position"));
 		}
 	}
 }
