@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "VRExpansion/GrippableStaticMeshActor.h"
+#include "MlgGrippableStaticMeshActor.h"
 #include "HitScanGunActor.generated.h"
 
 class UGripMotionControllerComponent;
@@ -12,7 +12,7 @@ class UWidgetComponent;
 struct FBPActorGripInformation;
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AHitScanGunActor : public AGrippableStaticMeshActor
+class MAJORLEAGUEGLADIATOR_API AHitScanGunActor : public AMlgGrippableStaticMeshActor
 {
 	GENERATED_BODY()
 	

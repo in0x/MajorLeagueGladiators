@@ -6,6 +6,7 @@
 #include "AmmoComponent.h"
 #include "WidgetComponent.h"
 #include "TextWidget.h"
+#include "MlgPlayerController.h"
 
 AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -84,6 +85,12 @@ void AHitScanGunActor::OnUsed()
 	shoot();
 
 	playShotEffect_NetMulticast();
+
+	auto* controller = this->GetMlgPlayerController();
+	if (controller != nullptr)
+	{
+		controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
+	}
 }
 
 void AHitScanGunActor::playShotEffect_NetMulticast_Implementation()
@@ -95,6 +102,8 @@ void AHitScanGunActor::playShotEffect_NetMulticast_Implementation()
 
 void AHitScanGunActor::OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) 
 {
+	Super::OnGrip(GrippingController, GripInformation);
+
 	grippingController = GrippingController;
 	gripInfo = GripInformation;
 }
