@@ -37,6 +37,8 @@ public:
 	void OnSideGripButtonLeft();
 	void OnSideGripButtonRight();
 
+	UStaticMeshComponent* GetMotionControllerMesh(EControllerHand hand);
+
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
 
