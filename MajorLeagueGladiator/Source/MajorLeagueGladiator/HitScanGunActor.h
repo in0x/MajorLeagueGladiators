@@ -18,13 +18,16 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnUsed() override;
-	virtual void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation) override;
+	virtual void OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) override;
 	
 private:
 	void shoot();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void playShotEffect_NetMulticast();
+
+	UPROPERTY(EditAnywhere)
+	UChildActorComponent* boltAction;
 
 	UPROPERTY(EditAnywhere)
 	UAudioComponent* shotAudioComponent;

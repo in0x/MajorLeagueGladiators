@@ -5,7 +5,7 @@
 #include "VRExpansion/GrippableStaticMeshActor.h"
 #include "BoltAction.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
 class MAJORLEAGUEGLADIATOR_API ABoltAction : public AGrippableStaticMeshActor
 {
 	GENERATED_BODY()
