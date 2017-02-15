@@ -110,7 +110,7 @@ void UGravityGunAbility::SetGripControllerFromOwner()
 	AActor* owner = GetOwningActorFromActorInfo();
 	AMlgPlayerCharacter* mlgPlayerCharacter = CastChecked<AMlgPlayerCharacter>(owner);
 
-	gripController = CastChecked<UVRControllerComponent>(mlgPlayerCharacter->LeftMotionController);
+	gripController = mlgPlayerCharacter->GetMotionController(EControllerHand::Left);
 	gripControllerMesh = mlgPlayerCharacter->GetMotionControllerMesh(EControllerHand::Left);
 }
 

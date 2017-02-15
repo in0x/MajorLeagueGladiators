@@ -11,6 +11,9 @@
 
 UShieldAbility::UShieldAbility()
 	: shieldActorClass(AShieldActor::StaticClass())
+	, pushBoxHalfExtent(100, 100, 100)
+	, pushBoxOffsetFromController(100, 0, 0)
+	, pushVelocity(1000)
 {
 }
 
@@ -49,8 +52,8 @@ void UShieldAbility::PushAwayCloseActors()
 	searchActor->StartLocation.SourceComponent = gripControllerMesh;
 	searchActor->StartLocation.SourceSocketName = "Aim";
 
-	searchActor->SetHalfExtent({ 100,100,100 });
-	searchActor->LocationOffsetFromPositon = { 100,0,0 };
+	searchActor->SetHalfExtent(pushBoxHalfExtent);
+	searchActor->LocationOffsetFromPositon = pushBoxOffsetFromController;
 	searchActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
 
 	searchTask->FinishSpawningActor(this, spawnedActor);
@@ -60,7 +63,7 @@ void UShieldAbility::OnBoxTraceFinished(const FGameplayAbilityTargetDataHandle& 
 {
 	FGameplayAbilityTargetData* targetData = Data.Data[0].Get();
 	FGameplayAbilityTargetData_ActorArray* actorArray = static_cast<FGameplayAbilityTargetData_ActorArray*>(targetData);
-	const FVector impulse = actorArray->SourceLocation.GetTargetingTransform().GetRotation().Vector() * 1000;
+	const FVector impulse = actorArray->SourceLocation.GetTargetingTransform().GetRotation().Vector() * pushVelocity;
 	for (auto actor : actorArray->GetActors())
 	{
 		ACharacter* character = Cast<ACharacter>(actor.Get());
@@ -86,16 +89,11 @@ void UShieldAbility::SpawnShield()
 		shieldActor = GetWorld()->SpawnActor<AShieldActor>(shieldActorClass, GetOwningActorFromActorInfo()->GetTransform());		
 		
 		FTransform gripTransform = gripControllerMesh->GetSocketTransform("Aim");
-		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Yellow, TEXT("shield"));
-		gripController->GripActor(shieldActor, 
+
+		gripController->GripActor(shieldActor,
 			gripTransform,
 			false,
-			"Ability",
-			EGripCollisionType::InteractiveCollisionWithPhysics,
-			EGripLateUpdateSettings::NotWhenCollidingOrDoubleGripping,
-			EGripMovementReplicationSettings::ForceClientSideMovement,
-			1500.0f * 10,
-			200.0f);
+			"Ability");
 	}
 }
 
@@ -115,6 +113,6 @@ void UShieldAbility::SetGripControllerFromOwner()
 	AMlgPlayerCharacter* mlgPlayerCharacter = CastChecked<AMlgPlayerCharacter>(owner);
 
 	gripControllerMesh = mlgPlayerCharacter->GetMotionControllerMesh(EControllerHand::Left);
-	gripController = CastChecked<UVRControllerComponent>(mlgPlayerCharacter->LeftMotionController);
+	gripController = mlgPlayerCharacter->GetMotionController(EControllerHand::Left);
 }
 

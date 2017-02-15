@@ -13,6 +13,7 @@ class UDamageReceiverComponent;
 class UAbilitySystemComponent;
 class UGameplayAbilitySet;
 class UMlgAbilitySet;
+class UVRControllerComponent;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgPlayerCharacter : public AVRSimpleCharacter, public IAbilitySystemInterface
@@ -37,7 +38,8 @@ public:
 	void OnSideGripButtonLeft();
 	void OnSideGripButtonRight();
 
-	UStaticMeshComponent* GetMotionControllerMesh(EControllerHand hand);
+	UStaticMeshComponent* GetMotionControllerMesh(EControllerHand Hand);
+	UVRControllerComponent* GetMotionController(EControllerHand Hand);
 
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;

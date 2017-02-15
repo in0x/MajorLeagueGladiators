@@ -228,14 +228,28 @@ void AMlgPlayerCharacter::OnSideGripButtonRight()
 	rightHandDrop_Server();
 }
 
-UStaticMeshComponent* AMlgPlayerCharacter::GetMotionControllerMesh(EControllerHand hand)
+UStaticMeshComponent* AMlgPlayerCharacter::GetMotionControllerMesh(EControllerHand Hand)
 {
-	switch (hand)
+	switch (Hand)
 	{
 	case EControllerHand::Left:
 		return leftMesh;
 	case EControllerHand::Right:
 		return rightMesh;
+	default:
+		checkNoEntry();
+		return nullptr;
+	}
+}
+
+UVRControllerComponent* AMlgPlayerCharacter::GetMotionController(EControllerHand Hand)
+{
+	switch (Hand)
+	{
+	case EControllerHand::Left:
+		return CastChecked<UVRControllerComponent>(LeftMotionController);
+	case EControllerHand::Right:
+		return CastChecked<UVRControllerComponent>(RightMotionController);
 	default:
 		checkNoEntry();
 		return nullptr;

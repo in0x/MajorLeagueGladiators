@@ -34,6 +34,15 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AShieldActor> shieldActorClass;
 
+	UPROPERTY(EditAnywhere)
+	FVector pushBoxHalfExtent;
+
+	UPROPERTY(EditAnywhere)
+	FVector pushBoxOffsetFromController;
+
+	UPROPERTY(EditAnywhere)
+	float pushVelocity;
+
 	UPROPERTY(Transient)
 	UMeshComponent* gripControllerMesh;
 
