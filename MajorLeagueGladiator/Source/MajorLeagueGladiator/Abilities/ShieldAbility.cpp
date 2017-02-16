@@ -8,6 +8,11 @@
 #include "VRControllerComponent.h"
 #include "ShieldActor.h"
 
+namespace
+{
+	const char* AIM_SOCKET_NAME = "Aim";
+	const char* SHIELD_SOCKET_NAME = "Ability";
+}
 
 UShieldAbility::UShieldAbility()
 	: shieldActorClass(AShieldActor::StaticClass())
@@ -51,7 +56,7 @@ void UShieldAbility::PushAwayCloseActors()
 
 	searchActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
 	searchActor->StartLocation.SourceComponent = gripControllerMesh;
-	searchActor->StartLocation.SourceSocketName = "Aim";
+	searchActor->StartLocation.SourceSocketName = AIM_SOCKET_NAME;
 
 	searchActor->SetHalfExtent(pushBoxHalfExtent);
 	searchActor->LocationOffsetFromPositon = pushBoxOffsetFromController;
@@ -93,9 +98,9 @@ void UShieldAbility::SpawnShield()
 	{
 		shieldActor = GetWorld()->SpawnActor<AShieldActor>(shieldActorClass, GetOwningActorFromActorInfo()->GetTransform());		
 		
-		FTransform gripTransform = gripControllerMesh->GetSocketTransform("Aim");
+		FTransform gripTransform = gripControllerMesh->GetSocketTransform(AIM_SOCKET_NAME);
 
-		gripController->GripActor(shieldActor, gripTransform, false, "Ability");
+		gripController->GripActor(shieldActor, gripTransform, false, SHIELD_SOCKET_NAME);
 	}
 }
 
