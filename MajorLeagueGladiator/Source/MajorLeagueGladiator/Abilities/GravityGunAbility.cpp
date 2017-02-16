@@ -97,6 +97,7 @@ void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHand
 	pullTask = UAbilityTask_PullTarget::Create(this, "Pull Actor Task", foundActor, gripController, PullSpeed, GrabRange);
 	pullTask->Activate();
 	pullTask->OnSuccess.AddUObject(this, &UGravityGunAbility::OnActorPullFinished);
+	pullTask->OnFail.AddUObject(this, &UGravityGunAbility::OnActorPullFailed);
 }
 
 
