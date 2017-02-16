@@ -3,6 +3,7 @@
 #pragma once
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FAbilityTaskPullTargetSuccessDelegate, AActor*);
+DECLARE_MULTICAST_DELEGATE(FAbilityTaskPullTargetFailDelegate);
 
 #include "Abilities/Tasks/AbilityTask.h"
 #include "AbilityTask_PullTarget.generated.h"
@@ -18,9 +19,11 @@ public:
 	static UAbilityTask_PullTarget* Create(UObject* WorldContextObject, FName TaskName, AActor* TargetActor, USceneComponent* EndLocation, float PullSpeed, float MinDistanceThreshold);
 
 	virtual void Activate() override;
+	virtual void ExternalCancel() override;
 	void OnDestroy(bool AbilityEnded) override;
 
 	FAbilityTaskPullTargetSuccessDelegate OnSuccess;
+	FAbilityTaskPullTargetFailDelegate OnFail;
 
 	UFUNCTION(reliable, NetMulticast)
 	void SetActorGravity_NetMulticast(AActor* Actor, bool GravityEnabled);
@@ -30,5 +33,6 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<AActor> targetActor;
 
-	void OnLocationReachedCallback();	
+	void OnLocationReachedCallback();
+	void OnFailedCallback();
 };

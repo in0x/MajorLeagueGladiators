@@ -33,6 +33,7 @@ public:
 	float LaunchVelocity;
 
 private:
+	virtual void InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
 	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
@@ -48,6 +49,7 @@ private:
 	void OnSearchCancelled(const FGameplayAbilityTargetDataHandle& Data);
 
 	void OnActorPullFinished(AActor* pulledActor);
+	void OnActorPullFailed();
 
 	bool HasGrippedActor() const;
 

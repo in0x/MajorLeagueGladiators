@@ -6,6 +6,7 @@
 #include "AbilityTask_PullTargetActor.generated.h"
 
 DECLARE_DELEGATE(FOnLocationReachedDelegate);
+DECLARE_DELEGATE(FOnFailDelegate);
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AAbilityTask_PullTargetActor : public AActor
@@ -25,9 +26,14 @@ public:
 
 	FOnLocationReachedDelegate OnLocationReached;
 
+	FOnFailDelegate OnFail;
+
 	UPROPERTY()
 	float PullSpeed;
 
 	UPROPERTY()
 	float MinDistanceThreshold;	
+
+	UPROPERTY()
+	float MaxDistanceThreshold;
 };

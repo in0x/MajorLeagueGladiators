@@ -19,6 +19,7 @@ UAbilityTask_PullTarget* UAbilityTask_PullTarget::Create(UObject* WorldContextOb
 	SpawnedActor->MinDistanceThreshold = MinDistanceThreshold;
 
 	SpawnedActor->OnLocationReached.BindUObject(task, &UAbilityTask_PullTarget::OnLocationReachedCallback);
+	SpawnedActor->OnFail.BindUObject(task, &UAbilityTask_PullTarget::OnFailedCallback);
 
 	task->spawnedActor = SpawnedActor;
 	task->targetActor = TargetActor;
@@ -36,12 +37,24 @@ void UAbilityTask_PullTarget::Activate()
 	rootComponent->MoveIgnoreActors.Add(spawnedActor->EndLocationSceneComponent->GetOwner());	
 }
 
+void UAbilityTask_PullTarget::ExternalCancel()
+{
+	Super::ExternalCancel();
+	OnFail.Broadcast();
+}
+
 void UAbilityTask_PullTarget::OnLocationReachedCallback()
 {
 	check(targetActor.IsValid());
 
 	EndTask();
 	OnSuccess.Broadcast(targetActor.Get());	
+}
+
+void UAbilityTask_PullTarget::OnFailedCallback()
+{
+	EndTask();
+	OnFail.Broadcast();
 }
 
 void UAbilityTask_PullTarget::OnDestroy(bool AbilityEnded)

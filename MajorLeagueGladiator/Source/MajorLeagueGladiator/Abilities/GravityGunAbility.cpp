@@ -28,6 +28,15 @@ UGravityGunAbility::UGravityGunAbility(const FObjectInitializer& ObjectInitializ
 	bReplicateInputDirectly = true;
 }
 
+void UGravityGunAbility::InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
+{
+	if (pullTask)
+	{
+		pullTask->ExternalCancel();
+		pullTask = nullptr;
+	}
+}
+
 void UGravityGunAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
 	if (searchTask)
@@ -105,6 +114,12 @@ void UGravityGunAbility::OnActorPullFinished(AActor* pulledActor)
 		gripController->TryGrabActor(pulledActor);
 	}
 
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
+}
+
+void UGravityGunAbility::OnActorPullFailed()
+{
+	pullTask = nullptr;
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
 }
 
