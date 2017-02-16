@@ -6,6 +6,8 @@
 
 class UVRControllerComponent;
 class UAbilityTask_Search;
+class UAbilityTask_WaitTargetData;
+class UAbilityTask_PullTarget;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UGravityGunAbility : public UGameplayAbility
@@ -42,16 +44,22 @@ private:
 	UFUNCTION()
 	void OnSearchSuccessful(const FGameplayAbilityTargetDataHandle& Data);
 
+	UFUNCTION()
+	void OnSearchCancelled(const FGameplayAbilityTargetDataHandle& Data);
+
 	void OnActorPullFinished(AActor* pulledActor);
 
 	bool HasGrippedActor() const;
 
-	UPROPERTY()
-	TWeakObjectPtr<UAbilityTask> currentTask;
+	UPROPERTY(Transient)
+	UAbilityTask_PullTarget* pullTask;
+	
+	UPROPERTY(Transient)
+	UAbilityTask_WaitTargetData* searchTask;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	UVRControllerComponent* gripController;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	UMeshComponent* gripControllerMesh;
 };

@@ -14,7 +14,10 @@ UGravityGunAbility::UGravityGunAbility(const FObjectInitializer& ObjectInitializ
 	, PullSpeed(500)
 	, GrabRange(10)
 	, LaunchVelocity(1000)
+	, pullTask(nullptr)
+	, searchTask(nullptr)
 	, gripController(nullptr)
+	, gripControllerMesh(nullptr)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;
@@ -22,11 +25,11 @@ UGravityGunAbility::UGravityGunAbility(const FObjectInitializer& ObjectInitializ
 
 void UGravityGunAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if (currentTask.IsValid() && !currentTask.IsStale())
+	if (searchTask)
 	{
-		currentTask->ExternalCancel();
+		searchTask->ExternalCancel();
+		searchTask = nullptr;
 	}
-	EndAbility(Handle, ActorInfo, ActivationInfo, true);
 }
 
 void UGravityGunAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData * TriggerEventData)
@@ -44,10 +47,8 @@ void UGravityGunAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 void UGravityGunAbility::SearchAndPull()
 {
-	UAbilityTask_WaitTargetData* searchTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Search Task", EGameplayTargetingConfirmation::Custom, AAbilityTask_SearchActor::StaticClass());
+	searchTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Search Task", EGameplayTargetingConfirmation::Custom, AAbilityTask_SearchActor::StaticClass());
 	searchTask->ValidData.AddDynamic(this, &UGravityGunAbility::OnSearchSuccessful);
-	currentTask = searchTask;
-
 
 	AGameplayAbilityTargetActor* spawnedActor;
 	if (!searchTask->BeginSpawningActor(this, AAbilityTask_SearchActor::StaticClass(), spawnedActor))
@@ -69,23 +70,30 @@ void UGravityGunAbility::SearchAndPull()
 
 void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
+	searchTask = nullptr;
 	if(GetOwningActorFromActorInfo()->Role < ROLE_Authority)
 	{
-		currentTask.Reset();
 		return;
 	}
 
 	AActor* foundActor = Data.Data[0]->GetActors()[0].Get();
 
 	//This gets spawned on server and client, if he started the ability so that he has a prediction	
-	UAbilityTask_PullTarget* pullTask = UAbilityTask_PullTarget::Create(this, "Pull Actor Task", foundActor, gripController, PullSpeed, GrabRange);
+	pullTask = UAbilityTask_PullTarget::Create(this, "Pull Actor Task", foundActor, gripController, PullSpeed, GrabRange);
 	pullTask->Activate();
 	pullTask->OnSuccess.AddUObject(this, &UGravityGunAbility::OnActorPullFinished);
-	currentTask = pullTask;
+}
+
+
+void UGravityGunAbility::OnSearchCancelled(const FGameplayAbilityTargetDataHandle& Data)
+{
+	searchTask = nullptr;
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
 }
 
 void UGravityGunAbility::OnActorPullFinished(AActor* pulledActor)
 {
+	pullTask = nullptr;
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
 	{
 		gripController->TryGrabActor(pulledActor);
