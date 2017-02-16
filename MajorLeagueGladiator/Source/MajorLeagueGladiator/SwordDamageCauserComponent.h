@@ -13,7 +13,7 @@ class MAJORLEAGUEGLADIATOR_API USwordDamageCauserComponent : public UDamageCause
 
 public:
 	USwordDamageCauserComponent();
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 protected:
 	virtual bool CanDoDamage() override;
@@ -23,6 +23,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	int threshholdDoDamageSquared;
 
+	//TODO: change sword color changing. THIS IS ONLY TEMPORARY
 	UPROPERTY(EditAnywhere)
 	UMaterial* materialRedObject;
 
@@ -42,6 +43,8 @@ private:
 
 	void turnDamageOn();
 	void turnDamageOff();
+
+	void setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn);
 
 	bool canDealDamage;
 };

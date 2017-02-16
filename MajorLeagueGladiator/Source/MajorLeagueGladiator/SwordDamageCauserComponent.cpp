@@ -15,17 +15,25 @@ USwordDamageCauserComponent::USwordDamageCauserComponent()
 	static ConstructorHelpers::FObjectFinder<UMaterial> SwordMaterialRed(TEXT("Material'/Game/MVRCFPS_Assets/Blade_HeroSword22/M_Blade_HeroSword_Red.M_Blade_HeroSword_Red'"));
 	if (SwordMaterialRed.Object != NULL)
 	{
-		materialRedObject = (UMaterial*)SwordMaterialRed.Object;
+		materialRedObject = CastChecked<UMaterial>(SwordMaterialRed.Object);
+	}
+	else 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("M_Blade_HeroSword_Red not found."));
 	}
 	
 	static ConstructorHelpers::FObjectFinder<UMaterial> SwordMaterial(TEXT("Material'/Game/MVRCFPS_Assets/Blade_HeroSword22/M_Blade_HeroSword22.M_Blade_HeroSword22'"));
 	if (SwordMaterial.Object != NULL)
 	{
-		materialObject = (UMaterial*)SwordMaterial.Object;
+		materialObject = CastChecked<UMaterial>(SwordMaterial.Object);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("M_Blade_HeroSword22 not found."));
 	}
 }
 
-void USwordDamageCauserComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void USwordDamageCauserComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	FVector newSwordState = GetOwner()->GetVelocity();
 	oldSwingSpeed = oldSwingSpeed * (1.0f - slashVelocityLearnRate) + (DeltaTime * newSwordState) * slashVelocityLearnRate;
@@ -53,12 +61,7 @@ void USwordDamageCauserComponent::turnDamageOn()
 		materialRedObject_Dyn = UMaterialInstanceDynamic::Create(materialRedObject, this);
 	}
 
-	AMlgGrippableStaticMeshActor* owner = Cast<AMlgGrippableStaticMeshActor>(GetOwner());
-	if (owner != nullptr)
-	{
-		auto* mesh = owner->GetStaticMeshComponent();
-		mesh->SetMaterial(0, materialRedObject_Dyn);
-	}
+	setMaterialOfOwnerMesh(materialRedObject_Dyn);
 }
 
 void USwordDamageCauserComponent::turnDamageOff()
@@ -67,7 +70,17 @@ void USwordDamageCauserComponent::turnDamageOff()
 	{
 		materialObject_Dyn = UMaterialInstanceDynamic::Create(materialObject, this);
 	}
+
+	setMaterialOfOwnerMesh(materialObject_Dyn);
+}
+
+
+void USwordDamageCauserComponent::setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn) 
+{
 	AMlgGrippableStaticMeshActor* owner = Cast<AMlgGrippableStaticMeshActor>(GetOwner());
-	auto* mesh = owner->GetStaticMeshComponent();
-	mesh->SetMaterial(0, materialObject_Dyn);
+	if (owner != nullptr)
+	{
+		auto* mesh = owner->GetStaticMeshComponent();
+		mesh->SetMaterial(0, material_Dyn);
+	}
 }
