@@ -24,7 +24,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "VRExpansionLibrary")
 		FTransform OffsetComponentToWorld;
 
-	FORCEINLINE void GenerateOffsetToWorld();
+	void GenerateOffsetToWorld();
 
 	UFUNCTION(BlueprintPure, Category = "SimpleVRCharacter|VRLocations")
 		FVector GetVRForwardVector()
