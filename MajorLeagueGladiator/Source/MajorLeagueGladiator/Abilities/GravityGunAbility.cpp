@@ -49,6 +49,7 @@ void UGravityGunAbility::SearchAndPull()
 {
 	searchTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Search Task", EGameplayTargetingConfirmation::Custom, AAbilityTask_SearchActor::StaticClass());
 	searchTask->ValidData.AddDynamic(this, &UGravityGunAbility::OnSearchSuccessful);
+	searchTask->Cancelled.AddDynamic(this, &UGravityGunAbility::OnSearchCancelled);
 
 	AGameplayAbilityTargetActor* spawnedActor;
 	if (!searchTask->BeginSpawningActor(this, AAbilityTask_SearchActor::StaticClass(), spawnedActor))
