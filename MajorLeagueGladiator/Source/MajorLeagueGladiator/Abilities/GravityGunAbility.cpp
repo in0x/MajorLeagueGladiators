@@ -9,6 +9,11 @@
 #include "AbilityTask_PullTargetActor.h"
 
 
+namespace
+{
+	const char* AIM_SOCKET_NAME = "Aim";
+}
+
 UGravityGunAbility::UGravityGunAbility(const FObjectInitializer& ObjectInitializer)
 	: PullRange(1000)
 	, PullSpeed(500)
@@ -61,7 +66,7 @@ void UGravityGunAbility::SearchAndPull()
 
 	searchActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
 	searchActor->StartLocation.SourceComponent = gripControllerMesh;
-	searchActor->StartLocation.SourceSocketName = "Aim";
+	searchActor->StartLocation.SourceSocketName = AIM_SOCKET_NAME;
 
 	searchActor->MaxRange = PullRange;
 	searchActor->IgnoredActors.Add(GetOwningActorFromActorInfo());	
@@ -107,7 +112,7 @@ void UGravityGunAbility::LaunchGrippedActor()
 {
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
 	{
-		FVector velocity = gripControllerMesh->GetSocketRotation("Aim").Vector() * LaunchVelocity;
+		FVector velocity = gripControllerMesh->GetSocketRotation(AIM_SOCKET_NAME).Vector() * LaunchVelocity;
 		gripController->LaunchActor(velocity, true);
 	}
 
