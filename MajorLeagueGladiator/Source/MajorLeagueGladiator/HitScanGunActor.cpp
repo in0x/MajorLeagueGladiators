@@ -78,7 +78,7 @@ void AHitScanGunActor::BeginPlay()
 
 void AHitScanGunActor::OnUsed()
 {
-	if (bApplyingRecoil || ammoComponent->GetAmmoCount() <= 0) // Gun hasn't reset yet.
+	if (bIsApplyingRecoil || ammoComponent->GetAmmoCount() <= 0) // Gun hasn't reset yet.
 		return;
 
 	ammoComponent->ConsumeAmmo();
@@ -96,7 +96,7 @@ void AHitScanGunActor::OnUsed()
 void AHitScanGunActor::playShotEffect_NetMulticast_Implementation()
 {
 	currentAnimDuration = recoilAnimBackDuration;
-	bApplyingRecoil = true;
+	bIsApplyingRecoil = true;
 	shotAudioComponent->Play();
 }
 
@@ -143,7 +143,7 @@ void AHitScanGunActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bApplyingRecoil)
+	if (bIsApplyingRecoil)
 	{
 		elapsedAnimTime += DeltaTime;
 
@@ -169,7 +169,7 @@ void AHitScanGunActor::Tick(float DeltaTime)
 			{
 				recoilDistance = recoilOrigin;
 				recoilOrigin = 0.f;
-				bApplyingRecoil = false;
+				bIsApplyingRecoil = false;
 			}
 		}
 	}
