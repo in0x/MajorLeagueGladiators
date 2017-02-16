@@ -28,5 +28,4 @@ private:
 
 protected:
 	virtual bool CanDoDamage();
-	virtual float CalculateDamage();
 };
