@@ -80,5 +80,5 @@ private:
 	
 	FBPActorGripInformation gripInfo;
 
-	bool bApplyingRecoil;
+	bool bIsApplyingRecoil;
 };
