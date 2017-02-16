@@ -8,6 +8,7 @@
 AAbilityTask_PullTargetActor::AAbilityTask_PullTargetActor()
 	: PullSpeed(500)
 	, MinDistanceThreshold(100)
+	, MaxDistanceThreshold(2000)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -26,6 +27,10 @@ void AAbilityTask_PullTargetActor::Tick(float DeltaTime)
 	if (distance < MinDistanceThreshold && Role >= ROLE_Authority)
 	{
 		OnLocationReached.ExecuteIfBound();
+	}
+	else if (distance > MaxDistanceThreshold && Role >= ROLE_Authority)
+	{
+		OnFail.ExecuteIfBound();
 	}
 	else
 	{
