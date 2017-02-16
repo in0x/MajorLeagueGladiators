@@ -17,7 +17,6 @@ public:
 	
 protected:
 	virtual bool CanDoDamage() override;
-	virtual float CalculateDamage() override;
 private:
 	FVector oldSwingSpeed;
 
@@ -25,15 +24,24 @@ private:
 	int threshholdDoDamageSquared;
 
 	UPROPERTY(EditAnywhere)
-	int threshholdBonusDamageSquared;
+	UMaterial* materialRedObject;
 
 	UPROPERTY(EditAnywhere)
-	float bonusDamageFactor;
+	UMaterial* materialObject;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInstanceDynamic* materialRedObject_Dyn;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInstanceDynamic* materialObject_Dyn;
 
 	// between 0 and 1
 	// defines how fast new sword speed influences overall speedvalue
 	UPROPERTY(EditAnywhere)
 	float slashVelocityLearnRate; 
 
-	float calcBonusDamageFactor();
+	void turnDamageOn();
+	void turnDamageOff();
+
+	bool canDealDamage;
 };
