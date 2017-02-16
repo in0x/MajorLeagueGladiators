@@ -15,6 +15,7 @@ UShieldAbility::UShieldAbility()
 	, pushBoxOffsetFromController(100, 0, 0)
 	, pushVelocity(1000)
 {
+	bReplicateInputDirectly = true;
 }
 
 void UShieldAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
@@ -63,18 +64,18 @@ void UShieldAbility::OnBoxTraceFinished(const FGameplayAbilityTargetDataHandle& 
 {
 	FGameplayAbilityTargetData* targetData = Data.Data[0].Get();
 	FGameplayAbilityTargetData_ActorArray* actorArray = static_cast<FGameplayAbilityTargetData_ActorArray*>(targetData);
-	const FVector impulse = actorArray->SourceLocation.GetTargetingTransform().GetRotation().Vector() * pushVelocity;
+	const FVector launchVelocity = actorArray->SourceLocation.GetTargetingTransform().GetRotation().Vector() * pushVelocity;
 	for (auto actor : actorArray->GetActors())
 	{
 		ACharacter* character = Cast<ACharacter>(actor.Get());
 		if (character)
 		{
-			character->LaunchCharacter(impulse, true, true);
+			character->LaunchCharacter(launchVelocity, true, true);
 		}
 		else
 		{
 			UPrimitiveComponent* rootcomp = CastChecked<UPrimitiveComponent>(actor->GetRootComponent());
-			rootcomp->AddImpulse(impulse, NAME_None, true);
+			rootcomp->AddImpulse(launchVelocity, NAME_None, true);
 		}
 		
 	}
@@ -83,17 +84,18 @@ void UShieldAbility::OnBoxTraceFinished(const FGameplayAbilityTargetDataHandle& 
 
 void UShieldAbility::SpawnShield()
 {
-	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority && shieldActorClass)
+	if (shieldActorClass == nullptr)
 	{
-		FActorSpawnParameters spawnParameters;
+		UE_LOG(LogTemp, Warning, TEXT("Shield Class not set"));
+	}
+
+	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
+	{
 		shieldActor = GetWorld()->SpawnActor<AShieldActor>(shieldActorClass, GetOwningActorFromActorInfo()->GetTransform());		
 		
 		FTransform gripTransform = gripControllerMesh->GetSocketTransform("Aim");
 
-		gripController->GripActor(shieldActor,
-			gripTransform,
-			false,
-			"Ability");
+		gripController->GripActor(shieldActor, gripTransform, false, "Ability");
 	}
 }
 

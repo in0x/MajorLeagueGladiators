@@ -13,7 +13,7 @@ class MAJORLEAGUEGLADIATOR_API AGameplayAbilityTargetActor_Box : public AGamepla
 	GENERATED_BODY()
 public:
 	
-	//Half width, half breadth, half height
+	//Half length, half width, half height
 	void SetHalfExtent(const FVector& HalfExtent);
 
 
