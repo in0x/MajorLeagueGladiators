@@ -24,11 +24,25 @@
 
 #include "Engine/DemoNetDriver.h"
 #include "Engine/NetworkObjectList.h"
-
+#include "ConsoleManager.h"
 
 DECLARE_CYCLE_STAT(TEXT("Char ReplicateMoveToServerVRSimple"), STAT_CharacterMovementReplicateMoveToServerVRSimple, STATGROUP_Character);
 DECLARE_CYCLE_STAT(TEXT("Char CallServerMoveVRSimple"), STAT_CharacterMovementCallServerMoveVRSimple, STATGROUP_Character);
-static const auto CVarNetEnableMoveCombiningVRSimple = IConsoleManager::Get().FindConsoleVariable(TEXT("p.NetEnableMoveCombining"));
+
+//static const auto CVarNetEnableMoveCombiningVRSimple = IConsoleManager::Get().FindConsoleVariable(TEXT("p.NetEnableMoveCombining"));
+
+static const auto CVarNetEnableMoveCombiningVRSimple = []()
+{
+	auto result = IConsoleManager::Get().FindConsoleVariable(TEXT("p.NetEnableMoveCombining"));
+	
+	if (!result)
+	{	
+		result = IConsoleManager::Get().RegisterConsoleVariable(TEXT("__NetEnableMoveCombining"), 0, TEXT("This is a help text"), EConsoleVariableFlags::ECVF_Default);
+	}
+
+	return result;
+}(); 
+
 //#include "PerfCountersHelpers.h"
 //DECLARE_CYCLE_STAT(TEXT("Char PhysWalking"), STAT_CharPhysWalking, STATGROUP_Character);
 //DECLARE_CYCLE_STAT(TEXT("Char PhysFalling"), STAT_CharPhysFalling, STATGROUP_Character);

@@ -18,7 +18,7 @@ class MAJORLEAGUEGLADIATOR_API UVRRootComponent : public UCapsuleComponent//USha
 public:
 	friend class FDrawCylinderSceneProxy;
 
-	FORCEINLINE void GenerateOffsetToWorld(bool bUpdateBounds = true);
+	void GenerateOffsetToWorld(bool bUpdateBounds = true);
 
 	/*FVector GetVROffsetFromLocationAndRotation(FVector Location, const FQuat &Rotation)
 	{
