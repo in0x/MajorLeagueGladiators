@@ -104,7 +104,7 @@ void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHand
 void UGravityGunAbility::OnSearchCancelled(const FGameplayAbilityTargetDataHandle& Data)
 {
 	searchTask = nullptr;
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
 void UGravityGunAbility::OnActorPullFinished(AActor* pulledActor)
@@ -115,13 +115,13 @@ void UGravityGunAbility::OnActorPullFinished(AActor* pulledActor)
 		gripController->TryGrabActor(pulledActor);
 	}
 
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
 void UGravityGunAbility::OnActorPullFailed()
 {
 	pullTask = nullptr;
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
 void UGravityGunAbility::LaunchGrippedActor()
@@ -132,7 +132,7 @@ void UGravityGunAbility::LaunchGrippedActor()
 		gripController->LaunchActor(velocity, true);
 	}
 
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
 void UGravityGunAbility::SetGripControllerFromOwner()

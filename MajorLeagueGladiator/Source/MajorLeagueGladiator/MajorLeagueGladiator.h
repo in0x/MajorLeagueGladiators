@@ -20,10 +20,12 @@
 
 // UNREAL
 #include "PhysXIncludes.h"
+#include "PhysicsPublic.h"
+#include "PhysXPublic.h" 
+#include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
 #include "UnrealNetwork.h"
 #include "MessageEndpointBuilder.h"
 #include "Runtime/Launch/Resources/Version.h"
-#include "Runtime/Engine/Private/EnginePrivate.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "Runtime/UMG/Public/UMG.h"
 #include "Runtime/UMG/Public/UMGStyle.h"

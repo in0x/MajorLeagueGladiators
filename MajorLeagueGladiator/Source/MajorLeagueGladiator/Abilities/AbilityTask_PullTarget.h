@@ -16,7 +16,7 @@ class MAJORLEAGUEGLADIATOR_API UAbilityTask_PullTarget : public UAbilityTask
 	GENERATED_BODY()
 	
 public:
-	static UAbilityTask_PullTarget* Create(UObject* WorldContextObject, FName TaskName, AActor* TargetActor, USceneComponent* EndLocation, float PullSpeed, float MinDistanceThreshold);
+	static UAbilityTask_PullTarget* Create(UGameplayAbility* ThisAbility, FName TaskName, AActor* TargetActor, USceneComponent* EndLocation, float PullSpeed, float MinDistanceThreshold);
 
 	virtual void Activate() override;
 	virtual void ExternalCancel() override;
