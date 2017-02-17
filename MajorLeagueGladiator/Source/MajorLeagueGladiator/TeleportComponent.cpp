@@ -37,22 +37,26 @@ void UTeleportComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 	if (!origin)
 		return;
-	
-	shouldTeleport = UGameplayStatics::PredictProjectilePath(
-		GetWorld(),
-		tpHitResult,
-		positions,
-		lastTraceDest,
-		origin->GetComponentLocation(),
-		origin->GetForwardVector() * 750,
-		true,
-		0,
-		queryTypes,
-		false,
-		TArray<AActor*>(),
-		EDrawDebugTrace::ForOneFrame,
-		1.f
-	);
+
+
+	FPredictProjectilePathParams params(0.f, origin->GetComponentLocation(), origin->GetForwardVector() * 750, 2.f);
+	params.ObjectTypes = queryTypes;
+	params.DrawDebugType = EDrawDebugTrace::ForOneFrame;
+	params.DrawDebugTime = 1.f;
+	params.bTraceComplex = false;
+	params.bTraceWithCollision = true;
+
+	FPredictProjectilePathResult result;
+
+	shouldTeleport = UGameplayStatics::PredictProjectilePath(GetWorld(), params, result);
+
+	tpHitResult = result.HitResult;
+	lastTraceDest = result.LastTraceDestination.Location;
+	positions.Empty(result.PathData.Num());
+	for (const FPredictProjectilePathPointData& PathPoint : result.PathData)
+	{
+		positions.Add(PathPoint.Location);
+	}
 }
 
 void UTeleportComponent::Enable(USceneComponent* TeleportOrigin)
