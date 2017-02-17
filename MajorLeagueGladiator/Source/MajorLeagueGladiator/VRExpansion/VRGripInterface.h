@@ -89,7 +89,7 @@ public:
 	/*============
 
 	NOTE(Phil): I had to change OnGrip and OnGripRelease to virtual so that I can implement them in C++.
-				We need this to notify objects when they are gripped / dropped.
+	We need this to notify objects when they are gripped / dropped.
 	*/
 	// Event triggered on the interfaced object when gripped
 	// UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
@@ -98,7 +98,7 @@ public:
 	// Event triggered on the interfaced object when grip is released
 	//UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
 	virtual void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation) {}
-	
+
 	//===========
 
 	// Event triggered on the interfaced object when child component is gripped
@@ -120,21 +120,37 @@ public:
 	// Interaction Functions
 
 	//===========
-	
+
 	// NOTE(PHIL): Changed so we can use them in C++ 
 	// Call to use an object
 	//UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VRGripInterface")
 	virtual void OnUsed() {}
-		
+
 	// Call to stop using an object
 	//UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VRGripInterface")
 	virtual void OnEndUsed() {}
-		
+
 	//===========
-	
+
+	// Call to use an object
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VRGripInterface")
+		void OnSecondaryUsed();
+
+	// Call to stop using an object
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VRGripInterface")
+		void OnEndSecondaryUsed();
+		
 	// Check if the object is an interactable
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 		bool IsInteractible();
+
+	// Returns if the object is held and if so, which pawn is holding it
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
+		void IsHeld(UGripMotionControllerComponent *& HoldingController, bool & bIsHeld);
+
+	// Sets is held, used by the plugin
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
+		void SetHeld(UGripMotionControllerComponent * HoldingController, bool bIsHeld);
 
 	// Get interactable settings
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
