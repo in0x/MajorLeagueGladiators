@@ -1,7 +1,7 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
 #include "MajorLeagueGladiator.h"
-#include "Runtime/Engine/Private/EnginePrivate.h"
+//#include "Runtime/Engine/Private/EnginePrivate.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "ParentRelativeAttachmentComponent.h"
 #include "VRSimpleCharacter.h"

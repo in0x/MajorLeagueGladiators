@@ -15,7 +15,7 @@
 
 //This is a stupid way of gaining access to this header...see build.cs
 #include "../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Private/SteamVRHMD.h" //"Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Private/SteamVRHMD.h"
-#include "../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Private/SteamVRPrivatePCH.h" // Need a define in here....this is so ugly
+//#include "../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Private/SteamVRPrivatePCH.h" // Need a define in here....this is so ugly
 #include "SteamVRFunctionLibrary.h"
 
 #endif // STEAMVR_SUPPORTED_PLATFORM
