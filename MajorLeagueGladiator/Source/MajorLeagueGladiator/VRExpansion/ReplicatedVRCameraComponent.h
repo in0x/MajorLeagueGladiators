@@ -48,7 +48,9 @@ class MAJORLEAGUEGLADIATOR_API UReplicatedVRCameraComponent : public UCameraComp
 	UFUNCTION()
 	virtual void OnRep_ReplicatedTransform()
 	{
-		SetRelativeLocationAndRotation(ReplicatedTransform.Position, ReplicatedTransform.GetRotation()/*ReplicatedTransform.Orientation*/);
+		ReplicatedTransform.Unpack();
+
+		SetRelativeLocationAndRotation(ReplicatedTransform.UnpackedLocation, ReplicatedTransform.UnpackedRotation);
 	}
 
 	// Rate to update the position to the server, 100htz is default (same as replication rate, should also hit every tick).

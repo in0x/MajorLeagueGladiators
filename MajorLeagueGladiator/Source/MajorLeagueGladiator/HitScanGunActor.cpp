@@ -149,7 +149,7 @@ void AHitScanGunActor::Tick(float DeltaTime)
 
 		auto recoil = FMath::Lerp(FVector(0, recoilOrigin, 0), FVector(0, recoilDistance, 0), elapsedAnimTime / currentAnimDuration);
 
-		TEnumAsByte<EBPVRResultSwitch::Type> result;
+		EBPVRResultSwitch result;
 		FTransform addTrafo;
 		addTrafo.AddToTranslation(recoil);
 
