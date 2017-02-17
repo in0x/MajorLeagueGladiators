@@ -4,19 +4,7 @@
 
 #include "Engine.h"
 
-// VREXPANSION
-#include "VRExpansion/VRBPDatatypes.h"
-#include "VRExpansion/GripMotionControllerComponent.h"
-#include "VRExpansion/VRExpansionFunctionLibrary.h"
-#include "VRExpansion/ReplicatedVRCameraComponent.h"
-#include "VRExpansion/ParentRelativeAttachmentComponent.h"
-#include "VRExpansion/VRRootComponent.h"
-#include "VRExpansion/VRCharacterMovementComponent.h"
-#include "VRExpansion/VRCharacter.h"
-#include "VRExpansion/VRPathFollowingComponent.h"
-#include "VRExpansion/VRPlayerController.h"
-#include "VRExpansion/VRGripInterface.h"
-#include "VRExpansion/VRSimpleCharacter.h"
+#include "Private/SteamVRPrivate.h"
 
 // UNREAL
 #include "PhysXIncludes.h"
@@ -36,6 +24,20 @@
 // STL
 #include <algorithm>
 #include <memory>
+
+// VREXPANSION
+#include "VRExpansion/VRBPDatatypes.h"
+#include "VRExpansion/GripMotionControllerComponent.h"
+#include "VRExpansion/VRExpansionFunctionLibrary.h"
+#include "VRExpansion/ReplicatedVRCameraComponent.h"
+#include "VRExpansion/ParentRelativeAttachmentComponent.h"
+#include "VRExpansion/VRRootComponent.h"
+#include "VRExpansion/VRCharacterMovementComponent.h"
+#include "VRExpansion/VRCharacter.h"
+#include "VRExpansion/VRPathFollowingComponent.h"
+#include "VRExpansion/VRPlayerController.h"
+#include "VRExpansion/VRGripInterface.h"
+#include "VRExpansion/VRSimpleCharacter.h"
 
 // LOG
 DECLARE_LOG_CATEGORY_EXTERN(DebugLog, Log, All);

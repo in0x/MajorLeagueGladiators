@@ -1,7 +1,7 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
 #include "MajorLeagueGladiator.h"
-//#include "Runtime/Engine/Private/EnginePrivate.h"
+//#include "Runtime/Engine/Private/EnginePrivate.h" //Altered
 
 #include "PhysicsPublic.h"
 
@@ -562,10 +562,11 @@ bool UVRRootComponent::MoveComponentImpl(const FVector& Delta, const FQuat& NewR
 				}
 			}
 #endif*/
-
-#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST) && PERF_MOVECOMPONENT_STATS
-			MoveTimer.bDidLineCheck = true;
-#endif 
+//Altered - PERF_MOVECOMPONENT_STATS is defined in primitivecomponent.cpp now. Most of the time PERF_MOVECOMPONENT_STATS is defined as 0,
+//so this should be fine
+//#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST) && PERF_MOVECOMPONENT_STATS
+//			MoveTimer.bDidLineCheck = true;
+//#endif 
 			UWorld* const MyWorld = GetWorld();
 
 			FComponentQueryParams Params(/*PrimitiveComponentStatics::MoveComponentName*/"MoveComponent", Actor);
