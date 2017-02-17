@@ -6,7 +6,6 @@
 //#endif
 
 #include "VRExpansionFunctionLibrary.h"
-#include "Private/SteamVRPrivate.h"
 
 //General Log
 DEFINE_LOG_CATEGORY(VRExpansionFunctionLibraryLog);

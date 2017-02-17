@@ -3,8 +3,9 @@
 #pragma once
 #include "Engine.h"
 
-#include "PhysXIncludes.h"
-#include "PhysXPublic.h" 
+//#include "PhysicsPublic.h" Altered
+#include "PhysXIncludes.h" //Altered, added
+#include "PhysXPublic.h" //Altered, added
 #if WITH_PHYSX
 #include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
 #endif // WITH_PHYSX
