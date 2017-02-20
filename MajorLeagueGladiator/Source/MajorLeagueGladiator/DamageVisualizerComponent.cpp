@@ -5,21 +5,24 @@
 #include "DamageReceiverComponent.h"
 
 UDamageVisualizerComponent::UDamageVisualizerComponent()
+	: isVisualizingMaterial(false)
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UDamageVisualizerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UStaticMeshComponent* targetMeshComponent = GetOwner()->FindComponentByClass<UStaticMeshComponent>();
+	UMeshComponent* targetMeshComponent = GetOwner()->FindComponentByClass<UMeshComponent>();
 
 	if (targetMeshComponent)
 	{
-		UMaterialInterface* matIface = targetMeshComponent->GetMaterial(0); //Currently should only have one.
-		matInstance = UMaterialInstanceDynamic::Create(matIface, targetMeshComponent); //GetOwner()
-		targetMeshComponent->SetMaterial(0, matInstance);
+		matInstance = targetMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No MeshComponent found."));
 	}
 
 	UDamageReceiverComponent* damageReceiver = GetOwner()->FindComponentByClass<UDamageReceiverComponent>();
@@ -32,6 +35,19 @@ void UDamageVisualizerComponent::BeginPlay()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UDamageReceiverComponent missing."));
+	}
+}
+
+void UDamageVisualizerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (isVisualizingMaterial)
+	{
+		if (matInstance)
+		{
+			matInstance->SetScalarParameterValue(FName(DAMAGE_VALUE_PARAMETER_NAME), 1.0f);
+		}
 	}
 }
 
@@ -66,7 +82,8 @@ void UDamageVisualizerComponent::startMaterialVisualization_NetMulticast_Impleme
 {
 	if (matInstance)
 	{
-		matInstance->SetScalarParameterValue(FName("DamageValue"), 1.0f);
+		isVisualizingMaterial = true;
+		matInstance->SetScalarParameterValue(FName(DAMAGE_VALUE_PARAMETER_NAME), 1.0f);
 
 		FTimerManager& timer = GetOwner()->GetWorldTimerManager();
 		FTimerHandle timerHandle;
@@ -80,31 +97,18 @@ void UDamageVisualizerComponent::startMaterialVisualization_NetMulticast_Impleme
 
 void UDamageVisualizerComponent::startParticleSystemVisualization_NetMulticast_Implementation(const FTransform& visualizationTransform)
 {
-
-	auto ps = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, visualizationTransform, true);
-	ps->Activate();
-	particleSystemInstances.Add(ps);
-
-	FTimerManager& timer = GetOwner()->GetWorldTimerManager();
-	FTimerHandle timerHandle;
-	timer.SetTimer(timerHandle, this, &UDamageVisualizerComponent::stopParticleSystemVisualization, particleSystemVisualizationDuration, false);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, visualizationTransform.GetLocation()); //
 }
 
 void UDamageVisualizerComponent::stopMaterialVisualization()
 {
+	isVisualizingMaterial = false;
 	if (matInstance)
 	{
-		matInstance->SetScalarParameterValue(FName("DamageValue"), 0.0f);
+		matInstance->SetScalarParameterValue(FName(DAMAGE_VALUE_PARAMETER_NAME), 0.0f);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UDamageVisualizerComponent::startDamageVisualization: NO Material Instance!"));
 	}
-}
-
-void UDamageVisualizerComponent::stopParticleSystemVisualization()
-{
-	auto ps = particleSystemInstances.Pop();
-	ps->Deactivate();
-	ps->DestroyComponent();
 }
