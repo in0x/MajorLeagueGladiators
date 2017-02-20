@@ -14,9 +14,13 @@ class MAJORLEAGUEGLADIATOR_API UDamageVisualizerComponent : public UActorCompone
 
 public:	
 
+	const char* DAMAGE_VALUE_PARAMETER_NAME = "DamageValue";
+
 	UDamageVisualizerComponent();
 
 	virtual void BeginPlay() override;
+
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 
@@ -26,12 +30,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Visualizer")
 	float materialVisualizationDuration;
 
-	UPROPERTY(EditAnywhere, Category = "Visualizer")
-		float particleSystemVisualizationDuration;
-
-	TArray<UParticleSystemComponent*> particleSystemInstances;
-
 	UMaterialInstanceDynamic* matInstance;
+
+	bool isVisualizingMaterial;
 
 	UFUNCTION()
 	void onDamageReceived(AActor* DamagedActor);
@@ -46,6 +47,4 @@ private:
 	void startParticleSystemVisualization_NetMulticast(const FTransform& visualizationTransform);
 
 	void stopMaterialVisualization();
-
-	void stopParticleSystemVisualization();
 };
