@@ -8,12 +8,14 @@
 namespace
 {
 	const char* REFLECT_SOCKET_NAME = "Reflect";
+	const char* ABILITY_ACTOR_COLLISION_PRESET_NAME = "AbilityActor";
 }
 
 AShieldActor::AShieldActor()
 {
 	bReplicates = true;
 	GetStaticMeshComponent()->bGenerateOverlapEvents = true;
+	GetStaticMeshComponent()->SetCollisionProfileName(ABILITY_ACTOR_COLLISION_PRESET_NAME);
 }
 
 void AShieldActor::NotifyActorBeginOverlap(AActor* OtherActor)
