@@ -54,9 +54,13 @@ bool AShieldActor::ReflectProjectile_Server_Validate(AActor* Projectile, FVector
 
 void AShieldActor::ReflectProjectile_Server_Implementation(AActor* Projectile, FVector SocketLocation, FRotator SocketRotation)
 {
-	AActor* spawnedActor = GetWorld()->SpawnActor<AActor>(Projectile->GetClass(), SocketLocation, SocketRotation);
-	UPrimitiveComponent* rootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
-	rootComponent->AddImpulse(1000 * SocketRotation.Vector(), NAME_None, true);
+	AActor* spawnedActor = GetWorld()->SpawnActorDeferred<AActor>(Projectile->GetClass(), SocketLocation, SocketRotation);
+	UPrimitiveComponent* spawnedRootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
+	spawnedRootComponent->AddImpulse(1000 * SocketRotation.Vector(), NAME_None, true);
+
+	//Don't collide with shield again
+	spawnedRootComponent->MoveIgnoreActors.Add(this);
+	spawnedActor->FinishSpawning(FTransform(SocketRotation, SocketLocation));
 
 	Projectile->Destroy();
 }
