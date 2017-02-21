@@ -96,7 +96,14 @@ void UShieldAbility::SpawnShield()
 
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
 	{
-		shieldActor = GetWorld()->SpawnActor<AShieldActor>(shieldActorClass, GetOwningActorFromActorInfo()->GetTransform());		
+		
+		APawn* ownerPawn = CastChecked<APawn>(GetOwningActorFromActorInfo());
+
+		FActorSpawnParameters spawnParams;
+		spawnParams.Owner = ownerPawn;
+		spawnParams.Instigator = ownerPawn;
+
+		shieldActor = GetWorld()->SpawnActor<AShieldActor>(shieldActorClass, GetOwningActorFromActorInfo()->GetTransform(), spawnParams);
 		
 		FTransform gripTransform = gripControllerMesh->GetSocketTransform(AIM_SOCKET_NAME);
 

@@ -4,6 +4,11 @@
 #include "Singleton.h"
 
 
+namespace
+{
+	const char* REFLECT_SOCKET_NAME = "Reflect";
+}
+
 USingleton::USingleton(const FObjectInitializer& ObjectInitializer)
 {
 }
