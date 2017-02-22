@@ -3,7 +3,7 @@
 #include "MajorLeagueGladiator.h"
 #include "MlgPlayerCharacter.h"
 #include "VRControllerComponent.h"
-#include "TeleportComponent.h"
+#include "ArcAimComponent.h"
 #include "TriggerZoneComponent.h"
 #include "HealthComponent.h"
 #include "MlgPlayerController.h"
@@ -48,8 +48,8 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	hudTeleportCD = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HudTeleportCD"));
 	hudTeleportCD->SetupAttachment(leftMesh, FName(TEXT("Touch"), EFindName::FNAME_Find));
 	
-	teleportComp = ObjectInitializer.CreateDefaultSubobject<UTeleportComponent>(this, TEXT("TeleportComp"));
-	teleportComp->Disable();
+	arcAimComp = ObjectInitializer.CreateDefaultSubobject<UArcAimComponent>(this, TEXT("ArcAimComp"));
+	arcAimComp->Disable();
 
 	abilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAbilitySystemComponent>(this, TEXT("GameplayTasks"));
 	abilitySystemComponent->SetIsReplicated(true);
@@ -93,10 +93,18 @@ void AMlgPlayerCharacter::BeginPlay()
 	auto healthWidget = CastChecked<UPlayerHudWidget>(hudHealth->GetUserWidgetObject());
 	healthWidget->OnAttachPlayer(this);
 
-	teleportComp->OnCooldownChange.AddLambda([textWidget = CastChecked<UTextWidget>(hudTeleportCD->GetUserWidgetObject())](float CurrentCD)
+	arcAimComp->OnCooldownChange.AddLambda([textWidget = CastChecked<UTextWidget>(hudTeleportCD->GetUserWidgetObject())](float CurrentCD)
 	{
 		textWidget->SetText(FString::FromInt(static_cast<int>(FMath::RoundFromZero(CurrentCD))));
 	});
+
+	LandedDelegate.AddDynamic(this, &AMlgPlayerCharacter::OnLand);
+}
+
+void AMlgPlayerCharacter::OnLand(const FHitResult& hit)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Landed"));
+	GetCharacterMovement()->StopMovementImmediately();
 }
 
 void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -210,12 +218,12 @@ void AMlgPlayerCharacter::OnRightTriggerReleased()
 
 void AMlgPlayerCharacter::OnTeleportPressedLeft()
 {
-	teleportComp->Enable(LeftMotionController);
+	arcAimComp->Enable(/*LeftMotionController*/GetRootComponent(), LeftMotionController);
 }
 
 void AMlgPlayerCharacter::OnTeleportPressedRight()
 {
-	teleportComp->Enable(RightMotionController);
+	arcAimComp->Enable(GetRootComponent(), RightMotionController);
 }
 
 void AMlgPlayerCharacter::OnSideGripButtonLeft()
@@ -258,14 +266,14 @@ UVRControllerComponent* AMlgPlayerCharacter::GetMotionController(EControllerHand
 
 void AMlgPlayerCharacter::OnTeleportReleased()
 {
-	auto result = teleportComp->GetTeleportResult();
-	teleportComp->Disable();
+	auto result = arcAimComp->GetAimResult();
+	arcAimComp->Disable();
 
-	if (result.ShouldTeleport)
+	if (result.bDidAimFindPosition)
 	{
 		if (Role >= ROLE_Authority)
 		{
-			performTeleport_NetMulticast(result.Position, GetActorRotation());
+			this->LaunchCharacter(LeftMotionController->GetForwardVector() * arcAimComp->GetPredictProjectileForce(), true, true);
 		}
 		else
 		{

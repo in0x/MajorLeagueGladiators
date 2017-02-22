@@ -5,7 +5,7 @@
 #include "AbilitySystemInterface.h"
 #include "MlgPlayerCharacter.generated.h"
 
-class UTeleportComponent;
+class UArcAimComponent;
 class UHealthComponent;
 class AMlgPlayerController;
 class UWidgetComponent;
@@ -51,7 +51,7 @@ private:
 	UStaticMeshComponent* rightMesh;
 
 	UPROPERTY(EditAnywhere)
-	UTeleportComponent* teleportComp;
+	UArcAimComponent* arcAimComp;
 
 	UPROPERTY(EditAnywhere)
 	UHealthComponent* healthComp;
@@ -115,4 +115,7 @@ private:
 	virtual void BecomeViewTarget(APlayerController* PC) override;
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const { return abilitySystemComponent; }
+	
+	UFUNCTION()
+	void OnLand(const FHitResult& hit);
 };

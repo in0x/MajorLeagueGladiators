@@ -2,43 +2,49 @@
 
 #pragma once
 
-#include "Components/ActorComponent.h"
-#include "TeleportComponent.generated.h"
+#include "ArcAimComponent.generated.h"
 
-struct TeleportResult
+struct ArcAimResult
 {
 	FVector Position;
-	bool ShouldTeleport;
+	bool bDidAimFindPosition;
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(CooldownChangeDelegate, float);
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
-class MAJORLEAGUEGLADIATOR_API UTeleportComponent : public UPrimitiveComponent
+class MAJORLEAGUEGLADIATOR_API UArcAimComponent : public UPrimitiveComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UTeleportComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UArcAimComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 	
-	void Enable(USceneComponent* TeleportOrigin);
-	TeleportResult GetTeleportResult();
+	void Enable(USceneComponent* TeleportOrigin, USceneComponent* TeleportDirection);
+	ArcAimResult GetAimResult();
 	void Disable();
 
 	CooldownChangeDelegate OnCooldownChange;
+
+	float GetPredictProjectileForce() const
+	{
+		return 1000.f;
+	}
 
 private:
 	UPROPERTY(EditAnywhere)
 	float cooldown;
 	float elapsedCooldown;
+
 	USceneComponent* origin;	
-	
+	USceneComponent* direction;
+
 	// PredictProjectilePath Hit Test Data
 	FVector lastTraceDest;
 	FHitResult tpHitResult;
 	TArray<FVector> positions;
 	TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{ EObjectTypeQuery::ObjectTypeQuery1 }; // ObjectTypeQuery1 is static world objects
-	bool shouldTeleport;
+	bool bDidAimFindPosition;
 };
