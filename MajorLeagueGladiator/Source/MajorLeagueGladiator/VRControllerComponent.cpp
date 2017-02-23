@@ -56,13 +56,9 @@ void UVRControllerComponent::DropNonInteractGrips()
 
 UVRControllerComponent::ActorGrabData UVRControllerComponent::getNearestGrabableActor() const
 {
-
 	TArray<FHitResult> hitresults;
 
-	FCollisionObjectQueryParams params;
-
-	GetWorld()->SweepMultiByObjectType(hitresults, GetComponentLocation(), GetComponentLocation(), {}, params, FCollisionShape::MakeSphere(grabRadius));
-
+	GetWorld()->SweepMultiByObjectType(hitresults, GetComponentLocation(), GetComponentLocation(), {}, {}, FCollisionShape::MakeSphere(grabRadius));
 
 	hitresults = hitresults.FilterByPredicate([](const FHitResult& hitresult)
 	{

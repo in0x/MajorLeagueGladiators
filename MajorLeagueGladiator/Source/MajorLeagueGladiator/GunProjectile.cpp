@@ -12,6 +12,7 @@ AGunProjectile::AGunProjectile(const FObjectInitializer& ObjectInitializer)
 	bReplicateMovement = true;
 	bStaticMeshReplicateMovement = true;
 	projectileMovementComponent = ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, "projectileMovementComponent");
+	projectileMovementComponent->InitialSpeed = 1000;
 }
 
 void AGunProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
@@ -44,8 +45,8 @@ void AGunProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		DealDamage(OtherActor);
 	}
-	Destroy();
 
+	Destroy();
 }
 
 void AGunProjectile::DealDamage(AActor* OtherActor)
