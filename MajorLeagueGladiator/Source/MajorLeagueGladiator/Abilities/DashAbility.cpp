@@ -4,7 +4,16 @@
 #include "VRControllerComponent.h"
 #include "AbilityTask_WaitTargetData.h"
 #include "GameplayAbilityTargetActor_PredictProjectile.h"
-#include "GameplayTask_WaitUntiLocationReached.h"
+
+/*
+	Aim with Raycast
+	Limit Range
+	Ignore vertical surfaces
+	Dash directly to point
+	Turn off collision
+	Turn on flying movement mode
+	Move x units per second towards point
+*/
 
 UDashAbility::UDashAbility()
 	: PredictProjectileSpeed(1000.f)
@@ -47,8 +56,7 @@ void UDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 {
 	waitForTargetTask = nullptr;
 	targetingSpawnedActor = nullptr;
-	waitForLocationReachTask = nullptr;
-
+	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
@@ -57,15 +65,10 @@ void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
 	{
 		auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
-		player->ExtendedSimpleMoveToLocation(Data.Data[0]->GetHitResult()->Location);
+	
+		player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
 
-		/*waitForLocationReachTask = UGameplayTask_WaitUntiLocationReached::Create(this, "Wait for Location Reached Task", player);
-		waitForLocationReachTask->Activate();
-
-		waitForLocationReachTask->OnLocationReached.AddLambda([this]() 
-		{
-			EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
-		});*/
+		player->ExtendedSimpleMoveToLocation(Data.Data[0]->GetHitResult()->Location + FVector(0,0,100));
 
 		auto compPathFollow = player->GetController()->GetComponentByClass(UPathFollowingComponent::StaticClass());
 		auto pathFollow = CastChecked<UPathFollowingComponent>(compPathFollow);
@@ -75,6 +78,8 @@ void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 
 void UDashAbility::OnLocationReached(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
+	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	//player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
