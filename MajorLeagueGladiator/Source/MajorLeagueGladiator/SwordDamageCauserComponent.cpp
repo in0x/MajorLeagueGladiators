@@ -42,28 +42,17 @@ void USwordDamageCauserComponent::TickComponent(float DeltaTime, ELevelTick Tick
 	bool newCanDealDamage = oldSwingSpeed.SizeSquared() > threshholdDoDamageSquared;
 	if (newCanDealDamage && !canDealDamage)
 	{
-		startSlash();
+		onStartSlash();
 	}
 	else if (!newCanDealDamage && canDealDamage)
 	{
-		endSlash();
+		onEndSlash();
 	}
+	canDealDamage = newCanDealDamage;
 }
 
-void USwordDamageCauserComponent::damageAllOverlappingActors() 
+void USwordDamageCauserComponent::onStartSlash()
 {
-	TArray <AActor*> overlappingActors;
-	AActor* owner = GetOwner();
-	owner->GetOverlappingActors(overlappingActors);
-	for (int i = 0; i < overlappingActors.Num(); i++)
-	{
-		UGameplayStatics::ApplyDamage(overlappingActors[i], damageAppliedOnHit, nullptr, owner, damageType);
-	}
-}
-
-void USwordDamageCauserComponent::startSlash()
-{
-	canDealDamage = true;
 	damageAllOverlappingActors();
 
 	if (materialRedObject_Dyn == nullptr)
@@ -74,9 +63,8 @@ void USwordDamageCauserComponent::startSlash()
 	setMaterialOfOwnerMesh(materialRedObject_Dyn);
 }
 
-void USwordDamageCauserComponent::endSlash()
+void USwordDamageCauserComponent::onEndSlash()
 {
-	canDealDamage = false;
 	if (!materialObject_Dyn)
 	{
 		materialObject_Dyn = UMaterialInstanceDynamic::Create(materialObject, this);
@@ -85,6 +73,21 @@ void USwordDamageCauserComponent::endSlash()
 	setMaterialOfOwnerMesh(materialObject_Dyn);
 }
 
+void USwordDamageCauserComponent::damageAllOverlappingActors()
+{
+	TArray <AActor*> overlappingActors;
+	AActor* owner = GetOwner();
+	owner->GetOverlappingActors(overlappingActors);
+	if (overlappingActors.Num()) 
+	{
+		doRumbleRight(GetOwner());
+	}
+	for (AActor* actor : overlappingActors)
+	{
+		UGameplayStatics::ApplyDamage(actor, damageAppliedOnHit, nullptr, owner, damageType);
+	}
+
+}
 
 void USwordDamageCauserComponent::setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn) 
 {

@@ -42,8 +42,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	float slashVelocityLearnRate; 
 
-	void startSlash();
-	void endSlash();
+	void onStartSlash();
+	void onEndSlash();
 	void damageAllOverlappingActors();
 
 	void setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn);
