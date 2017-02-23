@@ -42,8 +42,11 @@ void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
-	auto player = CastChecked<ACharacter>(GetOwningActorFromActorInfo());
-	player->LaunchCharacter(Data.Data[0]->GetHitResult()->TraceStart, true, true); // Reuse TraceStart to transport launch velocity
+	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
+	{
+		auto player = CastChecked<ACharacter>(GetOwningActorFromActorInfo());
+		player->LaunchCharacter(Data.Data[0]->GetHitResult()->TraceStart, true, true); // Reuse TraceStart to transport launch velocity
+	}
 
 	waitForTargetTask = nullptr;
 	targetingSpawnedActor = nullptr;
