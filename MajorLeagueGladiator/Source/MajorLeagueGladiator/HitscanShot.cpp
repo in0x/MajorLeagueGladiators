@@ -6,6 +6,11 @@
 
 #include "ShieldActor.h"
 
+namespace
+{
+	const char* ABILITY_ACTOR_PROFILE_NAME = "AbilityActor";
+}
+
 AHitscanShot::AHitscanShot()
 	: range(1000000.f)
 {
@@ -38,12 +43,18 @@ FHitResult AHitscanShot::Trace(UWorld* world, FVector Location, FVector Directio
 {
 	FVector end = Location + DirectionVector * range;
 
+	FCollisionResponseTemplate abilityActorCollisionTemplate;
+	bool success = UCollisionProfile::Get()->GetProfileTemplate(FName(ABILITY_ACTOR_PROFILE_NAME), abilityActorCollisionTemplate);
+	checkf(success, TEXT("AbilityActor Collision Profile is missing"));	
+	
 	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic),
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic),
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody),
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)
+		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn),
+		UEngineTypes::ConvertToObjectType(abilityActorCollisionTemplate.ObjectType)
 	};
+	
 
 	FHitResult result;
 	FCollisionQueryParams CollisionParams;
