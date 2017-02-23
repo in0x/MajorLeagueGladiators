@@ -42,12 +42,6 @@ void UArcAimComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	if (!origin)
 		return;
 
-	/*
-	FVector tossVel; 
-			UGameplayStatics::SuggestProjectileVelocity(GetWorld(), tossVel, GetActorLocation(), GetActorLocation() + FVector(-500, 0, 500), 100);
-			
-	*/
-
 	FPredictProjectilePathParams params(0.f, origin->GetComponentLocation() - (origin->GetUpVector().GetSafeNormal() * 96) /*Capsule Half Height*/, direction->GetForwardVector() * GetPredictProjectileForce(), 2.f);
 	params.ObjectTypes = queryTypes;
 	params.DrawDebugType = EDrawDebugTrace::ForOneFrame /*EDrawDebugTrace::ForDuration*/;
