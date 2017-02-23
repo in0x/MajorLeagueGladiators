@@ -103,7 +103,6 @@ void AMlgPlayerCharacter::BeginPlay()
 
 void AMlgPlayerCharacter::OnLand(const FHitResult& hit)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Landed"));
 	GetCharacterMovement()->StopMovementImmediately();
 }
 
@@ -218,12 +217,12 @@ void AMlgPlayerCharacter::OnRightTriggerReleased()
 
 void AMlgPlayerCharacter::OnTeleportPressedLeft()
 {
-	arcAimComp->Enable(/*LeftMotionController*/GetRootComponent(), LeftMotionController);
+	arcAimComp->Enable(LeftMotionController);
 }
 
 void AMlgPlayerCharacter::OnTeleportPressedRight()
 {
-	arcAimComp->Enable(GetRootComponent(), RightMotionController);
+	arcAimComp->Enable(RightMotionController);
 }
 
 void AMlgPlayerCharacter::OnSideGripButtonLeft()
@@ -273,7 +272,7 @@ void AMlgPlayerCharacter::OnTeleportReleased()
 	{
 		if (Role >= ROLE_Authority)
 		{
-			this->LaunchCharacter(LeftMotionController->GetForwardVector() * arcAimComp->GetPredictProjectileForce(), true, true);
+			TeleportTo(result.Position, GetActorRotation());
 		}
 		else
 		{

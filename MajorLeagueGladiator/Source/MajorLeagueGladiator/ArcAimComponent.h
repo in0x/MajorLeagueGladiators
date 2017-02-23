@@ -22,7 +22,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 	
-	void Enable(USceneComponent* TeleportOrigin, USceneComponent* TeleportDirection);
+	void Enable(USceneComponent* TeleportOrigin);
 	ArcAimResult GetAimResult();
 	void Disable();
 
@@ -39,8 +39,7 @@ private:
 	float elapsedCooldown;
 
 	USceneComponent* origin;	
-	USceneComponent* direction;
-
+	
 	// PredictProjectilePath Hit Test Data
 	FVector lastTraceDest;
 	FHitResult tpHitResult;
