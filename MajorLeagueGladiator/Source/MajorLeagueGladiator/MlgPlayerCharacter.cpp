@@ -36,12 +36,6 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	rightMesh->SetupAttachment(RightMotionController);
 	bodyMesh->SetupAttachment(VRReplicatedCamera);
 
-	leftGrabSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("LeftGrabSphere"));
-	rightGrabSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("RightGrabSphere"));
-
-	leftGrabSphere->SetupAttachment(LeftMotionController);
-	rightGrabSphere->SetupAttachment(RightMotionController);
-
 	hudHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 	hudHealth->SetupAttachment(leftMesh, FName(TEXT("Touch")));
 	
@@ -291,7 +285,7 @@ void AMlgPlayerCharacter::leftHandGrab_Server_Implementation()
 {
 	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
 	leftController->UseGrippedActors();
-	leftController->GrabNearestActor(*leftGrabSphere);
+	leftController->GrabNearestActor();
 }
 
 bool AMlgPlayerCharacter::leftHandRelease_Server_Validate()
@@ -328,7 +322,7 @@ void AMlgPlayerCharacter::rightHandGrab_Server_Implementation()
 {
 	UVRControllerComponent* rightController = CastChecked<UVRControllerComponent>(RightMotionController);
 	rightController->UseGrippedActors();
-	rightController->GrabNearestActor(*rightGrabSphere);
+	rightController->GrabNearestActor();
 }
 
 bool AMlgPlayerCharacter::rightHandRelease_Server_Validate()

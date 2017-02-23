@@ -60,12 +60,6 @@ private:
 	UDamageReceiverComponent* dmgReceiverComp;
 
 	UPROPERTY(EditAnywhere)
-	USphereComponent* leftGrabSphere;
-
-	UPROPERTY(EditAnywhere)
-	USphereComponent* rightGrabSphere;
-
-	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* bodyMesh;
 
 	UPROPERTY(EditAnywhere)

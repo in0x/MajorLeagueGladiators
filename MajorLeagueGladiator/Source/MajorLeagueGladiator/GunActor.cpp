@@ -61,9 +61,13 @@ void AGunActor::Tick(float DeltaTime)
 	{
 		ammoComponent->ConsumeAmmo(); 
 		FTransform trafo;
+		FActorSpawnParameters spawnParaters;
+		spawnParaters.Owner = this;
+		spawnParaters.Instigator = GetMlgPlayerController()->GetPawn();
+
 		projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
 
-		auto projectile = GetWorld()->SpawnActor<AGunProjectile>(ammoComponent->GetProjectileType(), trafo);
+		auto projectile = GetWorld()->SpawnActor<AGunProjectile>(ammoComponent->GetProjectileType(), trafo, spawnParaters);
 		checkf(projectile, TEXT("AGunProjectile spawned by AGunActor was null"));
 		projectile->GetStaticMeshComponent()->AddImpulse(trafo.GetRotation().GetForwardVector() * projectileVelAccel);
 

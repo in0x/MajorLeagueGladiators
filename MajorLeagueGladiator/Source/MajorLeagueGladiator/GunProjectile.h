@@ -2,29 +2,29 @@
 
 #pragma once
 
-#include "Engine/StaticMeshActor.h"
+#include "MlgProjectile.h"
+
 #include "GunProjectile.generated.h"
 
-/**
- * 
- */
+class UProjectileMovementComponent;
+
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AGunProjectile : public AStaticMeshActor
+class MAJORLEAGUEGLADIATOR_API AGunProjectile : public AMlgProjectile
 {
 	GENERATED_BODY()
 	
 public:
-	AGunProjectile();
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTimeS) override;
+	AGunProjectile(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	
+	virtual void FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const override;
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
 private:
-	// Time until this projectile is destroyed in seconds.
-	UPROPERTY(EditAnywhere)
-	float lifeTimeS;
 
-	UFUNCTION()
-	void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+	void DealDamage(AActor* OtherActor);
+	bool IsIgnoredActor(const AActor* Actor) const;
 
-	float timeAliveS;
+	UPROPERTY()
+	UProjectileMovementComponent* projectileMovementComponent;
+
 };

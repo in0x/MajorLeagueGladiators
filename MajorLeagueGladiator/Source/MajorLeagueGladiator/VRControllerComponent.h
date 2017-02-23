@@ -15,7 +15,7 @@ class MAJORLEAGUEGLADIATOR_API UVRControllerComponent : public UGripMotionContro
 
 public:
 	UVRControllerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	bool GrabNearestActor(const USphereComponent& GrabSphere);
+	bool GrabNearestActor();
 	void DropAllGrips();
 	void DropNonInteractGrips();
 	void UseGrippedActors();
@@ -32,6 +32,9 @@ private:
 		IVRGripInterface* pIVRGrip;
 	};
 
-	ActorGrabData getNearestGrabableActor(const USphereComponent& GrabSphere) const;
+	ActorGrabData getNearestGrabableActor() const;
 	void GrabActorImpl(ActorGrabData GrabData);
+
+	UPROPERTY(EditAnywhere)
+	float grabRadius;
 };
