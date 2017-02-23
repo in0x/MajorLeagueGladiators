@@ -3,9 +3,8 @@
 #include "MajorLeagueGladiator.h"
 #include "ShieldActor.h"
 
-#include "GunProjectile.h"
-
 #include "MlgProjectile.h"
+#include "MlgPlayerController.h"
 
 namespace
 {
@@ -27,10 +26,13 @@ void AShieldActor::NotifyActorBeginOverlap(AActor* OtherActor)
 
 void AShieldActor::OnHitInteractable(const AMlgProjectile* projectile)
 {
-	if (GetStaticMeshComponent()->GetSocketByName(REFLECT_SOCKET_NAME) == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Socket \"%s\" is missing in the shield actor mesh"), *FString(REFLECT_SOCKET_NAME));
-	}
+	checkf(GetStaticMeshComponent()->GetSocketByName(REFLECT_SOCKET_NAME), TEXT("Socket \"AbilityActor\" is missing in the shield actor mesh"));
+
 	FTransform socketTransform = GetStaticMeshComponent()->GetSocketTransform(REFLECT_SOCKET_NAME);
-	projectile->FireProjectile(socketTransform.GetLocation(), socketTransform.Rotator().Vector(), this, Instigator->GetController());	
+	projectile->FireProjectile(socketTransform.GetLocation(), socketTransform.Rotator().Vector(), this, Instigator->GetController());
+
+	if (AMlgPlayerController* playerController = GetMlgPlayerController())
+	{
+		playerController->ClientPlayForceFeedback(playerController->GetRumbleShortLeft(), false, FName("rumbleLeft"));
+	}
 }
