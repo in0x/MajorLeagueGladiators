@@ -100,7 +100,6 @@ void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHand
 	pullTask->OnFail.AddUObject(this, &UGravityGunAbility::OnActorPullFailed);
 }
 
-
 void UGravityGunAbility::OnSearchCancelled(const FGameplayAbilityTargetDataHandle& Data)
 {
 	searchTask = nullptr;
