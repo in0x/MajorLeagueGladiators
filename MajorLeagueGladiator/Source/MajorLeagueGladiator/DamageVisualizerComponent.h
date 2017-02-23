@@ -14,8 +14,6 @@ class MAJORLEAGUEGLADIATOR_API UDamageVisualizerComponent : public UActorCompone
 
 public:	
 
-	const char* DAMAGE_VALUE_PARAMETER_NAME = "DamageValue";
-
 	UDamageVisualizerComponent();
 
 	virtual void BeginPlay() override;
@@ -30,9 +28,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Visualizer")
 	float materialVisualizationDuration;
 
+	const char* DAMAGE_VALUE_PARAMETER_NAME = "DamageValue";
+
 	UMaterialInstanceDynamic* matInstance;
 
 	bool isVisualizingMaterial;
+
+	float currentMatVisualizationDuration;
 
 	UFUNCTION()
 	void onDamageReceived(AActor* DamagedActor);
