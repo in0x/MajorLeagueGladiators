@@ -7,6 +7,7 @@
 #include "WidgetComponent.h"
 #include "TextWidget.h"
 #include "MlgPlayerController.h"
+#include "HitscanShot.h"
 
 AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -15,6 +16,7 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	, elapsedAnimTime(0.f)
 	, recoilOrigin(0.f)
 	, recoilDistance(-30.f)
+	, shotClass(AHitscanShot::StaticClass())
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -113,29 +115,7 @@ void AHitScanGunActor::shoot()
 	FTransform trafo;
 	shotOriginSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
 
-	auto forward = trafo.GetRotation().GetForwardVector();
-	forward.Normalize();
-	auto start = trafo.GetLocation();
-	auto end = start + forward * shotRange; 
-	
-	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic),
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic),
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody),
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)
-	};
-
-	FHitResult result;
-	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this);
-	auto* world = GetWorld();
-	
-	world->LineTraceSingleByObjectType(result, start, end, queryTypes, CollisionParams);
-	
-	if (result.bBlockingHit)
-	{
-		UGameplayStatics::ApplyDamage(result.GetActor(), damage, nullptr, this, UPlayerDamage::StaticClass());
-	}
+	shotClass.GetDefaultObject()->FireProjectile(trafo.GetLocation(), trafo.GetRotation().GetForwardVector(), this, GetMlgPlayerController());
 }
 
 void AHitScanGunActor::Tick(float DeltaTime)

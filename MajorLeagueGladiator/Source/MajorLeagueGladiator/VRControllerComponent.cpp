@@ -6,15 +6,16 @@
 
 UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
+	, grabRadius(32)
 {}
 
 
-bool UVRControllerComponent::GrabNearestActor(const USphereComponent& GrabSphere)
+bool UVRControllerComponent::GrabNearestActor()
 {	
 	if (GrippedActors.Num() > 0)
 		return false;
 
-	auto grabData = getNearestGrabableActor(GrabSphere);
+	auto grabData = getNearestGrabableActor();
 	
 	if (!grabData.pActorToGrip)
 	{
@@ -53,36 +54,44 @@ void UVRControllerComponent::DropNonInteractGrips()
 	}
 }
 
-UVRControllerComponent::ActorGrabData UVRControllerComponent::getNearestGrabableActor(const USphereComponent& GrabSphere) const
+UVRControllerComponent::ActorGrabData UVRControllerComponent::getNearestGrabableActor() const
 {
-	TArray<AActor*> overlaps;
-	GrabSphere.GetOverlappingActors(overlaps);
 
-	overlaps = overlaps.FilterByPredicate([](AActor* pActor)
+	TArray<FHitResult> hitresults;
+
+	FCollisionObjectQueryParams params;
+
+	GetWorld()->SweepMultiByObjectType(hitresults, GetComponentLocation(), GetComponentLocation(), {}, params, FCollisionShape::MakeSphere(grabRadius));
+
+
+	hitresults = hitresults.FilterByPredicate([](const FHitResult& hitresult)
 	{
+		AActor* actor = hitresult.GetActor();
 		// Covers two cases: We have an Actor whose RootComponent is of IVRGripInterface or we have an Actor
 		// who is derived from another grippable Actor, such as AGrippableStaticMeshActor.
-		return Cast<IVRGripInterface>(pActor->GetRootComponent()) != nullptr || Cast<IVRGripInterface>(pActor) != nullptr;
+		return actor && (Cast<IVRGripInterface>(actor->GetRootComponent()) != nullptr || Cast<IVRGripInterface>(actor) != nullptr);
 	});
 
-	if (overlaps.Num() == 0)
+	if (hitresults.Num() == 0)
 	{
 		return {};
 	}
 
-	AActor* closest = std::min(*overlaps.GetData(), overlaps.Last(), [&GrabSphere](auto a, auto b)
+	const FHitResult& closest = std::min(*hitresults.GetData(), hitresults.Last(), [this](const FHitResult& a, const FHitResult& b)
 	{
-		return FVector::DistSquared(a->GetRootComponent()->GetComponentLocation(), GrabSphere.GetComponentLocation())
-			 < FVector::DistSquared(b->GetRootComponent()->GetComponentLocation(), GrabSphere.GetComponentLocation());
+		AActor* actorA = a.GetActor();
+		AActor* actorB = b.GetActor();
+		return FVector::DistSquared(actorA->GetRootComponent()->GetComponentLocation(), GetComponentLocation())
+			 < FVector::DistSquared(actorB->GetRootComponent()->GetComponentLocation(), GetComponentLocation());
 	});
 
 	ActorGrabData ret;
-	ret.pActorToGrip = closest;
+	ret.pActorToGrip = closest.GetActor();
 
-	ret.pIVRGrip = Cast<IVRGripInterface>(closest->GetRootComponent());
+	ret.pIVRGrip = Cast<IVRGripInterface>(ret.pActorToGrip->GetRootComponent());
 	if (!ret.pIVRGrip)
 	{
-		ret.pIVRGrip = Cast<IVRGripInterface>(closest);
+		ret.pIVRGrip = Cast<IVRGripInterface>(ret.pActorToGrip);
 	}
 	
 	return ret;

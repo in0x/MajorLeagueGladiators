@@ -2,32 +2,66 @@
 
 #include "MajorLeagueGladiator.h"
 #include "GunProjectile.h"
+#include "MlgPlayerController.h"
 
-AGunProjectile::AGunProjectile()
+#include "ShieldActor.h" //Replace with interface when ready
+
+AGunProjectile::AGunProjectile(const FObjectInitializer& ObjectInitializer)
 {
-	PrimaryActorTick.bCanEverTick = true;
-
 	bReplicates = true;
 	bReplicateMovement = true;
 	bStaticMeshReplicateMovement = true;
+	projectileMovementComponent = ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, "projectileMovementComponent");
 }
 
-void AGunProjectile::BeginPlay()
+void AGunProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
-	Super::BeginPlay();
-	OnActorHit.AddDynamic(this, &AGunProjectile::OnHit);
+	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
+	AGunProjectile* spawnedActor = GetWorld()->SpawnActorDeferred<AGunProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
+	UPrimitiveComponent* spawnedRootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
+	spawnedRootComponent->AddImpulse(1000 * DirectionVector, NAME_None, true);
+
+	//Don't collide with shield again
+	spawnedRootComponent->MoveIgnoreActors.Add(ProjectileOwner);
+	spawnedActor->FinishSpawning(projectileTransform);
+
 }
 
-void AGunProjectile::OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
+void AGunProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 {
+	Super::NotifyActorBeginOverlap(OtherActor);
+
+	if (Role < ROLE_Authority || IsIgnoredActor(OtherActor))
+	{
+		return;
+	}
+
+	if (AShieldActor* interactable = Cast<AShieldActor>(OtherActor))
+	{
+		interactable->OnHitInteractable(this);
+	}
+	else
+	{
+		DealDamage(OtherActor);
+	}
 	Destroy();
+
 }
 
-void AGunProjectile::Tick(float DeltaTimeS)
+void AGunProjectile::DealDamage(AActor* OtherActor)
 {
-	timeAliveS += DeltaTimeS;
-	if (timeAliveS >= lifeTimeS)
-		Destroy();
+	FVector travelingDir = GetRootComponent()->GetComponentVelocity().GetSafeNormal();
+
+	UGameplayStatics::ApplyPointDamage(OtherActor, damage, travelingDir, FHitResult{}, Instigator->Controller, this, DamageType);
+
+	if (AMlgPlayerController* mlgController = Cast<AMlgPlayerController>(Instigator))
+	{
+		mlgController->ClientPlayForceFeedback(mlgController->GetRumbleShortRight(), false, FName("rumbleRight"));
+	}
+	
 }
 
-
+bool AGunProjectile::IsIgnoredActor(const AActor* Actor) const
+{
+	return GetOwner() == Actor;
+}

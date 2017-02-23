@@ -10,6 +10,7 @@ class UAmmoComponent;
 class UTextWidget;
 class UWidgetComponent;
 struct FBPActorGripInformation;
+class AHitscanShot;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AHitScanGunActor : public AMlgGrippableStaticMeshActor
@@ -49,6 +50,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* ammoCountWidget;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AHitscanShot> shotClass;
 	
 	UTextWidget* textWidget;
 

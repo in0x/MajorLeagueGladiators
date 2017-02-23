@@ -5,6 +5,8 @@
 
 #include "GunProjectile.h"
 
+#include "MlgProjectile.h"
+
 namespace
 {
 	const char* REFLECT_SOCKET_NAME = "Reflect";
@@ -21,46 +23,14 @@ AShieldActor::AShieldActor()
 void AShieldActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
-	if (IsLocallyControlled() && IsReflectableProjectile(OtherActor))
+}
+
+void AShieldActor::OnHitInteractable(const AMlgProjectile* projectile)
+{
+	if (GetStaticMeshComponent()->GetSocketByName(REFLECT_SOCKET_NAME) == nullptr)
 	{
-		FTransform socketTransform = GetStaticMeshComponent()->GetSocketTransform(REFLECT_SOCKET_NAME);
-
-		ReflectProjectile_Server(OtherActor, socketTransform.GetLocation(), socketTransform.Rotator());
+		UE_LOG(LogTemp, Warning, TEXT("Socket \"%s\" is missing in the shield actor mesh"), *FString(REFLECT_SOCKET_NAME));
 	}
-
-}
-
-bool AShieldActor::IsLocallyControlled() const
-{
-	AActor* owner = GetOwner();
-	APawn* ownerPawn = Cast<APawn>(owner);
-	if (ownerPawn)
-	{
-		return ownerPawn->IsLocallyControlled();
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Shieldactor was spawned without owner, reflection is disabled now"));
-	return false;
-}
-bool AShieldActor::IsReflectableProjectile(AActor* Projectile) const
-{
-	return Projectile->IsA<AGunProjectile>();
-}
-
-bool AShieldActor::ReflectProjectile_Server_Validate(AActor* Projectile, FVector SocketLocation, FRotator SocketRotation)
-{
-	return true;
-}
-
-void AShieldActor::ReflectProjectile_Server_Implementation(AActor* Projectile, FVector SocketLocation, FRotator SocketRotation)
-{
-	AActor* spawnedActor = GetWorld()->SpawnActorDeferred<AActor>(Projectile->GetClass(), SocketLocation, SocketRotation);
-	UPrimitiveComponent* spawnedRootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
-	spawnedRootComponent->AddImpulse(1000 * SocketRotation.Vector(), NAME_None, true);
-
-	//Don't collide with shield again
-	spawnedRootComponent->MoveIgnoreActors.Add(this);
-	spawnedActor->FinishSpawning(FTransform(SocketRotation, SocketLocation));
-
-	Projectile->Destroy();
+	FTransform socketTransform = GetStaticMeshComponent()->GetSocketTransform(REFLECT_SOCKET_NAME);
+	projectile->FireProjectile(socketTransform.GetLocation(), socketTransform.Rotator().Vector(), this, Instigator->GetController());	
 }
