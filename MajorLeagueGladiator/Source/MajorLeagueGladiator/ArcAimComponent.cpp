@@ -76,7 +76,10 @@ ArcAimResult UArcAimComponent::GetAimResult()
 		{
 			elapsedCooldown = cooldown;
 		}
-		return ArcAimResult{ tpHitResult.ImpactPoint, bDidAimFindPosition };
+
+		auto result = ArcAimResult{ tpHitResult.ImpactPoint, bDidAimFindPosition };
+		bDidAimFindPosition = false;
+		return result;
 	}
 	else
 	{
