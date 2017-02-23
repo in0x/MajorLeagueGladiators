@@ -42,11 +42,11 @@ void UArcAimComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	if (!origin)
 		return;
 
-	FPredictProjectilePathParams params(0.f, origin->GetComponentLocation() - (origin->GetUpVector().GetSafeNormal() * 96) /*Capsule Half Height*/, direction->GetForwardVector() * GetPredictProjectileForce(), 2.f);
+	FPredictProjectilePathParams params(0.f, origin->GetComponentLocation(), origin->GetForwardVector() * GetPredictProjectileForce(), 2.f);
 	params.ObjectTypes = queryTypes;
-	params.DrawDebugType = EDrawDebugTrace::ForOneFrame /*EDrawDebugTrace::ForDuration*/;
+	params.DrawDebugType = EDrawDebugTrace::ForOneFrame;
 	params.ActorsToIgnore.Add(GetOwner());
-	params.DrawDebugTime = 1.f /*30.f*/;
+	params.DrawDebugTime = 1.f;
 	params.bTraceComplex = false;
 	params.bTraceWithCollision = true;
 	
@@ -63,10 +63,9 @@ void UArcAimComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 }
 
-void UArcAimComponent::Enable(USceneComponent* TeleportOrigin, USceneComponent* TeleportDirection)
+void UArcAimComponent::Enable(USceneComponent* TeleportOrigin)
 {
 	origin = TeleportOrigin;
-	direction = TeleportDirection;
 }
 
 ArcAimResult UArcAimComponent::GetAimResult()
@@ -88,6 +87,5 @@ ArcAimResult UArcAimComponent::GetAimResult()
 void UArcAimComponent::Disable()
 {
 	origin = nullptr;
-	direction = nullptr;
 }
 
