@@ -5,7 +5,7 @@
 #include "DamageReceiverComponent.h"
 
 UDamageVisualizerComponent::UDamageVisualizerComponent()
-	: isVisualizingMaterial(false)
+	: isVisualizingMaterial(false), currentMatVisualizationDuration(0.f)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -46,7 +46,11 @@ void UDamageVisualizerComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	{
 		if (matInstance)
 		{
-			matInstance->SetScalarParameterValue(FName(DAMAGE_VALUE_PARAMETER_NAME), 1.0f);
+			float val = materialVisualizationDuration - currentMatVisualizationDuration;
+			float scaledValue = val / materialVisualizationDuration;
+			matInstance->SetScalarParameterValue(FName(DAMAGE_VALUE_PARAMETER_NAME), FMath::Clamp(scaledValue, 0.f, 1.f));
+
+			currentMatVisualizationDuration += DeltaTime;
 		}
 	}
 }
@@ -62,7 +66,8 @@ void UDamageVisualizerComponent::onDamageReceived(AActor* DamagedActor)
 
 	//Only temporary: later call only in onPointDamage function
 	FTransform trans = GetOwner()->GetTransform();
-	trans.AddToTranslation(FVector(0, 50, 0));
+	//trans.AddToTranslation(FVector(0, 0, 0));
+	trans.SetRotation(FQuat(FRotator(0.f, -70.f, 0.f)));
 	startParticleSystemVisualization_NetMulticast(trans);
 }
 
@@ -97,12 +102,13 @@ void UDamageVisualizerComponent::startMaterialVisualization_NetMulticast_Impleme
 
 void UDamageVisualizerComponent::startParticleSystemVisualization_NetMulticast_Implementation(const FTransform& visualizationTransform)
 {
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, visualizationTransform.GetLocation()); //
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystem, visualizationTransform); //
 }
 
 void UDamageVisualizerComponent::stopMaterialVisualization()
 {
 	isVisualizingMaterial = false;
+	currentMatVisualizationDuration = 0.f;
 	if (matInstance)
 	{
 		matInstance->SetScalarParameterValue(FName(DAMAGE_VALUE_PARAMETER_NAME), 0.0f);
