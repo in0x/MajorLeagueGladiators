@@ -3,6 +3,7 @@
 #include "MajorLeagueGladiator.h"
 #include "SwordDamageCauserComponent.h"
 #include "MlgGrippableStaticMeshActor.h"
+#include "MlgPlayerController.h"
 
 USwordDamageCauserComponent::USwordDamageCauserComponent()
 	: oldSwingSpeed(FVector::ZeroVector)
@@ -35,27 +36,36 @@ USwordDamageCauserComponent::USwordDamageCauserComponent()
 
 void USwordDamageCauserComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	FVector newSwordState = GetOwner()->GetVelocity();
 	oldSwingSpeed = oldSwingSpeed * (1.0f - slashVelocityLearnRate) + (DeltaTime * newSwordState) * slashVelocityLearnRate;
 	bool newCanDealDamage = oldSwingSpeed.SizeSquared() > threshholdDoDamageSquared;
 	if (newCanDealDamage && !canDealDamage)
 	{
-		turnDamageOn();
+		startSlash();
 	}
 	else if (!newCanDealDamage && canDealDamage)
 	{
-		turnDamageOff();
+		endSlash();
 	}
-	canDealDamage = newCanDealDamage;
 }
 
-bool USwordDamageCauserComponent::CanDoDamage()
+void USwordDamageCauserComponent::damageAllOverlappingActors() 
 {
-	return canDealDamage;
+	TArray <AActor*> overlappingActors;
+	AActor* owner = GetOwner();
+	owner->GetOverlappingActors(overlappingActors);
+	for (int i = 0; i < overlappingActors.Num(); i++)
+	{
+		UGameplayStatics::ApplyDamage(overlappingActors[i], damageAppliedOnHit, nullptr, owner, damageType);
+	}
 }
 
-void USwordDamageCauserComponent::turnDamageOn() 
+void USwordDamageCauserComponent::startSlash()
 {
+	canDealDamage = true;
+	damageAllOverlappingActors();
+
 	if (materialRedObject_Dyn == nullptr)
 	{
 		materialRedObject_Dyn = UMaterialInstanceDynamic::Create(materialRedObject, this);
@@ -64,8 +74,9 @@ void USwordDamageCauserComponent::turnDamageOn()
 	setMaterialOfOwnerMesh(materialRedObject_Dyn);
 }
 
-void USwordDamageCauserComponent::turnDamageOff()
+void USwordDamageCauserComponent::endSlash()
 {
+	canDealDamage = false;
 	if (!materialObject_Dyn)
 	{
 		materialObject_Dyn = UMaterialInstanceDynamic::Create(materialObject, this);
@@ -82,5 +93,36 @@ void USwordDamageCauserComponent::setMaterialOfOwnerMesh(UMaterialInstanceDynami
 	{
 		auto* mesh = owner->GetStaticMeshComponent();
 		mesh->SetMaterial(0, material_Dyn);
+	}
+}
+
+void USwordDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+{
+	if (canDealDamage)
+	{
+		UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, nullptr, OverlappedActor, damageType);
+		doRumbleRight(OtherActor);
+	}
+}
+
+void USwordDamageCauserComponent::doRumbleRight(AActor* OtherActor)
+{
+	AMlgGrippableStaticMeshActor* owner = Cast<AMlgGrippableStaticMeshActor>(GetOwner());
+	if (owner != nullptr)
+	{
+		AMlgPlayerController* controller = owner->GetMlgPlayerController();
+		if (controller != nullptr)
+		{
+			//check if hit object is part of myself, then we do not rumble
+			APawn* otherPlayer = Cast<APawn>(OtherActor);
+			if (otherPlayer != nullptr)
+			{
+				if (otherPlayer->Controller == controller)
+				{
+					return;
+				}
+			}
+			controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
+		}
 	}
 }

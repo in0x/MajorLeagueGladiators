@@ -16,7 +16,8 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 protected:
-	virtual bool CanDoDamage() override;
+	UFUNCTION()
+	virtual void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor) override;
 private:
 	FVector oldSwingSpeed;
 
@@ -41,10 +42,13 @@ private:
 	UPROPERTY(EditAnywhere)
 	float slashVelocityLearnRate; 
 
-	void turnDamageOn();
-	void turnDamageOff();
+	void startSlash();
+	void endSlash();
+	void damageAllOverlappingActors();
 
 	void setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn);
 
 	bool canDealDamage;
+
+	void doRumbleRight(AActor* OtherActor);
 };

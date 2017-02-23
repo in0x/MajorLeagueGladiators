@@ -5,6 +5,8 @@
 #include "Components/ActorComponent.h"
 #include "DamageCauserComponent.generated.h"
 
+
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class MAJORLEAGUEGLADIATOR_API UDamageCauserComponent : public UActorComponent
 {
@@ -13,19 +15,13 @@ class MAJORLEAGUEGLADIATOR_API UDamageCauserComponent : public UActorComponent
 public:	
 	UDamageCauserComponent();
 	virtual void BeginPlay() override;	
-
-private:
+protected:
 	UFUNCTION()
-	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
-	
+	virtual void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+
 	UPROPERTY(EditAnywhere, Category = "Damage")
 	float damageAppliedOnHit;
 
 	UPROPERTY(EditAnywhere, Category = "Damage")
 	TSubclassOf<UDamageType> damageType;
-
-	void doRumbleRight(AActor* OtherActor);
-
-protected:
-	virtual bool CanDoDamage();
 };
