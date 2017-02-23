@@ -135,7 +135,6 @@ void AHitScanGunActor::shoot()
 	if (result.bBlockingHit)
 	{
 		UGameplayStatics::ApplyDamage(result.GetActor(), damage, nullptr, this, UPlayerDamage::StaticClass());
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("shot"));
 	}
 }
 
