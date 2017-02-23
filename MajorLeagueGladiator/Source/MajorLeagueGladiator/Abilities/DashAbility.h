@@ -7,7 +7,6 @@
 
 class UAbilityTask_WaitTargetData;
 class AGameplayAbilityTargetActor_PredictProjectile;
-class UGameplayTask_WaitUntiLocationReached;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UDashAbility : public UGameplayAbility
@@ -37,9 +36,6 @@ private:
 
 	UPROPERTY(Transient)
 	UAbilityTask_WaitTargetData* waitForTargetTask;
-
-	UPROPERTY(Transient)
-	UGameplayTask_WaitUntiLocationReached* waitForLocationReachTask;
 
 	UPROPERTY(Transient)
 	AGameplayAbilityTargetActor_PredictProjectile* targetingSpawnedActor;
