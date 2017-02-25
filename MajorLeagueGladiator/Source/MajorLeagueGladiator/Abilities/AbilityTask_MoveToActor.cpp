@@ -1,0 +1,32 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "MajorLeagueGladiator.h"
+#include "AbilityTask_MoveToActor.h"
+
+
+AAbilityTask_MoveToActor::AAbilityTask_MoveToActor()
+{
+ 	PrimaryActorTick.bCanEverTick = true;
+}
+
+void AAbilityTask_MoveToActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	const auto location = MovingCharacter->GetActorLocation();
+	const auto distance = FVector::Distance(TargetLocation, location);
+
+	float MinDistanceThreshold = 10.f;
+
+	if (distance < MinDistanceThreshold && HasAuthority())
+	{
+		OnLocationReached.Broadcast();
+	}
+	else
+	{
+		const auto direction = (TargetLocation - location).GetSafeNormal();
+		MovingCharacter->AddMovementInput(direction * MoveSpeed);
+		DrawDebugDirectionalArrow(MovingCharacter->GetRootComponent()->GetWorld(), location, TargetLocation, 1.0f, FColor::Green);
+	}
+}
+

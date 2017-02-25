@@ -5,6 +5,7 @@
 #include "Abilities/GameplayAbility.h"
 #include "DashAbility.generated.h"
 
+class UAbilityTask_MoveTo;
 class UAbilityTask_WaitTargetData;
 class AGameplayAbilityTargetActor_Raycast;
 
@@ -24,8 +25,7 @@ private:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
-	/*UFUNCTION()*/
-	void OnLocationReached(FAIRequestID RequestID, const FPathFollowingResult& Result);
+	void OnLocationReached();
 
 	UFUNCTION()
 	void OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data);
@@ -35,6 +35,9 @@ private:
 
 	UPROPERTY(Transient)
 	UAbilityTask_WaitTargetData* waitForTargetTask;
+
+	UPROPERTY(Transient)
+	UAbilityTask_MoveTo* moveToTask;
 
 	UPROPERTY(Transient)
 	AGameplayAbilityTargetActor_Raycast* targetingSpawnedActor;

@@ -12,7 +12,7 @@ UJumpAbility::UJumpAbility()
 
 void UJumpAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if (waitForTargetTask)
+	if (waitForTargetTask && targetingSpawnedActor)
 	{
 		// Player has released targeting button -> finished picking target
 		targetingSpawnedActor->bShouldBroadcastResult = true;
@@ -42,7 +42,7 @@ void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
-	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
+	if (GetOwningActorFromActorInfo()->HasAuthority())
 	{
 		auto player = CastChecked<ACharacter>(GetOwningActorFromActorInfo());
 		player->LaunchCharacter(Data.Data[0]->GetHitResult()->TraceStart, true, true); // Reuse TraceStart to transport launch velocity
