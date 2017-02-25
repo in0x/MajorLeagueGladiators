@@ -35,16 +35,19 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	targetingSpawnedActor = CastChecked<AGameplayAbilityTargetActor_Raycast>(spawnedActor);
 
-	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
-	
+	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());	
 	auto gripController = player->GetMotionControllerMesh(EControllerHand::Left);
 	targetingSpawnedActor->StartLocation.SourceComponent = gripController;
+	
 	targetingSpawnedActor->aimDirection = ERaycastTargetDirection::ForwardVector;
 	targetingSpawnedActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
 	targetingSpawnedActor->MaxRange = MaxRange;
+
 	targetingSpawnedActor->EvalTargetFunc = [](const FHitResult& result)
 	{
-		return result.bBlockingHit > 0;
+		auto isNotVertical = FMath::Abs(FVector::DotProduct(result.ImpactNormal, FVector(0,0,1))) > 0.7f;
+		auto hitSurface = result.bBlockingHit > 0;
+		return isNotVertical && hitSurface;
 	};
 
 	waitForTargetTask->FinishSpawningActor(this, spawnedActor);
