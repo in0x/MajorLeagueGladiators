@@ -23,8 +23,4 @@ private:
 
 	void DealDamage(AActor* OtherActor);
 	bool IsIgnoredActor(const AActor* Actor) const;
-
-	UPROPERTY()
-	UProjectileMovementComponent* projectileMovementComponent;
-
 };

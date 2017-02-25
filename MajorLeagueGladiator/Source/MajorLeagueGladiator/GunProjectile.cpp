@@ -11,8 +11,6 @@ AGunProjectile::AGunProjectile(const FObjectInitializer& ObjectInitializer)
 	bReplicates = true;
 	bReplicateMovement = true;
 	bStaticMeshReplicateMovement = true;
-	projectileMovementComponent = ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, "projectileMovementComponent");
-	projectileMovementComponent->InitialSpeed = 1000;
 }
 
 void AGunProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
