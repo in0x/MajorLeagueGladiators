@@ -3,7 +3,7 @@
 #include "MajorLeagueGladiator.h"
 #include "ShieldActor.h"
 
-#include "MlgProjectile.h"
+#include "Projectiles/BaseProjectile.h"
 #include "MlgPlayerController.h"
 
 namespace
