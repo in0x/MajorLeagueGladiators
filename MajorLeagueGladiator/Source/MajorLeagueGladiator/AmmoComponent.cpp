@@ -63,8 +63,8 @@ void UAmmoComponent::IncreaseAmmo(int32 Amount)
 	OnAmmoChanged.Broadcast(ammoCount);
 }
 
-TSubclassOf<AGunProjectile> UAmmoComponent::GetProjectileType()
+TSubclassOf<ABaseProjectile> UAmmoComponent::GetProjectileType()
 {
-	return gunProjectileClass;
+	return projectileClass;
 }
 

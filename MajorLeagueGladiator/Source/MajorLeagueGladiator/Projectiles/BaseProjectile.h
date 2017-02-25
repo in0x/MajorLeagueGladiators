@@ -5,12 +5,12 @@
 #include "BaseProjectile.generated.h"
 
 UCLASS(abstract)
-class MAJORLEAGUEGLADIATOR_API AMlgProjectile : public AStaticMeshActor
+class MAJORLEAGUEGLADIATOR_API ABaseProjectile : public AStaticMeshActor
 {
 	GENERATED_BODY()
 
 public:	
-	AMlgProjectile();
+	ABaseProjectile();
 
 	virtual void FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const {	checkNoEntry();	}
 	

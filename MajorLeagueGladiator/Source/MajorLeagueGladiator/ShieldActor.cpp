@@ -24,7 +24,7 @@ void AShieldActor::NotifyActorBeginOverlap(AActor* OtherActor)
 	Super::NotifyActorBeginOverlap(OtherActor);
 }
 
-void AShieldActor::OnHitInteractable(const AMlgProjectile* projectile)
+void AShieldActor::OnHitInteractable(const ABaseProjectile* projectile)
 {
 	checkf(GetStaticMeshComponent()->GetSocketByName(REFLECT_SOCKET_NAME), TEXT("Socket \"AbilityActor\" is missing in the shield actor mesh"));
 

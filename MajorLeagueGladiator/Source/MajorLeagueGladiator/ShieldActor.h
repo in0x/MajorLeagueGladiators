@@ -5,7 +5,7 @@
 #include "MlgGrippableStaticMeshActor.h"
 #include "ShieldActor.generated.h"
 
-class AMlgProjectile;
+class ABaseProjectile;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AShieldActor : public AMlgGrippableStaticMeshActor
@@ -16,6 +16,6 @@ public:
 
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
-	void OnHitInteractable(const AMlgProjectile* projectile);
+	void OnHitInteractable(const ABaseProjectile* projectile);
 	
 };
