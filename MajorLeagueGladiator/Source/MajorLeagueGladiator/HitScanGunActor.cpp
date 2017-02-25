@@ -7,7 +7,7 @@
 #include "WidgetComponent.h"
 #include "TextWidget.h"
 #include "MlgPlayerController.h"
-#include "HitscanShot.h"
+#include "Projectiles/HitscanProjectile.h"
 
 AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

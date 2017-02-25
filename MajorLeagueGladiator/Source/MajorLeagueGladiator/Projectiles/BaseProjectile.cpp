@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MajorLeagueGladiator.h"
-#include "MlgProjectile.h"
+#include "BaseProjectile.h"
 
 
 // Sets default values

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MajorLeagueGladiator.h"
-#include "GunProjectile.h"
+#include "PhysicsProjectile.h"
 #include "MlgPlayerController.h"
 
 #include "ShieldActor.h" //Replace with interface when ready

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MlgProjectile.generated.h"
+#include "BaseProjectile.generated.h"
 
 UCLASS(abstract)
 class MAJORLEAGUEGLADIATOR_API AMlgProjectile : public AStaticMeshActor

@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "MlgProjectile.h"
+#include "BaseProjectile.h"
 
-#include "GunProjectile.generated.h"
+#include "PhysicsProjectile.generated.h"
 
 class UProjectileMovementComponent;
 

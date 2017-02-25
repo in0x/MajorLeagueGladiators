@@ -2,10 +2,9 @@
 
 #pragma once
 
-#include "GameFramework/Actor.h"
-#include "MlgProjectile.h"
+#include "BaseProjectile.h"
 
-#include "HitscanShot.generated.h"
+#include "HitscanProjectile.generated.h"
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AHitscanShot : public AMlgProjectile

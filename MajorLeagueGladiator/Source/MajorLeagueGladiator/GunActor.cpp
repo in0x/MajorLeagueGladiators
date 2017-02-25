@@ -3,7 +3,7 @@
 #include "MajorLeagueGladiator.h"
 #include "GunActor.h"
 #include "AmmoComponent.h"
-#include "GunProjectile.h"
+#include "Projectiles/PhysicsProjectile.h"
 #include "TextWidget.h"
 #include "WidgetComponent.h"
 #include "MlgPlayerController.h"

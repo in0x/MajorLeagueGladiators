@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MajorLeagueGladiator.h"
-#include "HitscanShot.h"
+#include "HitscanProjectile.h"
 #include "DamageTypes/PlayerDamage.h"
 
 #include "ShieldActor.h"
