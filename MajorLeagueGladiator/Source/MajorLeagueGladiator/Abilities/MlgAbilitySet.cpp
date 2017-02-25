@@ -5,16 +5,16 @@
 #include "AbilitySystemComponent.h"
 #include "GravityGunAbility.h"
 #include "ShieldAbility.h"
+#include "DashAbility.h"
 
 namespace
 {
 	constexpr int32 LEVEL_1 = 1;
 }
 
-
 UMlgAbilitySet::UMlgAbilitySet()
 {
-	Abilities.Add(FAbilityBindInfo{ EMlgAbilityInputBinds::Ability1, UGravityGunAbility::StaticClass() });
+	Abilities.Add(FAbilityBindInfo{ EMlgAbilityInputBinds::Ability1, UDashAbility::StaticClass() });
 	Abilities.Add(FAbilityBindInfo{ EMlgAbilityInputBinds::Ability2, UShieldAbility::StaticClass() });
 }
 
