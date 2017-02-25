@@ -7,13 +7,13 @@
 #include "HitscanProjectile.generated.h"
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AHitscanShot : public AMlgProjectile
+class MAJORLEAGUEGLADIATOR_API AHitscanProjectile : public ABaseProjectile
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AHitscanShot();
+	AHitscanProjectile();
 
 	virtual void FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const override;
 

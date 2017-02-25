@@ -5,7 +5,7 @@
 
 
 // Sets default values
-AMlgProjectile::AMlgProjectile()
+ABaseProjectile::ABaseProjectile()
 	: damage(10.f)
 {
 

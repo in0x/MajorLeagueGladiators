@@ -11,13 +11,13 @@ namespace
 	const char* ABILITY_ACTOR_PROFILE_NAME = "AbilityActor";
 }
 
-AHitscanShot::AHitscanShot()
+AHitscanProjectile::AHitscanProjectile()
 	: range(1000000.f)
 {
  
 }
 
-void AHitscanShot::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
+void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
 	FHitResult hitresult = Trace(ProjectileOwner->GetWorld(), Location, DirectionVector, { ProjectileOwner });
 
@@ -39,7 +39,7 @@ void AHitscanShot::FireProjectile(FVector Location, FVector DirectionVector, AAc
 }
 
 
-FHitResult AHitscanShot::Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const
+FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const
 {
 	FVector end = Location + DirectionVector * range;
 

@@ -6,17 +6,17 @@
 
 #include "ShieldActor.h" //Replace with interface when ready
 
-AGunProjectile::AGunProjectile(const FObjectInitializer& ObjectInitializer)
+APhysicsProjectile::APhysicsProjectile(const FObjectInitializer& ObjectInitializer)
 {
 	bReplicates = true;
 	bReplicateMovement = true;
 	bStaticMeshReplicateMovement = true;
 }
 
-void AGunProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
+void APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
-	AGunProjectile* spawnedActor = GetWorld()->SpawnActorDeferred<AGunProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
+	APhysicsProjectile* spawnedActor = GetWorld()->SpawnActorDeferred<APhysicsProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
 	UPrimitiveComponent* spawnedRootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
 	spawnedRootComponent->AddImpulse(1000 * DirectionVector, NAME_None, true);
 
@@ -26,7 +26,7 @@ void AGunProjectile::FireProjectile(FVector Location, FVector DirectionVector, A
 
 }
 
-void AGunProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
+void APhysicsProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
@@ -47,7 +47,7 @@ void AGunProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 	Destroy();
 }
 
-void AGunProjectile::DealDamage(AActor* OtherActor)
+void APhysicsProjectile::DealDamage(AActor* OtherActor)
 {
 	FVector travelingDir = GetRootComponent()->GetComponentVelocity().GetSafeNormal();
 
@@ -60,7 +60,7 @@ void AGunProjectile::DealDamage(AActor* OtherActor)
 	
 }
 
-bool AGunProjectile::IsIgnoredActor(const AActor* Actor) const
+bool APhysicsProjectile::IsIgnoredActor(const AActor* Actor) const
 {
 	return GetOwner() == Actor;
 }

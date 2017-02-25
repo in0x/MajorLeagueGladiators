@@ -6,7 +6,7 @@
 #include "MessageEndpoint.h"
 #include "AmmoComponent.generated.h"
 
-class AGunProjectile;
+class ABaseProjectile;
 struct FMsgAmmoRefill;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(AmmoChangedDelegate, int32);
@@ -25,7 +25,7 @@ public:
 	void ConsumeAmmo();
 	void IncreaseAmmo(int32 Amount);
 	
-	TSubclassOf<AGunProjectile> GetProjectileType();
+	TSubclassOf<ABaseProjectile> GetProjectileType();
 	int32 GetAmmoCount() const;
 	int32 GetMaxAmmoCount() const;
 	
@@ -33,7 +33,7 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Ammo")
-	TSubclassOf<AGunProjectile> gunProjectileClass;
+	TSubclassOf<ABaseProjectile> projectileClass;
 	
 	UPROPERTY(EditAnywhere, Category = "Ammo")
 	int32 maxAmmo;

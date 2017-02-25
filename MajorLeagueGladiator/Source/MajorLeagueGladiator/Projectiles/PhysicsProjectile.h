@@ -9,12 +9,12 @@
 class UProjectileMovementComponent;
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AGunProjectile : public AMlgProjectile
+class MAJORLEAGUEGLADIATOR_API APhysicsProjectile : public ABaseProjectile
 {
 	GENERATED_BODY()
 	
 public:
-	AGunProjectile(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	APhysicsProjectile(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	
 	virtual void FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const override;
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
