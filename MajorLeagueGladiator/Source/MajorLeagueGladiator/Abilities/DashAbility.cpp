@@ -3,20 +3,10 @@
 #include "MlgPlayerCharacter.h"
 #include "VRControllerComponent.h"
 #include "AbilityTask_WaitTargetData.h"
-#include "GameplayAbilityTargetActor_PredictProjectile.h"
-
-/*
-	Aim with Raycast
-	Limit Range
-	Ignore vertical surfaces
-	Dash directly to point
-	Turn off collision
-	Turn on flying movement mode
-	Move x units per second towards point
-*/
+#include "GameplayAbilityTargetActor_Raycast.h"
 
 UDashAbility::UDashAbility()
-	: PredictProjectileSpeed(1000.f)
+	: MaxRange(1000.f)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;
@@ -33,21 +23,29 @@ void UDashAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const 
 
 void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-	waitForTargetTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Pick Target Task", EGameplayTargetingConfirmation::Custom, AGameplayAbilityTargetActor_PredictProjectile::StaticClass());
+	waitForTargetTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Pick Target Task", EGameplayTargetingConfirmation::Custom, AGameplayAbilityTargetActor_Raycast::StaticClass());
 	waitForTargetTask->ValidData.AddDynamic(this, &UDashAbility::OnTargetPickSuccessful);
 	waitForTargetTask->Cancelled.AddDynamic(this, &UDashAbility::OnTargetPickCanceled);
 
 	AGameplayAbilityTargetActor* spawnedActor;
-	if (!waitForTargetTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_PredictProjectile::StaticClass(), spawnedActor))
+	if (!waitForTargetTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Raycast::StaticClass(), spawnedActor))
 	{
 		return;
 	}
 
-	targetingSpawnedActor = CastChecked<AGameplayAbilityTargetActor_PredictProjectile>(spawnedActor);
+	targetingSpawnedActor = CastChecked<AGameplayAbilityTargetActor_Raycast>(spawnedActor);
 
-	targetingSpawnedActor->TargetProjectileSpeed = PredictProjectileSpeed;
+	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	
+	auto gripController = player->GetMotionControllerMesh(EControllerHand::Left);
+	targetingSpawnedActor->StartLocation.SourceComponent = gripController;
+	targetingSpawnedActor->aimDirection = ERaycastTargetDirection::ForwardVector;
 	targetingSpawnedActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
-	targetingSpawnedActor->targetingType = EPickMoveLocationTargeting::FromPlayerCapsule /* TODO(Phil) FromController -> Borked */;
+	targetingSpawnedActor->MaxRange = MaxRange;
+	targetingSpawnedActor->EvalTargetFunc = [](const FHitResult& result)
+	{
+		return result.bBlockingHit > 0;
+	};
 
 	waitForTargetTask->FinishSpawningActor(this, spawnedActor);
 }
@@ -65,26 +63,24 @@ void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
 	{
 		auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
-	
-		player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
-
-		player->ExtendedSimpleMoveToLocation(Data.Data[0]->GetHitResult()->Location + FVector(0,0,100));
-
+		player->ExtendedSimpleMoveToLocation(Data.Data[0]->GetHitResult()->Location);
+		
 		auto compPathFollow = player->GetController()->GetComponentByClass(UPathFollowingComponent::StaticClass());
 		auto pathFollow = CastChecked<UPathFollowingComponent>(compPathFollow);
 		pathFollow->OnRequestFinished.AddUObject(this, &UDashAbility::OnLocationReached);
 	}
 }
 
-void UDashAbility::OnLocationReached(FAIRequestID RequestID, const FPathFollowingResult& Result)
-{
-	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
-	//player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
-}
-
 void UDashAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
 {
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
+
+void UDashAbility::OnLocationReached(FAIRequestID RequestID, const FPathFollowingResult& Result)
+{
+	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+}
+
+
 

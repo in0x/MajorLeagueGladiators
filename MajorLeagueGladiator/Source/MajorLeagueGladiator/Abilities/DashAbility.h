@@ -6,7 +6,7 @@
 #include "DashAbility.generated.h"
 
 class UAbilityTask_WaitTargetData;
-class AGameplayAbilityTargetActor_PredictProjectile;
+class AGameplayAbilityTargetActor_Raycast;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UDashAbility : public UGameplayAbility
@@ -16,9 +16,8 @@ class MAJORLEAGUEGLADIATOR_API UDashAbility : public UGameplayAbility
 public:
 	UDashAbility();
 
-	// The speed with which the targeting projectile will be launched.
 	UPROPERTY()
-	float PredictProjectileSpeed;
+	float MaxRange;
 
 private:
 	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
@@ -38,5 +37,5 @@ private:
 	UAbilityTask_WaitTargetData* waitForTargetTask;
 
 	UPROPERTY(Transient)
-	AGameplayAbilityTargetActor_PredictProjectile* targetingSpawnedActor;
+	AGameplayAbilityTargetActor_Raycast* targetingSpawnedActor;
 };
