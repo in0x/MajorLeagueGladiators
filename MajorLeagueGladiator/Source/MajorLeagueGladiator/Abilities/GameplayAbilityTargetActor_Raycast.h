@@ -15,7 +15,7 @@ namespace ERaycastTargetDirection
 	};
 }
 
-using RaycastTargetValidationFunc = std::function<bool(const FHitResult&)>;
+using RaycastTargetEvaluationFunc = std::function<bool(const FHitResult&)>;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AGameplayAbilityTargetActor_Raycast : public AGameplayAbilityTargetActor
@@ -31,7 +31,7 @@ public:
 	TArray<AActor*> IgnoredActors;
 	float MaxRange;
 	ERaycastTargetDirection::Type aimDirection;
-	RaycastTargetValidationFunc EvalTargetFunc;
+	RaycastTargetEvaluationFunc EvalTargetFunc;
 	bool bShouldBroadcastResult;
 
 private:

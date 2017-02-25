@@ -4,6 +4,17 @@
 #include "VRControllerComponent.h"
 #include "AbilityTask_WaitTargetData.h"
 #include "GameplayAbilityTargetActor_Raycast.h"
+#include "AbilityTask_MoveTo.h"
+
+/*
+Aim with Raycast - done
+Limit Range - done
+Ignore vertical surfaces - done
+Dash directly to point
+Turn off collision
+Turn on flying movement mode
+Move x units per second towards point
+*/
 
 UDashAbility::UDashAbility()
 	: MaxRange(1000.f)
@@ -14,7 +25,7 @@ UDashAbility::UDashAbility()
 
 void UDashAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if (waitForTargetTask)
+	if (waitForTargetTask && targetingSpawnedActor)
 	{
 		// Player has released targeting button -> finished picking target
 		targetingSpawnedActor->bShouldBroadcastResult = true;
@@ -45,7 +56,7 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	targetingSpawnedActor->EvalTargetFunc = [](const FHitResult& result)
 	{
-		auto isNotVertical = FMath::Abs(FVector::DotProduct(result.ImpactNormal, FVector(0,0,1))) > 0.7f;
+		auto isNotVertical = FMath::Abs(FVector::DotProduct(result.ImpactNormal, FVector(0,0,1))) > 0.7f; // TODO(Phil) This still allows selecting the underside of a surface
 		auto hitSurface = result.bBlockingHit > 0;
 		return isNotVertical && hitSurface;
 	};
@@ -63,14 +74,22 @@ void UDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 
 void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
-	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
+	if (GetOwningActorFromActorInfo()->HasAuthority())
 	{
-		auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
-		player->ExtendedSimpleMoveToLocation(Data.Data[0]->GetHitResult()->Location);
+		auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());	
+		auto capsule = player->GetCapsuleComponent();
+
+		// Add capsule halfheight to Z since our "location" is the capsule 
+		// center, otherwise we would move our body into the ground.
+		auto location = Data.Data[0]->GetHitResult()->Location;	
+		location += capsule->GetUpVector() * capsule->GetScaledCapsuleHalfHeight();
 		
-		auto compPathFollow = player->GetController()->GetComponentByClass(UPathFollowingComponent::StaticClass());
-		auto pathFollow = CastChecked<UPathFollowingComponent>(compPathFollow);
-		pathFollow->OnRequestFinished.AddUObject(this, &UDashAbility::OnLocationReached);
+		moveToTask = UAbilityTask_MoveTo::Create(this, "MoveTo Task", location, 10.f, player);
+		moveToTask->Activate();
+		moveToTask->OnLocationReached.AddUObject(this, &UDashAbility::OnLocationReached);
+
+		player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+		player->SetActorEnableCollision(false);
 	}
 }
 
@@ -79,11 +98,13 @@ void UDashAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
-void UDashAbility::OnLocationReached(FAIRequestID RequestID, const FPathFollowingResult& Result)
+void UDashAbility::OnLocationReached()
 {
 	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	player->SetActorEnableCollision(true);
+
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
-
 
 
