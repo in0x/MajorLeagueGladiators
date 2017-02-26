@@ -18,7 +18,7 @@ public:
 	static UAbilityTask_MoveTo* Create(UGameplayAbility* ThisAbility, FName TaskName, FVector TargetLocation, float MoveSpeed, ACharacter* MovingCharacter);
 
 	virtual void Activate() override;
-	void OnDestroy(bool AbilityEnded) override;
+	virtual void OnDestroy(bool AbilityEnded) override;
 
 	FAbilityTaskMoveToLocationReached OnLocationReached;
 

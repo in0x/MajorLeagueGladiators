@@ -40,23 +40,27 @@ void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 	waitForTargetTask->FinishSpawningActor(this, spawnedActor);
 }
 
-void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
+void UJumpAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+{
+	waitForTargetTask = nullptr;
+	targetingSpawnedActor = nullptr;
+
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+}
+
+void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data) 
 {
 	if (GetOwningActorFromActorInfo()->HasAuthority())
 	{
 		auto player = CastChecked<ACharacter>(GetOwningActorFromActorInfo());
-		player->LaunchCharacter(Data.Data[0]->GetHitResult()->TraceStart, true, true); // Reuse TraceStart to transport launch velocity
+		player->LaunchCharacter(Data.Data[0]->GetHitResult()->TraceStart, true, true); 
 	}
 
-	waitForTargetTask = nullptr;
-	targetingSpawnedActor = nullptr;
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
 void UJumpAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
 {
-	waitForTargetTask = nullptr;
-	targetingSpawnedActor = nullptr;
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 

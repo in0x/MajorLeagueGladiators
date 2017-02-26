@@ -34,7 +34,6 @@ void AGameplayAbilityTargetActor_PredictProjectile::GetVrControllerFromAbility(U
 	checkf(vrController, TEXT("Could not get controller mesh from PlayerCharacter"));
 }
 
-
 void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -42,14 +41,7 @@ void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 	FPredictProjectilePathResult result;
 	FVector launchVel;
 
-	if (targetingType == EPickMoveLocationTargeting::FromPlayerCapsule)
-	{
-		PickTargetFromPlayerCapsule(result, launchVel);
-	}
-	else // EPickMoveLocationTargeting == EPickMoveLocationTargeting::FromController
-	{
-		PickTargetFromVrController(result, launchVel);
-	}
+	PickTarget(result, launchVel);
 
 	if (bShouldBroadcastResult)
 	{
@@ -57,36 +49,25 @@ void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 	}
 }
 
-bool AGameplayAbilityTargetActor_PredictProjectile::PickTargetFromPlayerCapsule(FPredictProjectilePathResult& OutResult, FVector& OutLaunchVelocity)
+bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget(FPredictProjectilePathResult& OutResult, FVector& OutLaunchVelocity)
 {
-	auto queryTypes = TArray<TEnumAsByte<EObjectTypeQuery>>{
+	auto queryTypes = TArray<TEnumAsByte<EObjectTypeQuery>> {
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic)
 	};
 
 	OutLaunchVelocity = vrController->GetForwardVector() * TargetProjectileSpeed;
 
-	FPredictProjectilePathParams params(0.f, playerCapsule->GetComponentLocation() - (playerCapsule->GetUpVector() * playerCapsule->GetScaledCapsuleHalfHeight()),
-										OutLaunchVelocity, 2.f);
+	FPredictProjectilePathParams params;
 
-	params.ObjectTypes = queryTypes;
-	params.ActorsToIgnore = IgnoredActors;
-	params.DrawDebugType = EDrawDebugTrace::ForOneFrame;
-	params.DrawDebugTime = 1.f;
-	params.bTraceComplex = false;
-	params.bTraceWithCollision = true;
-
-	return UGameplayStatics::PredictProjectilePath(GetWorld(), params, OutResult);
-}
-
-bool AGameplayAbilityTargetActor_PredictProjectile::PickTargetFromVrController(FPredictProjectilePathResult& OutResult, FVector& OutLaunchVelocity)
-{
-	auto queryTypes = TArray<TEnumAsByte<EObjectTypeQuery>>{
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic)
-	};
-
-	OutLaunchVelocity = vrController->GetForwardVector() * TargetProjectileSpeed;
-
-	FPredictProjectilePathParams params(0.f, vrController->GetComponentLocation(), OutLaunchVelocity, 2.f);
+	if (targetingType == EPickMoveLocationTargeting::FromPlayerCapsule)
+	{
+		params = FPredictProjectilePathParams(0.f, playerCapsule->GetComponentLocation() - (playerCapsule->GetUpVector() * playerCapsule->GetScaledCapsuleHalfHeight()), 
+			OutLaunchVelocity, 2.f);
+	}
+	else // EPickMoveLocationTargeting == EPickMoveLocationTargeting::FromController
+	{
+		params = FPredictProjectilePathParams(0.f, vrController->GetComponentLocation(), OutLaunchVelocity, 2.f);
+	}
 
 	params.ObjectTypes = queryTypes;
 	params.ActorsToIgnore = IgnoredActors;
