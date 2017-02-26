@@ -17,7 +17,6 @@ void AAbilityTask_MoveToActor::Tick(float DeltaTime)
 	const auto location = MovingCharacter->GetActorLocation();
 	const auto distance = FVector::Distance(TargetLocation, location);
 
-
 	if (distance < MinDistanceThreshold && HasAuthority())
 	{
 		OnLocationReached.Broadcast();

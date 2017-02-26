@@ -41,9 +41,8 @@ private:
 	void GetPlayerCapsuleFromAbility(UGameplayAbility* Ability);
 	void GetVrControllerFromAbility(UGameplayAbility* Ability);
 
-	bool PickTargetFromPlayerCapsule(FPredictProjectilePathResult& OutResult, FVector& OutLaunchVelocity);
-	bool PickTargetFromVrController(FPredictProjectilePathResult& OutResult, FVector& OutLaunchVelocity);
-	
+	bool PickTarget(FPredictProjectilePathResult& OutResult, FVector& OutLaunchVelocity);
+
 	UCapsuleComponent* playerCapsule;
 	UVRControllerComponent* vrController;
 };

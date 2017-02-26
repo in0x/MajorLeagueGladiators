@@ -25,7 +25,6 @@ void UAbilityTask_MoveTo::Activate()
 
 	spawnedActor->FinishSpawning(FTransform::Identity);	
 	spawnedActor->OnLocationReached.AddUObject(this, &UAbilityTask_MoveTo::OnLocationReachedCallback);
-
 }
 
 void UAbilityTask_MoveTo::OnLocationReachedCallback()
