@@ -80,12 +80,22 @@ bool AGameplayAbilityTargetActor_PredictProjectile::PickTargetFromPlayerCapsule(
 
 bool AGameplayAbilityTargetActor_PredictProjectile::PickTargetFromVrController(FPredictProjectilePathResult& OutResult, FVector& OutLaunchVelocity)
 {
-	/*const auto targetTrans = StartLocation.SourceComponent->GetComponentTransform();
-	const auto direction = targetTrans.GetRotation().Vector();
-	const auto targetBegin = targetTrans.GetLocation();
-	const auto targetEnd = targetBegin + (direction * MaxRange);*/
+	auto queryTypes = TArray<TEnumAsByte<EObjectTypeQuery>>{
+		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic)
+	};
 
-	return false;
+	OutLaunchVelocity = vrController->GetForwardVector() * TargetProjectileSpeed;
+
+	FPredictProjectilePathParams params(0.f, vrController->GetComponentLocation(), OutLaunchVelocity, 2.f);
+
+	params.ObjectTypes = queryTypes;
+	params.ActorsToIgnore = IgnoredActors;
+	params.DrawDebugType = EDrawDebugTrace::ForOneFrame;
+	params.DrawDebugTime = 1.f;
+	params.bTraceComplex = false;
+	params.bTraceWithCollision = true;
+
+	return UGameplayStatics::PredictProjectilePath(GetWorld(), params, OutResult);
 }
 
 bool AGameplayAbilityTargetActor_PredictProjectile::IsConfirmTargetingAllowed()
