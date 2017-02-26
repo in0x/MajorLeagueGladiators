@@ -5,6 +5,7 @@
 
 
 AAbilityTask_MoveToActor::AAbilityTask_MoveToActor()
+	: MinDistanceThreshold(10.f)
 {
  	PrimaryActorTick.bCanEverTick = true;
 }
@@ -16,7 +17,6 @@ void AAbilityTask_MoveToActor::Tick(float DeltaTime)
 	const auto location = MovingCharacter->GetActorLocation();
 	const auto distance = FVector::Distance(TargetLocation, location);
 
-	float MinDistanceThreshold = 10.f;
 
 	if (distance < MinDistanceThreshold && HasAuthority())
 	{
