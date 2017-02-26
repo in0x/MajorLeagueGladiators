@@ -6,18 +6,9 @@
 #include "GameplayAbilityTargetActor_Raycast.h"
 #include "AbilityTask_MoveTo.h"
 
-/*
-Aim with Raycast - done
-Limit Range - done
-Ignore vertical surfaces - done
-Dash directly to point
-Turn off collision
-Turn on flying movement mode
-Move x units per second towards point
-*/
-
 UDashAbility::UDashAbility()
 	: MaxRange(1000.f)
+	, MoveSpeed(1000.f)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;
@@ -84,7 +75,7 @@ void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 		auto location = Data.Data[0]->GetHitResult()->Location;	
 		location += capsule->GetUpVector() * capsule->GetScaledCapsuleHalfHeight();
 		
-		moveToTask = UAbilityTask_MoveTo::Create(this, "MoveTo Task", location, 10.f, player);
+		moveToTask = UAbilityTask_MoveTo::Create(this, "MoveTo Task", location, MoveSpeed, player);
 		moveToTask->Activate();
 		moveToTask->OnLocationReached.AddUObject(this, &UDashAbility::OnLocationReached);
 
