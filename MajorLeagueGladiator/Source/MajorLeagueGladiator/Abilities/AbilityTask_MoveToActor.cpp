@@ -22,10 +22,12 @@ void AAbilityTask_MoveToActor::Tick(float DeltaTime)
 	{
 		OnLocationReached.Broadcast();
 	}
-	else
+	else if (HasAuthority())
 	{
-		const auto direction = (TargetLocation - location).GetSafeNormal();
-		MovingCharacter->AddMovementInput(direction * MoveSpeed);
+		const auto direction = (TargetLocation - location).GetSafeNormal() * MoveSpeed;
+
+		MovingCharacter->LaunchCharacter(direction, true, true);
+		
 		DrawDebugDirectionalArrow(MovingCharacter->GetRootComponent()->GetWorld(), location, TargetLocation, 1.0f, FColor::Green);
 	}
 }
