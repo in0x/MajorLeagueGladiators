@@ -26,4 +26,7 @@ public:
 	ACharacter* MovingCharacter;
 
 	FMoveToLocationReached OnLocationReached;
+
+private:
+	float MinDistanceThreshold;
 };
