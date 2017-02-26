@@ -47,7 +47,7 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	targetingSpawnedActor->EvalTargetFunc = [](const FHitResult& result)
 	{
-		auto isNotVertical = FVector::DotProduct(result.ImpactNormal, FVector(0,0,1)) > 0.7f; // TODO(Phil) This still allows selecting the underside of a surface
+		auto isNotVertical = FVector::DotProduct(result.ImpactNormal, FVector(0,0,1)) > 0.7f; 
 		auto hitSurface = result.bBlockingHit > 0;
 		return isNotVertical && hitSurface;
 	};
