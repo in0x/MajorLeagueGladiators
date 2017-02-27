@@ -14,8 +14,5 @@ class MAJORLEAGUEGLADIATOR_API AShieldActor : public AMlgGrippableStaticMeshActo
 public:
 	AShieldActor();
 
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-
-	void OnHitInteractable(const ABaseProjectile* projectile);
-	
+	void OnHitInteractable(const ABaseProjectile* projectile);	
 };

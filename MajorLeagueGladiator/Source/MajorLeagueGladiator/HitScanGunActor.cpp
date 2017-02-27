@@ -16,7 +16,7 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	, elapsedAnimTime(0.f)
 	, recoilOrigin(0.f)
 	, recoilDistance(-30.f)
-	, shotClass(AHitscanProjectile::StaticClass())
+	, projectileClass(AHitscanProjectile::StaticClass())
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -115,7 +115,7 @@ void AHitScanGunActor::shoot()
 	FTransform trafo;
 	shotOriginSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
 
-	shotClass.GetDefaultObject()->FireProjectile(trafo.GetLocation(), trafo.GetRotation().GetForwardVector(), this, GetMlgPlayerController());
+	projectileClass.GetDefaultObject()->FireProjectile(trafo.GetLocation(), trafo.GetRotation().GetForwardVector(), this, GetMlgPlayerController());
 }
 
 void AHitScanGunActor::Tick(float DeltaTime)

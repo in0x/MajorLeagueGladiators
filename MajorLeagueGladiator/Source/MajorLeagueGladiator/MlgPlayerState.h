@@ -5,9 +5,6 @@
 #include "GameFramework/PlayerState.h"
 #include "MlgPlayerState.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgPlayerState : public APlayerState
 {
