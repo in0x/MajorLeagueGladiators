@@ -3,8 +3,6 @@
 #include "MajorLeagueGladiator.h"
 #include "MlgPlayerController.h"
 
-#include "MlgPlayerState.h"
-
 AMlgPlayerController::AMlgPlayerController()
 {
 	const static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> helperShortLeft(TEXT("/Game/RumbleFiles/RumbleShortLeft"));
@@ -23,5 +21,3 @@ UForceFeedbackEffect* AMlgPlayerController::GetRumbleShortRight()
 {
 	return rumbleShortRight;
 }
-
-
