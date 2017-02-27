@@ -19,11 +19,6 @@ AShieldActor::AShieldActor()
 	GetStaticMeshComponent()->SetCollisionProfileName(ABILITY_ACTOR_COLLISION_PRESET_NAME);
 }
 
-void AShieldActor::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorBeginOverlap(OtherActor);
-}
-
 void AShieldActor::OnHitInteractable(const ABaseProjectile* projectile)
 {
 	checkf(GetStaticMeshComponent()->GetSocketByName(REFLECT_SOCKET_NAME), TEXT("Socket \"AbilityActor\" is missing in the shield actor mesh"));

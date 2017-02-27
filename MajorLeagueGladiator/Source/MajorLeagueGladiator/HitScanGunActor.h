@@ -52,7 +52,7 @@ private:
 	UWidgetComponent* ammoCountWidget;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AHitscanProjectile> shotClass;
+	TSubclassOf<AHitscanProjectile> projectileClass;
 	
 	UTextWidget* textWidget;
 

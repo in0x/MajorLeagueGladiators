@@ -5,14 +5,11 @@
 #include "AIController.h"
 #include "MlgAIController.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgAIController : public AAIController
 {
 	GENERATED_BODY()
+
 public:
-	AMlgAIController();
-		
+	AMlgAIController();	
 };

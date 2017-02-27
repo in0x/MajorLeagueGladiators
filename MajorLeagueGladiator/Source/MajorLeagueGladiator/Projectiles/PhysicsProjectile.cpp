@@ -27,7 +27,6 @@ void APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 	spawnedRootComponent->MoveIgnoreActors.Add(ProjectileOwner);
 	spawnedActor->FinishSpawning(projectileTransform);
 	spawnedActor->SetLifeSpan(5.f);
-
 }
 
 void APhysicsProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
@@ -55,13 +54,7 @@ void APhysicsProjectile::DealDamage(AActor* OtherActor)
 {
 	FVector travelingDir = GetRootComponent()->GetComponentVelocity().GetSafeNormal();
 
-	UGameplayStatics::ApplyPointDamage(OtherActor, damage, travelingDir, FHitResult{}, Instigator->Controller, this, DamageType);
-
-	if (AMlgPlayerController* mlgController = Cast<AMlgPlayerController>(Instigator))
-	{
-		mlgController->ClientPlayForceFeedback(mlgController->GetRumbleShortRight(), false, FName("rumbleRight"));
-	}
-	
+	UGameplayStatics::ApplyPointDamage(OtherActor, damage, travelingDir, FHitResult{}, Instigator->Controller, this, DamageType);	
 }
 
 bool APhysicsProjectile::IsIgnoredActor(const AActor* Actor) const

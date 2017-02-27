@@ -7,6 +7,7 @@
 bool AMlgPlayerState::IsSameTeam(const AMlgPlayerState* otherPlayerState) const
 {
 	// For now teams there is only the AI Team and the non AI Team. Easiest Solution until we need more teams.
-	return otherPlayerState && bIsABot == otherPlayerState->bIsABot;
+	check(otherPlayerState);
+	return bIsABot == otherPlayerState->bIsABot;
 }
 
