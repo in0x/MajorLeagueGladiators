@@ -19,6 +19,8 @@ protected:
 	UFUNCTION()
 	virtual void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
+	bool CanDealDamageTo(const AActor* OtherActor) const;
+
 	UPROPERTY(EditAnywhere, Category = "Damage")
 	float damageAppliedOnHit;
 

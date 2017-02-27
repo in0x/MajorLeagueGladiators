@@ -4,7 +4,7 @@
 #include "PhysicsProjectile.h"
 #include "MlgPlayerController.h"
 
-#include "MlgPlayerState.h"
+#include "MlgGameplayStatics.h"
 
 #include "ShieldActor.h" //Replace with interface when ready
 
@@ -43,18 +43,11 @@ void APhysicsProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		interactable->OnHitInteractable(this);
 	}
-	else if (APawn* pawn = Cast<APawn>(OtherActor))
-	{
-		if (CanDealDamageTo(pawn))
-		{
-			DealDamage(pawn);
-		}
-	}
-	else
+	else if (UMlgGameplayStatics::CanDealDamageTo(this, OtherActor))
 	{
 		DealDamage(OtherActor);
-	}
-
+	}	
+	//Destroy even if no damage is applied
 	Destroy();
 }
 
@@ -74,24 +67,4 @@ void APhysicsProjectile::DealDamage(AActor* OtherActor)
 bool APhysicsProjectile::IsIgnoredActor(const AActor* Actor) const
 {
 	return GetOwner() == Actor;
-}
-
-bool APhysicsProjectile::CanDealDamageTo(const APawn* otherPawn) const
-{
-	return otherPawn && CanDealDamageTo(otherPawn->Controller);
-}
-
-bool APhysicsProjectile::CanDealDamageTo(const AController* otherController) const
-{
-	if (otherController == nullptr)
-	{
-		return false;
-	}
-
-	const AMlgPlayerState* otherPlayerState = CastChecked<AMlgPlayerState>(otherController->PlayerState);
-
-	const AController* myController = GetInstigatorController();
-	const AMlgPlayerState* myPlayerState = CastChecked<AMlgPlayerState>(myController->PlayerState);
-
-	return !myPlayerState->IsSameTeam(otherPlayerState);
 }
