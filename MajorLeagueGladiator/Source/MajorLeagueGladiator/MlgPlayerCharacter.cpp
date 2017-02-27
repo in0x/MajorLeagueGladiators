@@ -3,7 +3,6 @@
 #include "MajorLeagueGladiator.h"
 #include "MlgPlayerCharacter.h"
 #include "VRControllerComponent.h"
-#include "ArcAimComponent.h"
 #include "TriggerZoneComponent.h"
 #include "HealthComponent.h"
 #include "MlgPlayerController.h"
@@ -39,12 +38,6 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	hudHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 	hudHealth->SetupAttachment(leftMesh, FName(TEXT("Touch")));
 	
-	hudTeleportCD = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HudTeleportCD"));
-	hudTeleportCD->SetupAttachment(leftMesh, FName(TEXT("Touch"), EFindName::FNAME_Find));
-	
-	arcAimComp = ObjectInitializer.CreateDefaultSubobject<UArcAimComponent>(this, TEXT("ArcAimComp"));
-	arcAimComp->Disable();
-
 	abilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAbilitySystemComponent>(this, TEXT("GameplayTasks"));
 	abilitySystemComponent->SetIsReplicated(true);
 
@@ -87,11 +80,6 @@ void AMlgPlayerCharacter::BeginPlay()
 	auto healthWidget = CastChecked<UPlayerHudWidget>(hudHealth->GetUserWidgetObject());
 	healthWidget->OnAttachPlayer(this);
 
-	arcAimComp->OnCooldownChange.AddLambda([textWidget = CastChecked<UTextWidget>(hudTeleportCD->GetUserWidgetObject())](float CurrentCD)
-	{
-		textWidget->SetText(FString::FromInt(static_cast<int>(FMath::RoundFromZero(CurrentCD))));
-	});
-
 	LandedDelegate.AddDynamic(this, &AMlgPlayerCharacter::OnLand);
 }
 
@@ -115,12 +103,6 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &AMlgPlayerCharacter::OnRightTriggerClicked);
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerReleased);
-
-	PlayerInputComponent->BindAction("TeleportPressLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnTeleportPressedLeft);
-	PlayerInputComponent->BindAction("TeleportPressRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnTeleportPressedRight);
-
-	PlayerInputComponent->BindAction("TeleportPressLeft", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnTeleportReleased);
-	PlayerInputComponent->BindAction("TeleportPressRight", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnTeleportReleased);
 
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
@@ -209,16 +191,6 @@ void AMlgPlayerCharacter::OnRightTriggerReleased()
 	rightHandRelease_Server();
 }
 
-void AMlgPlayerCharacter::OnTeleportPressedLeft()
-{
-	arcAimComp->Enable(LeftMotionController);
-}
-
-void AMlgPlayerCharacter::OnTeleportPressedRight()
-{
-	arcAimComp->Enable(RightMotionController);
-}
-
 void AMlgPlayerCharacter::OnSideGripButtonLeft()
 {
 	leftHandDrop_Server();
@@ -254,24 +226,6 @@ UVRControllerComponent* AMlgPlayerCharacter::GetMotionController(EControllerHand
 	default:
 		checkNoEntry();
 		return nullptr;
-	}
-}
-
-void AMlgPlayerCharacter::OnTeleportReleased()
-{
-	auto result = arcAimComp->GetAimResult();
-	arcAimComp->Disable();
-
-	if (result.bDidAimFindPosition)
-	{
-		if (Role >= ROLE_Authority)
-		{
-			TeleportTo(result.Position, GetActorRotation());
-		}
-		else
-		{
-			requestTeleport_Server(result.Position, GetActorRotation());
-		}		
 	}
 }
 
@@ -347,20 +301,4 @@ void AMlgPlayerCharacter::rightHandDrop_Server_Implementation()
 	UVRControllerComponent* rightController = CastChecked<UVRControllerComponent>(RightMotionController);
 	rightController->EndUseGrippedActors();
 	rightController->DropAllGrips();
-}
-
-bool AMlgPlayerCharacter::requestTeleport_Server_Validate(FVector Location, FRotator Rotation)
-{
-	//you could check if teleport is realistic/possible to prevent cheats
-	return true;
-}
-
-void AMlgPlayerCharacter::requestTeleport_Server_Implementation(FVector Location, FRotator Rotation)
-{
-	performTeleport_NetMulticast(Location, Rotation);
-}
-
-void AMlgPlayerCharacter::performTeleport_NetMulticast_Implementation(FVector Location, FRotator Rotation)
-{
-	TeleportTo(Location, Rotation, false, true);
 }
