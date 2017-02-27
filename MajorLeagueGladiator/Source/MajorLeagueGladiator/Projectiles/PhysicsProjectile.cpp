@@ -4,6 +4,8 @@
 #include "PhysicsProjectile.h"
 #include "MlgPlayerController.h"
 
+#include "MlgPlayerState.h"
+
 #include "ShieldActor.h" //Replace with interface when ready
 
 APhysicsProjectile::APhysicsProjectile(const FObjectInitializer& ObjectInitializer)
@@ -64,4 +66,24 @@ void APhysicsProjectile::DealDamage(AActor* OtherActor)
 bool APhysicsProjectile::IsIgnoredActor(const AActor* Actor) const
 {
 	return GetOwner() == Actor;
+}
+
+bool APhysicsProjectile::CanDealDamageTo(const APawn* otherPawn) const
+{
+	return otherPawn && CanDealDamageTo(otherPawn);
+}
+
+bool APhysicsProjectile::CanDealDamageTo(const AController* otherController) const
+{
+	if (otherController == nullptr)
+	{
+		return false;
+	}
+
+	const AMlgPlayerState* otherPlayerState = CastChecked<AMlgPlayerState>(otherController->PlayerState);
+
+	const AController* myController = GetInstigatorController();
+	const AMlgPlayerState* myPlayerState = CastChecked<AMlgPlayerState>(myController->PlayerState);
+
+	return !myPlayerState->IsSameTeam(otherPlayerState);
 }

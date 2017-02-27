@@ -15,8 +15,5 @@ class MAJORLEAGUEGLADIATOR_API AMlgPlayerState : public APlayerState
 	
 public:
 	bool IsSameTeam(const AMlgPlayerState* otherPlayerState) const;
-
-private:
-	int8 team;
 	
 };

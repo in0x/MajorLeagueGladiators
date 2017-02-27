@@ -3,6 +3,8 @@
 #include "MajorLeagueGladiator.h"
 #include "HitscanProjectile.h"
 #include "DamageTypes/PlayerDamage.h"
+#include "MlgPlayerState.h"
+
 
 #include "ShieldActor.h"
 
@@ -19,6 +21,12 @@ AHitscanProjectile::AHitscanProjectile()
 
 void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
+	if (Role < ROLE_Authority)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Fire Projectile should not be called on client"));
+		return;
+	}
+
 	FHitResult hitresult = Trace(ProjectileOwner->GetWorld(), Location, DirectionVector, { ProjectileOwner });
 
 	if (!hitresult.bBlockingHit)
@@ -32,9 +40,16 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 	{
 		interactable->OnHitInteractable(this);
 	}
+	else if (APawn* pawn = Cast<APawn>(hitActor))
+	{
+		if (CanDealDamageTo(ProjectileInstigator, pawn))
+		{
+			UGameplayStatics::ApplyPointDamage(pawn, damage, DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UPlayerDamage::StaticClass());
+		}
+	}
 	else
 	{
-		UGameplayStatics::ApplyPointDamage(hitresult.GetActor(), damage, DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UPlayerDamage::StaticClass());
+		UGameplayStatics::ApplyPointDamage(hitActor, damage, DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UPlayerDamage::StaticClass());
 	}	
 }
 
@@ -65,5 +80,12 @@ FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector Di
 	return result;
 }
 
+bool AHitscanProjectile::CanDealDamageTo(const AController* DamageInstigator, const APawn* targetPawn)
+{
+	const AMlgPlayerState* targetPlayerState = CastChecked<AMlgPlayerState>(targetPawn->GetController()->PlayerState);
+	const AMlgPlayerState* instigatorPlayerState = CastChecked<AMlgPlayerState>(DamageInstigator->PlayerState);
+
+	return !instigatorPlayerState->IsSameTeam(targetPlayerState);
+}
 
 
