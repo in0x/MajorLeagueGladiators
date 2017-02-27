@@ -26,6 +26,7 @@ void APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 	//Don't collide with shield again
 	spawnedRootComponent->MoveIgnoreActors.Add(ProjectileOwner);
 	spawnedActor->FinishSpawning(projectileTransform);
+	spawnedActor->SetLifeSpan(5.f);
 
 }
 
@@ -41,6 +42,13 @@ void APhysicsProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 	if (AShieldActor* interactable = Cast<AShieldActor>(OtherActor))
 	{
 		interactable->OnHitInteractable(this);
+	}
+	else if (APawn* pawn = Cast<APawn>(OtherActor))
+	{
+		if (CanDealDamageTo(pawn))
+		{
+			DealDamage(pawn);
+		}
 	}
 	else
 	{
