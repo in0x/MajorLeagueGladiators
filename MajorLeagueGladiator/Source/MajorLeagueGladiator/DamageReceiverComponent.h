@@ -19,8 +19,6 @@ public:
 	UDamageReceiverComponent();
 	virtual void BeginPlay() override;
 
-	bool CanBeDamagedBy(const UDamageType* DamageType) const;
-
 	DamageReceivedDelegate OnDamageReceived;
 	PointDamageReceivedDelegate OnPointDamageReceived;
 
@@ -33,7 +31,4 @@ private:
 									   FName BoneName, FVector ShotFromDirection, const UDamageType* DamageType, AActor* DamageCauser);
 	
 	TArray<UHealthComponent*> healthComponents;
-
-	UPROPERTY(EditAnywhere, Category = "Damage")
-	TArray<TSubclassOf<UDamageType>> damageableBy;
 };

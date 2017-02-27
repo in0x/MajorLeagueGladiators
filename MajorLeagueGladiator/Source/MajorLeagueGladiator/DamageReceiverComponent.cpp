@@ -28,17 +28,8 @@ void UDamageReceiverComponent::BeginPlay()
 	}
 }
 
-bool UDamageReceiverComponent::CanBeDamagedBy(const UDamageType* DamageType) const
-{
-	return damageableBy.ContainsByPredicate([&DamageType](TSubclassOf<UDamageType> currentDamageType)
-	{
-		return DamageType->GetClass() == *currentDamageType;
-	});
-}
-
 void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-
 	OnDamageReceived.Broadcast(DamagedActor);
 
 	UHealthComponent* healthComp = healthComponents[0];
@@ -51,19 +42,12 @@ void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, 
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Couldnt find HealthComponent, cant apply damage"));
 	}
-
-
 }
 
 void UDamageReceiverComponent::handlePointDamage(AActor* DamagedActor, float Damage, AController* InstigatedBy, FVector HitLocation, 
 												UPrimitiveComponent* HitComponent, FName BoneName, FVector ShotFromDirection, 
 												const UDamageType* DamageType, AActor* DamageCauser)
 {
-	if (!CanBeDamagedBy(DamageType))
-	{
-		return;
-	}
-
 	OnPointDamageReceived.Broadcast(DamagedActor, HitLocation);
 
 	if (healthComponents.Num() > 1) {
