@@ -11,6 +11,7 @@ APhysicsProjectile::APhysicsProjectile(const FObjectInitializer& ObjectInitializ
 	bReplicates = true;
 	bReplicateMovement = true;
 	bStaticMeshReplicateMovement = true;
+	GetStaticMeshComponent()->SetCollisionProfileName("OverlapDamageCauser");
 }
 
 void APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
