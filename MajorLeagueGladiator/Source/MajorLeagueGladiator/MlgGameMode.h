@@ -14,5 +14,5 @@ class MAJORLEAGUEGLADIATOR_API AMlgGameMode : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
-	AMlgGameMode(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());	
+	AMlgGameMode(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 };

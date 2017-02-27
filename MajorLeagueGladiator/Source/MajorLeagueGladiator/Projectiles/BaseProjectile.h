@@ -13,6 +13,9 @@ public:
 	ABaseProjectile();
 
 	virtual void FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const {	checkNoEntry();	}
+
+	bool CanDealDamageTo(const APawn* otherPawn) const;
+	bool CanDealDamageTo(const AController* otherController) const;
 	
 	UPROPERTY(EditAnywhere)
 	float damage;
