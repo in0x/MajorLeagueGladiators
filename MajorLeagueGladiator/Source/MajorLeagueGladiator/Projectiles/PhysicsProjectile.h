@@ -23,7 +23,4 @@ private:
 
 	void DealDamage(AActor* OtherActor);
 	bool IsIgnoredActor(const AActor* Actor) const;
-
-	bool CanDealDamageTo(const APawn* otherPawn) const;
-	bool CanDealDamageTo(const AController* otherController) const;
 };

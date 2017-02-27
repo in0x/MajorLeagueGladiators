@@ -3,6 +3,8 @@
 #include "MajorLeagueGladiator.h"
 #include "DamageCauserComponent.h"
 
+#include "MlgGameplayStatics.h"
+
 
 UDamageCauserComponent::UDamageCauserComponent()
 	: damageAppliedOnHit(0)
@@ -18,5 +20,16 @@ void UDamageCauserComponent::BeginPlay()
 
 void UDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, nullptr, OverlappedActor, damageType);
+	if (GetOwnerRole() >= ROLE_Authority && UMlgGameplayStatics::CanDealDamageTo(OverlappedActor, OtherActor))
+	{
+		APawn* damageInstigatorPawn = Cast<APawn>(OverlappedActor);
+		if (damageInstigatorPawn == nullptr)
+		{
+			damageInstigatorPawn = OverlappedActor->GetInstigator();
+		}
+		check(damageInstigatorPawn);
+
+		UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, damageInstigatorPawn->GetController(), OverlappedActor, damageType);
+	}
 }
+

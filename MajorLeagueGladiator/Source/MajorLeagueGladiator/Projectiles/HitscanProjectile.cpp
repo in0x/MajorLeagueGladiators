@@ -3,8 +3,7 @@
 #include "MajorLeagueGladiator.h"
 #include "HitscanProjectile.h"
 #include "DamageTypes/PlayerDamage.h"
-#include "MlgPlayerState.h"
-
+#include "MlgGameplayStatics.h"
 
 #include "ShieldActor.h"
 
@@ -40,17 +39,10 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 	{
 		interactable->OnHitInteractable(this);
 	}
-	else if (APawn* pawn = Cast<APawn>(hitActor))
-	{
-		if (CanDealDamageTo(ProjectileInstigator, pawn))
-		{
-			UGameplayStatics::ApplyPointDamage(pawn, damage, DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UPlayerDamage::StaticClass());
-		}
-	}
-	else
+	else if (UMlgGameplayStatics::CanDealDamageTo(ProjectileInstigator, hitActor))
 	{
 		UGameplayStatics::ApplyPointDamage(hitActor, damage, DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UPlayerDamage::StaticClass());
-	}	
+	}
 }
 
 
@@ -78,14 +70,6 @@ FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector Di
 	world->LineTraceSingleByObjectType(result, Location, end, queryTypes, CollisionParams);
 	DrawDebugDirectionalArrow(world, Location, end, 100.f, FColor::Purple, true, 2.f);
 	return result;
-}
-
-bool AHitscanProjectile::CanDealDamageTo(const AController* DamageInstigator, const APawn* targetPawn)
-{
-	const AMlgPlayerState* targetPlayerState = CastChecked<AMlgPlayerState>(targetPawn->GetController()->PlayerState);
-	const AMlgPlayerState* instigatorPlayerState = CastChecked<AMlgPlayerState>(DamageInstigator->PlayerState);
-
-	return !instigatorPlayerState->IsSameTeam(targetPlayerState);
 }
 
 
