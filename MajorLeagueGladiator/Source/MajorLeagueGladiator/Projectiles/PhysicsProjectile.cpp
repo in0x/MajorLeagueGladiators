@@ -78,7 +78,7 @@ bool APhysicsProjectile::IsIgnoredActor(const AActor* Actor) const
 
 bool APhysicsProjectile::CanDealDamageTo(const APawn* otherPawn) const
 {
-	return otherPawn && CanDealDamageTo(otherPawn);
+	return otherPawn && CanDealDamageTo(otherPawn->Controller);
 }
 
 bool APhysicsProjectile::CanDealDamageTo(const AController* otherController) const
