@@ -19,6 +19,7 @@ public:
 
 	FHitResult Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const;
 
+	static bool CanDealDamageTo(const AController* DamageInstigator, const APawn* targetPawn);
 private:
 	float range;
 };

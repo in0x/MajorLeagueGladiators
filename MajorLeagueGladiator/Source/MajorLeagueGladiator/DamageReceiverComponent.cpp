@@ -38,10 +38,6 @@ bool UDamageReceiverComponent::CanBeDamagedBy(const UDamageType* DamageType) con
 
 void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	/*if (!CanBeDamagedBy(DamageType))
-	{
-		return;
-	}*/
 
 	OnDamageReceived.Broadcast(DamagedActor);
 
