@@ -27,13 +27,18 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual bool IsConfirmTargetingAllowed() override;
-	
-	TArray<AActor*> IgnoredActors;
-	float MaxRange;
-	ERaycastTargetDirection::Type aimDirection;
-	RaycastTargetEvaluationFunc EvalTargetFunc;
-	bool bShouldBroadcastResult;
+	virtual void ConfirmTargetingAndContinue() override;
 
+	TArray<AActor*> IgnoredActors;
+	
+	float MaxRange;
+	
+	ERaycastTargetDirection::Type aimDirection;
+	
+	RaycastTargetEvaluationFunc EvalTargetFunc;
+	
 private:
-	FGameplayAbilityTargetDataHandle makeDataHandle(const FHitResult& Result) const;
+	FGameplayAbilityTargetDataHandle makeDataHandle();
+
+	FHitResult hitResult;
 };
