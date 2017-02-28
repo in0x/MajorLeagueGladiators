@@ -5,8 +5,6 @@
 #include "Components/ActorComponent.h"
 #include "DamageCauserComponent.generated.h"
 
-
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class MAJORLEAGUEGLADIATOR_API UDamageCauserComponent : public UActorComponent
 {

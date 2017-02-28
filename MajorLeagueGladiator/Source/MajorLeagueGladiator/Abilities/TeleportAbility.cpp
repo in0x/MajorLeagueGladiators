@@ -1,29 +1,29 @@
 #include "MajorLeagueGladiator.h"
-#include "JumpAbility.h"
+#include "TeleportAbility.h"
 #include "AbilityTask_WaitTargetData.h"
 #include "GameplayAbilityTargetActor_PredictProjectile.h"
 
-UJumpAbility::UJumpAbility()
-	: PredictProjectileSpeed(1000.f)
+UTeleportAbility::UTeleportAbility ()
+	: PredictProjectileSpeed(750.f)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;
 }
 
-void UJumpAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
+void UTeleportAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
 	if (waitForTargetTask)
 	{
 		// Player has released targeting button -> finished picking target
 		waitForTargetTask->ExternalConfirm(true);
 	}
-}
+} 
 
-void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+void UTeleportAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	waitForTargetTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Pick Target Task", EGameplayTargetingConfirmation::Custom, AGameplayAbilityTargetActor_PredictProjectile::StaticClass());
-	waitForTargetTask->ValidData.AddDynamic(this, &UJumpAbility::OnTargetPickSuccessful);
-	waitForTargetTask->Cancelled.AddDynamic(this, &UJumpAbility::OnTargetPickCanceled);
+	waitForTargetTask->ValidData.AddDynamic(this, &UTeleportAbility ::OnTargetPickSuccessful);
+	waitForTargetTask->Cancelled.AddDynamic(this, &UTeleportAbility ::OnTargetPickCanceled);
 
 	AGameplayAbilityTargetActor* spawnedActor;
 	if (!waitForTargetTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_PredictProjectile::StaticClass(), spawnedActor))
@@ -35,12 +35,12 @@ void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	targetingSpawnedActor->TargetProjectileSpeed = PredictProjectileSpeed;
 	targetingSpawnedActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
-	targetingSpawnedActor->targetingType = EPickMoveLocationTargeting::FromPlayerCapsule;
+	targetingSpawnedActor->targetingType = EPickMoveLocationTargeting::FromController;
 
 	waitForTargetTask->FinishSpawningActor(this, spawnedActor);
 }
 
-void UJumpAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+void UTeleportAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	waitForTargetTask = nullptr;
 	targetingSpawnedActor = nullptr;
@@ -48,18 +48,18 @@ void UJumpAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data) 
+void UTeleportAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
 	if (GetOwningActorFromActorInfo()->HasAuthority())
 	{
 		auto player = CastChecked<ACharacter>(GetOwningActorFromActorInfo());
-		player->LaunchCharacter(Data.Data[0]->GetHitResult()->TraceStart, true, true); 
+		player->TeleportTo(Data.Data[0]->GetHitResult()->Location, player->GetActorRotation());
 	}
 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
-void UJumpAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
+void UTeleportAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
 {
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }

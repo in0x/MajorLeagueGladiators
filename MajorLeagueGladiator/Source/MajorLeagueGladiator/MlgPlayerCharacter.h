@@ -5,7 +5,6 @@
 #include "AbilitySystemInterface.h"
 #include "MlgPlayerCharacter.generated.h"
 
-class UArcAimComponent;
 class UHealthComponent;
 class AMlgPlayerController;
 class UWidgetComponent;
@@ -32,9 +31,6 @@ public:
 	void OnLeftTriggerReleased();
 	void OnRightTriggerClicked();
 	void OnRightTriggerReleased();
-	void OnTeleportPressedLeft();
-	void OnTeleportPressedRight();
-	void OnTeleportReleased();
 	void OnSideGripButtonLeft();
 	void OnSideGripButtonRight();
 
@@ -51,9 +47,6 @@ private:
 	UStaticMeshComponent* rightMesh;
 
 	UPROPERTY(EditAnywhere)
-	UArcAimComponent* arcAimComp;
-
-	UPROPERTY(EditAnywhere)
 	UHealthComponent* healthComp;
 
 	UPROPERTY(EditAnywhere)
@@ -67,9 +60,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* hudHealth;
-
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* hudTeleportCD;
 
 	UPROPERTY(EditAnywhere)
 	UAbilitySystemComponent* abilitySystemComponent;
@@ -99,12 +89,6 @@ private:
 
 	UFUNCTION(Server, WithValidation, reliable)
 	void rightHandDrop_Server();
-
-	UFUNCTION(Server, WithValidation, reliable)
-	void requestTeleport_Server(FVector Location, FRotator Rotation);
-	
-	UFUNCTION(NetMulticast, reliable)
-	void performTeleport_NetMulticast(FVector Location, FRotator Rotation);
 
 	virtual void BecomeViewTarget(APlayerController* PC) override;
 
