@@ -3,6 +3,11 @@
 #include "MajorLeagueGladiator.h"
 #include "AbilityTask_SearchActor.h"
 
+namespace
+{
+	const char* OVERLAP_DAMAGE_CAUSER_PROFILE = "OverlapDamageCauser";
+}
+
 AAbilityTask_SearchActor::AAbilityTask_SearchActor()
 	: MaxRange(1000)
 {
@@ -20,10 +25,15 @@ void AAbilityTask_SearchActor::Tick(float DeltaTime)
 	const FVector rayCastBegin = targetTrans.GetLocation();
 	const FVector rayCastEnd = rayCastBegin + direction * MaxRange;
 
+	FCollisionResponseTemplate overlapDamageCauserCollisionTemplate;
+	bool success = UCollisionProfile::Get()->GetProfileTemplate(FName(OVERLAP_DAMAGE_CAUSER_PROFILE), overlapDamageCauserCollisionTemplate);
+	checkf(success, TEXT("OverlapDamageCauser Collision Profile is missing"));
+
 	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic),
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic),
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody)
+		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody),
+		UEngineTypes::ConvertToObjectType(overlapDamageCauserCollisionTemplate.ObjectType)
 	};
 
 	FHitResult result;

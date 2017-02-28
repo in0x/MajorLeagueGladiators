@@ -4,6 +4,11 @@
 #include "VRControllerComponent.h"
 #include "MlgPlayerController.h"
 
+namespace
+{
+	const char* OVERLAP_DAMAGE_CAUSER_PROFILE = "OverlapDamageCauser";
+}
+
 UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, grabRadius(32)
@@ -58,7 +63,19 @@ UVRControllerComponent::ActorGrabData UVRControllerComponent::getNearestGrabable
 {
 	TArray<FHitResult> hitresults;
 
-	GetWorld()->SweepMultiByObjectType(hitresults, GetComponentLocation(), GetComponentLocation(), {}, {}, FCollisionShape::MakeSphere(grabRadius));
+	FCollisionResponseTemplate overlapDamageCauserCollisionTemplate;
+	bool success = UCollisionProfile::Get()->GetProfileTemplate(FName(OVERLAP_DAMAGE_CAUSER_PROFILE), overlapDamageCauserCollisionTemplate);
+	checkf(success, TEXT("OverlapDamageCauser Collision Profile is missing"));
+
+	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
+		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody),
+		UEngineTypes::ConvertToObjectType(overlapDamageCauserCollisionTemplate.ObjectType)
+	};
+
+	FCollisionObjectQueryParams queryParams(queryTypes);
+	
+	GetWorld()->SweepMultiByObjectType(hitresults, GetComponentLocation(), GetComponentLocation(),
+		FQuat::Identity, queryParams, FCollisionShape::MakeSphere(grabRadius));
 
 	hitresults = hitresults.FilterByPredicate([](const FHitResult& hitresult)
 	{
