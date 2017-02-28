@@ -3,12 +3,21 @@
 #include "Abilities/GameplayAbility.h"
 #include "Characters/MlgPlayerCharacter.h"
 #include "VRControllerComponent.h"
+#include "Classes/Components/SplineMeshComponent.h"  
 
-AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_PredictProjectile()
-	: TargetProjectileSpeed(1000.f)
+AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_PredictProjectile(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+	, TargetProjectileSpeed(1000.f)
 	, TargetProjectileFlightTime(2.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	splineMesh = ObjectInitializer.CreateDefaultSubobject<USplineMeshComponent>(this, TEXT("SplineMesh"));
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> splineMaterial(TEXT("Material'/Game/Materials/M_SplineArcMat'")); // M_SplineArcMat.uasset
+
+	auto instance = UMaterialInstanceDynamic::Create(splineMaterial.Object, this);
+	splineMesh->SetMaterial(0, instance);
 }
 
 void AGameplayAbilityTargetActor_PredictProjectile::StartTargeting(UGameplayAbility* Ability)
@@ -41,6 +50,9 @@ void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	PickTarget();
+
+	auto path = predictResult.PathData;	
+	splineMesh->SetStartAndEnd(path[0].Location, path[0].Velocity, path.Last().Location, path.Last().Velocity);
 }
 
 bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
