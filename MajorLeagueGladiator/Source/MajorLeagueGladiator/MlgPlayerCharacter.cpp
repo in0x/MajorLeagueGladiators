@@ -304,3 +304,8 @@ void AMlgPlayerCharacter::rightHandDrop_Server_Implementation()
 	rightController->EndUseGrippedActors();
 	rightController->DropAllGrips();
 }
+
+void AMlgPlayerCharacter::EnableActorCollison_NetMulticast_Implementation(bool bNewActorEnableCollision)
+{
+	SetActorEnableCollision(bNewActorEnableCollision);
+}

@@ -80,7 +80,7 @@ void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 		moveToTask->OnLocationReached.AddUObject(this, &UDashAbility::OnLocationReached);
 
 		player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
-		player->SetActorEnableCollision(false);
+		player->EnableActorCollison_NetMulticast(false);
 	}
 }
 
@@ -93,7 +93,7 @@ void UDashAbility::OnLocationReached()
 {
 	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
 	player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-	player->SetActorEnableCollision(true);
+	player->EnableActorCollison_NetMulticast(true);
 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
