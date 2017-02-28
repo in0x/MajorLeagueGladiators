@@ -20,9 +20,10 @@ bool UMlgGameplayStatics::CanDealDamageTo(const AActor* DamageDealer, const AAct
 
 bool UMlgGameplayStatics::CanDealDamageTo(const APawn* DamageInstigator, const AActor* DamageReceiver)
 {
-	check(DamageInstigator && DamageInstigator->GetController());
+	check(DamageInstigator);
+	const AController* controller = DamageInstigator->GetController();
 
-	return CanDealDamageTo(DamageInstigator->GetController(), DamageReceiver);
+	return controller && CanDealDamageTo(controller, DamageReceiver);
 }
 
 bool UMlgGameplayStatics::CanDealDamageTo(const AController* DamageInstigator, const AActor* DamageReceiver)
