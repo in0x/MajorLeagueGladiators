@@ -19,7 +19,7 @@ APhysicsProjectile::APhysicsProjectile(const FObjectInitializer& ObjectInitializ
 void APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
-	APhysicsProjectile* spawnedActor = GetWorld()->SpawnActorDeferred<APhysicsProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
+	APhysicsProjectile* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<APhysicsProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
 	UPrimitiveComponent* spawnedRootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
 	spawnedRootComponent->AddImpulse(1000 * DirectionVector, NAME_None, true);
 
