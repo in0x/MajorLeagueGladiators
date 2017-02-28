@@ -12,7 +12,7 @@ UJumpAbility::UJumpAbility()
 
 void UJumpAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if (waitForTargetTask)
+	if (waitForTargetTask && targetingSpawnedActor)
 	{
 		// Player has released targeting button -> finished picking target
 		waitForTargetTask->ExternalConfirm(true);
@@ -54,9 +54,10 @@ void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 	{
 		auto player = CastChecked<ACharacter>(GetOwningActorFromActorInfo());
 		player->LaunchCharacter(Data.Data[0]->GetHitResult()->TraceStart, true, true); 
+		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 	}
 
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+	//
 }
 
 void UJumpAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)

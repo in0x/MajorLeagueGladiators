@@ -12,7 +12,7 @@ UTeleportAbility::UTeleportAbility ()
 
 void UTeleportAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if (waitForTargetTask)
+	if (waitForTargetTask && targetingSpawnedActor)
 	{
 		// Player has released targeting button -> finished picking target
 		waitForTargetTask->ExternalConfirm(true);

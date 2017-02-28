@@ -16,7 +16,7 @@ UDashAbility::UDashAbility()
 
 void UDashAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if (waitForTargetTask)
+	if (waitForTargetTask && targetingSpawnedActor)
 	{
 		// Player has released targeting button -> finished picking target
 		waitForTargetTask->ExternalConfirm(true);
@@ -95,7 +95,7 @@ void UDashAbility::OnLocationReached()
 	player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	player->SetActorEnableCollision(true);
 
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
 
