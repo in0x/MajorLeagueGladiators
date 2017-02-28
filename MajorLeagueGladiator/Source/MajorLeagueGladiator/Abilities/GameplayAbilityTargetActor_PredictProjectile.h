@@ -14,6 +14,7 @@ namespace EPickMoveLocationTargeting
 }
 
 class UVRControllerComponent;
+class USplineMeshComponent;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AGameplayAbilityTargetActor_PredictProjectile : public AGameplayAbilityTargetActor
@@ -21,7 +22,7 @@ class MAJORLEAGUEGLADIATOR_API AGameplayAbilityTargetActor_PredictProjectile : p
 	GENERATED_BODY()
 
 public:
-	AGameplayAbilityTargetActor_PredictProjectile();
+	AGameplayAbilityTargetActor_PredictProjectile(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual bool IsConfirmTargetingAllowed() override;
@@ -42,6 +43,9 @@ private:
 	void GetVrControllerFromAbility(UGameplayAbility* Ability);
 
 	bool PickTarget();
+
+	UPROPERTY()
+	USplineMeshComponent* splineMesh;
 
 	UCapsuleComponent* playerCapsule;
 	UVRControllerComponent* vrController;
