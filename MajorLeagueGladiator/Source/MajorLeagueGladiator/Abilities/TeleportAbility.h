@@ -18,7 +18,7 @@ public:
 
 	// The speed with which the targeting projectile will be launched.
 	UPROPERTY()
-		float PredictProjectileSpeed;
+	float PredictProjectileSpeed;
 
 private:
 	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
@@ -26,14 +26,14 @@ private:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
 	UFUNCTION()
-		void OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data);
+	void OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data);
 
 	UFUNCTION()
-		void OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data);
+	void OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data);
 
 	UPROPERTY(Transient)
-		UAbilityTask_WaitTargetData* waitForTargetTask;
+	UAbilityTask_WaitTargetData* waitForTargetTask;
 
 	UPROPERTY(Transient)
-		AGameplayAbilityTargetActor_PredictProjectile* targetingSpawnedActor;
+	AGameplayAbilityTargetActor_PredictProjectile* targetingSpawnedActor;
 };

@@ -26,6 +26,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual bool IsConfirmTargetingAllowed() override;
 	virtual void StartTargeting(UGameplayAbility* Ability) override;
+	virtual void ConfirmTargetingAndContinue() override;
 	
 	float TargetProjectileSpeed;
 	
@@ -33,16 +34,17 @@ public:
 	
 	EPickMoveLocationTargeting::Type targetingType;
 
-	bool bShouldBroadcastResult;
-
 private:
-	FGameplayAbilityTargetDataHandle makeDataHandle(FPredictProjectilePathResult& PredictResult, const FVector& LaunchVelocity) const;
+	FGameplayAbilityTargetDataHandle makeDataHandle();
 	
 	void GetPlayerCapsuleFromAbility(UGameplayAbility* Ability);
 	void GetVrControllerFromAbility(UGameplayAbility* Ability);
 
-	bool PickTarget(FPredictProjectilePathResult& OutResult, FVector& OutLaunchVelocity);
+	bool PickTarget();
 
 	UCapsuleComponent* playerCapsule;
 	UVRControllerComponent* vrController;
+
+	FPredictProjectilePathResult predictResult;
+	FVector launchVelocity;
 };

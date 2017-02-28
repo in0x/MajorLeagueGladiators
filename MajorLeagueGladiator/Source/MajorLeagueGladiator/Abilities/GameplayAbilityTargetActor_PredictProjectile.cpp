@@ -38,35 +38,27 @@ void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	FPredictProjectilePathResult result;
-	FVector launchVel;
-
-	PickTarget(result, launchVel);
-
-	if (bShouldBroadcastResult)
-	{
-		TargetDataReadyDelegate.Broadcast(makeDataHandle(result, launchVel));
-	}
+	PickTarget();
 }
 
-bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget(FPredictProjectilePathResult& OutResult, FVector& OutLaunchVelocity)
+bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
 {
 	auto queryTypes = TArray<TEnumAsByte<EObjectTypeQuery>> {
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic)
 	};
 
-	OutLaunchVelocity = vrController->GetForwardVector() * TargetProjectileSpeed;
+	launchVelocity = vrController->GetForwardVector() * TargetProjectileSpeed;
 
 	FPredictProjectilePathParams params;
 
 	if (targetingType == EPickMoveLocationTargeting::FromPlayerCapsule)
 	{
 		params = FPredictProjectilePathParams(0.f, playerCapsule->GetComponentLocation() - (playerCapsule->GetUpVector() * playerCapsule->GetScaledCapsuleHalfHeight()), 
-			OutLaunchVelocity, 2.f);
+			launchVelocity, 2.f);
 	}
 	else // EPickMoveLocationTargeting == EPickMoveLocationTargeting::FromController
 	{
-		params = FPredictProjectilePathParams(0.f, vrController->GetComponentLocation(), OutLaunchVelocity, 2.f);
+		params = FPredictProjectilePathParams(0.f, vrController->GetComponentLocation(), launchVelocity, 2.f);
 	}
 
 	params.ObjectTypes = queryTypes;
@@ -76,20 +68,30 @@ bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget(FPredictProjectil
 	params.bTraceComplex = false;
 	params.bTraceWithCollision = true;
 
-	return UGameplayStatics::PredictProjectilePath(GetWorld(), params, OutResult);
+	return UGameplayStatics::PredictProjectilePath(GetWorld(), params, predictResult);
 }
 
 bool AGameplayAbilityTargetActor_PredictProjectile::IsConfirmTargetingAllowed()
 {
-	return false;
+	return true;
 }
 
-FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_PredictProjectile::makeDataHandle(FPredictProjectilePathResult& PredictResult, const FVector& LaunchVelocity) const
+FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_PredictProjectile::makeDataHandle() 
 {
 	// Reuse TraceStart to transport launch velocity
-	PredictResult.HitResult.TraceStart = LaunchVelocity;
+	predictResult.HitResult.TraceStart = launchVelocity;
 
 	return FGameplayAbilityTargetDataHandle(
-		new FGameplayAbilityTargetData_SingleTargetHit(PredictResult.HitResult)
+		new FGameplayAbilityTargetData_SingleTargetHit(predictResult.HitResult)
 	);
+}
+
+void AGameplayAbilityTargetActor_PredictProjectile::ConfirmTargetingAndContinue()
+{
+	// I'm explicetly not calling Super since it just broadcast with an empty TargetDataHandle 
+
+	if (IsConfirmTargetingAllowed())
+	{
+		TargetDataReadyDelegate.Broadcast(makeDataHandle());
+	}
 }

@@ -3,23 +3,23 @@
 #include "AbilityTask_WaitTargetData.h"
 #include "GameplayAbilityTargetActor_PredictProjectile.h"
 
-UTeleportAbility ::UTeleportAbility ()
+UTeleportAbility::UTeleportAbility ()
 	: PredictProjectileSpeed(750.f)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;
 }
 
-void UTeleportAbility ::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
+void UTeleportAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if (waitForTargetTask && targetingSpawnedActor)
+	if (waitForTargetTask)
 	{
 		// Player has released targeting button -> finished picking target
-		targetingSpawnedActor->bShouldBroadcastResult = true;
+		waitForTargetTask->ExternalConfirm(true);
 	}
-}
+} 
 
-void UTeleportAbility ::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+void UTeleportAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	waitForTargetTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Pick Target Task", EGameplayTargetingConfirmation::Custom, AGameplayAbilityTargetActor_PredictProjectile::StaticClass());
 	waitForTargetTask->ValidData.AddDynamic(this, &UTeleportAbility ::OnTargetPickSuccessful);
@@ -40,7 +40,7 @@ void UTeleportAbility ::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	waitForTargetTask->FinishSpawningActor(this, spawnedActor);
 }
 
-void UTeleportAbility ::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+void UTeleportAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	waitForTargetTask = nullptr;
 	targetingSpawnedActor = nullptr;
@@ -48,7 +48,7 @@ void UTeleportAbility ::EndAbility(const FGameplayAbilitySpecHandle Handle, cons
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-void UTeleportAbility ::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
+void UTeleportAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
 	if (GetOwningActorFromActorInfo()->HasAuthority())
 	{
@@ -59,7 +59,7 @@ void UTeleportAbility ::OnTargetPickSuccessful(const FGameplayAbilityTargetDataH
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
-void UTeleportAbility ::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
+void UTeleportAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
 {
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }

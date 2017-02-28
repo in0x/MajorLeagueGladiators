@@ -42,16 +42,15 @@ void AGameplayAbilityTargetActor_Raycast::Tick(float DeltaSeconds)
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic),
 	};
 
-	FHitResult result;
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActors(IgnoredActors);
 
 	auto* world = GetWorld();
 
-	auto didHit = world->LineTraceSingleByObjectType(result, targetBegin, targetEnd, queryTypes, CollisionParams);
+	auto didHit = world->LineTraceSingleByObjectType(hitResult, targetBegin, targetEnd, queryTypes, CollisionParams);
 	
 
-	if (EvalTargetFunc(result))
+	if (EvalTargetFunc(hitResult))
 	{
 		DrawDebugLine(world, targetBegin, targetEnd, FColor::Green);
 	}
@@ -59,24 +58,30 @@ void AGameplayAbilityTargetActor_Raycast::Tick(float DeltaSeconds)
 	{
 		DrawDebugLine(world, targetBegin, targetEnd, FColor::Red);
 	}
+}
 
-	if (bShouldBroadcastResult)
+bool AGameplayAbilityTargetActor_Raycast::IsConfirmTargetingAllowed()
+{
+	return true;
+}
+
+FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_Raycast::makeDataHandle() 
+{
+	return FGameplayAbilityTargetDataHandle(
+		new FGameplayAbilityTargetData_SingleTargetHit(hitResult) 
+		);
+}
+
+void AGameplayAbilityTargetActor_Raycast::ConfirmTargetingAndContinue()
+{
+	// I'm explicetly not calling Super since it just broadcast with an empty TargetDataHandle 
+
+	if (IsConfirmTargetingAllowed())
 	{
-		if (EvalTargetFunc(result))
-			TargetDataReadyDelegate.Broadcast(makeDataHandle(result));
+		if (EvalTargetFunc(hitResult))
+			TargetDataReadyDelegate.Broadcast(makeDataHandle());
 		else
 			CancelTargeting();
 	}
 }
 
-bool AGameplayAbilityTargetActor_Raycast::IsConfirmTargetingAllowed()
-{
-	return false;
-}
-
-FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_Raycast::makeDataHandle(const FHitResult& Result) const
-{
-	return FGameplayAbilityTargetDataHandle(
-		new FGameplayAbilityTargetData_SingleTargetHit(Result) 
-		);
-}

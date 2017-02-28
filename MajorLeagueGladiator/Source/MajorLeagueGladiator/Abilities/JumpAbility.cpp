@@ -12,10 +12,10 @@ UJumpAbility::UJumpAbility()
 
 void UJumpAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if (waitForTargetTask && targetingSpawnedActor)
+	if (waitForTargetTask)
 	{
 		// Player has released targeting button -> finished picking target
-		targetingSpawnedActor->bShouldBroadcastResult = true;
+		waitForTargetTask->ExternalConfirm(true);
 	}
 }
 
