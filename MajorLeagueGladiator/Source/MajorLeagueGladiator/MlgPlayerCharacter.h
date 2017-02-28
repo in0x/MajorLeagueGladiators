@@ -34,6 +34,9 @@ public:
 	void OnSideGripButtonLeft();
 	void OnSideGripButtonRight();
 
+	UFUNCTION(NetMulticast, reliable)
+	void EnableActorCollison_NetMulticast(bool bNewActorEnableCollision);
+
 	UStaticMeshComponent* GetMotionControllerMesh(EControllerHand Hand);
 	UVRControllerComponent* GetMotionController(EControllerHand Hand);
 
