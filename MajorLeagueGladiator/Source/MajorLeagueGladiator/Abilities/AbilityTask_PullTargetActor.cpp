@@ -18,6 +18,11 @@ void AAbilityTask_PullTargetActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!TargetRootComponent.IsValid() || TargetRootComponent.IsStale())
+	{
+		OnFail.ExecuteIfBound();
+	}
+
 	const FVector targetLocation = TargetRootComponent->GetComponentLocation();
 	const FVector endLocation = EndLocationSceneComponent->GetComponentLocation();
 

@@ -42,6 +42,8 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	abilitySystemComponent->SetIsReplicated(true);
 
 	abilitySetClass = UMlgAbilitySet::StaticClass();
+
+	GetMovementComponent()->SetIsReplicated(true);
 }
 
 void AMlgPlayerCharacter::BeginPlay()
