@@ -6,6 +6,7 @@
 #include "GravityGunAbility.h"
 #include "ShieldAbility.h"
 #include "DashAbility.h"
+#include "JumpAbility.h"
 
 namespace
 {
@@ -16,6 +17,8 @@ UMlgAbilitySet::UMlgAbilitySet()
 {
 	Abilities.Add(FAbilityBindInfo{ EMlgAbilityInputBinds::Ability1, UDashAbility::StaticClass() });
 	Abilities.Add(FAbilityBindInfo{ EMlgAbilityInputBinds::Ability2, UShieldAbility::StaticClass() });
+	Abilities.Add(FAbilityBindInfo{ EMlgAbilityInputBinds::Ability3, UGravityGunAbility::StaticClass() });
+	Abilities.Add(FAbilityBindInfo{ EMlgAbilityInputBinds::Ability4, UJumpAbility::StaticClass() });
 }
 
 void UMlgAbilitySet::GiveAbilities(UAbilitySystemComponent* AbilitySystemComponent) const
