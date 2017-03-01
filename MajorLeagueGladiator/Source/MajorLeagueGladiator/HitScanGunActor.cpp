@@ -40,7 +40,11 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	boltAction->SetChildActorClass(*BoltActionBP.Object->GeneratedClass);*/
 
 	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
+	sceneCapture->SetIsReplicated(true);
+	sceneCapture->SetupAttachment(GetRootComponent());
+
 	scopeMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("ScopeMesh"));
+	scopeMesh->SetIsReplicated(true);
 	scopeMesh->SetupAttachment(GetRootComponent(), FName("UI"));
 
 	ammoComponent = ObjectInitializer.CreateDefaultSubobject<UAmmoComponent>(this, TEXT("AmmoComponent"));
