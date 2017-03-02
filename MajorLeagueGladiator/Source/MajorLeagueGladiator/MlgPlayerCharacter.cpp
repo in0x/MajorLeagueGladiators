@@ -59,6 +59,7 @@ void AMlgPlayerCharacter::BeginPlay()
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("VR MODE"));
+		GEngine->HMDDevice->SetBaseOrientation(FQuat::Identity);
 	}
 
 	if (healthTriggerClass)
@@ -143,7 +144,7 @@ void AMlgPlayerCharacter::PossessedBy(AController* NewController)
 			UE_LOG(LogTemp, Warning, TEXT("Ability Set Is null. GiveAbilities has not been called."));
 		}
 		
-	}
+	} 
 }
 
 const UMlgAbilitySet* AMlgPlayerCharacter::GetOrLoadAbilitySet()
