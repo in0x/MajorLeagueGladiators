@@ -20,7 +20,12 @@ public:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 private:
+	UPROPERTY(EditAnywhere)
+	UProjectileMovementComponent* projectileMovementComponent;
 
 	void DealDamage(AActor* OtherActor);
 	bool IsIgnoredActor(const AActor* Actor) const;
+
+	UFUNCTION()
+	void OnProjectileStop(const FHitResult& ImpactResult);
 };

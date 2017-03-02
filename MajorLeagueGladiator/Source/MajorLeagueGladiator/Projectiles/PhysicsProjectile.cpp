@@ -7,13 +7,24 @@
 #include "MlgGameplayStatics.h"
 
 #include "ShieldActor.h" //Replace with interface when ready
+#include "TimerManager.h"
 
 APhysicsProjectile::APhysicsProjectile(const FObjectInitializer& ObjectInitializer)
+	: projectileMovementComponent(ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, TEXT("ProjectileMovementComponent")))
 {
 	bReplicates = true;
 	bReplicateMovement = true;
 	bStaticMeshReplicateMovement = true;
 	GetStaticMeshComponent()->SetCollisionProfileName("OverlapDamageCauser");
+	GetStaticMeshComponent()->Mobility = EComponentMobility::Movable;
+	GetStaticMeshComponent()->bUseDefaultCollision = true;
+
+	UPrimitiveComponent* primRoot = CastChecked<UPrimitiveComponent>(RootComponent);
+	primRoot->SetCollisionProfileName("OverlapDamageCauser");
+
+	projectileMovementComponent->InitialSpeed = 1000.f;
+	projectileMovementComponent->bShouldBounce = false;
+	projectileMovementComponent->ProjectileGravityScale = 0;
 }
 
 void APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
@@ -21,12 +32,13 @@ void APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
 	APhysicsProjectile* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<APhysicsProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
 	UPrimitiveComponent* spawnedRootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
-	spawnedRootComponent->AddImpulse(1000 * DirectionVector, NAME_None, true);
 
 	//Don't collide with shield again
 	spawnedRootComponent->MoveIgnoreActors.Add(ProjectileOwner);
 	spawnedActor->FinishSpawning(projectileTransform);
 	spawnedActor->SetLifeSpan(5.f);
+
+	spawnedActor->projectileMovementComponent->OnProjectileStop.AddDynamic(spawnedActor, &APhysicsProjectile::OnProjectileStop);
 }
 
 void APhysicsProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
@@ -60,4 +72,9 @@ void APhysicsProjectile::DealDamage(AActor* OtherActor)
 bool APhysicsProjectile::IsIgnoredActor(const AActor* Actor) const
 {
 	return GetOwner() == Actor;
+}
+
+void APhysicsProjectile::OnProjectileStop(const FHitResult& ImpactResult)
+{
+	Destroy();
 }
