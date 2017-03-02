@@ -73,6 +73,10 @@ void UAbilityTask_PullTarget::OnDestroy(bool AbilityEnded)
 
 void UAbilityTask_PullTarget::SetActorGravity_NetMulticast_Implementation(AActor* Actor, bool GravityEnabled)
 {
+	if (Actor == nullptr)
+	{
+		return;
+	}
 	UPrimitiveComponent* rootComponent = CastChecked<UPrimitiveComponent>(Actor->GetRootComponent());
 	rootComponent->SetEnableGravity(GravityEnabled);
 }
