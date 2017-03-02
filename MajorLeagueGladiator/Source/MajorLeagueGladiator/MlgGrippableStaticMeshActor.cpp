@@ -17,6 +17,9 @@ void AMlgGrippableStaticMeshActor::OnGrip(UGripMotionControllerComponent* Grippi
 
 	UVRControllerComponent* comp = Cast<UVRControllerComponent>(GrippingController);
 	currentGrippedController = comp->GetMlgPlayerController();
+
+	//Instigator should be the one who gripped this actor last. So it can work for sword throwing.
+	Instigator = CastChecked<APawn>(GrippingController->GetOwner());
 }
 
 void AMlgGrippableStaticMeshActor::OnGripRelease(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation& GripInformation)
