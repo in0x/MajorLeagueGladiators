@@ -22,6 +22,7 @@ public:
 	void BeginPlay();
 
 	float GetCurrentHealth() const;
+	UFUNCTION(BlueprintCallable, Category = "Health")
 	float GetCurrentHealthPercentage() const;
 	float GetMaxHealth() const;
 
