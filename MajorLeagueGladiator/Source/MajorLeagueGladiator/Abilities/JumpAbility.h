@@ -31,6 +31,9 @@ private:
 	UFUNCTION()
 	void OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data);
 
+	UFUNCTION()
+	void OnLand(const FHitResult& hit);
+
 	UPROPERTY(Transient)
 	UAbilityTask_WaitTargetData* waitForTargetTask;
 

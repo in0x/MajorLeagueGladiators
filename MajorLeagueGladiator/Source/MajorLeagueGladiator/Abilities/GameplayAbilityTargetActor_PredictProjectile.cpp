@@ -92,6 +92,14 @@ void AGameplayAbilityTargetActor_PredictProjectile::ConfirmTargetingAndContinue(
 
 	if (IsConfirmTargetingAllowed())
 	{
-		TargetDataReadyDelegate.Broadcast(makeDataHandle());
+
+		if (predictResult.HitResult.bBlockingHit)
+		{
+			TargetDataReadyDelegate.Broadcast(makeDataHandle());
+		}
+		else
+		{
+			CancelTargeting();
+		}
 	}
 }
