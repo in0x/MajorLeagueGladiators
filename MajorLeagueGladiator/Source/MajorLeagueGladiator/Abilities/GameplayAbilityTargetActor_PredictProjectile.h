@@ -29,6 +29,7 @@ public:
 	virtual void ConfirmTargetingAndContinue() override;
 	
 	float TargetProjectileSpeed;
+	float TargetProjectileFlightTime;
 	
 	TArray<AActor*> IgnoredActors;
 	

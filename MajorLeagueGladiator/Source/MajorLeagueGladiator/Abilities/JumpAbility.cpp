@@ -5,6 +5,7 @@
 
 UJumpAbility::UJumpAbility()
 	: PredictProjectileSpeed(1000.f)
+	, MaxTimeInFlight(2.f)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;
@@ -36,6 +37,7 @@ void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 	targetingSpawnedActor->TargetProjectileSpeed = PredictProjectileSpeed;
 	targetingSpawnedActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
 	targetingSpawnedActor->targetingType = EPickMoveLocationTargeting::FromPlayerCapsule;
+	targetingSpawnedActor->TargetProjectileFlightTime = MaxTimeInFlight;
 
 	waitForTargetTask->FinishSpawningActor(this, spawnedActor);
 }
@@ -57,7 +59,7 @@ void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 		player->LaunchCharacter(Data.Data[0]->GetHitResult()->TraceStart, true, true); 
 	}
 
-	player->LandedDelegate.AddDynamic(this, &UJumpAbility::OnLand); // Where the fuck do i actually add this
+	player->MovementModeChangedDelegate.AddDynamic(this, &UJumpAbility::OnMovementModeChanged);
 }
 
 void UJumpAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
@@ -65,10 +67,11 @@ void UJumpAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
-void UJumpAbility::OnLand(const FHitResult& hit)
+void UJumpAbility::OnMovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
 {
-	auto player = CastChecked<ACharacter>(GetOwningActorFromActorInfo());
-	player->LandedDelegate.RemoveDynamic(this, &UJumpAbility::OnLand);
-
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+	if (Character->GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Walking)
+	{
+		Character->MovementModeChangedDelegate.RemoveDynamic(this, &UJumpAbility::OnMovementModeChanged);
+		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+	}
 }
