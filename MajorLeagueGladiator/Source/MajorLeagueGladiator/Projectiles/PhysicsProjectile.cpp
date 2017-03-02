@@ -7,7 +7,6 @@
 #include "MlgGameplayStatics.h"
 
 #include "ShieldActor.h" //Replace with interface when ready
-#include "TimerManager.h"
 
 APhysicsProjectile::APhysicsProjectile(const FObjectInitializer& ObjectInitializer)
 	: projectileMovementComponent(ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, TEXT("ProjectileMovementComponent")))
@@ -17,7 +16,6 @@ APhysicsProjectile::APhysicsProjectile(const FObjectInitializer& ObjectInitializ
 	bStaticMeshReplicateMovement = true;
 	GetStaticMeshComponent()->SetCollisionProfileName("OverlapDamageCauser");
 	GetStaticMeshComponent()->Mobility = EComponentMobility::Movable;
-	GetStaticMeshComponent()->bUseDefaultCollision = true;
 
 	UPrimitiveComponent* primRoot = CastChecked<UPrimitiveComponent>(RootComponent);
 	primRoot->SetCollisionProfileName("OverlapDamageCauser");
