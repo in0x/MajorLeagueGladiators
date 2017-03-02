@@ -6,6 +6,7 @@
 // Sets default values
 ABaseProjectile::ABaseProjectile()
 	: damage(10.f)
+	, DamageType(UDamageType::StaticClass())
 {
 
 }
