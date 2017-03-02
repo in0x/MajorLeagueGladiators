@@ -20,6 +20,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "JumpAbility")
 	float PredictProjectileSpeed;
 
+	UPROPERTY(EditAnywhere, Category = "JumpAbility")
+	float MaxTimeInFlight;
+
 private:
 	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
@@ -32,7 +35,7 @@ private:
 	void OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data);
 
 	UFUNCTION()
-	void OnLand(const FHitResult& hit);
+	void OnMovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
 
 	UPROPERTY(Transient)
 	UAbilityTask_WaitTargetData* waitForTargetTask;

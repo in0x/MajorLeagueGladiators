@@ -5,6 +5,8 @@
 #include "VRControllerComponent.h"
 
 AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_PredictProjectile()
+	: TargetProjectileSpeed(1000.f)
+	, TargetProjectileFlightTime(2.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -54,7 +56,7 @@ bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
 	if (targetingType == EPickMoveLocationTargeting::FromPlayerCapsule)
 	{
 		params = FPredictProjectilePathParams(0.f, playerCapsule->GetComponentLocation() - (playerCapsule->GetUpVector() * playerCapsule->GetScaledCapsuleHalfHeight()), 
-			launchVelocity, 2.f);
+			launchVelocity, TargetProjectileFlightTime);
 	}
 	else // EPickMoveLocationTargeting == EPickMoveLocationTargeting::FromController
 	{
