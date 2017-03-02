@@ -50,14 +50,14 @@ void UJumpAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 
 void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data) 
 {
-	if (GetOwningActorFromActorInfo()->HasAuthority())
+	auto player = CastChecked<ACharacter>(GetOwningActorFromActorInfo());
+
+	if (player->HasAuthority())
 	{
-		auto player = CastChecked<ACharacter>(GetOwningActorFromActorInfo());
 		player->LaunchCharacter(Data.Data[0]->GetHitResult()->TraceStart, true, true); 
-		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 	}
 
-	//
+	player->LandedDelegate.AddDynamic(this, &UJumpAbility::OnLand); // Where the fuck do i actually add this
 }
 
 void UJumpAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
@@ -65,3 +65,10 @@ void UJumpAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
+void UJumpAbility::OnLand(const FHitResult& hit)
+{
+	auto player = CastChecked<ACharacter>(GetOwningActorFromActorInfo());
+	player->LandedDelegate.RemoveDynamic(this, &UJumpAbility::OnLand);
+
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+}
