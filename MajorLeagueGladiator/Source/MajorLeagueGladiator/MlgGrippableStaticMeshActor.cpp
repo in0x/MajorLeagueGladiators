@@ -25,7 +25,6 @@ void AMlgGrippableStaticMeshActor::OnGrip(UGripMotionControllerComponent* Grippi
 void AMlgGrippableStaticMeshActor::OnGripRelease(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation& GripInformation)
 {
 	Super::OnGripRelease(ReleasingController, GripInformation);
-
 	currentGrippedController = nullptr;
 }
 
