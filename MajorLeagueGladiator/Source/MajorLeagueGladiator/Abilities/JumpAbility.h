@@ -17,7 +17,7 @@ public:
 	UJumpAbility();
 
 	// The speed with which the targeting projectile will be launched.
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = "JumpAbility")
 	float PredictProjectileSpeed;
 
 private:
