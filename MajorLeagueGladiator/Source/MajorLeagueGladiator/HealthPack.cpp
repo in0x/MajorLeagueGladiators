@@ -21,7 +21,9 @@ AHealthPack::AHealthPack()
 void AHealthPack::BeginPlay()
 {
 	Super::BeginPlay();
+
 	msgEndpoint = FMessageEndpoint::Builder("HealthPackMessager").Build();
+	checkf(msgEndpoint.IsValid(), TEXT("Health Pack Msg Endpoint invalid"));
 }
 
 void AHealthPack::Use(AActor* User, TriggerType Type)
@@ -32,8 +34,8 @@ void AHealthPack::Use(AActor* User, TriggerType Type)
 		healthMsg->TriggerActor = User;
 		healthMsg->Amount = amountToRefill;
 		msgEndpoint->Publish<FMsgHealthRefill>(healthMsg);
-
-		FVector trashLocation(0, 0, -300);
-		TeleportTo(trashLocation, FRotator());
+		
+		ReleaseFromGrippedComponent();
+		Destroy();
 	}
 }
