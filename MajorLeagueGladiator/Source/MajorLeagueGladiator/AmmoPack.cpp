@@ -35,8 +35,8 @@ void AAmmoPack::Use(AActor* User, TriggerType Type)
 		msg->Amount = amountToRefill;
 		msgEndpoint->Publish<FMsgAmmoRefill>(msg);
 
-		FVector trashLocation(0, 0, -300);
-		TeleportTo(trashLocation, FRotator());
+		ReleaseFromGrippedComponent();
+		Destroy();
 	}
 }
 
