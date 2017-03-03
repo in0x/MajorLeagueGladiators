@@ -95,9 +95,9 @@ void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHand
 
 	//This gets spawned on server and client, if he started the ability so that he has a prediction	
 	pullTask = UAbilityTask_PullTarget::Create(this, "Pull Actor Task", foundActor, gripController, PullSpeed, GrabRange);
-	pullTask->Activate();
 	pullTask->OnSuccess.AddUObject(this, &UGravityGunAbility::OnActorPullFinished);
 	pullTask->OnFail.AddUObject(this, &UGravityGunAbility::OnActorPullFailed);
+	pullTask->Activate();
 }
 
 void UGravityGunAbility::OnSearchCancelled(const FGameplayAbilityTargetDataHandle& Data)

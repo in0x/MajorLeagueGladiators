@@ -30,6 +30,15 @@ UAbilityTask_PullTarget* UAbilityTask_PullTarget::Create(UGameplayAbility* ThisA
 
 void UAbilityTask_PullTarget::Activate()
 {
+	if (targetActor.IsStale() || !targetActor.IsValid())
+	{
+		EndTask();
+		OnFail.Broadcast();
+		return;
+	}
+
+	targetActor->OnDestroyed.AddDynamic(this, &UAbilityTask_PullTarget::OnPulledActorDestroyed);
+
 	spawnedActor->FinishSpawning(FTransform::Identity);
 	SetActorGravity_NetMulticast(targetActor.Get(), false);
 
@@ -59,24 +68,28 @@ void UAbilityTask_PullTarget::OnFailedCallback()
 
 void UAbilityTask_PullTarget::OnDestroy(bool AbilityEnded)
 {
-	SetActorGravity_NetMulticast(targetActor.Get(), true);
 	if (spawnedActor)
 	{
 		spawnedActor->Destroy();
 	}
-
-	UPrimitiveComponent* rootComponent = CastChecked<UPrimitiveComponent>(targetActor->GetRootComponent());	
-	rootComponent->ClearMoveIgnoreActors();
+	if (targetActor.IsValid() && !targetActor.IsStale() && !targetActor->IsPendingKill())
+	{
+		SetActorGravity_NetMulticast(targetActor.Get(), true);
+		UPrimitiveComponent* rootComponent = CastChecked<UPrimitiveComponent>(targetActor->GetRootComponent());
+		rootComponent->ClearMoveIgnoreActors();
+	}	
 	
 	Super::OnDestroy(AbilityEnded);
 }
 
 void UAbilityTask_PullTarget::SetActorGravity_NetMulticast_Implementation(AActor* Actor, bool GravityEnabled)
 {
-	if (Actor == nullptr)
-	{
-		return;
-	}
 	UPrimitiveComponent* rootComponent = CastChecked<UPrimitiveComponent>(Actor->GetRootComponent());
 	rootComponent->SetEnableGravity(GravityEnabled);
+}
+void UAbilityTask_PullTarget::OnPulledActorDestroyed(AActor* DestroyedActor)
+{
+	check(targetActor == DestroyedActor);
+	EndTask();
+	OnFail.Broadcast();
 }

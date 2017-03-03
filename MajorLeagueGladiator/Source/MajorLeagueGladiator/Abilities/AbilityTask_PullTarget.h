@@ -33,6 +33,9 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<AActor> targetActor;
 
+	UFUNCTION()
+	void OnPulledActorDestroyed(AActor* DestroyedActor);
+
 	void OnLocationReachedCallback();
 	void OnFailedCallback();
 };
