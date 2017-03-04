@@ -30,7 +30,7 @@ UAbilityTask_PullTarget* UAbilityTask_PullTarget::Create(UGameplayAbility* ThisA
 
 void UAbilityTask_PullTarget::Activate()
 {
-	if (targetActor.IsStale() || !targetActor.IsValid())
+	if (!targetActor.IsValid())
 	{
 		EndTask();
 		OnFail.Broadcast();
@@ -72,7 +72,7 @@ void UAbilityTask_PullTarget::OnDestroy(bool AbilityEnded)
 	{
 		spawnedActor->Destroy();
 	}
-	if (targetActor.IsValid() && !targetActor.IsStale() && !targetActor->IsPendingKill())
+	if (targetActor.IsValid() && !targetActor->IsPendingKill())
 	{
 		SetActorGravity_NetMulticast(targetActor.Get(), true);
 		UPrimitiveComponent* rootComponent = CastChecked<UPrimitiveComponent>(targetActor->GetRootComponent());

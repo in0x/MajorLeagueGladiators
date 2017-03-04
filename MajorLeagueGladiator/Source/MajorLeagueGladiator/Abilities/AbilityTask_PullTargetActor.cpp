@@ -18,7 +18,7 @@ void AAbilityTask_PullTargetActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!TargetRootComponent.IsValid() || TargetRootComponent.IsStale())
+	if (!TargetRootComponent.IsValid())
 	{
 		OnFail.ExecuteIfBound();
 	}
