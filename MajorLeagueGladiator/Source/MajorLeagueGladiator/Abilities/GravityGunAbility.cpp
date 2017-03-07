@@ -6,8 +6,6 @@
 #include "AbilityTask_SearchActor.h"
 #include "AbilityTask_PullTarget.h"
 #include "AbilityTask_WaitTargetData.h"
-#include "AbilityTask_PullTargetActor.h"
-
 
 namespace
 {
@@ -86,10 +84,6 @@ void UGravityGunAbility::SearchAndPull()
 void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
 	searchTask = nullptr;
-	if(GetOwningActorFromActorInfo()->Role < ROLE_Authority)
-	{
-		return;
-	}
 
 	AActor* foundActor = Data.Data[0]->GetActors()[0].Get();
 
@@ -97,7 +91,7 @@ void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHand
 	pullTask = UAbilityTask_PullTarget::Create(this, "Pull Actor Task", foundActor, gripController, PullSpeed, GrabRange);
 	pullTask->OnSuccess.AddUObject(this, &UGravityGunAbility::OnActorPullFinished);
 	pullTask->OnFail.AddUObject(this, &UGravityGunAbility::OnActorPullFailed);
-	pullTask->Activate();
+	pullTask->ReadyForActivation();
 }
 
 void UGravityGunAbility::OnSearchCancelled(const FGameplayAbilityTargetDataHandle& Data)
