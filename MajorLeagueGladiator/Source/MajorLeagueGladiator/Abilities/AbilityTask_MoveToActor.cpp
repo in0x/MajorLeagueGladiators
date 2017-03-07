@@ -27,7 +27,7 @@ void AAbilityTask_MoveToActor::Tick(float DeltaTime)
 
 		//MovingCharacter->LaunchCharacter(direction, true, true);
 		
-		CastChecked<MlgPlayerCharacter>(MovingCharacter)->LaunchCharacter_NetMulticast(direction, true, true);
+		CastChecked<AMlgPlayerCharacter>(MovingCharacter)->LaunchCharacter_NetMulticast(direction, true, true);
 
 		DrawDebugDirectionalArrow(MovingCharacter->GetRootComponent()->GetWorld(), location, TargetLocation, 1.0f, FColor::Green);
 	}

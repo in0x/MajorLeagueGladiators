@@ -313,7 +313,7 @@ void AMlgPlayerCharacter::EnableActorCollison_NetMulticast_Implementation(bool b
 	SetActorEnableCollision(bNewActorEnableCollision);
 }
 
-void AMlgPlayerCharacter::LaunchCharacter_NetMulticast_Implementation(FVector LaunchVelocity, bool bXYOverride, bool bZOverride);
+void AMlgPlayerCharacter::LaunchCharacter_NetMulticast_Implementation(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
 {
 	LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
 }
