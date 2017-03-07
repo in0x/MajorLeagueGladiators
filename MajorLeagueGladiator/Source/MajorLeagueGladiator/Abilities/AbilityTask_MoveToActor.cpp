@@ -2,7 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "AbilityTask_MoveToActor.h"
-
+#include "MlgPlayerCharacter.h"
 
 AAbilityTask_MoveToActor::AAbilityTask_MoveToActor()
 	: MinDistanceThreshold(10.f)
@@ -17,16 +17,18 @@ void AAbilityTask_MoveToActor::Tick(float DeltaTime)
 	const auto location = MovingCharacter->GetActorLocation();
 	const auto distance = FVector::Distance(TargetLocation, location); // This needs to happen locally
 
-	if (distance < MinDistanceThreshold /*&& HasAuthority()*/)
+	if (distance < MinDistanceThreshold && HasAuthority())
 	{
 		OnLocationReached.Broadcast();
 	}
-	else /*if (HasAuthority())*/
+	else if (HasAuthority())
 	{
 		const auto direction = (TargetLocation - location).GetSafeNormal() * MoveSpeed;
 
-		MovingCharacter->LaunchCharacter(direction, true, true);
+		//MovingCharacter->LaunchCharacter(direction, true, true);
 		
+		CastChecked<MlgPlayerCharacter>(MovingCharacter)->LaunchCharacter_NetMulticast(direction, true, true);
+
 		DrawDebugDirectionalArrow(MovingCharacter->GetRootComponent()->GetWorld(), location, TargetLocation, 1.0f, FColor::Green);
 	}
 }

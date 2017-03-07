@@ -37,6 +37,9 @@ public:
 	UFUNCTION(NetMulticast, reliable)
 	void EnableActorCollison_NetMulticast(bool bNewActorEnableCollision);
 
+	UFUNCTION(NetMulticast, reliable)
+	void LaunchCharacter_NetMulticast(FVector LaunchVelocity, bool bXYOverride, bool bZOverride);
+
 	UStaticMeshComponent* GetMotionControllerMesh(EControllerHand Hand);
 	UVRControllerComponent* GetMotionController(EControllerHand Hand);
 
