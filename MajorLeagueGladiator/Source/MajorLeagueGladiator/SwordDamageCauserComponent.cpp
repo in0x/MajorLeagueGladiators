@@ -14,6 +14,7 @@ USwordDamageCauserComponent::USwordDamageCauserComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> SwordMaterialRed(TEXT("Material'/Game/MVRCFPS_Assets/Blade_HeroSword22/M_Blade_HeroSword_Red.M_Blade_HeroSword_Red'"));
+
 	if (SwordMaterialRed.Object != NULL)
 	{
 		materialRedObject = CastChecked<UMaterial>(SwordMaterialRed.Object);
@@ -24,6 +25,7 @@ USwordDamageCauserComponent::USwordDamageCauserComponent()
 	}
 	
 	static ConstructorHelpers::FObjectFinder<UMaterial> SwordMaterial(TEXT("Material'/Game/MVRCFPS_Assets/Blade_HeroSword22/M_Blade_HeroSword22.M_Blade_HeroSword22'"));
+
 	if (SwordMaterial.Object != NULL)
 	{
 		materialObject = CastChecked<UMaterial>(SwordMaterial.Object);
@@ -37,9 +39,12 @@ USwordDamageCauserComponent::USwordDamageCauserComponent()
 void USwordDamageCauserComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
 	FVector newSwordState = GetOwner()->GetVelocity();
 	oldSwingSpeed = oldSwingSpeed * (1.0f - slashVelocityLearnRate) + (DeltaTime * newSwordState) * slashVelocityLearnRate;
+
 	bool newCanDealDamage = oldSwingSpeed.SizeSquared() > threshholdDoDamageSquared;
+
 	if (newCanDealDamage && !canDealDamage)
 	{
 		onStartSlash();
@@ -48,6 +53,7 @@ void USwordDamageCauserComponent::TickComponent(float DeltaTime, ELevelTick Tick
 	{
 		onEndSlash();
 	}
+
 	canDealDamage = newCanDealDamage;
 }
 
@@ -78,20 +84,22 @@ void USwordDamageCauserComponent::damageAllOverlappingActors()
 	TArray <AActor*> overlappingActors;
 	AActor* owner = GetOwner();
 	owner->GetOverlappingActors(overlappingActors);
+
 	if (overlappingActors.Num()) 
 	{
 		doRumbleRight(GetOwner());
 	}
+
 	for (AActor* actor : overlappingActors)
 	{
 		UGameplayStatics::ApplyDamage(actor, damageAppliedOnHit, nullptr, owner, damageType);
 	}
-
 }
 
 void USwordDamageCauserComponent::setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn) 
 {
 	AMlgGrippableStaticMeshActor* owner = Cast<AMlgGrippableStaticMeshActor>(GetOwner());
+	
 	if (owner != nullptr)
 	{
 		auto* mesh = owner->GetStaticMeshComponent();
