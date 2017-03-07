@@ -65,8 +65,8 @@ void UDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 
 void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
-	/*if (GetOwningActorFromActorInfo()->HasAuthority())
-	{*/
+	if (GetOwningActorFromActorInfo()->HasAuthority())
+	{
 		auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());	
 		auto capsule = player->GetCapsuleComponent();
 
@@ -81,7 +81,7 @@ void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 
 		player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
 		player->EnableActorCollison_NetMulticast(false);
-	//}
+	}
 }
 
 void UDashAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
