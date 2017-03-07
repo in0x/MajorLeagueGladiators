@@ -85,7 +85,13 @@ void USwordDamageCauserComponent::damageAllOverlappingActors()
 	AActor* owner = GetOwner();
 	owner->GetOverlappingActors(overlappingActors);
 
-	if (overlappingActors.Num()) 
+	int32 overlaps = overlappingActors.Num();
+
+	if (overlaps != 0 && (overlaps > 1 || overlappingActors[0] != owner)) // Either more than one or the one is not us
+	{
+		doRumbleRight(GetOwner());
+	}
+
 	{
 		doRumbleRight(GetOwner());
 	}
