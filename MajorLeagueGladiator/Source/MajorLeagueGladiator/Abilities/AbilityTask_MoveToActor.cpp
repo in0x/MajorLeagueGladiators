@@ -15,13 +15,13 @@ void AAbilityTask_MoveToActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	const auto location = MovingCharacter->GetActorLocation();
-	const auto distance = FVector::Distance(TargetLocation, location);
+	const auto distance = FVector::Distance(TargetLocation, location); // This needs to happen locally
 
-	if (distance < MinDistanceThreshold && HasAuthority())
+	if (distance < MinDistanceThreshold /*&& HasAuthority()*/)
 	{
 		OnLocationReached.Broadcast();
 	}
-	else if (HasAuthority())
+	else /*if (HasAuthority())*/
 	{
 		const auto direction = (TargetLocation - location).GetSafeNormal() * MoveSpeed;
 
