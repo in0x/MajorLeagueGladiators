@@ -7,6 +7,8 @@
 
 DECLARE_MULTICAST_DELEGATE(FMoveToLocationReached);
 
+class AMlgPlayerCharacter;
+
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AAbilityTask_MoveToActor : public AActor
 {
@@ -22,8 +24,8 @@ public:
 	UPROPERTY()
 	float MoveSpeed;
 	
-	UPROPERTY()
-	ACharacter* MovingCharacter;
+	UPROPERTY() // Uses a PlayerCharacter for now since we the LaunchCharacter_Multicast
+	AMlgPlayerCharacter* MovingCharacter;
 
 	FMoveToLocationReached OnLocationReached;
 
