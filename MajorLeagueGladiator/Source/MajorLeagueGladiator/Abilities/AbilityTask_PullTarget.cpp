@@ -3,34 +3,68 @@
 #include "MajorLeagueGladiator.h"
 #include "AbilityTask_PullTarget.h"
 
-#include "AbilityTask_PullTargetActor.h"
-
-UAbilityTask_PullTarget* UAbilityTask_PullTarget::Create(UGameplayAbility* ThisAbility, FName TaskName, AActor* TargetActor, USceneComponent* EndLocation, float PullSpeed, float MinDistanceThreshold)
+UAbilityTask_PullTarget* UAbilityTask_PullTarget::Create(UGameplayAbility* ThisAbility, FName TaskName, AActor* TargetActor, USceneComponent* EndLocation,
+	float PullSpeed, float MinDistanceThreshold, float MaxDistanceThreshold)
 {
 	UAbilityTask_PullTarget* task = NewAbilityTask<UAbilityTask_PullTarget>(ThisAbility, TaskName);
 
-	UWorld* World = GEngine->GetWorldFromContextObject(ThisAbility);
-	AAbilityTask_PullTargetActor* SpawnedActor = World->SpawnActorDeferred<AAbilityTask_PullTargetActor>(AAbilityTask_PullTargetActor::StaticClass(),
-		FTransform::Identity, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-
-	SpawnedActor->PullSpeed = PullSpeed;
-	SpawnedActor->EndLocationSceneComponent = EndLocation;	
-	SpawnedActor->TargetRootComponent = CastChecked<UPrimitiveComponent>(TargetActor->GetRootComponent());
-	SpawnedActor->MinDistanceThreshold = MinDistanceThreshold;
-
-	SpawnedActor->OnLocationReached.BindUObject(task, &UAbilityTask_PullTarget::OnLocationReachedCallback);
-	SpawnedActor->OnFail.BindUObject(task, &UAbilityTask_PullTarget::OnFailedCallback);
-
-	task->spawnedActor = SpawnedActor;
+	task->pullSpeed = PullSpeed;
+	task->endLocationSceneComponent = EndLocation;
 	task->targetActor = TargetActor;
+	task->targetPrimitve = CastChecked<UPrimitiveComponent>(TargetActor->GetRootComponent());
+	task->minDistanceThreshold = MinDistanceThreshold;
+	task->maxDistanceThreshold = MaxDistanceThreshold;
 
 	return task;
 }
 
+UAbilityTask_PullTarget::UAbilityTask_PullTarget()
+{
+	bTickingTask = true;
+	bSimulatedTask = true;
+}
+
+void UAbilityTask_PullTarget::TickTask(float DeltaTime)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("Ticking"));
+	Super::TickTask(DeltaTime);
+	const FVector targetLocation = targetPrimitve->GetComponentLocation();
+	const FVector endLocation = endLocationSceneComponent->GetComponentLocation();
+
+	const FVector distanceVec = endLocation - targetLocation;
+	const float distance = distanceVec.Size();
+
+	if (distance < minDistanceThreshold)
+	{
+		targetPrimitve->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
+		targetPrimitve->SetWorldLocation(endLocation);
+		if (HasAuthority())
+		{
+			OnSuccess.Broadcast(targetActor);
+		}
+	}
+	else if (distance > maxDistanceThreshold)
+	{
+		if (HasAuthority())
+		{
+			OnFail.Broadcast();
+		}
+	}
+	else
+	{
+		const FVector dirVector = distanceVec / distance;
+		//targetPrimitve->MoveComponent(dirVector * pullSpeed * DeltaTime, targetPrimitve->GetComponentQuat(), true);
+		targetPrimitve->SetAllPhysicsLinearVelocity(dirVector * pullSpeed);
+
+		DrawDebugDirectionalArrow(targetActor->GetWorld(), targetLocation, endLocation, 1.0f, FColor::Green);
+	}
+}
+
+
 
 void UAbilityTask_PullTarget::Activate()
 {
-	if (!targetActor.IsValid())
+	if (!targetActor)
 	{
 		EndTask();
 		OnFail.Broadcast();
@@ -39,11 +73,9 @@ void UAbilityTask_PullTarget::Activate()
 
 	targetActor->OnDestroyed.AddDynamic(this, &UAbilityTask_PullTarget::OnPulledActorDestroyed);
 
-	spawnedActor->FinishSpawning(FTransform::Identity);
-	SetActorGravity_NetMulticast(targetActor.Get(), false);
+	SetActorGravity_NetMulticast(targetActor, false);
 
-	UPrimitiveComponent* rootComponent = CastChecked<UPrimitiveComponent>(targetActor->GetRootComponent());	
-	rootComponent->MoveIgnoreActors.Add(spawnedActor->EndLocationSceneComponent->GetOwner());	
+	targetPrimitve->MoveIgnoreActors.Add(endLocationSceneComponent->GetOwner());
 }
 
 void UAbilityTask_PullTarget::ExternalCancel()
@@ -52,29 +84,11 @@ void UAbilityTask_PullTarget::ExternalCancel()
 	OnFail.Broadcast();
 }
 
-void UAbilityTask_PullTarget::OnLocationReachedCallback()
-{
-	check(targetActor.IsValid());
-
-	EndTask();
-	OnSuccess.Broadcast(targetActor.Get());	
-}
-
-void UAbilityTask_PullTarget::OnFailedCallback()
-{
-	EndTask();
-	OnFail.Broadcast();
-}
-
 void UAbilityTask_PullTarget::OnDestroy(bool AbilityEnded)
 {
-	if (spawnedActor)
+	if (!targetActor->IsPendingKill())
 	{
-		spawnedActor->Destroy();
-	}
-	if (targetActor.IsValid() && !targetActor->IsPendingKill())
-	{
-		SetActorGravity_NetMulticast(targetActor.Get(), true);
+		SetActorGravity_NetMulticast(targetActor, true);
 		UPrimitiveComponent* rootComponent = CastChecked<UPrimitiveComponent>(targetActor->GetRootComponent());
 		rootComponent->ClearMoveIgnoreActors();
 	}	
@@ -93,4 +107,9 @@ void UAbilityTask_PullTarget::OnPulledActorDestroyed(AActor* DestroyedActor)
 	check(targetActor == DestroyedActor);
 	EndTask();
 	OnFail.Broadcast();
+}
+
+bool UAbilityTask_PullTarget::HasAuthority() const
+{
+	return Ability &&  Ability->HasAuthority(&Ability->GetCurrentActivationInfoRef());
 }
