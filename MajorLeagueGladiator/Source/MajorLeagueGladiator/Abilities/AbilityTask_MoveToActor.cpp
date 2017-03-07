@@ -25,9 +25,7 @@ void AAbilityTask_MoveToActor::Tick(float DeltaTime)
 	{
 		const auto direction = (TargetLocation - location).GetSafeNormal() * MoveSpeed;
 
-		//MovingCharacter->LaunchCharacter(direction, true, true);
-		
-		CastChecked<AMlgPlayerCharacter>(MovingCharacter)->LaunchCharacter_NetMulticast(direction, true, true);
+		MovingCharacter->LaunchCharacter_NetMulticast(direction, true, true);
 
 		DrawDebugDirectionalArrow(MovingCharacter->GetRootComponent()->GetWorld(), location, TargetLocation, 1.0f, FColor::Green);
 	}
