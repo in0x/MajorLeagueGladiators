@@ -5,7 +5,6 @@
 #include "DamageCauserComponent.h"
 #include "SwordDamageCauserComponent.generated.h"
 
-
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class MAJORLEAGUEGLADIATOR_API USwordDamageCauserComponent : public UDamageCauserComponent
 {
@@ -18,6 +17,7 @@ public:
 protected:
 	UFUNCTION()
 	virtual void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor) override;
+
 private:
 	FVector oldSwingSpeed;
 
