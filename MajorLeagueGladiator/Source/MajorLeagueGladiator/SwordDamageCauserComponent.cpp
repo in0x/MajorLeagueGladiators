@@ -92,10 +92,6 @@ void USwordDamageCauserComponent::damageAllOverlappingActors()
 		doRumbleRight(GetOwner());
 	}
 
-	{
-		doRumbleRight(GetOwner());
-	}
-
 	for (AActor* actor : overlappingActors)
 	{
 		UGameplayStatics::ApplyDamage(actor, damageAppliedOnHit, nullptr, owner, damageType);
