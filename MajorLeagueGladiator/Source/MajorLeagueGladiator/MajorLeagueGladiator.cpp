@@ -7,6 +7,6 @@ DEFINE_LOG_CATEGORY(DebugLog);
 
 bool g_IsVREnabled()
 {
-	bool isEnabled = FParse::Param(FCommandLine::Get(), TEXT("vr")) || GetDefault<UGeneralProjectSettings>()->bStartInVR;
+	bool isEnabled = FParse::Param(FCommandLine::Get(), TEXT("vr"));
 	return isEnabled;
 }
