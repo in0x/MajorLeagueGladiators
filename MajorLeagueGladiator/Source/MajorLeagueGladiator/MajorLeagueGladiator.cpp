@@ -7,10 +7,6 @@ DEFINE_LOG_CATEGORY(DebugLog);
 
 bool g_IsVREnabled()
 {
-#if !UE_BUILD_SHIPPING
-	static bool isEnabled = (GEngine && GEngine->HMDDevice.IsValid() && GEngine->HMDDevice->IsHMDConnected());
+	bool isEnabled = FParse::Param(FCommandLine::Get(), TEXT("vr")) || GetDefault<UGeneralProjectSettings>()->bStartInVR;
 	return isEnabled;
-#elif
-	return true;
-#endif
 }
