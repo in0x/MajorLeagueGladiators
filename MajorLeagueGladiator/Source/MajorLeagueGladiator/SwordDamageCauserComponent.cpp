@@ -4,6 +4,7 @@
 #include "SwordDamageCauserComponent.h"
 #include "MlgGrippableStaticMeshActor.h"
 #include "MlgPlayerController.h"
+#include "MlgGameplayStatics.h"
 
 USwordDamageCauserComponent::USwordDamageCauserComponent()
 	: oldSwingSpeed(FVector::ZeroVector)
@@ -87,14 +88,19 @@ void USwordDamageCauserComponent::damageAllOverlappingActors()
 
 	int32 overlaps = overlappingActors.Num();
 
-	if (overlaps != 0 && (overlaps > 1 || overlappingActors[0] != owner)) // Either more than one or the one is not us
-	{
-		doRumbleRight(GetOwner());
-	}
-
+	bool hasDealtdamage = false;
 	for (AActor* actor : overlappingActors)
 	{
-		UGameplayStatics::ApplyDamage(actor, damageAppliedOnHit, owner->GetInstigatorController(), owner, damageType);
+		if (UMlgGameplayStatics::CanDealDamageTo(owner, actor))
+		{
+			UGameplayStatics::ApplyDamage(actor, damageAppliedOnHit, owner->GetInstigatorController(), owner, damageType);
+			hasDealtdamage = true;
+		}
+	}
+
+	if (hasDealtdamage)
+	{
+		doRumbleRight(GetOwner());
 	}
 }
 
@@ -111,7 +117,7 @@ void USwordDamageCauserComponent::setMaterialOfOwnerMesh(UMaterialInstanceDynami
 
 void USwordDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	if (canDealDamage)
+	if (canDealDamage && UMlgGameplayStatics::CanDealDamageTo(OverlappedActor, OtherActor))
 	{
 		UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, OverlappedActor->GetInstigatorController(), OverlappedActor, damageType);
 		doRumbleRight(OtherActor);

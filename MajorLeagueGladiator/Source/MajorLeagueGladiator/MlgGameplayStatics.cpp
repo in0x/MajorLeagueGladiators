@@ -13,7 +13,12 @@ bool UMlgGameplayStatics::CanDealDamageTo(const AActor* DamageDealer, const AAct
 	{
 		DamageDealerPawn = DamageDealer->GetInstigator();
 	}
-	check(DamageDealerPawn);
+
+	if (DamageDealerPawn == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Damage Dealer Pawn has no instigator"));
+		return false;
+	}
 
 	return CanDealDamageTo(DamageDealerPawn, DamageReceiver);
 }
