@@ -91,7 +91,7 @@ void AMlgPlayerCharacter::BeginPlay()
 
 void AMlgPlayerCharacter::OnLand(const FHitResult& hit)
 {
-	GetCharacterMovement()->StopMovementImmediately();
+	StopMovementImmediately_NetMulticast();
 }
 
 void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -316,4 +316,9 @@ void AMlgPlayerCharacter::EnableActorCollison_NetMulticast_Implementation(bool b
 void AMlgPlayerCharacter::LaunchCharacter_NetMulticast_Implementation(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
 {
 	LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
+}
+
+void AMlgPlayerCharacter::StopMovementImmediately_NetMulticast_Implementation()
+{
+	GetMovementComponent()->StopMovementImmediately();
 }
