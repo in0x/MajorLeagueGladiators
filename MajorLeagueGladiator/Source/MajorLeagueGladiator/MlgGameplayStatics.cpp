@@ -52,7 +52,7 @@ bool UMlgGameplayStatics::CanDealDamageTo(const AMlgPlayerState* DamageDealerSta
 	if (const APawn* DamageReceiverPawn = Cast<APawn>(DamageReceiver))
 	{
 		const AMlgPlayerState* DamageReceiverState = CastChecked<AMlgPlayerState>(DamageReceiverPawn->PlayerState);
-		return CanDealDamageTo(DamageDealerState, DamageReceiver);
+		return CanDealDamageTo(DamageDealerState, DamageReceiverState);
 	}
 
 	// Forbid damaging non pawns,
