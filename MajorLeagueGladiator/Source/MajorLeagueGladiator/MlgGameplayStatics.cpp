@@ -8,6 +8,9 @@
 
 bool UMlgGameplayStatics::CanDealDamageTo(const AActor* DamageDealer, const AActor* DamageReceiver)
 {
+	check(DamageDealer);
+	check(DamageReceiver);
+
 	const APawn* DamageDealerPawn = Cast<APawn>(DamageDealer);
 	if (DamageDealerPawn == nullptr)
 	{
@@ -26,18 +29,30 @@ bool UMlgGameplayStatics::CanDealDamageTo(const AActor* DamageDealer, const AAct
 bool UMlgGameplayStatics::CanDealDamageTo(const APawn* DamageInstigator, const AActor* DamageReceiver)
 {
 	check(DamageInstigator);
-	const AController* controller = DamageInstigator->GetController();
+	check(DamageReceiver);
 
-	return controller && CanDealDamageTo(controller, DamageReceiver);
+	const AMlgPlayerState* playerstate = CastChecked<AMlgPlayerState>(DamageInstigator->PlayerState);
+	return playerstate && CanDealDamageTo(playerstate, DamageReceiver);
 }
 
 bool UMlgGameplayStatics::CanDealDamageTo(const AController* DamageInstigator, const AActor* DamageReceiver)
+{	
+	check(DamageInstigator);
+	check(DamageReceiver);
+
+	const AMlgPlayerState* DamageInstigatorState = CastChecked<AMlgPlayerState>(DamageInstigator->PlayerState);
+	return CanDealDamageTo(DamageInstigatorState, DamageReceiver);
+}
+
+bool UMlgGameplayStatics::CanDealDamageTo(const AMlgPlayerState* DamageDealerState, const AActor* DamageReceiver)
 {
+	check(DamageDealerState);
+	check(DamageReceiver);
+
 	if (const APawn* DamageReceiverPawn = Cast<APawn>(DamageReceiver))
 	{
-		const AMlgPlayerState* DamageInstigatorState = CastChecked<AMlgPlayerState>(DamageInstigator->PlayerState);
-		const AMlgPlayerState* DamageReceiverState = CastChecked<AMlgPlayerState>(DamageReceiverPawn->GetController()->PlayerState);
-		return CanDealDamageTo(DamageInstigatorState, DamageReceiverState);
+		const AMlgPlayerState* DamageReceiverState = CastChecked<AMlgPlayerState>(DamageReceiverPawn->PlayerState);
+		return CanDealDamageTo(DamageDealerState, DamageReceiver);
 	}
 
 	// Forbid damaging non pawns,
@@ -47,5 +62,8 @@ bool UMlgGameplayStatics::CanDealDamageTo(const AController* DamageInstigator, c
 
 bool UMlgGameplayStatics::CanDealDamageTo(const AMlgPlayerState* DamageDealer, const AMlgPlayerState* DamageReceiver)
 {
+	check(DamageDealer);
+	check(DamageReceiver);
+
 	return !DamageDealer->IsSameTeam(DamageReceiver);
 }
