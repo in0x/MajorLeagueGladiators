@@ -26,7 +26,6 @@ UAbilityTask_PullTarget::UAbilityTask_PullTarget()
 
 void UAbilityTask_PullTarget::TickTask(float DeltaTime)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("Ticking"));
 	Super::TickTask(DeltaTime);
 	const FVector targetLocation = targetPrimitve->GetComponentLocation();
 	const FVector endLocation = endLocationSceneComponent->GetComponentLocation();
@@ -53,7 +52,6 @@ void UAbilityTask_PullTarget::TickTask(float DeltaTime)
 	else
 	{
 		const FVector dirVector = distanceVec / distance;
-		//targetPrimitve->MoveComponent(dirVector * pullSpeed * DeltaTime, targetPrimitve->GetComponentQuat(), true);
 		targetPrimitve->SetAllPhysicsLinearVelocity(dirVector * pullSpeed);
 
 		DrawDebugDirectionalArrow(targetActor->GetWorld(), targetLocation, endLocation, 1.0f, FColor::Green);
