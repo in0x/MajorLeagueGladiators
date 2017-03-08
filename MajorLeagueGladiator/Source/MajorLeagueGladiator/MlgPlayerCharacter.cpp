@@ -19,8 +19,6 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 		.SetDefaultSubobjectClass<UVRControllerComponent>(TEXT("Right Grip Motion Controller"))
 	)
 {
-	bUseControllerRotationPitch = true;
-
 	healthComp = ObjectInitializer.CreateDefaultSubobject<UHealthComponent>(this, TEXT("HealthComp"));
 	healthComp->SetIsReplicated(true);
 
@@ -162,6 +160,8 @@ const UMlgAbilitySet* AMlgPlayerCharacter::GetOrLoadAbilitySet()
 void AMlgPlayerCharacter::BecomeViewTarget(APlayerController* PC) 
 {
 	Super::BecomeViewTarget(PC);
+
+	FaceRotation(Controller->GetControlRotation());
 }
 
 void AMlgPlayerCharacter::MoveForward(float Value)
