@@ -94,7 +94,7 @@ void USwordDamageCauserComponent::damageAllOverlappingActors()
 
 	for (AActor* actor : overlappingActors)
 	{
-		UGameplayStatics::ApplyDamage(actor, damageAppliedOnHit, OtherActor->GetInstigatorController(), owner, damageType);
+		UGameplayStatics::ApplyDamage(actor, damageAppliedOnHit, actor->GetInstigatorController(), owner, damageType);
 	}
 }
 
