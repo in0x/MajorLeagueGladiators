@@ -2,6 +2,7 @@
 #include "JumpAbility.h"
 #include "AbilityTask_WaitTargetData.h"
 #include "GameplayAbilityTargetActor_PredictProjectile.h"
+#include "MlgPlayerCharacter.h"
 
 UJumpAbility::UJumpAbility()
 	: PredictProjectileSpeed(1000.f)
@@ -72,6 +73,8 @@ void UJumpAbility::OnMovementModeChanged(ACharacter* Character, EMovementMode Pr
 	if (Character->GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Walking)
 	{
 		Character->MovementModeChangedDelegate.RemoveDynamic(this, &UJumpAbility::OnMovementModeChanged);
+		AMlgPlayerCharacter* mlgPlayerChar = CastChecked<AMlgPlayerCharacter>(Character);
+		mlgPlayerChar->StopMovementImmediately_NetMulticast();
 		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 	}
 }

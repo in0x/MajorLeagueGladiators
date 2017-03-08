@@ -40,6 +40,9 @@ public:
 	UFUNCTION(NetMulticast, reliable)
 	void LaunchCharacter_NetMulticast(FVector LaunchVelocity, bool bXYOverride, bool bZOverride);
 
+	UFUNCTION(NetMulticast, reliable)
+	void StopMovementImmediately_NetMulticast();
+
 	UStaticMeshComponent* GetMotionControllerMesh(EControllerHand Hand);
 	UVRControllerComponent* GetMotionController(EControllerHand Hand);
 
