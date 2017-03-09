@@ -40,7 +40,6 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	boltAction->SetChildActorClass(*BoltActionBP.Object->GeneratedClass);*/
 
 	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
-	sceneCapture->SetIsReplicated(true);
 	sceneCapture->SetupAttachment(GetRootComponent());
 
 	scopeMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("ScopeMesh"));
@@ -69,9 +68,9 @@ void AHitScanGunActor::BeginPlay()
 		}
 	}
 
-	auto instance = UMaterialInstanceDynamic::Create(scopeMesh->GetMaterial(0), scopeMesh);
+	/*auto instance = UMaterialInstanceDynamic::Create(scopeMesh->GetMaterial(0), scopeMesh);
 	instance->SetTextureParameterValue(FName("ScopeTex"), sceneCapture->TextureTarget);
-	scopeMesh->SetMaterial(0, instance);
+	scopeMesh->SetMaterial(0, instance);*/
 
 	textWidget = CastChecked<UTextWidget>(ammoCountWidget->GetUserWidgetObject());
 	textWidget->SetText(FString::FromInt(ammoComponent->GetAmmoCount()));
