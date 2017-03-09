@@ -4,12 +4,16 @@
 #include "MlgGameMode.h"
 #include "Characters/MlgPlayerCharacter.h"
 #include "MlgPlayerState.h"
+#include "ParticleSystemManagerActor.h"
+#include "MlgGameState.h"
 
 AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 {
 	//DefaultPawnClass = AMlgPlayerCharacter::StaticClass();
 	//PlayerControllerClass = AMlgPlayerController::StaticClass();
 	PlayerStateClass = AMlgPlayerState::StaticClass();
+
+
 }
 
 UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
@@ -40,4 +44,13 @@ UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AControlle
 
 		return tankClass.Get();
 	}
+}
+
+void AMlgGameMode::StartPlay()
+{
+	Super::StartPlay();
+
+	FVector location(0);
+	AParticleSystemManagerActor* psManager = GetWorld()->SpawnActor<AParticleSystemManagerActor>(AParticleSystemManagerActor::StaticClass(), location, FRotator::ZeroRotator);
+	CastChecked<AMlgGameState>(GetWorld()->GetGameState())->
 }

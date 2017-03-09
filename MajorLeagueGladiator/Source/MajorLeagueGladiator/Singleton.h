@@ -4,10 +4,11 @@
 
 #include <memory>
 #include "UObject/NoExportTypes.h"
+#include "ParticleSystemManagerActor.h"
 
 #include "Singleton.generated.h"
 
-class UEventBus;
+//class AParticleSystemManagerActor;
 /**
  * 
  */
@@ -19,4 +20,7 @@ public:
 	USingleton(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	static USingleton& Get();
+
+	
+
 };

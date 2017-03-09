@@ -5,6 +5,8 @@
 
 USingleton::USingleton(const FObjectInitializer& ObjectInitializer)
 {
+
+
 }
 
 USingleton& USingleton::Get()
