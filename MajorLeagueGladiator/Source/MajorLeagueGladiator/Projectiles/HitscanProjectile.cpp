@@ -35,6 +35,11 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 
 	AActor* hitActor = hitresult.GetActor();
 
+	if (hitActor == nullptr)
+	{
+		return;
+	}
+
 	if (AShieldActor* interactable = Cast<AShieldActor>(hitActor))
 	{
 		interactable->OnHitInteractable(this);
