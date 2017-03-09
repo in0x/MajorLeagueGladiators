@@ -20,5 +20,9 @@ public:
 	FHitResult Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const;
 
 private:
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* beamParticleSystem;
+
 	float range;
 };
