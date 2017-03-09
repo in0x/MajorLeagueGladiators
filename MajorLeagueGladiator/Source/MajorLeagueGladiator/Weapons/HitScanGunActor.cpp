@@ -102,6 +102,7 @@ void AHitScanGunActor::playShotEffect_NetMulticast_Implementation()
 {
 	currentAnimDuration = recoilAnimBackDuration;
 	bIsApplyingRecoil = true;
+
 	shotAudioComponent->Play();
 }
 

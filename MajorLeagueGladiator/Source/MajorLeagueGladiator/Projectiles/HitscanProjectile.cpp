@@ -24,6 +24,8 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 
 	AActor* hitActor = hitresult.GetActor();
 
+	UGameplayStatics::SpawnEmitterAtLocation(ProjectileOwner->GetWorld(), beamParticleSystem, FTransform(DirectionVector.Rotation().Quaternion(), Location));
+
 	if (hitActor == nullptr)
 	{
 		return;
@@ -37,6 +39,8 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 	{
 		UGameplayStatics::ApplyPointDamage(hitActor, damage, DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UPlayerDamage::StaticClass());
 	}
+
+	
 }
 
 
@@ -49,11 +53,16 @@ FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector Di
 	FCollisionQueryParams CollisionParams("HitscanShot", true, Instigator);
 	CollisionParams.AddIgnoredActors(IngnoredActors);
 
+<<<<<<< HEAD
 	ECollisionChannel hitScanChannel = CollisionStatics::GetCollsionChannelByName(CollisionStatics::HITSCAN_TRACE_CHANNEL_NAME);
 
 	world->LineTraceSingleByChannel(result, Location, end, hitScanChannel, CollisionParams);
 
 	DrawDebugDirectionalArrow(world, Location, end, 100.f, FColor::Purple, true, 2.f);
+=======
+	world->LineTraceSingleByObjectType(result, Location, end, queryTypes, CollisionParams);
+	
+>>>>>>> improve hitscan PS; added PS to hitscan projectile(BP)
 	return result;
 }
 
