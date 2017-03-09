@@ -2,6 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "RespawnComponent.h"
+#include "MlgPlayerCharacter.h"
 
 URespawnComponent::URespawnComponent()
 {
@@ -20,6 +21,9 @@ void URespawnComponent::BeginPlay()
 
 void URespawnComponent::OnOverlapBegin(UPrimitiveComponent* SelfComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIdx, bool bFromSweep, const FHitResult& Hit)
 {
-	Other->TeleportTo(respawnPosition, Other->GetActorRotation());
+	if (Other->IsA<AMlgPlayerCharacter>()) 
+	{
+		Other->TeleportTo(respawnPosition, Other->GetActorRotation());
+	}
 }
 
