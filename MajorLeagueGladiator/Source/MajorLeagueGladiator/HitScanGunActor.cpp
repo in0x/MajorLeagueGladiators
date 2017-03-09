@@ -68,9 +68,13 @@ void AHitScanGunActor::BeginPlay()
 		}
 	}
 
-	/*auto instance = UMaterialInstanceDynamic::Create(scopeMesh->GetMaterial(0), scopeMesh);
-	instance->SetTextureParameterValue(FName("ScopeTex"), sceneCapture->TextureTarget);
-	scopeMesh->SetMaterial(0, instance);*/
+	if (!sceneCapture->TextureTarget)
+	{
+		sceneCapture->TextureTarget = UCanvasRenderTarget2D::CreateCanvasRenderTarget2D(GetWorld(), UCanvasRenderTarget2D::StaticClass());
+		auto instance = UMaterialInstanceDynamic::Create(scopeMesh->GetMaterial(0), scopeMesh);
+		instance->SetTextureParameterValue(FName("ScopeTex"), sceneCapture->TextureTarget);
+		scopeMesh->SetMaterial(0, instance);
+	}
 
 	textWidget = CastChecked<UTextWidget>(ammoCountWidget->GetUserWidgetObject());
 	textWidget->SetText(FString::FromInt(ammoComponent->GetAmmoCount()));
