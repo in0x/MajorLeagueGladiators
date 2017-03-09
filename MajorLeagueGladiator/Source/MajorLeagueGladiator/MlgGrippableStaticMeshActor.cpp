@@ -6,6 +6,7 @@
 
 AMlgGrippableStaticMeshActor::AMlgGrippableStaticMeshActor(const FObjectInitializer& ObjectInitializer) {
 	bReplicateMovement = true;
+	GetStaticMeshComponent()->SetCollisionProfileName("Pack");
 }
 
 void AMlgGrippableStaticMeshActor::OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation)

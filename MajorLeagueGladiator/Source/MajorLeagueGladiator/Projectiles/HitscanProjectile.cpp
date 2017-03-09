@@ -6,17 +6,11 @@
 #include "MlgGameplayStatics.h"
 
 #include "ShieldActor.h"
-
-namespace
-{
-	const char* ABILITY_ACTOR_PROFILE_NAME = "AbilityActor";
-}
+#include "CollisionStatics.h"
 
 AHitscanProjectile::AHitscanProjectile()
 	: range(1000000.f)
-{
- 
-}
+{}
 
 void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
@@ -28,7 +22,9 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 
 	FHitResult hitresult = Trace(ProjectileOwner->GetWorld(), Location, DirectionVector, { ProjectileOwner });
 
-	if (!hitresult.bBlockingHit)
+	AActor* hitActor = hitresult.GetActor();
+
+	if (hitActor == nullptr)
 	{
 		return;
 	}
@@ -55,24 +51,15 @@ FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector Di
 {
 	FVector end = Location + DirectionVector * range;
 
-	FCollisionResponseTemplate abilityActorCollisionTemplate;
-	bool success = UCollisionProfile::Get()->GetProfileTemplate(FName(ABILITY_ACTOR_PROFILE_NAME), abilityActorCollisionTemplate);
-	checkf(success, TEXT("AbilityActor Collision Profile is missing"));	
-	
-	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic),
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic),
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody),
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn),
-		UEngineTypes::ConvertToObjectType(abilityActorCollisionTemplate.ObjectType)
-	};
-	
-
 	FHitResult result;
-	FCollisionQueryParams CollisionParams;
+
+	FCollisionQueryParams CollisionParams("HitscanShot", true, Instigator);
 	CollisionParams.AddIgnoredActors(IngnoredActors);
 
-	world->LineTraceSingleByObjectType(result, Location, end, queryTypes, CollisionParams);
+	ECollisionChannel hitScanChannel = CollisionStatics::GetCollsionChannelByName(CollisionStatics::HITSCAN_TRACE_CHANNEL_NAME);
+
+	world->LineTraceSingleByChannel(result, Location, end, hitScanChannel, CollisionParams);
+
 	DrawDebugDirectionalArrow(world, Location, end, 100.f, FColor::Purple, true, 2.f);
 	return result;
 }

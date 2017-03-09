@@ -4,10 +4,7 @@
 #include "VRControllerComponent.h"
 #include "MlgPlayerController.h"
 
-namespace
-{
-	const char* OVERLAP_DAMAGE_CAUSER_PROFILE = "OverlapDamageCauser";
-}
+#include "CollisionStatics.h"
 
 UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -63,19 +60,11 @@ UVRControllerComponent::ActorGrabData UVRControllerComponent::getNearestGrabable
 {
 	TArray<FHitResult> hitresults;
 
-	FCollisionResponseTemplate overlapDamageCauserCollisionTemplate;
-	bool success = UCollisionProfile::Get()->GetProfileTemplate(FName(OVERLAP_DAMAGE_CAUSER_PROFILE), overlapDamageCauserCollisionTemplate);
-	checkf(success, TEXT("OverlapDamageCauser Collision Profile is missing"));
+	ECollisionChannel gripScanChannel = CollisionStatics::GetCollsionChannelByName(CollisionStatics::GRIPSCAN_TRACE_CHANNEL_NAME);
+		;
 
-	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody),
-		UEngineTypes::ConvertToObjectType(overlapDamageCauserCollisionTemplate.ObjectType)
-	};
-
-	FCollisionObjectQueryParams queryParams(queryTypes);
-	
-	GetWorld()->SweepMultiByObjectType(hitresults, GetComponentLocation(), GetComponentLocation(),
-		FQuat::Identity, queryParams, FCollisionShape::MakeSphere(grabRadius));
+	GetWorld()->SweepMultiByChannel(hitresults, GetComponentLocation(), GetComponentLocation(),
+		FQuat::Identity, gripScanChannel, FCollisionShape::MakeSphere(grabRadius));
 
 	hitresults = hitresults.FilterByPredicate([](const FHitResult& hitresult)
 	{

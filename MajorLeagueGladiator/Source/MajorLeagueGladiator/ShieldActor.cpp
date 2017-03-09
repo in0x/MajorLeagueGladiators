@@ -9,14 +9,14 @@
 namespace
 {
 	const char* REFLECT_SOCKET_NAME = "Reflect";
-	const char* ABILITY_ACTOR_COLLISION_PRESET_NAME = "AbilityActor";
+	const char* SHIELD_COLLISION_PRESET_NAME = "Shield";
 }
 
 AShieldActor::AShieldActor()
 {
 	bReplicates = true;
 	GetStaticMeshComponent()->bGenerateOverlapEvents = true;
-	GetStaticMeshComponent()->SetCollisionProfileName(ABILITY_ACTOR_COLLISION_PRESET_NAME);
+	GetStaticMeshComponent()->SetCollisionProfileName(REFLECT_SOCKET_NAME);
 }
 
 void AShieldActor::OnHitInteractable(const ABaseProjectile* projectile)

@@ -14,11 +14,10 @@ APhysicsProjectile::APhysicsProjectile(const FObjectInitializer& ObjectInitializ
 	bReplicates = true;
 	bReplicateMovement = true;
 	bStaticMeshReplicateMovement = true;
-	GetStaticMeshComponent()->SetCollisionProfileName("OverlapDamageCauser");
+	GetStaticMeshComponent()->SetCollisionProfileName("Projectile");
 	GetStaticMeshComponent()->Mobility = EComponentMobility::Movable;
 
 	UPrimitiveComponent* primRoot = CastChecked<UPrimitiveComponent>(RootComponent);
-	primRoot->SetCollisionProfileName("OverlapDamageCauser");
 
 	projectileMovementComponent->InitialSpeed = 1000.f;
 	projectileMovementComponent->bShouldBounce = false;
@@ -33,10 +32,11 @@ void APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 
 	//Don't collide with shield again
 	spawnedRootComponent->MoveIgnoreActors.Add(ProjectileOwner);
-	spawnedActor->FinishSpawning(projectileTransform);
+	
 	spawnedActor->SetLifeSpan(5.f);
 
 	spawnedActor->projectileMovementComponent->OnProjectileStop.AddDynamic(spawnedActor, &APhysicsProjectile::OnProjectileStop);
+	spawnedActor->FinishSpawning(projectileTransform);
 }
 
 void APhysicsProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
