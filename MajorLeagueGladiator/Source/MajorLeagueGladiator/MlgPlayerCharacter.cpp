@@ -52,11 +52,6 @@ void AMlgPlayerCharacter::BeginPlay()
 	if (!g_IsVREnabled())
 	{
 		pHandMotionController = std::make_unique<HandMotionController>(this);
-
-		this->bUseControllerRotationPitch = true;
-		this->bUseControllerRotationRoll = true;
-		this->bUseControllerRotationYaw = true;
-
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("NON VR MODE"));
 	}	
 	else
