@@ -24,12 +24,17 @@ void UBTTaskRangedAttack::SetOwner(AActor* ActorOwner)
 
 EBTNodeResult::Type UBTTaskRangedAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	AActor* targetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(Target.SelectedKeyName));
+	if (targetActor == nullptr)
+	{
+		return EBTNodeResult::Failed;
+	}
+
 	APawn* pawn = controller->GetPawn();
 	USkeletalMeshComponent* meshComponent = pawn->FindComponentByClass<USkeletalMeshComponent>();
 
 	FTransform socketTransform = meshComponent->GetSocketTransform(SocketName);	
 
-	AActor* targetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(Target.SelectedKeyName));
 
 	FVector targetDir = targetActor->GetActorLocation() - socketTransform.GetLocation();
 	targetDir.Normalize();

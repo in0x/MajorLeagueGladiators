@@ -51,6 +51,11 @@ bool UMlgGameplayStatics::CanDealDamageTo(const AMlgPlayerState* DamageDealerSta
 
 	if (const APawn* DamageReceiverPawn = Cast<APawn>(DamageReceiver))
 	{
+		if (DamageReceiverPawn->PlayerState == nullptr)
+		{
+			// Can damage stuff without playerstates
+			return false;
+		}
 		const AMlgPlayerState* DamageReceiverState = CastChecked<AMlgPlayerState>(DamageReceiverPawn->PlayerState);
 		return CanDealDamageTo(DamageDealerState, DamageReceiverState);
 	}
