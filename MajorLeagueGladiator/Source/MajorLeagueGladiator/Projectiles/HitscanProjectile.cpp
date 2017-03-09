@@ -4,6 +4,7 @@
 #include "HitscanProjectile.h"
 #include "DamageTypes/PlayerDamage.h"
 #include "MlgGameplayStatics.h"
+#include "Singleton.h"
 
 #include "ShieldActor.h"
 #include "CollisionStatics.h"
@@ -22,9 +23,13 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 
 	FHitResult hitresult = Trace(ProjectileOwner->GetWorld(), Location, DirectionVector, { ProjectileOwner });
 
+
 	AActor* hitActor = hitresult.GetActor();
 
 	UGameplayStatics::SpawnEmitterAtLocation(ProjectileOwner->GetWorld(), beamParticleSystem, FTransform(DirectionVector.Rotation().Quaternion(), Location));
+
+	FTransform transf = FTransform(DirectionVector.Rotation().Quaternion(), Location);
+
 
 	if (hitActor == nullptr)
 	{
@@ -65,5 +70,3 @@ FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector Di
 >>>>>>> improve hitscan PS; added PS to hitscan projectile(BP)
 	return result;
 }
-
-
