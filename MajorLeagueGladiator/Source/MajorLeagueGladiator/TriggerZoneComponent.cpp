@@ -9,7 +9,7 @@ UTriggerZoneComponent::UTriggerZoneComponent()
 	ToggleVisibility(false);
 	bGenerateOverlapEvents = true;
 	bMultiBodyOverlap = true;
-	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	SetCollisionProfileName("TriggerZone");
 	OnComponentBeginOverlap.AddDynamic(this, &UTriggerZoneComponent::OnOverlapBegin);
 }
 
