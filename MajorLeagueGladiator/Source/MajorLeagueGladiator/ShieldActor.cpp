@@ -16,7 +16,7 @@ AShieldActor::AShieldActor()
 {
 	bReplicates = true;
 	GetStaticMeshComponent()->bGenerateOverlapEvents = true;
-	GetStaticMeshComponent()->SetCollisionProfileName(REFLECT_SOCKET_NAME);
+	GetStaticMeshComponent()->SetCollisionProfileName(SHIELD_COLLISION_PRESET_NAME);
 }
 
 void AShieldActor::OnHitInteractable(const ABaseProjectile* projectile)
