@@ -8,16 +8,19 @@
 
 #include "ShieldActor.h" //Replace with interface when ready
 
+namespace 
+{
+	const char* PROJECTILE_COLLISION_PROFILE_NAME = "Projectile";
+}
+
 APhysicsProjectile::APhysicsProjectile(const FObjectInitializer& ObjectInitializer)
 	: projectileMovementComponent(ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, TEXT("ProjectileMovementComponent")))
 {
 	bReplicates = true;
 	bReplicateMovement = true;
 	bStaticMeshReplicateMovement = true;
-	GetStaticMeshComponent()->SetCollisionProfileName("Projectile");
+	GetStaticMeshComponent()->SetCollisionProfileName(PROJECTILE_COLLISION_PROFILE_NAME);
 	GetStaticMeshComponent()->Mobility = EComponentMobility::Movable;
-
-	UPrimitiveComponent* primRoot = CastChecked<UPrimitiveComponent>(RootComponent);
 
 	projectileMovementComponent->InitialSpeed = 1000.f;
 	projectileMovementComponent->bShouldBounce = false;

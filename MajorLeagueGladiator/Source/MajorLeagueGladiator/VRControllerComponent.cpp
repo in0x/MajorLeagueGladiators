@@ -61,7 +61,6 @@ UVRControllerComponent::ActorGrabData UVRControllerComponent::getNearestGrabable
 	TArray<FHitResult> hitresults;
 
 	ECollisionChannel gripScanChannel = CollisionStatics::GetCollsionChannelByName(CollisionStatics::GRIPSCAN_TRACE_CHANNEL_NAME);
-		;
 
 	GetWorld()->SweepMultiByChannel(hitresults, GetComponentLocation(), GetComponentLocation(),
 		FQuat::Identity, gripScanChannel, FCollisionShape::MakeSphere(grabRadius));
