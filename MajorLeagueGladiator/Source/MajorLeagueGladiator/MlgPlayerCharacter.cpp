@@ -48,16 +48,20 @@ void AMlgPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// If no HMD is connected, setup non VR mode.
-	if (!g_IsVREnabled())
-	{
-		pHandMotionController = std::make_unique<HandMotionController>(this);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("NON VR MODE"));
-	}	
-	else
+	if (g_IsVREnabled())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("VR MODE"));
 		GEngine->HMDDevice->SetBaseOrientation(FQuat::Identity);
+	}
+	else
+	{
+		pHandMotionController = std::make_unique<HandMotionController>(this);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("NON VR MODE"));
+#if 0 //If this is on you can move with the mouse, however it also causes the sliding bug
+		bUseControllerRotationPitch = true;
+		bUseControllerRotationRoll = true;
+		bUseControllerRotationYaw = true;
+#endif
 	}
 
 	if (healthTriggerClass)
