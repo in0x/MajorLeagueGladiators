@@ -4,9 +4,15 @@
 #include "MlgGrippableStaticMeshActor.h"
 #include "VRControllerComponent.h"
 
-AMlgGrippableStaticMeshActor::AMlgGrippableStaticMeshActor(const FObjectInitializer& ObjectInitializer) {
+namespace
+{
+	const char* PACK_COLLISION_PROFILE_NAME = "Pack";
+}
+
+AMlgGrippableStaticMeshActor::AMlgGrippableStaticMeshActor(const FObjectInitializer& ObjectInitializer) 
+{
 	bReplicateMovement = true;
-	GetStaticMeshComponent()->SetCollisionProfileName("Pack");
+	GetStaticMeshComponent()->SetCollisionProfileName(PACK_COLLISION_PROFILE_NAME);
 }
 
 void AMlgGrippableStaticMeshActor::OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation)

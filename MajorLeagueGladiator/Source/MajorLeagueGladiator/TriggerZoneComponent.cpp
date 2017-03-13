@@ -4,12 +4,17 @@
 #include "TriggerZoneComponent.h"
 #include "Usable.h"
 
+namespace
+{
+	const char* TRIGGER_ZONE_COLLISION_PROFILE_NAME = "TriggerZone";
+}
+
 UTriggerZoneComponent::UTriggerZoneComponent()
 {
 	ToggleVisibility(false);
 	bGenerateOverlapEvents = true;
 	bMultiBodyOverlap = true;
-	SetCollisionProfileName("TriggerZone");
+	SetCollisionProfileName(TRIGGER_ZONE_COLLISION_PROFILE_NAME);
 	OnComponentBeginOverlap.AddDynamic(this, &UTriggerZoneComponent::OnOverlapBegin);
 }
 
