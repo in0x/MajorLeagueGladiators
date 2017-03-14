@@ -29,6 +29,8 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	CrouchedEyeHeight = 0.0f;
 	bUseControllerRotationYaw = false;
 
+	CastChecked<UPrimitiveComponent>(RootComponent)->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
+
 	healthComp = ObjectInitializer.CreateDefaultSubobject<UHealthComponent>(this, TEXT("HealthComp"));
 	healthComp->SetIsReplicated(true);	
 
@@ -56,7 +58,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	bodyMesh->SetupAttachment(VRReplicatedCamera);
 	bodyMesh->SetOwnerNoSee(true);
-	bodyMesh->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
+	bodyMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
 	hudHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 	hudHealth->SetupAttachment(leftMesh, FName(TEXT("Touch")));
