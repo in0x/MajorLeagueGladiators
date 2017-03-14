@@ -2,7 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "ShieldAbility.h"
-#include "MlgPlayerCharacter.h"
+#include "Characters/MlgPlayerCharacter.h"
 #include "GameplayAbilityTargetActor_Box.h"
 #include "AbilityTask_WaitTargetData.h"
 #include "VRControllerComponent.h"

@@ -3,7 +3,6 @@
 #include "MajorLeagueGladiator.h"
 #include "AbilityTask_MoveTo.h"
 #include "AbilityTask_MoveToActor.h"
-#include "MlgPlayerCharacter.h"
 
 UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, FName TaskName, FVector TargetLocation, float MoveSpeed, AMlgPlayerCharacter* MovingCharacter)
 {

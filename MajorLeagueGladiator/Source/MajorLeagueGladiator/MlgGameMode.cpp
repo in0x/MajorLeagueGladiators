@@ -2,8 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "MlgGameMode.h"
-#include "MlgPlayerCharacter.h"
-#include "MlgPlayerController.h"
+#include "Characters/MlgPlayerCharacter.h"
 #include "MlgPlayerState.h"
 
 AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)

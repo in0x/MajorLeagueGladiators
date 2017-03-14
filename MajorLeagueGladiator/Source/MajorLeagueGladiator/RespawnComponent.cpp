@@ -2,7 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "RespawnComponent.h"
-#include "MlgPlayerCharacter.h"
+#include "Characters/MlgPlayerCharacter.h"
 
 URespawnComponent::URespawnComponent()
 {

@@ -1,6 +1,6 @@
 #include "MajorLeagueGladiator.h"
 #include "DashAbility.h"
-#include "MlgPlayerCharacter.h"
+#include "Characters/MlgPlayerCharacter.h"
 #include "VRControllerComponent.h"
 #include "AbilityTask_WaitTargetData.h"
 #include "GameplayAbilityTargetActor_Raycast.h"

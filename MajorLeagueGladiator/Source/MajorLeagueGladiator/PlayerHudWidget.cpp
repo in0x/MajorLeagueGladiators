@@ -2,11 +2,11 @@
 
 #include "MajorLeagueGladiator.h"
 #include "PlayerHudWidget.h"
-#include "MlgPlayerCharacter.h"
+
 #include "HealthComponent.h"
 
 
-void UPlayerHudWidget::OnAttachPlayer(AMlgPlayerCharacter* PlayerCharacter)
+void UPlayerHudWidget::OnAttachPlayer(ACharacter* PlayerCharacter)
 {
 	UHealthComponent* curHealthComp = Cast<UHealthComponent>(PlayerCharacter->GetComponentByClass(UHealthComponent::StaticClass()));
 	if (curHealthComp != nullptr) 

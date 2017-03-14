@@ -1,8 +1,7 @@
 #include "MajorLeagueGladiator.h"
 #include "HandMotionController.h"
-#include "MlgPlayerCharacter.h"
 
-HandMotionController::HandMotionController(AMlgPlayerCharacter* PlayerCharacter)
+HandMotionController::HandMotionController(ACharacter* PlayerCharacter)
 	: playerChar(PlayerCharacter)
 {
 	IModularFeatures::Get().RegisterModularFeature(IMotionController::GetModularFeatureName(), this);

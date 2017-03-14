@@ -2,7 +2,7 @@
 #include "JumpAbility.h"
 #include "AbilityTask_WaitTargetData.h"
 #include "GameplayAbilityTargetActor_PredictProjectile.h"
-#include "MlgPlayerCharacter.h"
+#include "Characters/MlgPlayerCharacter.h"
 
 UJumpAbility::UJumpAbility()
 	: PredictProjectileSpeed(1000.f)
