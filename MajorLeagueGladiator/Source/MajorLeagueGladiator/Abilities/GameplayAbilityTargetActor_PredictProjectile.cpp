@@ -1,7 +1,7 @@
 #include "MajorLeagueGladiator.h"
 #include "GameplayAbilityTargetActor_PredictProjectile.h"
 #include "Abilities/GameplayAbility.h"
-#include "MlgPlayerCharacter.h"
+#include "Characters/MlgPlayerCharacter.h"
 #include "VRControllerComponent.h"
 
 AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_PredictProjectile()

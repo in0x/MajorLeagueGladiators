@@ -2,7 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "AbilityTask_MoveToActor.h"
-#include "MlgPlayerCharacter.h"
+#include "Characters/MlgPlayerCharacter.h"
 
 AAbilityTask_MoveToActor::AAbilityTask_MoveToActor()
 	: MinDistanceThreshold(10.f)

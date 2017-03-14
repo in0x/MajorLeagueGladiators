@@ -1,8 +1,6 @@
 #pragma once
 #include "IMotionController.h"
 
-class AMlgPlayerCharacter;
-
 /*
 * NOTE(Phil)
 * This serves as the IMotionController IModularfeature when no actual Motion
@@ -17,12 +15,12 @@ class AMlgPlayerCharacter;
 class MAJORLEAGUEGLADIATOR_API HandMotionController :  public IMotionController
 {
 public:
-	HandMotionController(AMlgPlayerCharacter* PlayerCharacter);
+	HandMotionController(ACharacter* PlayerCharacter);
 	virtual ~HandMotionController();
 	
 	virtual bool GetControllerOrientationAndPosition(int32 ControllerIndex, EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition) const override;
 	virtual ETrackingStatus GetControllerTrackingStatus(int32 ControllerIndex, EControllerHand DeviceHand) const override;
 	
 private:
-	AMlgPlayerCharacter* playerChar;
+	ACharacter* playerChar;
 };

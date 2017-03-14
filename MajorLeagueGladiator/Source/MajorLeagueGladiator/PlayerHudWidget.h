@@ -12,7 +12,7 @@ class MAJORLEAGUEGLADIATOR_API UPlayerHudWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	void OnAttachPlayer(AMlgPlayerCharacter* PlayerCharacter);
+	void OnAttachPlayer(ACharacter* PlayerCharacter);
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Hud")

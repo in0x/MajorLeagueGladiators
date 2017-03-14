@@ -1,7 +1,7 @@
 #include "MajorLeagueGladiator.h"
 #include "GravityGunAbility.h"
 
-#include "MlgPlayerCharacter.h"
+#include "Characters/MlgPlayerCharacter.h"
 #include "VRControllerComponent.h"
 #include "AbilityTask_SearchActor.h"
 #include "AbilityTask_PullTarget.h"
