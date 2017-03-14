@@ -16,6 +16,7 @@
 namespace 
 {
 	const char* PAWN_COLLISION_PROFILE_NAME = "Pawn";
+	const char* NO_COLLISION_PROFILE_NAME = "NoCollision";
 }
 
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -37,9 +38,22 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	rightMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightMesh"));
 
 	bodyMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh"));
-
+	
 	leftMesh->SetupAttachment(LeftMotionController);
 	rightMesh->SetupAttachment(RightMotionController);
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> viveMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/vive_controller.vive_controller'"));
+	if (viveMesh.Succeeded())
+	{
+		leftMesh->SetStaticMesh(viveMesh.Object);
+		rightMesh->SetStaticMesh(viveMesh.Object);
+	}
+
+	LeftMotionController->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+	RightMotionController->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+	leftMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+	rightMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+
 	bodyMesh->SetupAttachment(VRReplicatedCamera);
 	bodyMesh->SetOwnerNoSee(true);
 	bodyMesh->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
