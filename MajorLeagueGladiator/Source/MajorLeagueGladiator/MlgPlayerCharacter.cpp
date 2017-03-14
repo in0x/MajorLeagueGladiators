@@ -13,14 +13,23 @@
 #include "AbilitySystemComponent.h"
 #include "Abilities/MlgAbilitySet.h"
 
+namespace 
+{
+	const char* PAWN_COLLISION_PROFILE_NAME = "Pawn";
+}
+
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer
 		.SetDefaultSubobjectClass<UVRControllerComponent>(TEXT("Left Grip Motion Controller"))
 		.SetDefaultSubobjectClass<UVRControllerComponent>(TEXT("Right Grip Motion Controller"))
 	)
 {
+	BaseEyeHeight = 0.0f;
+	CrouchedEyeHeight = 0.0f;
+	bUseControllerRotationYaw = false;
+
 	healthComp = ObjectInitializer.CreateDefaultSubobject<UHealthComponent>(this, TEXT("HealthComp"));
-	healthComp->SetIsReplicated(true);
+	healthComp->SetIsReplicated(true);	
 
 	dmgReceiverComp = ObjectInitializer.CreateDefaultSubobject<UDamageReceiverComponent>(this, TEXT("DmgReceiverComp"));
 
@@ -32,9 +41,18 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	leftMesh->SetupAttachment(LeftMotionController);
 	rightMesh->SetupAttachment(RightMotionController);
 	bodyMesh->SetupAttachment(VRReplicatedCamera);
+	bodyMesh->SetOwnerNoSee(true);
+	bodyMesh->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
 
 	hudHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 	hudHealth->SetupAttachment(leftMesh, FName(TEXT("Touch")));
+
+	auto classString = TEXT("WidgetBlueprint'/Game/BluePrints/PlayerHudBP.PlayerHudBP'");
+	classString = TEXT("/Game/BluePrints/PlayerHudBP");
+	static const ConstructorHelpers::FClassFinder<UUserWidget> healthWidgetClass(classString);
+	hudHealth->SetWidgetClass(healthWidgetClass.Class);
+	hudHealth->SetDrawSize({ 400, 100 });
+	hudHealth->SetTwoSided(true);
 	
 	abilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAbilitySystemComponent>(this, TEXT("GameplayTasks"));
 	abilitySystemComponent->SetIsReplicated(true);
@@ -57,7 +75,7 @@ void AMlgPlayerCharacter::BeginPlay()
 	{
 		pHandMotionController = std::make_unique<HandMotionController>(this);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("NON VR MODE"));
-#if 0 //If this is on you can move with the mouse, however it also causes the sliding bug
+#if 1 //If this is on you can move with the mouse, however it also causes the sliding bug
 		bUseControllerRotationPitch = true;
 		bUseControllerRotationRoll = true;
 		bUseControllerRotationYaw = true;
