@@ -19,5 +19,8 @@ del /S *.sln
 del /S *.swp
 del /S *.swo
 del /S *.VC.db
-rmdir /s /q Saved
+del Saved\AutoScreenshot.png
+rmdir /s /q Saved\Autosaves
+rmdir /s /q Saved\Backup
+rmdir /s /q Saved\Logs
 rmdir /s /q Binaries
