@@ -12,6 +12,7 @@
 #include "DamageReceiverComponent.h"
 #include "AbilitySystemComponent.h"
 #include "Abilities/MlgAbilitySet.h"
+#include "MlgGrippableStaticMeshActor.h"
 
 namespace 
 {
@@ -120,6 +121,10 @@ void AMlgPlayerCharacter::BeginPlay()
 	healthWidget->OnAttachPlayer(this);
 
 	LandedDelegate.AddDynamic(this, &AMlgPlayerCharacter::OnLand);
+	if (IsLocallyControlled())
+	{
+		SpawnAndAttackWeapon_Server();
+	}
 }
 
 void AMlgPlayerCharacter::OnLand(const FHitResult& hit)
@@ -195,6 +200,27 @@ void AMlgPlayerCharacter::BecomeViewTarget(APlayerController* PC)
 	Super::BecomeViewTarget(PC);
 
 	FaceRotation(Controller->GetControlRotation());
+}
+
+bool AMlgPlayerCharacter::SpawnAndAttackWeapon_Server_Validate()
+{
+	return true;
+}
+
+void AMlgPlayerCharacter::SpawnAndAttackWeapon_Server_Implementation()
+{
+	if (HasAuthority() && startWeaponClass.Get())
+	{
+		AActor* spawnedWeapon = GetWorld()->SpawnActorDeferred<AActor>(
+			startWeaponClass.Get(), {}, this, this, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+		GetMotionController(EControllerHand::Right)->GripActor(spawnedWeapon, FTransform::Identity, true, TEXT("VRGripP1"));
+		spawnedWeapon->FinishSpawning(spawnedWeapon->GetTransform());
+		//GetMotionController(EControllerHand::Right)->TryGrabActor(spawnedWeapon);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Spawning Start weapon was not set"));
+	}
 }
 
 void AMlgPlayerCharacter::MoveForward(float Value)
