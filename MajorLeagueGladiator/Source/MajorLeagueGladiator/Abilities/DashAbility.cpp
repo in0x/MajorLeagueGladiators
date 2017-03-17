@@ -8,7 +8,7 @@
 
 UDashAbility::UDashAbility()
 	: MaxRange(1000.f)
-	, MoveSpeed(1000.f)
+	, MoveSpeed(1500.f)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;
