@@ -1048,7 +1048,7 @@ void UVRSimpleCharacterMovementComponent::TickComponent(float DeltaTime, enum EL
 		}
 		
 		// NOTE(Phil): Add offset back on if we're not in VR, so we're not stuck in the floor.
-		if (owningChar->IsLocallyControlled() && !g_IsVREnabled()) 
+		if (!g_IsVREnabled() /* && owningChar->IsLocallyControlled() */) 
 		{
 			owningChar->VRSceneComponent->AddRelativeLocation(FVector(0, 0, VRRootCapsule->GetUnscaledCapsuleHalfHeight()));
 		}
