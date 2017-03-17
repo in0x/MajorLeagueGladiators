@@ -31,6 +31,12 @@ bool UMlgGameplayStatics::CanDealDamageTo(const APawn* DamageInstigator, const A
 	check(DamageInstigator);
 	check(DamageReceiver);
 
+	if (DamageInstigator->PlayerState == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" \"%s\" has no PlayerState"), *DamageInstigator->GetName());
+		return false;
+	}
+
 	const AMlgPlayerState* playerstate = CastChecked<AMlgPlayerState>(DamageInstigator->PlayerState);
 	return playerstate && CanDealDamageTo(playerstate, DamageReceiver);
 }
