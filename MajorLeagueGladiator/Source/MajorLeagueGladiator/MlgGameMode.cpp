@@ -53,4 +53,6 @@ void AMlgGameMode::StartPlay()
 	FVector location(0);
 	AParticleSystemManagerActor* psManager = GetWorld()->SpawnActor<AParticleSystemManagerActor>(AParticleSystemManagerActor::StaticClass(), location, FRotator::ZeroRotator);
 	CastChecked<AMlgGameState>(GetWorld()->GetGameState())->
+
+	GetWorld()->SpawnActor<AParticleSystemManagerActor>(AParticleSystemManagerActor::StaticClass(), FVector(0), FRotator::ZeroRotator);
 }

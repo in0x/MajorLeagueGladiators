@@ -15,8 +15,5 @@ class MAJORLEAGUEGLADIATOR_API AMlgGameState : public AGameStateBase
 	
 	
 public:
-
-	UPROPERTY()
-
 	
 };
