@@ -6,6 +6,8 @@
 
 #include "HitscanProjectile.generated.h"
 
+class AParticleSystemManagerActor;
+
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AHitscanProjectile : public ABaseProjectile
 {
@@ -19,10 +21,14 @@ public:
 
 	FHitResult Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const;
 
+	virtual void BeginPlay() override;
+
 private:
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* beamParticleSystem;
+
+	AParticleSystemManagerActor* particleSystemManager;
 
 	float range;
 };

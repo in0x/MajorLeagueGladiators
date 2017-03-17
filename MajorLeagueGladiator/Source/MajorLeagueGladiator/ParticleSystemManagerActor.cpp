@@ -11,6 +11,8 @@ AParticleSystemManagerActor::AParticleSystemManagerActor()
 
 void AParticleSystemManagerActor::SpawnParticleSystemAtLocation(UParticleSystem* ParticleSystemTemplate, FTransform Trans, bool AutoDestroy)
 {
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticleSystemTemplate, Trans, AutoDestroy);
+	//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticleSystemTemplate, Trans.GetLocation(), Trans.GetRotation(), AutoDestroy);
 	CreateParticleSystem_NetMulticast(ParticleSystemTemplate, GetWorld(), this, AutoDestroy);
 	//UParticleSystemComponent* PSC = CreateParticleSystem_NetMulticast(psTemplate, GetWorld(), this, autoDestroy);
 	//particleSystems.Add(PSC);
