@@ -13,6 +13,7 @@ class UAbilitySystemComponent;
 class UGameplayAbilitySet;
 class UMlgAbilitySet;
 class UVRControllerComponent;
+class AMlgGrippableStaticMeshActor;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgPlayerCharacter : public AVRSimpleCharacter, public IAbilitySystemInterface
@@ -68,6 +69,9 @@ private:
 	TSubclassOf<AActor> healthTriggerClass;
 
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<AMlgGrippableStaticMeshActor> startWeaponClass;
+
+	UPROPERTY(EditAnywhere)
 	UWidgetComponent* hudHealth;
 
 	UPROPERTY(EditAnywhere)
@@ -98,6 +102,9 @@ private:
 
 	UFUNCTION(Server, WithValidation, reliable)
 	void rightHandDrop_Server();
+
+	UFUNCTION(Server, WithValidation, reliable)
+	void SpawnAndAttackWeapon_Server();
 
 	virtual void BecomeViewTarget(APlayerController* PC) override;
 
