@@ -4,6 +4,8 @@
 #include "Characters/MlgPlayerCharacter.h"
 #include "VRControllerComponent.h"
 #include "Classes/Components/SplineMeshComponent.h"  
+#include "Math/InterpCurve.h"
+#include <numeric>
 
 AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_PredictProjectile(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -13,11 +15,29 @@ AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_Predi
 	PrimaryActorTick.bCanEverTick = true;
 
 	splineMesh = ObjectInitializer.CreateDefaultSubobject<USplineMeshComponent>(this, TEXT("SplineMesh"));
+	splineMesh->SetupAttachment(GetRootComponent());
 
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> splineMaterial(TEXT("Material'/Game/Materials/M_SplineArcMat'")); // M_SplineArcMat.uasset
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> splineMaterial(TEXT("Material'/Game/Materials/M_SplineArcMat.M_SplineArcMat'")); 
+	splineMeshMat = splineMaterial.Object;
 
-	auto instance = UMaterialInstanceDynamic::Create(splineMaterial.Object, this);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> splineStaticMeshObject(TEXT("StaticMesh'/Game/MVRCFPS_Assets/BeamMesh.BeamMesh'"));
+	splineStaticMesh = splineStaticMeshObject.Object;
+}
+
+void AGameplayAbilityTargetActor_PredictProjectile::BeginPlay()
+{
+	Super::BeginPlay();
+
+	auto instance = UMaterialInstanceDynamic::Create(splineMeshMat, this);
 	splineMesh->SetMaterial(0, instance);
+	splineMesh->SetMobility(EComponentMobility::Movable);
+
+	splineMesh->SetStaticMesh(splineStaticMesh);
+
+	splineMesh->SetStartScale(FVector2D(20, 5));
+	splineMesh->SetEndScale(FVector2D(20, 5));
+
+	splineMesh->SetForwardAxis(ESplineMeshAxis::Type::X);
 }
 
 void AGameplayAbilityTargetActor_PredictProjectile::StartTargeting(UGameplayAbility* Ability)
@@ -52,7 +72,38 @@ void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 	PickTarget();
 
 	auto path = predictResult.PathData;	
-	splineMesh->SetStartAndEnd(path[0].Location, path[0].Velocity, path.Last().Location, path.Last().Velocity);
+	check(path.GetData());
+	auto highest = std::max_element(path.GetData(), path.GetData() + path.Num(), [](auto a, auto b) {return a.Location.Z < b.Location.Z; });
+
+	auto dot = FVector::DotProduct(FVector(path[0].Velocity.X, path[0].Velocity.Y, 0).GetSafeNormal(), path[0].Velocity.GetSafeNormal());
+	auto angle = FMath::Acos(dot);
+	
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("%f"), FMath::RadiansToDegrees(angle)));
+
+	FInterpCurve<FVector> curve;
+	auto first = curve.AddPoint(path[0].Time, path[0].Location);
+	curve.Points[first].InterpMode = CIM_CurveAuto;
+	
+	auto second = curve.AddPoint(highest->Time, highest->Location);
+	curve.Points[second].InterpMode = CIM_CurveAuto;
+
+	auto third = curve.AddPoint(path.Last().Time, path.Last().Location);
+	curve.Points[third].InterpMode = CIM_CurveAuto;
+
+	curve.AutoSetTangents(0.0f, false);
+	
+	auto begin = curve.Points[0].LeaveTangent;
+	auto end = curve.Points[2].ArriveTangent;
+	
+	begin.Z *= 4.f * FMath::Sin(angle);
+	end.Z *= 4.f * FMath::Sin(angle);
+	
+	splineMesh->SetStartAndEnd(GetTransform().InverseTransformPosition(curve.Points[0].OutVal),
+		GetTransform().InverseTransformVector(begin),
+		GetTransform().InverseTransformPosition(curve.Points[2].OutVal),
+		GetTransform().InverseTransformVector(end));
+
+	splineMesh->UpdateMesh();
 }
 
 bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
