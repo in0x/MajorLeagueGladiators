@@ -44,6 +44,8 @@ public:
 	UFUNCTION(NetMulticast, reliable)
 	void StopMovementImmediately_NetMulticast();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UStaticMeshComponent* GetMotionControllerMesh(EControllerHand Hand);
 	UVRControllerComponent* GetMotionController(EControllerHand Hand);
 
@@ -70,6 +72,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AMlgGrippableStaticMeshActor> startWeaponClass;
+
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_AttachedWeapon)
+	AMlgGrippableStaticMeshActor* attachedWeapon;
 
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* hudHealth;
@@ -103,8 +108,12 @@ private:
 	UFUNCTION(Server, WithValidation, reliable)
 	void rightHandDrop_Server();
 
-	UFUNCTION(Server, WithValidation, reliable)
-	void SpawnAndAttackWeapon_Server();
+	void SpawnWeapon();
+
+	UFUNCTION()
+	void OnRep_AttachedWeapon();
+
+	void OnAttachedWeaponSet();
 
 	virtual void BecomeViewTarget(APlayerController* PC) override;
 

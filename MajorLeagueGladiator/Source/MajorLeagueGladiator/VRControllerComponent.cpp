@@ -109,6 +109,15 @@ void UVRControllerComponent::UseGrippedActors()
 			gripActor->OnUsed();
 		}
 	}
+	for (auto& grip : LocallyGrippedActors)
+	{
+		auto gripActor = Cast<IVRGripInterface>(CastChecked<AActor>(grip.GrippedObject));
+
+		if (gripActor)
+		{
+			gripActor->OnUsed();
+		}
+	}
 }
 
 void UVRControllerComponent::EndUseGrippedActors()
@@ -120,6 +129,15 @@ void UVRControllerComponent::EndUseGrippedActors()
 		if (gripActor)
 		{
 			gripActor->OnEndUsed();
+		}
+	}
+	for (auto& grip : LocallyGrippedActors)
+	{
+		auto gripActor = Cast<IVRGripInterface>(CastChecked<AActor>(grip.GrippedObject));
+
+		if (gripActor)
+		{
+			gripActor->OnUsed();
 		}
 	}
 }
