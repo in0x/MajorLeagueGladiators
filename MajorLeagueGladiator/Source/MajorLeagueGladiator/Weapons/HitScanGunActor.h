@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Weapons/MlgWeapon.h"
+#include "Weapons/MlgRangedWeapon.h"
 #include "HitScanGunActor.generated.h"
 
 class UGripMotionControllerComponent;
@@ -13,7 +13,7 @@ struct FBPActorGripInformation;
 class AHitscanProjectile;
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AHitScanGunActor : public AMlgWeapon
+class MAJORLEAGUEGLADIATOR_API AHitScanGunActor : public AMlgRangedWeapon
 {
 	GENERATED_BODY()
 	
