@@ -5,15 +5,11 @@
 #include "MlgGrippableStaticMeshActor.h"
 #include "MlgWeapon.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgWeapon : public AMlgGrippableStaticMeshActor
 {
 	GENERATED_BODY()
-	
-	
-	
+public:
+	AMlgWeapon(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	
 };

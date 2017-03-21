@@ -214,10 +214,9 @@ void AMlgPlayerCharacter::SpawnWeapon()
 		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
 		attachedWeapon = GetWorld()->SpawnActor<AMlgGrippableStaticMeshActor>(
-			startWeaponClass.Get(), {}, spawnParams);
+			startWeaponClass.Get(), GetTransform(), spawnParams);
 
-		OnAttachedWeaponSet();
-		
+		OnAttachedWeaponSet();	
 	}
 	else
 	{
