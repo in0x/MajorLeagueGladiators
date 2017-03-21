@@ -122,7 +122,7 @@ void AHitScanGunActor::shoot()
 	FTransform trafo;
 	shotOriginSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
 
-	projectileClass.GetDefaultObject()->FireProjectile(trafo.GetLocation(), trafo.GetRotation().GetForwardVector(), this, GetMlgPlayerController());
+	projectileClass.GetDefaultObject()->FireProjectile(trafo.GetLocation(), trafo.GetRotation().GetForwardVector(), this, Instigator->GetController());
 }
 
 void AHitScanGunActor::Tick(float DeltaTime)

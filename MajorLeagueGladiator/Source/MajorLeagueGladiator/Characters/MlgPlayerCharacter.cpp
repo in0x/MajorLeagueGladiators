@@ -121,9 +121,10 @@ void AMlgPlayerCharacter::BeginPlay()
 	healthWidget->OnAttachPlayer(this);
 
 	LandedDelegate.AddDynamic(this, &AMlgPlayerCharacter::OnLand);
-	if (IsLocallyControlled())
+	
+	if (HasAuthority())
 	{
-		SpawnAndAttackWeapon_Server();
+		SpawnWeapon();
 	}
 }
 
@@ -202,25 +203,44 @@ void AMlgPlayerCharacter::BecomeViewTarget(APlayerController* PC)
 	FaceRotation(Controller->GetControlRotation());
 }
 
-bool AMlgPlayerCharacter::SpawnAndAttackWeapon_Server_Validate()
+void AMlgPlayerCharacter::SpawnWeapon()
 {
-	return true;
-}
-
-void AMlgPlayerCharacter::SpawnAndAttackWeapon_Server_Implementation()
-{
-	if (HasAuthority() && startWeaponClass.Get())
+	check(HasAuthority());
+	if (startWeaponClass.Get())
 	{
-		AActor* spawnedWeapon = GetWorld()->SpawnActorDeferred<AActor>(
-			startWeaponClass.Get(), {}, this, this, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-		GetMotionController(EControllerHand::Right)->GripActor(spawnedWeapon, FTransform::Identity, true, TEXT("VRGripP1"));
-		spawnedWeapon->FinishSpawning(spawnedWeapon->GetTransform());
-		//GetMotionController(EControllerHand::Right)->TryGrabActor(spawnedWeapon);
+		FActorSpawnParameters spawnParams;
+		spawnParams.Instigator = this;
+		spawnParams.Owner = this;
+		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+		attachedWeapon = GetWorld()->SpawnActor<AMlgGrippableStaticMeshActor>(
+			startWeaponClass.Get(), {}, spawnParams);
+
+		OnAttachedWeaponSet();
+		
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Spawning Start weapon was not set"));
 	}
+}
+
+void AMlgPlayerCharacter::OnRep_AttachedWeapon()
+{
+	OnAttachedWeaponSet();
+}
+void AMlgPlayerCharacter::OnAttachedWeaponSet()
+{
+	// We don't replicate the movement, as it is set by the motion controllers.
+	// Thus it would be unnecessary and it also fixes a bug :)
+	// However the values of the object will still be replicated and RPC can be used
+	attachedWeapon->SetReplicateMovement(false);
+
+	GetMotionController(EControllerHand::Right)->GripActor(
+		attachedWeapon, GetTransform(), true, TEXT("VRGripP1"),
+		EGripCollisionType::InteractiveCollisionWithPhysics,
+		EGripLateUpdateSettings::NotWhenCollidingOrDoubleGripping,
+		EGripMovementReplicationSettings::LocalOnly_Not_Replicated);
 }
 
 void AMlgPlayerCharacter::MoveForward(float Value)
@@ -381,3 +401,10 @@ void AMlgPlayerCharacter::StopMovementImmediately_NetMulticast_Implementation()
 {
 	GetMovementComponent()->StopMovementImmediately();
 }
+
+void AMlgPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AMlgPlayerCharacter, attachedWeapon);
+}
+
