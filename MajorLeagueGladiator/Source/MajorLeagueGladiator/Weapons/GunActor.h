@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Weapons/MlgWeapon.h"
+#include "Weapons/MlgRangedWeapon.h"
 #include "GunActor.generated.h"
 
 class UAmmoComponent;
@@ -13,7 +13,7 @@ class UWidgetComponent;
  * 
  */
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AGunActor : public AMlgWeapon
+class MAJORLEAGUEGLADIATOR_API AGunActor : public AMlgRangedWeapon
 {
 	GENERATED_BODY()
 	
