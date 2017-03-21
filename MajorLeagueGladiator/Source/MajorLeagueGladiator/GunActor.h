@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MlgGrippableStaticMeshActor.h"
+#include "Weapons/MlgWeapon.h"
 #include "GunActor.generated.h"
 
 class UAmmoComponent;
@@ -13,7 +13,7 @@ class UWidgetComponent;
  * 
  */
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AGunActor : public AMlgGrippableStaticMeshActor
+class MAJORLEAGUEGLADIATOR_API AGunActor : public AMlgWeapon
 {
 	GENERATED_BODY()
 	

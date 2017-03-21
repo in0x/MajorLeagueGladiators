@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MlgGrippableStaticMeshActor.h"
+#include "Weapons/MlgWeapon.h"
 #include "HitScanGunActor.generated.h"
 
 class UGripMotionControllerComponent;
@@ -13,7 +13,7 @@ struct FBPActorGripInformation;
 class AHitscanProjectile;
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AHitScanGunActor : public AMlgGrippableStaticMeshActor
+class MAJORLEAGUEGLADIATOR_API AHitScanGunActor : public AMlgWeapon
 {
 	GENERATED_BODY()
 	
