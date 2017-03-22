@@ -38,8 +38,6 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
 	sceneCapture->SetupAttachment(GetRootComponent());
 
-	UPrimitiveComponent* rootPrimitve = CastChecked <UPrimitiveComponent>(RootComponent);
-
 	scopeMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("ScopeMesh"));
 	scopeMesh->SetIsReplicated(true);
 	scopeMesh->SetupAttachment(GetRootComponent(), FName("UI"));
