@@ -21,16 +21,18 @@ void AGameplayAbilityTargetActor_Raycast::Tick(float DeltaSeconds)
 		case ERaycastTargetDirection::ForwardVector:
 		{
 			direction = StartLocation.SourceComponent->GetForwardVector();
+			
 			break;
 		}
 		case ERaycastTargetDirection::UpVector:
 		{
 			direction = StartLocation.SourceComponent->GetUpVector();
+			
 			break; 
 		}
 		case ERaycastTargetDirection::ComponentRotation:
 		{
-			direction = targetTrans.GetRotation().Vector();
+			direction = StartLocation.GetTargetingTransform().GetRotation().Vector();
 			break; 
 		}
 	}
