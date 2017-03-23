@@ -15,9 +15,8 @@ AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_Predi
 	PrimaryActorTick.bCanEverTick = true;
 
 	splineMesh = ObjectInitializer.CreateDefaultSubobject<USplineMeshComponent>(this, TEXT("SplineMesh"));
-	splineMesh->SetupAttachment(GetRootComponent());
-
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> splineMaterial(TEXT("Material'/Game/Materials/M_SplineArcMat.M_SplineArcMat'")); 
+	
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> splineMaterial(TEXT("Material'/Game/Materials/M_SplineArcMat.M_SplineArcMat'"));
 	splineMeshMat = splineMaterial.Object;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> splineStaticMeshObject(TEXT("StaticMesh'/Game/MVRCFPS_Assets/BeamMesh.BeamMesh'"));
@@ -43,25 +42,27 @@ void AGameplayAbilityTargetActor_PredictProjectile::BeginPlay()
 void AGameplayAbilityTargetActor_PredictProjectile::StartTargeting(UGameplayAbility* Ability)
 {
 	Super::StartTargeting(Ability);
-	GetPlayerCapsuleFromAbility(Ability);
-	GetVrControllerFromAbility(Ability);
+
+	AMlgPlayerCharacter* owner = CastChecked<AMlgPlayerCharacter>(Ability->GetOwningActorFromActorInfo());
+	
+	GetPlayerCapsuleFromAbility(owner);
+	GetVrControllerFromAbility(owner);
+
+	FAttachmentTransformRules attachRules(EAttachmentRule::SnapToTarget, false);
+	USceneComponent* ownerRoot = owner->GetRootComponent();
+		
+	splineMesh->AttachToComponent(ownerRoot, attachRules);
 }
 
-void AGameplayAbilityTargetActor_PredictProjectile::GetPlayerCapsuleFromAbility(UGameplayAbility* Ability)
-{
-	auto owner = Ability->GetOwningActorFromActorInfo();
-	auto mlgPlayerCharacter = CastChecked<AMlgPlayerCharacter>(owner);
-	
-	playerCapsule = mlgPlayerCharacter->GetCapsuleComponent();
+void AGameplayAbilityTargetActor_PredictProjectile::GetPlayerCapsuleFromAbility(AMlgPlayerCharacter* owner)
+{	
+	playerCapsule = owner->GetCapsuleComponent();
 	checkf(playerCapsule, TEXT("Could not get capsule from PlayerCharacter"));
 }
 
-void AGameplayAbilityTargetActor_PredictProjectile::GetVrControllerFromAbility(UGameplayAbility* Ability)
+void AGameplayAbilityTargetActor_PredictProjectile::GetVrControllerFromAbility(AMlgPlayerCharacter* owner)
 {
-	auto owner = Ability->GetOwningActorFromActorInfo();
-	auto mlgPlayerCharacter = CastChecked<AMlgPlayerCharacter>(owner);
-
-	vrController = mlgPlayerCharacter->GetMotionController(EControllerHand::Left);
+	vrController = owner->GetMotionController(EControllerHand::Left);
 	checkf(vrController, TEXT("Could not get controller mesh from PlayerCharacter"));
 }
 
@@ -71,37 +72,15 @@ void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 
 	PickTarget();
 
-	auto path = predictResult.PathData;	
-	check(path.GetData());
-	auto highest = std::max_element(path.GetData(), path.GetData() + path.Num(), [](auto a, auto b) {return a.Location.Z < b.Location.Z; });
+	auto& path = predictResult.PathData;
+	float timeInFlight = path.Last().Time; // Need to multiply tangents with this to properly take length into account.
 
-	auto dot = FVector::DotProduct(FVector(path[0].Velocity.X, path[0].Velocity.Y, 0).GetSafeNormal(), path[0].Velocity.GetSafeNormal());
-	auto angle = FMath::Acos(dot);
-	
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("%f"), FMath::RadiansToDegrees(angle)));
+	FTransform trafo = GetTransform();
 
-	FInterpCurve<FVector> curve;
-	auto first = curve.AddPoint(path[0].Time, path[0].Location);
-	curve.Points[first].InterpMode = CIM_CurveAuto;
-	
-	auto second = curve.AddPoint(highest->Time, highest->Location);
-	curve.Points[second].InterpMode = CIM_CurveAuto;
-
-	auto third = curve.AddPoint(path.Last().Time, path.Last().Location);
-	curve.Points[third].InterpMode = CIM_CurveAuto;
-
-	curve.AutoSetTangents(0.0f, false);
-	
-	auto begin = curve.Points[0].LeaveTangent;
-	auto end = curve.Points[2].ArriveTangent;
-	
-	begin.Z *= 4.f * FMath::Sin(angle);
-	end.Z *= 4.f * FMath::Sin(angle);
-	
-	splineMesh->SetStartAndEnd(GetTransform().InverseTransformPosition(curve.Points[0].OutVal),
-		GetTransform().InverseTransformVector(begin),
-		GetTransform().InverseTransformPosition(curve.Points[2].OutVal),
-		GetTransform().InverseTransformVector(end));
+	splineMesh->SetStartAndEnd(trafo.InverseTransformPosition(path[0].Location),
+		trafo.InverseTransformVector(path[0].Velocity * timeInFlight),
+		trafo.InverseTransformPosition(path.Last().Location),
+		trafo.InverseTransformVector(path.Last().Velocity * timeInFlight));
 
 	splineMesh->UpdateMesh();
 }
