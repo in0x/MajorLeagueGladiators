@@ -4,8 +4,7 @@
 #include "Characters/MlgPlayerCharacter.h"
 #include "VRControllerComponent.h"
 #include "Classes/Components/SplineMeshComponent.h"  
-#include "Math/InterpCurve.h"
-#include <numeric>
+#include "MlgGameplayStatics.h"
 
 AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_PredictProjectile(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -27,16 +26,13 @@ void AGameplayAbilityTargetActor_PredictProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto instance = UMaterialInstanceDynamic::Create(splineMeshMat, this);
-	splineMesh->SetMaterial(0, instance);
-	splineMesh->SetMobility(EComponentMobility::Movable);
-
-	splineMesh->SetStaticMesh(splineStaticMesh);
-
-	splineMesh->SetStartScale(FVector2D(20, 5));
-	splineMesh->SetEndScale(FVector2D(20, 5));
-
-	splineMesh->SetForwardAxis(ESplineMeshAxis::Type::X);
+	FSplineMeshComponentParams params;
+	params.Material = splineMeshMat;
+	params.StaticMesh = splineStaticMesh;
+	params.StartScale = FVector2D(5, 5);
+	params.EndScale = FVector2D(5, 5);
+	
+	UMlgGameplayStatics::ConfigureSplineMesh(splineMesh, params);
 }
 
 void AGameplayAbilityTargetActor_PredictProjectile::StartTargeting(UGameplayAbility* Ability)
@@ -49,9 +45,7 @@ void AGameplayAbilityTargetActor_PredictProjectile::StartTargeting(UGameplayAbil
 	GetVrControllerFromAbility(owner);
 
 	FAttachmentTransformRules attachRules(EAttachmentRule::SnapToTarget, false);
-	USceneComponent* ownerRoot = owner->GetRootComponent();
-		
-	splineMesh->AttachToComponent(ownerRoot, attachRules);
+	splineMesh->AttachToComponent(owner->GetRootComponent(), attachRules);
 }
 
 void AGameplayAbilityTargetActor_PredictProjectile::GetPlayerCapsuleFromAbility(AMlgPlayerCharacter* owner)
@@ -69,20 +63,8 @@ void AGameplayAbilityTargetActor_PredictProjectile::GetVrControllerFromAbility(A
 void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
 	PickTarget();
-
-	auto& path = predictResult.PathData;
-	float timeInFlight = path.Last().Time; // Need to multiply tangents with this to properly take length into account.
-
-	FTransform trafo = GetTransform();
-
-	splineMesh->SetStartAndEnd(trafo.InverseTransformPosition(path[0].Location),
-		trafo.InverseTransformVector(path[0].Velocity * timeInFlight),
-		trafo.InverseTransformPosition(path.Last().Location),
-		trafo.InverseTransformVector(path.Last().Velocity * timeInFlight));
-
-	splineMesh->UpdateMesh();
+	UMlgGameplayStatics::SetSplineMeshFromPath(splineMesh, GetTransform(), predictResult.PathData);
 }
 
 bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
@@ -107,8 +89,6 @@ bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
 
 	params.ObjectTypes = queryTypes;
 	params.ActorsToIgnore = IgnoredActors;
-	params.DrawDebugType = EDrawDebugTrace::ForOneFrame;
-	params.DrawDebugTime = 1.f;
 	params.bTraceComplex = false;
 	params.bTraceWithCollision = true;
 
@@ -132,7 +112,7 @@ FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_PredictProjectile::
 
 void AGameplayAbilityTargetActor_PredictProjectile::ConfirmTargetingAndContinue()
 {
-	// I'm explicetly not calling Super since it just broadcast with an empty TargetDataHandle 
+	// I'm explicetly not calling Super since it just broadcasts with an empty TargetDataHandle 
 
 	if (IsConfirmTargetingAllowed())
 	{

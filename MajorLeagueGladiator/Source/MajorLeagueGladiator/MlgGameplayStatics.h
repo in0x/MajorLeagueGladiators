@@ -5,7 +5,32 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "MlgGameplayStatics.generated.h"
 
+namespace ESplineMeshAxis { enum Type; }
 class AMlgPlayerState;
+class USplineMeshComponent;
+
+USTRUCT()
+struct FSplineMeshComponentParams
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "SplineMeshParams")
+	UMaterialInterface* Material;
+
+	UPROPERTY(EditAnywhere, Category = "SplineMeshParams")
+	UStaticMesh* StaticMesh;
+
+	UPROPERTY(EditAnywhere, Category = "SplineMeshParams")
+	FVector2D StartScale;
+
+	UPROPERTY(EditAnywhere, Category = "SplineMeshParams")
+	FVector2D EndScale;
+
+	UPROPERTY(EditAnywhere, Category = "SplineMeshParams")
+	TEnumAsByte<ESplineMeshAxis::Type> SplineMeshAxis;
+
+	FSplineMeshComponentParams();
+};
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UMlgGameplayStatics : public UBlueprintFunctionLibrary
@@ -18,4 +43,6 @@ public:
 	static bool CanDealDamageTo(const AController* DamageInstigator, const AActor* DamageReceiver);
 	static bool CanDealDamageTo(const AMlgPlayerState* DamageDealerState, const AActor* DamageReceiver);
 	static bool CanDealDamageTo(const AMlgPlayerState* DamageDealer, const AMlgPlayerState* DamageReceiver);
+	static void ConfigureSplineMesh(USplineMeshComponent* splineMesh, const FSplineMeshComponentParams& params); 
+	static void SetSplineMeshFromPath(USplineMeshComponent* splineMesh, const FTransform& parentTransform, const TArray<FPredictProjectilePathPointData>& path);
 };
