@@ -12,8 +12,8 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	//DefaultPawnClass = AMlgPlayerCharacter::StaticClass();
 	//PlayerControllerClass = AMlgPlayerController::StaticClass();
 	PlayerStateClass = AMlgPlayerState::StaticClass();
-
-
+	GameStateClass = AMlgGameState::StaticClass();
+	psManagerClass = AParticleSystemManagerActor::StaticClass();
 }
 
 UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
@@ -50,9 +50,14 @@ void AMlgGameMode::StartPlay()
 {
 	Super::StartPlay();
 
-	FVector location(0);
-	AParticleSystemManagerActor* psManager = GetWorld()->SpawnActor<AParticleSystemManagerActor>(AParticleSystemManagerActor::StaticClass(), location, FRotator::ZeroRotator);
-	CastChecked<AMlgGameState>(GetWorld()->GetGameState())->
+}
 
-	GetWorld()->SpawnActor<AParticleSystemManagerActor>(AParticleSystemManagerActor::StaticClass(), FVector(0), FRotator::ZeroRotator);
+void AMlgGameMode::InitGameState()
+{
+	Super::InitGameState();
+
+	AParticleSystemManagerActor* psManager = GetWorld()->SpawnActor<AParticleSystemManagerActor>(psManagerClass.Get(), FVector(0), FRotator::ZeroRotator);
+
+	AMlgGameState* gameState = GetWorld()->GetGameState<AMlgGameState>();
+	gameState->SetGetParticleSystemManager(psManager);
 }

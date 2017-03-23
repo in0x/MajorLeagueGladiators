@@ -5,6 +5,12 @@
 #include "GameFramework/Actor.h"
 #include "ParticleSystemManagerActor.generated.h"
 
+UENUM()
+enum class EParticleSystem : uint8
+{
+	HitscanBeam 	UMETA(DisplayName = "HitscanBeam")
+};
+
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AParticleSystemManagerActor : public AActor
 {
@@ -13,14 +19,14 @@ class MAJORLEAGUEGLADIATOR_API AParticleSystemManagerActor : public AActor
 public:	
 	AParticleSystemManagerActor();
 
-	void SpawnParticleSystemAtLocation(UParticleSystem* ParticleSystemTemplate, FTransform Trans, bool AutoDestroy = true);
+	void SpawnParticleSystemAtLocation(EParticleSystem particleSystem, FTransform Trans, bool AutoDestroy = true);
 
 private:
 
 	UFUNCTION(NetMulticast, unreliable)
-	void CreateParticleSystem_NetMulticast(UParticleSystem* EmitterTemplate, UWorld* World, AActor* Actor, bool bAutoDestroy);
+	void CreateParticleSystem_NetMulticast(UParticleSystem* EmitterTemplate, UWorld* World, AActor* Actor, FTransform Trans, bool bAutoDestroy);
 
-	UPROPERTY()
-	TArray<UParticleSystemComponent*> particleSystems;
+	UPROPERTY(EditAnywhere)
+	TArray<UParticleSystem*> particleSystems;
 
 };

@@ -5,7 +5,7 @@
 #include "DamageTypes/PlayerDamage.h"
 #include "MlgGameplayStatics.h"
 #include "ParticleSystemManagerActor.h"
-
+#include "MlgGameState.h"
 #include "ShieldActor.h"
 #include "CollisionStatics.h"
 
@@ -13,27 +13,6 @@ AHitscanProjectile::AHitscanProjectile()
 	: range(1000000.f)
 {
 	
-}
-
-void AHitscanProjectile::BeginPlay()
-{
-	Super::BeginPlay();
-
-	static AParticleSystemManagerActor* psManager = NULL;
-	if (!psManager)
-	{
-		TArray <AActor*> psMgers;
-		UGameplayStatics::GetAllActorsOfClass(GetOwner()->GetWorld(), AParticleSystemManagerActor::StaticClass(), psMgers);
-		if (psMgers.Num() > 0)
-		{
-			psManager = CastChecked<AParticleSystemManagerActor>(psMgers[0]);
-			particleSystemManager = psManager;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("No AParticleSystemManagerActor found!"));
-		}
-	}
 }
 
 void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
@@ -52,8 +31,8 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 	UGameplayStatics::SpawnEmitterAtLocation(ProjectileOwner->GetWorld(), beamParticleSystem, FTransform(DirectionVector.Rotation().Quaternion(), Location));
 
 	FTransform transf = FTransform(DirectionVector.Rotation().Quaternion(), Location);
-
-	particleSystemManager->SpawnParticleSystemAtLocation(beamParticleSystem, transf);
+	
+	ProjectileOwner->GetWorld()->GetGameState<AMlgGameState>()->GetParticleSystemManager()->SpawnParticleSystemAtLocation(EParticleSystem::HitscanBeam, transf);
 
 
 	if (hitActor == nullptr)
@@ -83,15 +62,12 @@ FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector Di
 	FCollisionQueryParams CollisionParams("HitscanShot", true, Instigator);
 	CollisionParams.AddIgnoredActors(IngnoredActors);
 
-<<<<<<< HEAD
 	ECollisionChannel hitScanChannel = CollisionStatics::GetCollsionChannelByName(CollisionStatics::HITSCAN_TRACE_CHANNEL_NAME);
 
 	world->LineTraceSingleByChannel(result, Location, end, hitScanChannel, CollisionParams);
 
-	DrawDebugDirectionalArrow(world, Location, end, 100.f, FColor::Purple, true, 2.f);
-=======
-	world->LineTraceSingleByObjectType(result, Location, end, queryTypes, CollisionParams);
+	//DrawDebugDirectionalArrow(world, Location, end, 100.f, FColor::Purple, true, 2.f);
+	//world->LineTraceSingleByObjectType(result, Location, end, queryTypes, CollisionParams);
 	
->>>>>>> improve hitscan PS; added PS to hitscan projectile(BP)
 	return result;
 }

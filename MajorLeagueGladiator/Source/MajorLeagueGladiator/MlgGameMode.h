@@ -7,6 +7,10 @@
 
 class AMlgPlayerCharacter;
 
+class AParticleSystemManagerActor;
+/**
+ * 
+ */
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgGameMode : public AGameModeBase
 {
@@ -26,4 +30,11 @@ public:
 	TSubclassOf<AMlgPlayerCharacter> dpsClass;
 
 	virtual void StartPlay() override;
+
+	virtual void InitGameState() override;
+		
+private:
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AParticleSystemManagerActor> psManagerClass;
 };
