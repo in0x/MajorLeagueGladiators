@@ -5,6 +5,8 @@
 #include "GameFramework/GameStateBase.h"
 #include "MlgGameState.generated.h"
 
+class AParticleSystemManagerActor;
+
 /**
  * 
  */
@@ -15,5 +17,16 @@ class MAJORLEAGUEGLADIATOR_API AMlgGameState : public AGameStateBase
 	
 	
 public:
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	AParticleSystemManagerActor* GetParticleSystemManager();
+
+	void SetGetParticleSystemManager(AParticleSystemManagerActor* psManager);
+
+private:
+
+	UPROPERTY(Replicated)
+	AParticleSystemManagerActor* particleSystemManager;
 	
 };

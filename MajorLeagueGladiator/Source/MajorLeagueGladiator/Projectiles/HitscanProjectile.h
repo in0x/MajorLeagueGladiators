@@ -21,8 +21,6 @@ public:
 
 	FHitResult Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const;
 
-	virtual void BeginPlay() override;
-
 private:
 
 	UPROPERTY(EditAnywhere)
