@@ -29,12 +29,13 @@ void UAbilityTask_DashTo::Activate()
 
 	cachedMovementComponent->StopMovementImmediately();
 	
-	cachedMovementComponent->SetMovementMode(MOVE_Flying);
+	cachedMovementComponent->SetMovementMode(MOVE_Custom, 0);
 }
 
 void UAbilityTask_DashTo::OnDestroy(bool bInOwnerFinished)
 {
-	if (cachedMovementComponent->MovementMode == MOVE_Flying)
+	Super::OnDestroy(bInOwnerFinished);
+	if (cachedMovementComponent->MovementMode == MOVE_Custom)
 	{
 		cachedMovementComponent->SetMovementMode(MOVE_Falling);
 	}
@@ -45,7 +46,10 @@ void UAbilityTask_DashTo::TickTask(float DeltaTime)
 {
 	FHitResult hitresult;
 
-	cachedMovementComponent->MoveUpdatedComponent(CalcMovementDelta(DeltaTime), cachedPrimitive->GetComponentQuat(), true, &hitresult);
+	FVector moveDelta = CalcMovementDelta(DeltaTime);
+	FQuat rotation = cachedPrimitive->GetComponentQuat();
+
+	cachedPrimitive->GetOwner()->SetActorLocation(cachedPrimitive->GetComponentLocation() + moveDelta, true, &hitresult);
 
 	if (hitresult.bBlockingHit)
 	{
