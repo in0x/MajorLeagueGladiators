@@ -7,8 +7,6 @@
 
 class UAbilityTask_WaitTargetData;
 class AGameplayAbilityTargetActor;
-class UAbilityTask_DashTo;
-class UAbilityTask_MoveTo;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UJumpDashAbility : public UGameplayAbility
@@ -30,9 +28,6 @@ private:
 
 	UPROPERTY(Transient)
 	UAbilityTask_WaitTargetData* waitTargetDataTask;
-
-	UPROPERTY(Transient)
-	UAbilityTask_DashTo* dashTask;
 
 	UPROPERTY(Transient)
 	UCharacterMovementComponent* cachedMoveComp;

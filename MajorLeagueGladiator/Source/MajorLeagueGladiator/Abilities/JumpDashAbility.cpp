@@ -3,13 +3,9 @@
 #include "MajorLeagueGladiator.h"
 #include "JumpDashAbility.h"
 
-#include "AbilityTask_WaitMovementModeChange.h"
 #include "AbilityTask_WaitTargetData.h"
 #include "Abilities/GameplayAbilityTargetActor_Raycast.h"
 
-#include "Characters/MlgPlayerCharacter.h"
-#include "Abilities/AbilityTask_DashTo.h"
-#include "Abilities/AbilityTask_MoveTo.h"
 #include "Characters/MlgPlayerCharacter.h"
 
 namespace
@@ -19,7 +15,7 @@ namespace
 
 UJumpDashAbility::UJumpDashAbility()
 	: launchVelocity(0,0,1300)
-	, dashSpeed(1300)
+	, dashSpeed(1750)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
@@ -74,12 +70,6 @@ void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 		waitTargetDataTask->EndTask();
 		waitTargetDataTask = nullptr;
 	}
-
-	if (dashTask)
-	{
-		dashTask->EndTask();
-		dashTask = nullptr;
-	}
 }
 
 void UJumpDashAbility::OnMovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
@@ -93,6 +83,7 @@ void UJumpDashAbility::OnMovementModeChanged(ACharacter* Character, EMovementMod
 
 void UJumpDashAbility::OnLanded()
 {
+	cachedMoveComp->StopMovementImmediately();
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
@@ -150,7 +141,10 @@ void UJumpDashAbility::OnTargetingFailed(const FGameplayAbilityTargetDataHandle&
 
 void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 {
-	dashTask = UAbilityTask_DashTo::Create(this, TEXT("DashTo"), Velocity, 5);
-	dashTask->ReadyForActivation();
+	const FVector RealVelocity = Velocity * (dashSpeed / std::abs(Velocity.Z));
+	check(RealVelocity != FVector::ZeroVector);
+	cachedMoveComp->StopMovementImmediately();
+	cachedMoveComp->SetMovementMode(MOVE_Custom);
+	cachedMoveComp->Launch(RealVelocity);
 }
 
