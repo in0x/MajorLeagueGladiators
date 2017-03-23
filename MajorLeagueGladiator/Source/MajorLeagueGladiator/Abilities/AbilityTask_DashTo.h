@@ -34,7 +34,4 @@ private:
 
 	UPROPERTY(Transient)
 	UCharacterMovementComponent* cachedMovementComponent;
-
-
-	
 };
