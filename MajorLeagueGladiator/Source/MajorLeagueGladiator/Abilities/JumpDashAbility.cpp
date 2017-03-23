@@ -18,9 +18,11 @@ namespace
 }
 
 UJumpDashAbility::UJumpDashAbility()
-	: LaunchVelocity(0,0,1000)
+	: launchVelocity(0,0,1300)
+	, dashSpeed(1300)
 {
-
+	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
 }
 
 void UJumpDashAbility::InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
@@ -40,10 +42,13 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 		return;
 	}
 
-	ACharacter* character = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get());
+	cachedCharacter = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get());
+	cachedMoveComp = CastChecked<UCharacterMovementComponent>(cachedCharacter->GetMovementComponent());
 
-	if (character->GetReplicatedMovementMode() != MOVE_Walking)
+	if (cachedMoveComp->MovementMode != MOVE_Walking)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, FString::Printf(TEXT("was not walking")));
+		EndAbility(Handle,ActorInfo, ActivationInfo, true, true);
 		return;
 	}
 
@@ -53,10 +58,8 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 		return;
 	}
 
-
-	character->LaunchCharacter(LaunchVelocity, true, true);
-
-	character->MovementModeChangedDelegate.AddDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
+	cachedCharacter->LaunchCharacter(launchVelocity, true, true);
+	cachedCharacter->MovementModeChangedDelegate.AddDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
 
 	BeginTargeting();
 }
@@ -64,8 +67,8 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-	ACharacter* character = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get());
-	character->MovementModeChangedDelegate.RemoveDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
+
+	cachedCharacter->MovementModeChangedDelegate.RemoveDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
 
 	if (waitTargetDataTask)
 	{
@@ -81,10 +84,8 @@ void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 }
 
 void UJumpDashAbility::OnMovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
-{
-	UCharacterMovementComponent *moveComp = CastChecked<UCharacterMovementComponent>(Character->GetMovementComponent());
-	
-	if (moveComp->MovementMode == MOVE_Walking)
+{	
+	if (cachedMoveComp->MovementMode == MOVE_Walking)
 	{
 		OnLanded();
 	}	
@@ -93,8 +94,6 @@ void UJumpDashAbility::OnMovementModeChanged(ACharacter* Character, EMovementMod
 
 void UJumpDashAbility::OnLanded()
 {
-	ACharacter* character = CastChecked<ACharacter>(CurrentActorInfo->AvatarActor.Get());
-	character->GetMovementComponent()->StopMovementImmediately();
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
@@ -104,7 +103,7 @@ void UJumpDashAbility::BeginTargeting()
 		EGameplayTargetingConfirmation::Custom, AGameplayAbilityTargetActor_Raycast::StaticClass());
 
 	waitTargetDataTask->ValidData.AddDynamic(this, &UJumpDashAbility::OnTargetingSuccess);
-	waitTargetDataTask->ValidData.AddDynamic(this, &UJumpDashAbility::OnTargetingFailed);
+	waitTargetDataTask->Cancelled.AddDynamic(this, &UJumpDashAbility::OnTargetingFailed);
 
 	AGameplayAbilityTargetActor* spawnedTargetingActor = nullptr;
 
@@ -142,11 +141,17 @@ void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle
 
 	const FVector distance = targetLocation - actorLocation;
 
-	dashTask = UAbilityTask_MoveTo::Create(this, TEXT("MoveTo"), targetLocation, 1000, CastChecked<AMlgPlayerCharacter>(CurrentActorInfo->AvatarActor.Get()));
-	//dashTask = UAbilityTask_DashTo::Create(this, TEXT("DashTo"), distance.GetUnsafeNormal() * 1000, 5);
-	dashTask->ReadyForActivation();
+	BeginDashing(distance.GetUnsafeNormal() * dashSpeed);
 }
 
 void UJumpDashAbility::OnTargetingFailed(const FGameplayAbilityTargetDataHandle& Data)
 {
+	BeginDashing(FVector(0, 0, -dashSpeed));
 }
+
+void UJumpDashAbility::BeginDashing(const FVector& Velocity)
+{
+	dashTask = UAbilityTask_DashTo::Create(this, TEXT("DashTo"), Velocity, 5);
+	dashTask->ReadyForActivation();
+}
+
