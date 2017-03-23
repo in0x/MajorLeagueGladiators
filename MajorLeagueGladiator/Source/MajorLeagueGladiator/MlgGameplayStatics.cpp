@@ -3,15 +3,6 @@
 #include "MajorLeagueGladiator.h"
 #include "MlgGameplayStatics.h"
 #include "MlgPlayerState.h"
-#include "Classes/Components/SplineMeshComponent.h"  
-
-FSplineMeshComponentParams::FSplineMeshComponentParams()
-	: Material(nullptr)
-	, StaticMesh(nullptr)
-	, StartScale(FVector2D(0, 0))
-	, EndScale(FVector2D(0, 0))
-	, SplineMeshAxis(ESplineMeshAxis::Type::X)
-{}
 
 bool UMlgGameplayStatics::CanDealDamageTo(const AActor* DamageDealer, const AActor* DamageReceiver)
 {
@@ -86,43 +77,3 @@ bool UMlgGameplayStatics::CanDealDamageTo(const AMlgPlayerState* DamageDealer, c
 	return !DamageDealer->IsSameTeam(DamageReceiver);
 }
 
-void UMlgGameplayStatics::ConfigureSplineMesh(USplineMeshComponent* splineMesh, const FSplineMeshComponentParams& params)
-{
-	check(splineMesh);
-
-	splineMesh->SetMobility(EComponentMobility::Movable);
-
-	if (params.Material)
-	{
-		splineMesh->SetMaterial(0, UMaterialInstanceDynamic::Create(params.Material, nullptr));
-	}
-	else
-	{
-		UE_LOG(DebugLog, Warning, TEXT("Material passed was null, spline will not have a material"));
-	}
-
-	if (params.StaticMesh)
-	{
-		splineMesh->SetStaticMesh(params.StaticMesh);
-	}
-	else
-	{
-		UE_LOG(DebugLog, Warning, TEXT("StaticMesh passed was null, spline will not have a static mesh"));
-	}
-
-	splineMesh->SetStartScale(params.StartScale);
-	splineMesh->SetEndScale(params.EndScale);
-	splineMesh->SetForwardAxis(params.SplineMeshAxis);
-}
-
-void UMlgGameplayStatics::SetSplineMeshFromPath(USplineMeshComponent* splineMesh, const FTransform& parentTransform, const TArray<FPredictProjectilePathPointData>& path)
-{
-	float timeInFlight = path.Last().Time; // Need to multiply tangents with this to properly take length into account.
-
-	splineMesh->SetStartAndEnd(	parentTransform.InverseTransformPosition(path[0].Location),
-								parentTransform.InverseTransformVector(path[0].Velocity * timeInFlight),
-								parentTransform.InverseTransformPosition(path.Last().Location),
-								parentTransform.InverseTransformVector(path.Last().Velocity * timeInFlight));
-
-	splineMesh->UpdateMesh();
-}

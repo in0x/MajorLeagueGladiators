@@ -1,10 +1,9 @@
 #include "MajorLeagueGladiator.h"
 #include "GameplayAbilityTargetActor_PredictProjectile.h"
-#include "Abilities/GameplayAbility.h"
 #include "Characters/MlgPlayerCharacter.h"
+#include "TargetingSplineMeshComponent.h"
+#include "Abilities/GameplayAbility.h"
 #include "VRControllerComponent.h"
-#include "Classes/Components/SplineMeshComponent.h"  
-#include "MlgGameplayStatics.h"
 
 AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_PredictProjectile(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -13,26 +12,12 @@ AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_Predi
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	splineMesh = ObjectInitializer.CreateDefaultSubobject<USplineMeshComponent>(this, TEXT("SplineMesh"));
-	
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> splineMaterial(TEXT("Material'/Game/Materials/M_SplineArcMat.M_SplineArcMat'"));
-	splineMeshMat = splineMaterial.Object;
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> splineStaticMeshObject(TEXT("StaticMesh'/Game/MVRCFPS_Assets/BeamMesh.BeamMesh'"));
-	splineStaticMesh = splineStaticMeshObject.Object;
+	splineMesh = ObjectInitializer.CreateDefaultSubobject<UTargetingSplineMeshComponent>(this, TEXT("SplineMesh"));
 }
 
 void AGameplayAbilityTargetActor_PredictProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-
-	FSplineMeshComponentParams params;
-	params.Material = splineMeshMat;
-	params.StaticMesh = splineStaticMesh;
-	params.StartScale = FVector2D(5, 5);
-	params.EndScale = FVector2D(5, 5);
-	
-	UMlgGameplayStatics::ConfigureSplineMesh(splineMesh, params);
 }
 
 void AGameplayAbilityTargetActor_PredictProjectile::StartTargeting(UGameplayAbility* Ability)
@@ -64,7 +49,7 @@ void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	PickTarget();
-	UMlgGameplayStatics::SetSplineMeshFromPath(splineMesh, GetTransform(), predictResult.PathData);
+	splineMesh->SetFromProjectilePath(predictResult.PathData);
 }
 
 bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
@@ -91,6 +76,8 @@ bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
 	params.ActorsToIgnore = IgnoredActors;
 	params.bTraceComplex = false;
 	params.bTraceWithCollision = true;
+
+	splineMesh->SetIsTargetValid(predictResult.HitResult.bBlockingHit);
 
 	return UGameplayStatics::PredictProjectilePath(GetWorld(), params, predictResult);
 }
