@@ -14,7 +14,7 @@ namespace EPickMoveLocationTargeting
 }
 
 class UVRControllerComponent;
-class USplineMeshComponent;
+class UTargetingSplineMeshComponent;
 class AMlgPlayerCharacter;
 
 UCLASS()
@@ -46,10 +46,8 @@ private:
 	bool PickTarget();
 
 	UPROPERTY(EditAnywhere)
-	USplineMeshComponent* splineMesh;
-	UMaterialInterface* splineMeshMat;
-	UStaticMesh* splineStaticMesh;
-
+	UTargetingSplineMeshComponent* splineMesh;
+	
 	UCapsuleComponent* playerCapsule;
 	UVRControllerComponent* vrController;
 
