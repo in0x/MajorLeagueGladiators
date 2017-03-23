@@ -47,7 +47,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USplineMeshComponent* splineMesh;
-	
 	UMaterialInterface* splineMeshMat;
 	UStaticMesh* splineStaticMesh;
 
