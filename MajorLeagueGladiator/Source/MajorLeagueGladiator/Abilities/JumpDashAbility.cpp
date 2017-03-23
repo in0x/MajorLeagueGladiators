@@ -47,7 +47,6 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 
 	if (cachedMoveComp->MovementMode != MOVE_Walking)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Orange, FString::Printf(TEXT("was not walking")));
 		EndAbility(Handle,ActorInfo, ActivationInfo, true, true);
 		return;
 	}
