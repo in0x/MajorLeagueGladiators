@@ -23,21 +23,31 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	FVector LaunchVelocity;
+	FVector launchVelocity;
+
+	UPROPERTY(EditAnywhere)
+	float dashSpeed;
 
 	UPROPERTY(Transient)
 	UAbilityTask_WaitTargetData* waitTargetDataTask;
 
 	UPROPERTY(Transient)
-	UAbilityTask_MoveTo* dashTask;
+	UAbilityTask_DashTo* dashTask;
+
+	UPROPERTY(Transient)
+	UCharacterMovementComponent* cachedMoveComp;
+
+	UPROPERTY(Transient)
+	ACharacter* cachedCharacter;
 
 	void BeginTargeting();
+
+	void BeginDashing(const FVector& Velocity);
 
 	UFUNCTION()
 	void OnMovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
 
 	void OnLanded();
-
 
 	UFUNCTION()
 	void OnTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data);
