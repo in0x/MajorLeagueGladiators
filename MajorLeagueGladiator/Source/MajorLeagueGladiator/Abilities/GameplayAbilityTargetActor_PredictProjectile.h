@@ -15,6 +15,7 @@ namespace EPickMoveLocationTargeting
 
 class UVRControllerComponent;
 class USplineMeshComponent;
+class AMlgPlayerCharacter;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AGameplayAbilityTargetActor_PredictProjectile : public AGameplayAbilityTargetActor
@@ -39,13 +40,14 @@ public:
 private:
 	FGameplayAbilityTargetDataHandle makeDataHandle();
 	
-	void GetPlayerCapsuleFromAbility(UGameplayAbility* Ability);
-	void GetVrControllerFromAbility(UGameplayAbility* Ability);
-
+	void GetPlayerCapsuleFromAbility(AMlgPlayerCharacter* owner);
+	void GetVrControllerFromAbility(AMlgPlayerCharacter* owner);
+	
 	bool PickTarget();
 
+	UPROPERTY(EditAnywhere)
 	USplineMeshComponent* splineMesh;
-
+	
 	UMaterialInterface* splineMeshMat;
 	UStaticMesh* splineStaticMesh;
 
