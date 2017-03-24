@@ -36,12 +36,12 @@ private:
 	UFUNCTION()
 	void OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data);
 
-	UPROPERTY(Transient)
+	UPROPERTY()
 	UAbilityTask_WaitTargetData* waitForTargetTask;
 
-	UPROPERTY(Transient)
+	UPROPERTY()
 	UAbilityTask_MoveTo* moveToTask;
 
-	UPROPERTY(Transient)
+	UPROPERTY()
 	AGameplayAbilityTargetActor_Raycast* targetingSpawnedActor;
 };
