@@ -56,6 +56,8 @@ private:
 
 	bool isSwordFastEnough;
 
-	void doRumbleRight(AActor* OtherActor);
-	bool CanDealDamageTo(const AActor* OtherActor) const;
+	void LaunchCharacterInSwingDirection(ACharacter* character) const;
+	void doRumbleRight();
+	bool CanDealDamageTo(const ACharacter* OtherCharacter) const;
+	void DealDamageTo(ACharacter* OtherCharacter);
 };
