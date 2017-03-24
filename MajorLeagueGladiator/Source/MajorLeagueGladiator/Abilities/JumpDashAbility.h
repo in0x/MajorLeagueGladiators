@@ -33,6 +33,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	float maxDashRange;
 
+	UPROPERTY(EditAnywhere)
+	float effectDistance;
+
+	UPROPERTY(EditAnywhere)
+	float effectAngle;
+
 	FTimerHandle timerHandle;
 
 	UPROPERTY(Transient)
@@ -43,6 +49,10 @@ private:
 
 	UPROPERTY(Transient)
 	AMlgPlayerCharacter* cachedCharacter;
+
+	void LauchNearEnemies();
+
+	bool CanLaunchCharacter(ACharacter* Character) const;
 
 	void BeginTargeting();
 
