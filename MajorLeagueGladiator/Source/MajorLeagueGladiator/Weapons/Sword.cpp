@@ -143,7 +143,7 @@ void ASword::LaunchCharacterInSwingDirection(ACharacter* character) const
 	if (moveMode == MOVE_Falling)
 	{
 		charMoveComp->StopMovementImmediately();
-		character->LaunchCharacter(oldSwingSpeed * 300, true, true);
+		character->LaunchCharacter(GetVelocity() * 300, true, true);
 	}
 }
 
