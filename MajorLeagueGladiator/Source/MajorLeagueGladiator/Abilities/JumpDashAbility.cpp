@@ -40,7 +40,7 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 		return;
 	}
 
-	cachedCharacter = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get());
+	cachedCharacter = CastChecked<AMlgPlayerCharacter>(ActorInfo->AvatarActor.Get());
 	cachedMoveComp = CastChecked<UCharacterMovementComponent>(cachedCharacter->GetMovementComponent());
 
 	if (cachedMoveComp->MovementMode != MOVE_Walking)
@@ -58,9 +58,11 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 	cachedCharacter->LaunchCharacter(launchVelocity, true, true);
 	cachedCharacter->MovementModeChangedDelegate.AddDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
 
+	const float targetingDelay = minmalJumpHightBeforeDash / launchVelocity.Z;
+
 	FTimerManager& timeManager = cachedCharacter->GetWorldTimerManager();
 	timeManager.SetTimer(timerHandle, this, &UJumpDashAbility::BeginTargeting,
-		 minmalJumpHightBeforeDash / launchVelocity.Z, false);
+		targetingDelay, false);
 }
 
 void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -112,14 +114,14 @@ void UJumpDashAbility::BeginTargeting()
 
 	AGameplayAbilityTargetActor_Raycast* targetingRayCastActor = CastChecked<AGameplayAbilityTargetActor_Raycast>(spawnedTargetingActor);
 
-	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
-	auto gripController = player->GetMotionControllerMesh(EControllerHand::Left);
+	
+	auto gripController = cachedCharacter->GetMotionControllerMesh(EControllerHand::Left);
 	targetingRayCastActor->StartLocation.SourceComponent = gripController;
 	targetingRayCastActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
 	targetingRayCastActor->StartLocation.SourceSocketName = AIM_SOCKET_NAME;
 
 	targetingRayCastActor->aimDirection = ERaycastTargetDirection::ComponentRotation;
-	targetingRayCastActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
+	targetingRayCastActor->IgnoredActors.Add(cachedCharacter);
 	targetingRayCastActor->MaxRange = maxDashRange;
 
 	targetingRayCastActor->EvalTargetFunc = [](const FHitResult& result)
@@ -135,12 +137,13 @@ void UJumpDashAbility::BeginTargeting()
 void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data)
 {
 	const FVector targetLocation = Data.Data[0]->GetHitResult()->Location;
-	const AMlgPlayerCharacter* mlgPlayerChar = CastChecked<AMlgPlayerCharacter>(cachedCharacter);
-	const FVector actorFeetLocation = mlgPlayerChar->CalcFeetPosition();
+	const FVector actorFeetLocation = cachedCharacter->CalcFeetPosition();
+	const FVector feetToTargetVector = targetLocation - actorFeetLocation;
+	const FVector direction = feetToTargetVector.GetUnsafeNormal();
+	const FVector zNormalizedDirection = direction / direction.Z;
+	const FVector velocity = zNormalizedDirection * dashSpeed;
 
-	const FVector distance = targetLocation - actorFeetLocation;
-
-	BeginDashing(distance.GetUnsafeNormal() * dashSpeed);
+	BeginDashing(velocity);
 }
 
 void UJumpDashAbility::OnTargetingFailed(const FGameplayAbilityTargetDataHandle& Data)
@@ -150,10 +153,8 @@ void UJumpDashAbility::OnTargetingFailed(const FGameplayAbilityTargetDataHandle&
 
 void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 {
-	const FVector RealVelocity = Velocity * (dashSpeed / std::abs(Velocity.Z));
-
 	cachedMoveComp->StopMovementImmediately();
 	cachedMoveComp->SetMovementMode(MOVE_Custom);
-	cachedMoveComp->Launch(RealVelocity);
+	cachedMoveComp->Launch(Velocity);
 }
 
