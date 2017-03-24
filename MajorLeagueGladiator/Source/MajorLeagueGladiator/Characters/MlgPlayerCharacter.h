@@ -2,6 +2,7 @@
 
 #include "VRExpansion/VRSimpleCharacter.h"
 #include "HandMotionController.h"
+#include "ChaperoneBounds.h"
 #include "AbilitySystemInterface.h"
 #include "MlgPlayerCharacter.generated.h"
 
@@ -14,6 +15,7 @@ class UGameplayAbilitySet;
 class UMlgAbilitySet;
 class UVRControllerComponent;
 class AMlgGrippableStaticMeshActor;
+class USteamVRChaperoneComponent;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgPlayerCharacter : public AVRSimpleCharacter, public IAbilitySystemInterface
@@ -53,6 +55,10 @@ public:
 
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
+	std::unique_ptr<ChaperoneBounds> pChaperoneBounds;
+
+	UPROPERTY(EditAnywhere)
+	USteamVRChaperoneComponent* chaperone;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* leftMesh;
