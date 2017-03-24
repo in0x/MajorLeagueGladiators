@@ -24,11 +24,10 @@ void UHealthComponent::BeginPlay()
 
 void UHealthComponent::OnHealthRefill(const FMsgHealthRefill& Msg, const IMessageContextRef& Context)
 {
-	// TODO(Phil): Comment this back in before commiting
-	/*if (GetOwner() == Msg.TriggerActor || Msg.TriggerActor->IsAttachedTo(GetOwner()))
+	if (GetOwner() == Msg.TriggerActor || Msg.TriggerActor->IsAttachedTo(GetOwner()))
 	{
 		IncreaseHealth(static_cast<float>(Msg.Amount));
-	}*/
+	}
 }
 
 void UHealthComponent::onRep_CurrentHealth()
