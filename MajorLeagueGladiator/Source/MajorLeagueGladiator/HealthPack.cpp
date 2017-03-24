@@ -22,7 +22,12 @@ void AHealthPack::Use(AActor* User, TriggerType Type)
 {
 	if (Type == TriggerType::Health)
 	{
-		UHealthComponent* healthComponent = User->GetOwner()->FindComponentByClass<UHealthComponent>();
+		UHealthComponent* healthComponent = User->FindComponentByClass<UHealthComponent>();
+
+		if (!healthComponent)
+		{
+			healthComponent = User->GetOwner()->FindComponentByClass<UHealthComponent>();
+		}
 		
 		if (!healthComponent)
 		{
