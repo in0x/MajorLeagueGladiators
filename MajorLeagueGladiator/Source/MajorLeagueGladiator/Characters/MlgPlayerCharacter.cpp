@@ -245,7 +245,7 @@ void AMlgPlayerCharacter::OnAttachedWeaponSet()
 		attachedWeapon, GetTransform(), true, TEXT("VRGripP1"),
 		EGripCollisionType::InteractiveCollisionWithPhysics,
 		EGripLateUpdateSettings::NotWhenCollidingOrDoubleGripping,
-		EGripMovementReplicationSettings::LocalOnly_Not_Replicated);
+		EGripMovementReplicationSettings::LocalOnly_Not_Replicated, 1500000, 2000);
 }
 
 void AMlgPlayerCharacter::MoveForward(float Value)
