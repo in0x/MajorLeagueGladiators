@@ -312,6 +312,16 @@ UVRControllerComponent* AMlgPlayerCharacter::GetMotionController(EControllerHand
 	}
 }
 
+FVector AMlgPlayerCharacter::AMlgPlayerCharacter::CalcFeetPosition() const
+{
+	const UCapsuleComponent* capsuleComponent = GetCapsuleComponent();
+	const FVector CapsuleLocation = capsuleComponent->GetComponentLocation();
+	
+	const FVector FeetOffset = capsuleComponent->GetUpVector() * capsuleComponent->GetScaledCapsuleHalfHeight();
+		
+	return CapsuleLocation - FeetOffset;
+}
+
 // Left hand.
 bool AMlgPlayerCharacter::leftHandGrab_Server_Validate()
 {
