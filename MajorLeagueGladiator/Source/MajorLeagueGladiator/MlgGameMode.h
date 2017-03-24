@@ -6,11 +6,8 @@
 #include "MlgGameMode.generated.h"
 
 class AMlgPlayerCharacter;
-
 class AParticleSystemManagerActor;
-/**
- * 
- */
+
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgGameMode : public AGameModeBase
 {
@@ -21,6 +18,13 @@ public:
 
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
+	virtual void InitGameState() override;
+		
+private:
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AParticleSystemManagerActor> psManagerClass;
+	
 	// The Tank Class. For now this is always assigned to the client.
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AMlgPlayerCharacter> tankClass;
@@ -28,13 +32,4 @@ public:
 	// The DPS Class. For now this is always assigned to the server.
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AMlgPlayerCharacter> dpsClass;
-
-	virtual void StartPlay() override;
-
-	virtual void InitGameState() override;
-		
-private:
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AParticleSystemManagerActor> psManagerClass;
 };

@@ -7,9 +7,6 @@
 
 class AParticleSystemManagerActor;
 
-/**
- * 
- */
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgGameState : public AGameStateBase
 {

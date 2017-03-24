@@ -26,7 +26,5 @@ private:
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* beamParticleSystem;
 
-	AParticleSystemManagerActor* particleSystemManager;
-
 	float range;
 };
