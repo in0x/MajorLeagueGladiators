@@ -13,9 +13,10 @@ namespace EPickMoveLocationTargeting
 	};
 }
 
+class AMlgPlayerCharacter;
 class UVRControllerComponent;
 class UTargetingSplineMeshComponent;
-class AMlgPlayerCharacter;
+class UPlayAreaMeshComponent;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AGameplayAbilityTargetActor_PredictProjectile : public AGameplayAbilityTargetActor
@@ -47,6 +48,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UTargetingSplineMeshComponent* splineMesh;
+
+	UPROPERTY(EditAnywhere)
+	UPlayAreaMeshComponent* playAreaMesh;
 	
 	UCapsuleComponent* playerCapsule;
 	UVRControllerComponent* vrController;

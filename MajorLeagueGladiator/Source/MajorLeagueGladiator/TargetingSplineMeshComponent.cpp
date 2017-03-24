@@ -10,6 +10,8 @@ UTargetingSplineMeshComponent::UTargetingSplineMeshComponent()
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> splineStaticMeshObject(TEXT("StaticMesh'/Game/MVRCFPS_Assets/BeamMesh.BeamMesh'"));
 	SetStaticMesh(splineStaticMeshObject.Object);
+
+	SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void UTargetingSplineMeshComponent::BeginPlay()
@@ -20,8 +22,8 @@ void UTargetingSplineMeshComponent::BeginPlay()
 
 	SetMaterial(0, UMaterialInstanceDynamic::Create(material, nullptr));
 	
-	SetStartScale(FVector2D(5.f ,5.f));
-	SetEndScale(FVector2D(5.f, 5.f));
+	SetStartScale(FVector2D(20.f ,5.f));
+	SetEndScale(FVector2D(20.f, 5.f));
 	SetForwardAxis(ESplineMeshAxis::Type::X);
 }
 
@@ -53,3 +55,12 @@ void UTargetingSplineMeshComponent::SetFromProjectilePath(const TArray<FPredictP
 	UpdateMesh();
 }
 
+FVector UTargetingSplineMeshComponent::GetStartPositionWorld() const
+{
+	return GetOwner()->GetTransform().TransformFVector4(GetStartPosition());
+}
+
+FVector UTargetingSplineMeshComponent::GetEndPositionWorld() const
+{
+	return GetOwner()->GetTransform().TransformFVector4(GetEndPosition());
+}

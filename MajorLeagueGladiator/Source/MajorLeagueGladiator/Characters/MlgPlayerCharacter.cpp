@@ -13,6 +13,7 @@
 #include "AbilitySystemComponent.h"
 #include "Abilities/MlgAbilitySet.h"
 #include "MlgGrippableStaticMeshActor.h"
+#include "../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Classes/SteamVRChaperoneComponent.h"
 
 namespace 
 {
@@ -44,6 +45,8 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	
 	leftMesh->SetupAttachment(LeftMotionController);
 	rightMesh->SetupAttachment(RightMotionController);
+
+	chaperone = ObjectInitializer.CreateDefaultSubobject<USteamVRChaperoneComponent>(this, TEXT("Chaperone"));
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> viveMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/vive_controller.vive_controller'"));
 	if (viveMesh.Succeeded())
@@ -82,6 +85,8 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 void AMlgPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	pChaperoneBounds = std::make_unique<ChaperoneBounds>(chaperone);
 
 	if (g_IsVREnabled())
 	{

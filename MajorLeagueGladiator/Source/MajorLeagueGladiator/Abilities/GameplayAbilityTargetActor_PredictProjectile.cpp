@@ -4,6 +4,7 @@
 #include "TargetingSplineMeshComponent.h"
 #include "Abilities/GameplayAbility.h"
 #include "VRControllerComponent.h"
+#include "PlayAreaMeshComponent.h"
 
 AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_PredictProjectile(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -13,6 +14,7 @@ AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_Predi
 	PrimaryActorTick.bCanEverTick = true;
 
 	splineMesh = ObjectInitializer.CreateDefaultSubobject<UTargetingSplineMeshComponent>(this, TEXT("SplineMesh"));
+	playAreaMesh = ObjectInitializer.CreateDefaultSubobject<UPlayAreaMeshComponent>(this, TEXT("PlayAreaMesh"));
 }
 
 void AGameplayAbilityTargetActor_PredictProjectile::BeginPlay()
@@ -48,8 +50,13 @@ void AGameplayAbilityTargetActor_PredictProjectile::GetVrControllerFromAbility(A
 void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	
 	PickTarget();
+	
 	splineMesh->SetFromProjectilePath(predictResult.PathData);
+	splineMesh->SetIsTargetValid(predictResult.HitResult.bBlockingHit);
+
+	playAreaMesh->SetPositionXY(splineMesh->GetEndPositionWorld());
 }
 
 bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
@@ -76,8 +83,6 @@ bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
 	params.ActorsToIgnore = IgnoredActors;
 	params.bTraceComplex = false;
 	params.bTraceWithCollision = true;
-
-	splineMesh->SetIsTargetValid(predictResult.HitResult.bBlockingHit);
 
 	return UGameplayStatics::PredictProjectilePath(GetWorld(), params, predictResult);
 }
