@@ -21,10 +21,12 @@ public:
 
 	void SpawnParticleSystemAtLocation(EParticleSystem particleSystem, FTransform Trans, bool AutoDestroy = true);
 
+	void CreateParticleSystemMain(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy);
+
 private:
 
-	UFUNCTION(NetMulticast, unreliable)
-	void CreateParticleSystem_NetMulticast(UParticleSystem* EmitterTemplate, UWorld* World, AActor* Actor, FTransform Trans, bool bAutoDestroy);
+	UFUNCTION(Server, unreliable, WithValidation)
+	void CreateParticleSystem_Server(int Index, FTransform Trans, bool bAutoDestroy);
 
 	UPROPERTY(EditAnywhere)
 	TArray<UParticleSystem*> particleSystems;

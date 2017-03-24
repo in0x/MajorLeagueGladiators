@@ -4,34 +4,64 @@
 
 AParticleSystemManagerActor::AParticleSystemManagerActor()
 {
-
+	bReplicates = true;
 }
 
 void AParticleSystemManagerActor::SpawnParticleSystemAtLocation(EParticleSystem particleSystem, FTransform Trans, bool AutoDestroy)
 {
 	//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticleSystemTemplate, Trans, AutoDestroy);
 	//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticleSystemTemplate, Trans.GetLocation(), Trans.GetRotation(), AutoDestroy);
-	CreateParticleSystem_NetMulticast(particleSystems[(int32)particleSystem], GetWorld(), this, Trans, AutoDestroy);
+	//CreateParticleSystem_NetMulticast(particleSystems[(int32)particleSystem], GetWorld(), this, Trans, AutoDestroy);
 }
 
-void AParticleSystemManagerActor::CreateParticleSystem_NetMulticast_Implementation(UParticleSystem* EmitterTemplate, UWorld* World, AActor* Actor, FTransform Trans, bool bAutoDestroy)
+void AParticleSystemManagerActor::CreateParticleSystemMain(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy)
 {
-	UParticleSystemComponent* PSC = NewObject<UParticleSystemComponent>((Actor ? Actor : (UObject*)World));
-	PSC->bAutoDestroy = bAutoDestroy;
-	PSC->bAllowAnyoneToDestroyMe = true;
-	PSC->SecondsBeforeInactive = 0.0f;
-	PSC->bAutoActivate = false;
-	PSC->SetTemplate(EmitterTemplate);
-	PSC->bOverrideLODMethod = false;
+	int index = particleSystems.Find(EmitterTemplate);
+	if (index >= 0)
+	{
+		CreateParticleSystem_Server(index, Trans, bAutoDestroy);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No particle system available!"));
+	}
+	
+}
 
-	PSC->bAbsoluteLocation = true;
-	PSC->bAbsoluteRotation = true;
-	PSC->bAbsoluteScale = true;
-	PSC->RelativeLocation = Trans.GetLocation();
-	PSC->RelativeRotation = Trans.GetRotation().Rotator();
-	PSC->RelativeScale3D = Trans.GetScale3D();
+void AParticleSystemManagerActor::CreateParticleSystem_Server_Implementation(int Index, FTransform Trans, bool bAutoDestroy)
+{
+	UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystems[Index], Trans);
+	psc->SetIsReplicated(true);
 
-	PSC->RegisterComponentWithWorld(World);
+	//UParticleSystem* ps = particleSystems[Index];
+	//if (!ps)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Particle system is null!"));
+	//}
 
-	PSC->ActivateSystem(true);
+	//UParticleSystemComponent* PSC = NewObject<UParticleSystemComponent>(this);
+	//PSC->bAutoDestroy = bAutoDestroy;
+	//PSC->bAllowAnyoneToDestroyMe = true;
+	//PSC->SecondsBeforeInactive = 0.0f;
+	//PSC->bAutoActivate = false;
+	//PSC->SetTemplate(ps);
+	//PSC->bOverrideLODMethod = false;
+
+	//PSC->bAbsoluteLocation = true;
+	//PSC->bAbsoluteRotation = true;
+	//PSC->bAbsoluteScale = true;
+	//PSC->RelativeLocation = Trans.GetLocation();
+	//PSC->RelativeRotation = Trans.GetRotation().Rotator();
+	//PSC->RelativeScale3D = Trans.GetScale3D();
+	//PSC->SetIsReplicated(true);
+
+	//PSC->RegisterComponent();
+	////PSC->RegisterComponentWithWorld(GetWorld());
+
+	//PSC->ActivateSystem(true);
+}
+
+bool AParticleSystemManagerActor::CreateParticleSystem_Server_Validate(int Index, FTransform Trans, bool bAutoDestroy)
+{
+	return true;
 }
