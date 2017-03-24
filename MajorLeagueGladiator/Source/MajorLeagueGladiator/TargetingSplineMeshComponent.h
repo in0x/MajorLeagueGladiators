@@ -26,5 +26,5 @@ private:
 	UPROPERTY(EditAnywhere, Category="TargetingSpline")
 	UMaterialInterface* material;
 
-	AActor* transformOwner = nullptr;
+	void updateStartAndEnd(const FVector& start, const FVector& end, const FVector& startTangent, const FVector& endTangent);
 };

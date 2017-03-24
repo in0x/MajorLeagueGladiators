@@ -22,6 +22,8 @@ UPlayAreaMeshComponent::UPlayAreaMeshComponent(const FObjectInitializer& ObjectI
 
 void UPlayAreaMeshComponent::BeginPlay()
 {
+	Super::BeginPlay();
+
 	SetMobility(EComponentMobility::Movable);
 	SetMaterial(0, UMaterialInstanceDynamic::Create(material, nullptr));
 }
