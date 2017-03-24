@@ -11,4 +11,51 @@ class MAJORLEAGUEGLADIATOR_API ASword : public AMlgGrippableStaticMeshActor
 	GENERATED_BODY()	
 public:
 	ASword(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	virtual void Tick(float DeltaTime) override;
+
+protected:
+
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
+private:
+	FVector oldSwingSpeed;
+
+	UPROPERTY(EditAnywhere)
+	float damageAppliedOnHit;
+
+	UPROPERTY(EditAnywhere)
+	int threshholdDoDamageSquared;
+
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	TSubclassOf<UDamageType> damageType;
+
+	//TODO: change sword color changing. THIS IS ONLY TEMPORARY
+	UPROPERTY(EditAnywhere)
+	UMaterial* materialRedObject;
+
+	UPROPERTY(EditAnywhere)
+	UMaterial* materialObject;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInstanceDynamic* materialRedObject_Dyn;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInstanceDynamic* materialObject_Dyn;
+
+	// between 0 and 1
+	// defines how fast new sword speed influences overall speedvalue
+	UPROPERTY(EditAnywhere)
+	float slashVelocityLearnRate;
+
+	void onStartSlash();
+	void onEndSlash();
+	void damageAllOverlappingActors();
+
+	void setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn);
+
+	bool isSwordFastEnough;
+
+	void doRumbleRight(AActor* OtherActor);
+	bool CanDealDamageTo(const AActor* OtherActor) const;
 };
