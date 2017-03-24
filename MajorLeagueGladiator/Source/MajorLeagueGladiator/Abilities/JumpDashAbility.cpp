@@ -140,7 +140,7 @@ void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle
 	const FVector actorFeetLocation = cachedCharacter->CalcFeetPosition();
 	const FVector feetToTargetVector = targetLocation - actorFeetLocation;
 	const FVector direction = feetToTargetVector.GetUnsafeNormal();
-	const FVector zNormalizedDirection = direction / direction.Z;
+	const FVector zNormalizedDirection = direction / std::abs(direction.Z);
 	const FVector velocity = zNormalizedDirection * dashSpeed;
 
 	BeginDashing(velocity);
