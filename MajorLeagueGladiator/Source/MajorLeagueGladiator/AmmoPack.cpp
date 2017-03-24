@@ -3,7 +3,7 @@
 #include "MajorLeagueGladiator.h"
 #include "AmmoPack.h"
 #include "TriggerZoneComponent.h"
-#include "Messages/MsgAmmoRefill.h"
+#include "AmmoComponent.h"
 
 AAmmoPack::AAmmoPack()
 {
@@ -18,23 +18,24 @@ AAmmoPack::AAmmoPack()
 	}
 }
 
-void AAmmoPack::BeginPlay()
-{
-	Super::BeginPlay();
-
-	msgEndpoint = FMessageEndpoint::Builder("AmmoPackMessager");
-	checkf(msgEndpoint.IsValid(), TEXT("Ammo Pack Msg Endpoint invalid"));
-}
-
 void AAmmoPack::Use(AActor* User, TriggerType Type)
 {
-	if (Type == TriggerType::Ammo)
-	{
-		FMsgAmmoRefill* msg = new FMsgAmmoRefill();
-		msg->TriggerActor = User;
-		msg->Amount = amountToRefill;
-		msgEndpoint->Publish<FMsgAmmoRefill>(msg);
+	UAmmoComponent* ammoComponent = User->FindComponentByClass<UAmmoComponent>();
 
+	if (!ammoComponent)
+	{
+		ammoComponent = User->GetOwner()->FindComponentByClass<UAmmoComponent>();
+	}
+
+	if (!ammoComponent)
+	{
+		UE_LOG(DebugLog, Warning, TEXT("Owner of ammo trigger has no healthcomponent, cannot use ammopack."));
+		return;
+	}
+
+	if (ammoComponent->GetAmmoCount() < ammoComponent->GetMaxAmmoCount())
+	{
+		ammoComponent->IncreaseAmmo(amountToRefill);
 		ReleaseFromGrippedComponent();
 		Destroy();
 	}
