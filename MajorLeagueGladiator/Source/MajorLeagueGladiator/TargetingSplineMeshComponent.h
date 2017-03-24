@@ -17,6 +17,7 @@ public:
 
 	void SetIsTargetValid(bool bIsTargetValid);
 	void SetFromProjectilePath(const TArray<FPredictProjectilePathPointData>& Path);
+	void SetFromRayCast(FVector Start, FVector End, bool bDidHit);
 
 	FVector GetStartPositionWorld() const;
 	FVector GetEndPositionWorld() const;

@@ -1,12 +1,24 @@
 #include "MajorLeagueGladiator.h"
 #include "GameplayAbilityTargetActor_Raycast.h"
 #include "Abilities/GameplayAbility.h"
+#include "TargetingSplineMeshComponent.h"
+#include "PlayAreaMeshComponent.h"
 
-AGameplayAbilityTargetActor_Raycast::AGameplayAbilityTargetActor_Raycast()
-	: MaxRange(100)
+AGameplayAbilityTargetActor_Raycast::AGameplayAbilityTargetActor_Raycast(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+	, MaxRange(100)
 	, EvalTargetFunc([](const FHitResult&) { return true; })
 {
 	PrimaryActorTick.bCanEverTick = true;
+	splineMesh = ObjectInitializer.CreateDefaultSubobject<UTargetingSplineMeshComponent>(this, TEXT("SplineMesh"));
+	playAreaMesh = ObjectInitializer.CreateDefaultSubobject<UPlayAreaMeshComponent>(this, TEXT("PlayAreaMesh"));
+}
+void AGameplayAbilityTargetActor_Raycast::BeginPlay()
+{
+	Super::BeginPlay();
+
+	splineMesh->SetStartScale(FVector2D(5.f, 5.f));
+	splineMesh->SetEndScale(FVector2D(5.f, 5.f));
 }
 
 void AGameplayAbilityTargetActor_Raycast::Tick(float DeltaSeconds)
@@ -46,18 +58,15 @@ void AGameplayAbilityTargetActor_Raycast::Tick(float DeltaSeconds)
 	CollisionParams.AddIgnoredActors(IgnoredActors);
 
 	auto* world = GetWorld();
-
 	auto didHit = world->LineTraceSingleByObjectType(hitResult, targetBegin, targetEnd, queryTypes, CollisionParams);
 	
+	bool isValidTarget = EvalTargetFunc(hitResult);
 
-	if (EvalTargetFunc(hitResult))
-	{
-		DrawDebugLine(world, targetBegin, targetEnd, FColor::Green);
-	}
-	else
-	{
-		DrawDebugLine(world, targetBegin, targetEnd, FColor::Red);
-	}
+	FVector drawEnd = isValidTarget ? hitResult.ImpactPoint : targetEnd;
+	splineMesh->SetFromRayCast(targetBegin, drawEnd, isValidTarget);
+
+	playAreaMesh->SetIsTargetValid(isValidTarget);
+	playAreaMesh->SetWorldLocation(splineMesh->GetEndPositionWorld());
 }
 
 bool AGameplayAbilityTargetActor_Raycast::IsConfirmTargetingAllowed()
