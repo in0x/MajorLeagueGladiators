@@ -16,6 +16,7 @@ namespace
 UJumpDashAbility::UJumpDashAbility()
 	: launchVelocity(0,0,1300)
 	, dashSpeed(1750)
+	, maxDashRange(50'000)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
@@ -112,7 +113,7 @@ void UJumpDashAbility::BeginTargeting()
 
 	targetingRayCastActor->aimDirection = ERaycastTargetDirection::ComponentRotation;
 	targetingRayCastActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
-	targetingRayCastActor->MaxRange = 50000;
+	targetingRayCastActor->MaxRange = maxDashRange;
 
 	targetingRayCastActor->EvalTargetFunc = [](const FHitResult& result)
 	{
@@ -142,7 +143,7 @@ void UJumpDashAbility::OnTargetingFailed(const FGameplayAbilityTargetDataHandle&
 void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 {
 	const FVector RealVelocity = Velocity * (dashSpeed / std::abs(Velocity.Z));
-	check(RealVelocity != FVector::ZeroVector);
+
 	cachedMoveComp->StopMovementImmediately();
 	cachedMoveComp->SetMovementMode(MOVE_Custom);
 	cachedMoveComp->Launch(RealVelocity);

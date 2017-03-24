@@ -26,6 +26,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	float dashSpeed;
 
+	UPROPERTY(EditAnywhere)
+	float maxDashRange;
+
 	UPROPERTY(Transient)
 	UAbilityTask_WaitTargetData* waitTargetDataTask;
 
