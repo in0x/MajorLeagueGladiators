@@ -24,10 +24,15 @@ private:
 	FVector launchVelocity;
 
 	UPROPERTY(EditAnywhere)
+	float minmalJumpHightBeforeDash;
+
+	UPROPERTY(EditAnywhere)
 	float dashSpeed;
 
 	UPROPERTY(EditAnywhere)
 	float maxDashRange;
+
+	FTimerHandle timerHandle;
 
 	UPROPERTY(Transient)
 	UAbilityTask_WaitTargetData* waitTargetDataTask;

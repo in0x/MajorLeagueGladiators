@@ -15,6 +15,7 @@ namespace
 
 UJumpDashAbility::UJumpDashAbility()
 	: launchVelocity(0,0,1300)
+	, minmalJumpHightBeforeDash(500)
 	, dashSpeed(1750)
 	, maxDashRange(50'000)
 {
@@ -57,15 +58,21 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 	cachedCharacter->LaunchCharacter(launchVelocity, true, true);
 	cachedCharacter->MovementModeChangedDelegate.AddDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
 
-	BeginTargeting();
+	FTimerManager& timeManager = cachedCharacter->GetWorldTimerManager();
+	timeManager.SetTimer(timerHandle, this, &UJumpDashAbility::BeginTargeting,
+		 minmalJumpHightBeforeDash / launchVelocity.Z, false);
 }
 
 void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
-	cachedCharacter->MovementModeChangedDelegate.RemoveDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
+	FTimerManager& timeManager = cachedCharacter->GetWorldTimerManager();
+	timeManager.ClearTimer(timerHandle);
+	timerHandle.Invalidate();
 
+	cachedCharacter->MovementModeChangedDelegate.RemoveDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
+	
 	if (waitTargetDataTask)
 	{
 		waitTargetDataTask->EndTask();
