@@ -56,7 +56,7 @@ void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 	splineMesh->SetFromProjectilePath(predictResult.PathData);
 	splineMesh->SetIsTargetValid(predictResult.HitResult.bBlockingHit);
 
-	playAreaMesh->SetPositionXY(splineMesh->GetEndPositionWorld());
+	playAreaMesh->SetWorldLocation(splineMesh->GetEndPositionWorld());
 }
 
 bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()

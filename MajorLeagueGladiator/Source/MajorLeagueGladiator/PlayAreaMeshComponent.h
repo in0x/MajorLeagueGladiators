@@ -16,8 +16,6 @@ public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 	virtual void BeginPlay() override;
 
-	void SetPositionXY(FVector PosXY);
-
 private:
 	UMaterialInterface* material;
 };
