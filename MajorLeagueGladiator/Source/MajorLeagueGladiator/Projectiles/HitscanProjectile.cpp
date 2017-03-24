@@ -32,7 +32,10 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 
 	FTransform transf = FTransform(DirectionVector.Rotation().Quaternion(), Location);
 	
-	ProjectileOwner->GetWorld()->GetGameState<AMlgGameState>()->GetParticleSystemManager()->SpawnParticleSystemAtLocation(EParticleSystem::HitscanBeam, transf);
+	/*UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(ProjectileOwner->GetWorld(), beamParticleSystem, transf);
+	psc->SetIsReplicated(true);*/
+	ProjectileOwner->GetWorld()->GetGameState<AMlgGameState>()->GetParticleSystemManager()->CreateParticleSystemMain(beamParticleSystem, transf, true);
+	//ProjectileOwner->GetWorld()->GetGameState<AMlgGameState>()->GetParticleSystemManager()->SpawnParticleSystemAtLocation(EParticleSystem::HitscanBeam, transf);
 
 
 	if (hitActor == nullptr)
