@@ -45,7 +45,6 @@ void UTargetingSplineMeshComponent::SetFromProjectilePath(const TArray<FPredictP
 {
 	float timeInFlight = path.Last().Time; // Need to multiply tangents with this to properly take length into account.
 	updateStartAndEnd(path[0].Location, path.Last().Location, path[0].Velocity * timeInFlight, path.Last().Velocity * timeInFlight);
-	UpdateMesh();
 }
 
 void UTargetingSplineMeshComponent::SetFromRayCast(FVector Start, FVector End, bool bDidHit)
