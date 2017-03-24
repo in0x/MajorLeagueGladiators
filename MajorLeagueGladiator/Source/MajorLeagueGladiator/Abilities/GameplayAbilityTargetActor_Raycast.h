@@ -16,6 +16,8 @@ namespace ERaycastTargetDirection
 }
 
 using RaycastTargetEvaluationFunc = std::function<bool(const FHitResult&)>;
+class UTargetingSplineMeshComponent;
+class UPlayAreaMeshComponent;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AGameplayAbilityTargetActor_Raycast : public AGameplayAbilityTargetActor
@@ -23,9 +25,10 @@ class MAJORLEAGUEGLADIATOR_API AGameplayAbilityTargetActor_Raycast : public AGam
 	GENERATED_BODY()
 
 public:
-	AGameplayAbilityTargetActor_Raycast();
+	AGameplayAbilityTargetActor_Raycast(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void BeginPlay() override;
 	virtual bool IsConfirmTargetingAllowed() override;
 	virtual void ConfirmTargetingAndContinue() override;
 
@@ -41,4 +44,10 @@ private:
 	FGameplayAbilityTargetDataHandle makeDataHandle();
 
 	FHitResult hitResult;
+
+	UPROPERTY(EditAnywhere)
+	UTargetingSplineMeshComponent* splineMesh;
+
+	UPROPERTY(EditAnywhere)
+	UPlayAreaMeshComponent* playAreaMesh;
 };

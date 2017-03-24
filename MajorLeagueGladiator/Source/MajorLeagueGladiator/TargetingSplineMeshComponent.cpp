@@ -55,6 +55,22 @@ void UTargetingSplineMeshComponent::SetFromProjectilePath(const TArray<FPredictP
 	UpdateMesh();
 }
 
+void UTargetingSplineMeshComponent::SetFromRayCast(FVector Start, FVector End, bool bDidHit)
+{
+	FVector tangent = End - Start;
+
+	FTransform parentTransform = GetOwner()->GetTransform();
+
+	SetStartAndEnd(parentTransform.InverseTransformPosition(Start),
+		parentTransform.InverseTransformVector(tangent),
+		parentTransform.InverseTransformPosition(End),
+		parentTransform.InverseTransformVector(tangent));
+
+	UpdateMesh();
+
+	SetIsTargetValid(bDidHit);
+}
+
 FVector UTargetingSplineMeshComponent::GetStartPositionWorld() const
 {
 	return GetOwner()->GetTransform().TransformFVector4(GetStartPosition());

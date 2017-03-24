@@ -17,11 +17,6 @@ AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_Predi
 	playAreaMesh = ObjectInitializer.CreateDefaultSubobject<UPlayAreaMeshComponent>(this, TEXT("PlayAreaMesh"));
 }
 
-void AGameplayAbilityTargetActor_PredictProjectile::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void AGameplayAbilityTargetActor_PredictProjectile::StartTargeting(UGameplayAbility* Ability)
 {
 	Super::StartTargeting(Ability);
@@ -30,9 +25,6 @@ void AGameplayAbilityTargetActor_PredictProjectile::StartTargeting(UGameplayAbil
 	
 	GetPlayerCapsuleFromAbility(owner);
 	GetVrControllerFromAbility(owner);
-
-	FAttachmentTransformRules attachRules(EAttachmentRule::SnapToTarget, false);
-	splineMesh->AttachToComponent(owner->GetRootComponent(), attachRules);
 }
 
 void AGameplayAbilityTargetActor_PredictProjectile::GetPlayerCapsuleFromAbility(AMlgPlayerCharacter* owner)
@@ -57,6 +49,7 @@ void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 	splineMesh->SetIsTargetValid(predictResult.HitResult.bBlockingHit);
 
 	playAreaMesh->SetWorldLocation(splineMesh->GetEndPositionWorld());
+	playAreaMesh->SetIsTargetValid(predictResult.HitResult.bBlockingHit);
 }
 
 bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()

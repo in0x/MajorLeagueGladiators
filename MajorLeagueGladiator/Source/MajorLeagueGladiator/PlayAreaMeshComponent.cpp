@@ -69,3 +69,15 @@ void UPlayAreaMeshComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	SetRelativeRotation(outRotator);
 	AddRelativeLocation(curLoc);
 }
+
+void UPlayAreaMeshComponent::SetIsTargetValid(bool bIsTargetValid)
+{
+	if (bIsTargetValid)
+	{
+		this->SetVisibility(true);
+	}
+	else
+	{
+		this->SetVisibility(false);
+	}
+}

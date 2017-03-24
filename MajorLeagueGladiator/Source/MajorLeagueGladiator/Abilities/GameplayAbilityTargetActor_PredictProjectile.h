@@ -25,7 +25,6 @@ class MAJORLEAGUEGLADIATOR_API AGameplayAbilityTargetActor_PredictProjectile : p
 
 public:
 	AGameplayAbilityTargetActor_PredictProjectile(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual bool IsConfirmTargetingAllowed() override;
 	virtual void StartTargeting(UGameplayAbility* Ability) override;
