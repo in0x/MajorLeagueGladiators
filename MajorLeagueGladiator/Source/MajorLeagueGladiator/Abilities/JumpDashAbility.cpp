@@ -8,6 +8,9 @@
 
 #include "Characters/MlgPlayerCharacter.h"
 
+#include "MlgGameplayStatics.h"
+
+
 namespace
 {
 	const char* AIM_SOCKET_NAME = "Aim";
@@ -18,6 +21,8 @@ UJumpDashAbility::UJumpDashAbility()
 	, minmalJumpHightBeforeDash(500)
 	, dashSpeed(1750)
 	, maxDashRange(50'000)
+	, effectDistance(400)
+	, effectAngle(0.7)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
@@ -57,6 +62,7 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 
 	cachedCharacter->LaunchCharacter(launchVelocity, true, true);
 	cachedCharacter->MovementModeChangedDelegate.AddDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
+	LauchNearEnemies();
 
 	const float targetingDelay = minmalJumpHightBeforeDash / launchVelocity.Z;
 
@@ -96,6 +102,52 @@ void UJumpDashAbility::OnLanded()
 	cachedMoveComp->StopMovementImmediately();
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
+
+void UJumpDashAbility::LauchNearEnemies()
+{
+	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
+		//UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody),
+		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)
+	};
+
+	UWorld* world = cachedCharacter->GetWorld();
+	
+	//TODO, use the right one (i.e. the HMD pos)
+	const FVector actorLocation = cachedCharacter->GetActorLocation();
+	const FVector2D forwardVector(cachedCharacter->GetVRForwardVector());
+	const FVector2D normalizedForwardVector = forwardVector.GetSafeNormal();
+
+	DrawDebugSphere(world, actorLocation, effectDistance, 16, FColor::Silver, true, 2.f);
+
+	TArray<FOverlapResult> outOverlapResult;
+	world->GetWorld()->OverlapMultiByObjectType(outOverlapResult, actorLocation, FQuat::Identity, 
+		FCollisionObjectQueryParams(queryTypes), FCollisionShape::MakeSphere(effectDistance));
+
+	for (FOverlapResult& result : outOverlapResult)
+	{
+
+		if(ACharacter* character = Cast<ACharacter>(result.Actor.Get()))
+		{
+			const FVector2D distance(character->GetActorLocation() - cachedCharacter->GetActorLocation());
+			const FVector2D normalizedDistance = distance.GetSafeNormal();
+
+			const float angle = FVector2D::DotProduct(normalizedDistance, normalizedForwardVector);
+
+			if (effectAngle < angle && CanLaunchCharacter(character))
+			{
+				character->LaunchCharacter(launchVelocity, true, true);
+			}
+		}
+	}
+
+
+}
+
+bool UJumpDashAbility::CanLaunchCharacter(ACharacter* Character) const
+{
+	return UMlgGameplayStatics::CanDealDamageTo(cachedCharacter, Character);
+}
+
 
 void UJumpDashAbility::BeginTargeting()
 {
