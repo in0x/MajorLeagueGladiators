@@ -44,31 +44,27 @@ void UTargetingSplineMeshComponent::SetIsTargetValid(bool bIsTargetValid)
 void UTargetingSplineMeshComponent::SetFromProjectilePath(const TArray<FPredictProjectilePathPointData>& path)
 {
 	float timeInFlight = path.Last().Time; // Need to multiply tangents with this to properly take length into account.
-	
-	FTransform parentTransform = GetOwner()->GetTransform();
-
-	SetStartAndEnd( parentTransform.InverseTransformPosition(path[0].Location),
-					parentTransform.InverseTransformVector(path[0].Velocity * timeInFlight),
-					parentTransform.InverseTransformPosition(path.Last().Location),
-					parentTransform.InverseTransformVector(path.Last().Velocity * timeInFlight));
-
+	updateStartAndEnd(path[0].Location, path.Last().Location, path[0].Velocity * timeInFlight, path.Last().Velocity * timeInFlight);
 	UpdateMesh();
 }
 
 void UTargetingSplineMeshComponent::SetFromRayCast(FVector Start, FVector End, bool bDidHit)
 {
 	FVector tangent = End - Start;
+	updateStartAndEnd(Start, End, tangent, tangent);
+	SetIsTargetValid(bDidHit);
+}
 
+void UTargetingSplineMeshComponent::updateStartAndEnd(const FVector& start, const FVector& end, const FVector& startTangent, const FVector& endTangent)
+{
 	FTransform parentTransform = GetOwner()->GetTransform();
 
-	SetStartAndEnd(parentTransform.InverseTransformPosition(Start),
-		parentTransform.InverseTransformVector(tangent),
-		parentTransform.InverseTransformPosition(End),
-		parentTransform.InverseTransformVector(tangent));
+	SetStartAndEnd( parentTransform.InverseTransformPosition(start),
+					parentTransform.InverseTransformVector(startTangent),
+					parentTransform.InverseTransformPosition(end),
+					parentTransform.InverseTransformVector(endTangent));
 
 	UpdateMesh();
-
-	SetIsTargetValid(bDidHit);
 }
 
 FVector UTargetingSplineMeshComponent::GetStartPositionWorld() const
