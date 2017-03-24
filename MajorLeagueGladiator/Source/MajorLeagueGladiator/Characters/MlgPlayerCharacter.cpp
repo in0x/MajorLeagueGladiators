@@ -108,9 +108,10 @@ void AMlgPlayerCharacter::BeginPlay()
 	{
 		auto healthTrigger = GetWorld()->SpawnActor<AActor>(healthTriggerClass, FTransform());
 		healthTrigger->AttachToComponent(VRReplicatedCamera, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+		healthTrigger->SetOwner(this);
 		auto triggerComp = healthTrigger->GetComponentByClass(UTriggerZoneComponent::StaticClass());
 
-		healthTrigger->SetActorScale3D(FVector(0.1, 0.1, 0.1));
+		healthTrigger->SetActorScale3D(FVector(1, 1, 1));
 
 		if (triggerComp)
 		{

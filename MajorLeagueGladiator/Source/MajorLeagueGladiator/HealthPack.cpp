@@ -4,6 +4,7 @@
 #include "HealthPack.h"
 #include "TriggerZoneComponent.h"
 #include "Messages/MsgHealthRefill.h"
+#include "HealthComponent.h"
 
 AHealthPack::AHealthPack()
 {
@@ -30,12 +31,19 @@ void AHealthPack::Use(AActor* User, TriggerType Type)
 {
 	if (Type == TriggerType::Health)
 	{
-		FMsgHealthRefill* healthMsg = new FMsgHealthRefill;
-		healthMsg->TriggerActor = User;
-		healthMsg->Amount = amountToRefill;
-		msgEndpoint->Publish<FMsgHealthRefill>(healthMsg);
+		UHealthComponent* healthComponent = User->GetOwner()->FindComponentByClass<UHealthComponent>();
 		
-		ReleaseFromGrippedComponent();
-		Destroy();
+		if (!healthComponent)
+		{
+			UE_LOG(DebugLog, Warning, TEXT("Owner of health trigger has no healthcomponent, cannot use healthpack."));
+			return;
+		}
+
+		if (healthComponent->GetCurrentHealthPercentage() < 1.f)
+		{
+			healthComponent->IncreaseHealth(amountToRefill);
+			ReleaseFromGrippedComponent();
+			Destroy();
+		}
 	}
 }
