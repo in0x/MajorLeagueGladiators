@@ -3,7 +3,6 @@
 #include "MajorLeagueGladiator.h"
 #include "HealthPack.h"
 #include "TriggerZoneComponent.h"
-#include "Messages/MsgHealthRefill.h"
 #include "HealthComponent.h"
 
 AHealthPack::AHealthPack()
@@ -17,14 +16,6 @@ AHealthPack::AHealthPack()
 		mesh->bGenerateOverlapEvents = true;
 		mesh->bMultiBodyOverlap = true;
 	}
-}
-
-void AHealthPack::BeginPlay()
-{
-	Super::BeginPlay();
-
-	msgEndpoint = FMessageEndpoint::Builder("HealthPackMessager").Build();
-	checkf(msgEndpoint.IsValid(), TEXT("Health Pack Msg Endpoint invalid"));
 }
 
 void AHealthPack::Use(AActor* User, TriggerType Type)
