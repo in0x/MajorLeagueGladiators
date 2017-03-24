@@ -103,14 +103,14 @@ void ASword::damageAllOverlappingActors()
 	{
 		if (UMlgGameplayStatics::CanDealDamageTo(owner, actor))
 		{
-			UGameplayStatics::ApplyDamage(actor, damageAppliedOnHit, owner->GetInstigatorController(), owner, damageType);
+			DealDamageTo(CastChecked<ACharacter>(actor));
 			hasDealtdamage = true;
 		}
 	}
 
 	if (hasDealtdamage)
 	{
-		doRumbleRight(GetOwner());
+		doRumbleRight();
 	}
 }
 
@@ -123,18 +123,33 @@ void ASword::setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn)
 void ASword::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
-
-	if (CanDealDamageTo(OtherActor))
+	
+	ACharacter* otherCharacter = Cast<ACharacter>(OtherActor);
+	if (otherCharacter && CanDealDamageTo(otherCharacter))
 	{
-		UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, GetInstigatorController(), this, damageType);
-		doRumbleRight(OtherActor);
+		DealDamageTo(otherCharacter);
+		doRumbleRight();
 	}
 }
 
 
-void ASword::doRumbleRight(AActor* OtherActor)
+void ASword::LaunchCharacterInSwingDirection(ACharacter* character) const
 {
-		
+	check(character);
+	UCharacterMovementComponent* charMoveComp = 
+		CastChecked<UCharacterMovementComponent>(character->GetMovementComponent());
+	EMovementMode moveMode = charMoveComp->MovementMode;
+
+	if (moveMode == MOVE_Falling)
+	{
+		charMoveComp->StopMovementImmediately();
+		character->LaunchCharacter(oldSwingSpeed * 300, true, true);
+	}
+}
+
+
+void ASword::doRumbleRight()
+{	
 	AMlgPlayerController* controller = GetMlgPlayerController();
 	if (controller != nullptr)
 	{		
@@ -143,9 +158,16 @@ void ASword::doRumbleRight(AActor* OtherActor)
 	
 }
 
-bool ASword::CanDealDamageTo(const AActor* OtherActor) const
+bool ASword::CanDealDamageTo(const ACharacter* OtherCharacter) const
 {
-	return this != OtherActor
-		&& isSwordFastEnough
-		&& UMlgGameplayStatics::CanDealDamageTo(this, OtherActor);
+	return isSwordFastEnough
+		&& GetOwner() != OtherCharacter
+		&& UMlgGameplayStatics::CanDealDamageTo(this, OtherCharacter);
+}
+
+void ASword::DealDamageTo(ACharacter* OtherCharacter)
+{
+	UGameplayStatics::ApplyDamage(OtherCharacter, damageAppliedOnHit,
+		GetInstigatorController(), this, damageType);
+	LaunchCharacterInSwingDirection(OtherCharacter);
 }
