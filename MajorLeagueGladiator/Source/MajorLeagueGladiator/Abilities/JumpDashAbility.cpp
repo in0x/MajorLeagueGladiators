@@ -128,9 +128,10 @@ void UJumpDashAbility::BeginTargeting()
 void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data)
 {
 	const FVector targetLocation = Data.Data[0]->GetHitResult()->Location;
-	const FVector actorLocation = GetOwningActorFromActorInfo()->GetActorLocation();
+	const AMlgPlayerCharacter* mlgPlayerChar = CastChecked<AMlgPlayerCharacter>(cachedCharacter);
+	const FVector actorFeetLocation = mlgPlayerChar->CalcFeetPosition();
 
-	const FVector distance = targetLocation - actorLocation;
+	const FVector distance = targetLocation - actorFeetLocation;
 
 	BeginDashing(distance.GetUnsafeNormal() * dashSpeed);
 }

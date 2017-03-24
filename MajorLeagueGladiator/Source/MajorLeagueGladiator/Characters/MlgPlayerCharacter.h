@@ -49,6 +49,8 @@ public:
 	UStaticMeshComponent* GetMotionControllerMesh(EControllerHand Hand);
 	UVRControllerComponent* GetMotionController(EControllerHand Hand);
 
+	FVector CalcFeetPosition() const;
+
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
 
