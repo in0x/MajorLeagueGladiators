@@ -69,9 +69,3 @@ void UPlayAreaMeshComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	SetRelativeRotation(outRotator);
 	AddRelativeLocation(curLoc);
 }
-
-void UPlayAreaMeshComponent::SetPositionXY(FVector PosXY)
-{
-	PosXY.Z = GetComponentLocation().Z;
-	SetWorldLocation(PosXY);
-}
