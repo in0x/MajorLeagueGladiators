@@ -7,6 +7,7 @@
 
 class UAbilityTask_WaitTargetData;
 class AGameplayAbilityTargetActor;
+class AMlgPlayerCharacter;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UJumpDashAbility : public UGameplayAbility
@@ -41,7 +42,7 @@ private:
 	UCharacterMovementComponent* cachedMoveComp;
 
 	UPROPERTY(Transient)
-	ACharacter* cachedCharacter;
+	AMlgPlayerCharacter* cachedCharacter;
 
 	void BeginTargeting();
 
