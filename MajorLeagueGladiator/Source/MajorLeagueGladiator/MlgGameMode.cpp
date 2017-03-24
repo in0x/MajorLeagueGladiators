@@ -46,12 +46,6 @@ UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AControlle
 	}
 }
 
-void AMlgGameMode::StartPlay()
-{
-	Super::StartPlay();
-
-}
-
 void AMlgGameMode::InitGameState()
 {
 	Super::InitGameState();

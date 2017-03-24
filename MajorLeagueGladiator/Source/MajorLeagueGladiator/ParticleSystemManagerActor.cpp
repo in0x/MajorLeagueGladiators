@@ -9,6 +9,7 @@ AParticleSystemManagerActor::AParticleSystemManagerActor()
 
 void AParticleSystemManagerActor::SpawnParticleSystemAtLocation(EParticleSystem particleSystem, FTransform Trans, bool AutoDestroy)
 {
+	//TODO: Sandro
 	//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticleSystemTemplate, Trans, AutoDestroy);
 	//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticleSystemTemplate, Trans.GetLocation(), Trans.GetRotation(), AutoDestroy);
 	//CreateParticleSystem_NetMulticast(particleSystems[(int32)particleSystem], GetWorld(), this, Trans, AutoDestroy);
@@ -30,9 +31,20 @@ void AParticleSystemManagerActor::CreateParticleSystemMain(UParticleSystem* Emit
 
 void AParticleSystemManagerActor::CreateParticleSystem_Server_Implementation(int Index, FTransform Trans, bool bAutoDestroy)
 {
-	UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystems[Index], Trans);
-	psc->SetIsReplicated(true);
+	CreateParticleSystem_NetMulticast(Index, Trans, bAutoDestroy);
+}
 
+bool AParticleSystemManagerActor::CreateParticleSystem_Server_Validate(int Index, FTransform Trans, bool bAutoDestroy)
+{
+	return true;
+}
+
+void AParticleSystemManagerActor::CreateParticleSystem_NetMulticast_Implementation(int Index, FTransform Trans, bool bAutoDestroy)
+{
+	UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystems[Index], Trans);
+	//psc->SetIsReplicated(true);
+
+	//TODO: Sandro
 	//UParticleSystem* ps = particleSystems[Index];
 	//if (!ps)
 	//{
@@ -59,9 +71,4 @@ void AParticleSystemManagerActor::CreateParticleSystem_Server_Implementation(int
 	////PSC->RegisterComponentWithWorld(GetWorld());
 
 	//PSC->ActivateSystem(true);
-}
-
-bool AParticleSystemManagerActor::CreateParticleSystem_Server_Validate(int Index, FTransform Trans, bool bAutoDestroy)
-{
-	return true;
 }
