@@ -17,6 +17,9 @@ public:
 
 	void SetIsTargetValid(bool bIsTargetValid);
 	void SetFromProjectilePath(const TArray<FPredictProjectilePathPointData>& Path);
+
+	FVector GetStartPositionWorld() const;
+	FVector GetEndPositionWorld() const;
 	
 private:
 	UPROPERTY(EditAnywhere, Category="TargetingSpline")
