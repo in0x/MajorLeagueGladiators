@@ -24,19 +24,11 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 	}
 
 	FHitResult hitresult = Trace(ProjectileOwner->GetWorld(), Location, DirectionVector, { ProjectileOwner });
-
-
 	AActor* hitActor = hitresult.GetActor();
 
 	UGameplayStatics::SpawnEmitterAtLocation(ProjectileOwner->GetWorld(), beamParticleSystem, FTransform(DirectionVector.Rotation().Quaternion(), Location));
-
 	FTransform transf = FTransform(DirectionVector.Rotation().Quaternion(), Location);
-	
-	/*UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(ProjectileOwner->GetWorld(), beamParticleSystem, transf);
-	psc->SetIsReplicated(true);*/
 	ProjectileOwner->GetWorld()->GetGameState<AMlgGameState>()->GetParticleSystemManager()->CreateParticleSystemMain(beamParticleSystem, transf, true);
-	//ProjectileOwner->GetWorld()->GetGameState<AMlgGameState>()->GetParticleSystemManager()->SpawnParticleSystemAtLocation(EParticleSystem::HitscanBeam, transf);
-
 
 	if (hitActor == nullptr)
 	{
@@ -50,11 +42,8 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 	else if (UMlgGameplayStatics::CanDealDamageTo(ProjectileInstigator, hitActor))
 	{
 		UGameplayStatics::ApplyPointDamage(hitActor, damage, DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UPlayerDamage::StaticClass());
-	}
-
-	
+	}	
 }
-
 
 FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const
 {
@@ -69,8 +58,5 @@ FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector Di
 
 	world->LineTraceSingleByChannel(result, Location, end, hitScanChannel, CollisionParams);
 
-	//DrawDebugDirectionalArrow(world, Location, end, 100.f, FColor::Purple, true, 2.f);
-	//world->LineTraceSingleByObjectType(result, Location, end, queryTypes, CollisionParams);
-	
 	return result;
 }
