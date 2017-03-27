@@ -20,26 +20,32 @@ AHealthPack::AHealthPack()
 
 void AHealthPack::Use(AActor* User, TriggerType Type)
 {
-	if (Type == TriggerType::Health)
+	if (Type != TriggerType::Health)
 	{
-		UHealthComponent* healthComponent = User->FindComponentByClass<UHealthComponent>();
+		return;
+	}
+	
+	UHealthComponent* healthComponent = User->FindComponentByClass<UHealthComponent>();
 
-		if (!healthComponent)
+	if (!healthComponent)
+	{
+		auto* owner = User->GetOwner();
+		if (owner)
 		{
-			healthComponent = User->GetOwner()->FindComponentByClass<UHealthComponent>();
+			healthComponent = owner->FindComponentByClass<UHealthComponent>();
 		}
+	}
 		
-		if (!healthComponent)
-		{
-			UE_LOG(DebugLog, Warning, TEXT("Owner of health trigger has no healthcomponent, cannot use healthpack."));
-			return;
-		}
+	if (!healthComponent)
+	{
+		UE_LOG(DebugLog, Warning, TEXT("Owner of health trigger has no healthcomponent, cannot use healthpack."));
+		return;
+	}
 
-		if (healthComponent->GetCurrentHealthPercentage() < 1.f)
-		{
-			healthComponent->IncreaseHealth(amountToRefill);
-			ReleaseFromGrippedComponent();
-			Destroy();
-		}
+	if (healthComponent->GetCurrentHealthPercentage() < 1.f)
+	{
+		healthComponent->IncreaseHealth(amountToRefill);
+		ReleaseFromGrippedComponent();
+		Destroy();
 	}
 }
