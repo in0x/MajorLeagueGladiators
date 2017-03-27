@@ -37,7 +37,7 @@ private:
 	float effectDistance;
 
 	UPROPERTY(EditAnywhere)
-	float maxEffectAngleDegrees;
+	float halfEffectAngleDegrees;
 
 	FTimerHandle timerHandle;
 
