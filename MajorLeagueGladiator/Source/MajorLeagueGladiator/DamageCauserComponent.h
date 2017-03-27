@@ -13,6 +13,12 @@ class MAJORLEAGUEGLADIATOR_API UDamageCauserComponent : public UActorComponent
 public:	
 	UDamageCauserComponent();
 	virtual void BeginPlay() override;	
+
+	void SetDamageType(TSubclassOf<UDamageType> Type)
+	{
+		damageType = Type;
+	}
+
 protected:
 	UFUNCTION()
 	virtual void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
