@@ -60,4 +60,6 @@ private:
 	void doRumbleRight();
 	bool canDealDamageTo(const ACharacter* OtherCharacter) const;
 	void dealDamageTo(ACharacter* OtherCharacter);
+
+	FVector calcRelativeVelocity() const;
 };
