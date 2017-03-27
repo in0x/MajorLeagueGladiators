@@ -13,7 +13,7 @@ class MAJORLEAGUEGLADIATOR_API ARangedPlayerCharacter : public AMlgPlayerCharact
 {
 	GENERATED_BODY()
 	
-	
-	
-	
+public:
+	ARangedPlayerCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	virtual void BeginPlay() override;
 };
