@@ -11,7 +11,7 @@ class MAJORLEAGUEGLADIATOR_API UPlayAreaMeshComponent : public UStaticMeshCompon
 	GENERATED_BODY()
 	
 public:
-	UPlayAreaMeshComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UPlayAreaMeshComponent();
 	
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 	virtual void BeginPlay() override;

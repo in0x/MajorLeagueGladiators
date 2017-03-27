@@ -5,8 +5,7 @@
 #include "Classes/Kismet/KismetMathLibrary.h"
 #include "IChaperoneBounds.h"
 
-UPlayAreaMeshComponent::UPlayAreaMeshComponent(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+UPlayAreaMeshComponent::UPlayAreaMeshComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = true;
