@@ -22,6 +22,7 @@ public:
 protected:
 	virtual float InternalTakePointDamage(float Damage, const FPointDamageEvent& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
+private:
 	UPROPERTY(EditAnywhere)
 	UHealthComponent* health;
 
