@@ -3,11 +3,12 @@
 #include "MajorLeagueGladiator.h"
 #include "MlgAICharacter.h"
 #include "HealthComponent.h"
+#include "WeakpointComponent.h"
 #include "TriggerZoneComponent.h"
 #include "DamageCauserComponent.h"
+#include "DamageTypes/EnemyDamage.h"
 #include "DamageReceiverComponent.h"
 #include "DamageVisualizerComponent.h"
-#include "DamageTypes/EnemyDamage.h"
 
 AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -15,7 +16,8 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	PrimaryActorTick.bCanEverTick = true;
 
 	health = ObjectInitializer.CreateDefaultSubobject<UHealthComponent>(this, TEXT("Health"));
-	
+	weakpoints = ObjectInitializer.CreateDefaultSubobject<UWeakpointComponent>(this, TEXT("Weakpoints"));
+
 	ConstructorHelpers::FObjectFinder<UStaticMesh> cubeMesh(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
 	triggerZone = ObjectInitializer.CreateDefaultSubobject<UTriggerZoneComponent>(this, TEXT("TriggerZone"));
 	triggerZone->SetTriggerType(TriggerType::Health);
@@ -33,7 +35,8 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 
 float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageEvent& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	return Damage;
+	FWeakpoint hitWeakpoint = weakpoints->FindHitWeakpoint(PointDamageEvent.HitInfo);
+	return Damage * hitWeakpoint.DamageMultiplier;
 }
 
 
