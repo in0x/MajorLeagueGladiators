@@ -11,6 +11,8 @@ namespace
 	const char* MELEE_WEAPON_COLLISION_PROFILE_NAME = "MeleeWeapon";
 }
 
+//TODO: FIX multi hit issue
+
 ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, oldSwingSpeed(FVector::ZeroVector)
@@ -160,6 +162,7 @@ void ASword::doRumbleRight()
 
 bool ASword::CanDealDamageTo(const ACharacter* OtherCharacter) const
 {
+	check(OtherCharacter)
 	return isSwordFastEnough
 		&& GetOwner() != OtherCharacter
 		&& UMlgGameplayStatics::CanDealDamageTo(this, OtherCharacter);
@@ -167,6 +170,7 @@ bool ASword::CanDealDamageTo(const ACharacter* OtherCharacter) const
 
 void ASword::DealDamageTo(ACharacter* OtherCharacter)
 {
+	check(OtherCharacter)
 	UGameplayStatics::ApplyDamage(OtherCharacter, damageAppliedOnHit,
 		GetInstigatorController(), this, damageType);
 	LaunchCharacterInSwingDirection(OtherCharacter);
