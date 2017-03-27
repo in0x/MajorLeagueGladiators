@@ -20,16 +20,25 @@ AAmmoPack::AAmmoPack()
 
 void AAmmoPack::Use(AActor* User, TriggerType Type)
 {
+	if (Type != TriggerType::Ammo)
+	{
+		return;
+	}
+
 	UAmmoComponent* ammoComponent = User->FindComponentByClass<UAmmoComponent>();
 
 	if (!ammoComponent)
 	{
-		ammoComponent = User->GetOwner()->FindComponentByClass<UAmmoComponent>();
+		auto* owner = User->GetOwner();
+		if (owner) 
+		{
+			ammoComponent = owner->FindComponentByClass<UAmmoComponent>();
+		}
 	}
 
 	if (!ammoComponent)
 	{
-		UE_LOG(DebugLog, Warning, TEXT("Owner of ammo trigger has no healthcomponent, cannot use ammopack."));
+		UE_LOG(DebugLog, Warning, TEXT("Owner of ammo trigger has no ammocomponent, cannot use ammopack."));
 		return;
 	}
 
