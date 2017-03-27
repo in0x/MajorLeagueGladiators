@@ -53,18 +53,22 @@ public:
 
 	FVector CalcFeetPosition() const;
 
+protected:
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* leftMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* rightMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UMaterialInterface* multiToolMaterial;
+
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
 	std::unique_ptr<ChaperoneBounds> pChaperoneBounds;
 
 	UPROPERTY(EditAnywhere)
 	USteamVRChaperoneComponent* chaperone;
-
-	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* leftMesh;
-
-	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* rightMesh;
 
 	UPROPERTY(EditAnywhere)
 	UHealthComponent* healthComp;

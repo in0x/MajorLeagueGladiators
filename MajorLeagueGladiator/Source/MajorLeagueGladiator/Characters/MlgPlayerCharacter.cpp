@@ -52,15 +52,8 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	ConstructorHelpers::FObjectFinder<UStaticMesh> multiMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/MultiTool/MultiTool_MainMesh.MultiTool_MainMesh'"));
 	if (multiMesh.Succeeded())
 	{
-		//leftMesh->SetStaticMesh(multiMesh.Object);
+		leftMesh->SetStaticMesh(multiMesh.Object);
 		rightMesh->SetStaticMesh(multiMesh.Object);
-	}
-
-	ConstructorHelpers::FObjectFinder<UStaticMesh> viveMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/vive_controller.vive_controller'"));
-	if (viveMesh.Succeeded())
-	{
-		leftMesh->SetStaticMesh(viveMesh.Object);
-		//rightMesh->SetStaticMesh(viveMesh.Object);
 	}
 
 	LeftMotionController->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);

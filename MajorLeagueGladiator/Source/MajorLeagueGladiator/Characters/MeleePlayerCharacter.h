@@ -12,8 +12,8 @@ UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMeleePlayerCharacter : public AMlgPlayerCharacter
 {
 	GENERATED_BODY()
-	
-	
-	
-	
+
+public:
+	AMeleePlayerCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	virtual void BeginPlay() override;
 };

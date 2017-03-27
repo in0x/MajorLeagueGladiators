@@ -6,6 +6,11 @@
 #include "GameplayAbilityTargetActor_Raycast.h"
 #include "AbilityTask_MoveTo.h"
 
+namespace
+{
+	const char* AIM_SOCKET_NAME = "Aim";
+}
+
 UDashAbility::UDashAbility()
 	: MaxRange(1000.f)
 	, MoveSpeed(1500.f)
@@ -40,8 +45,10 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());	
 	auto gripController = player->GetMotionControllerMesh(EControllerHand::Left);
 	targetingSpawnedActor->StartLocation.SourceComponent = gripController;
-	
-	targetingSpawnedActor->aimDirection = ERaycastTargetDirection::ForwardVector;
+	targetingSpawnedActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
+	targetingSpawnedActor->StartLocation.SourceSocketName = AIM_SOCKET_NAME;
+
+	targetingSpawnedActor->aimDirection = ERaycastTargetDirection::ComponentRotation;
 	targetingSpawnedActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
 	targetingSpawnedActor->MaxRange = MaxRange;
 
