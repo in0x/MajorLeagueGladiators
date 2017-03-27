@@ -5,6 +5,7 @@
 AParticleSystemManagerActor::AParticleSystemManagerActor()
 {
 	bReplicates = true;
+	bAlwaysRelevant = true;
 }
 
 void AParticleSystemManagerActor::SpawnParticleSystemAtLocation(EParticleSystem particleSystem, FTransform Trans, bool AutoDestroy)
