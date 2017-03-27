@@ -53,8 +53,8 @@ void ASword::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector newSwordState = GetVelocity();
-	oldSwingSpeed = oldSwingSpeed * (1.0f - slashVelocityLearnRate) + (DeltaTime * newSwordState) * slashVelocityLearnRate;
+	const FVector relativeSwordVelocity = calcRelativeVelocity();
+	oldSwingSpeed = oldSwingSpeed * (1.0f - slashVelocityLearnRate) + (DeltaTime * relativeSwordVelocity) * slashVelocityLearnRate;
 
 	bool newIsSwordFastEnough = oldSwingSpeed.SizeSquared() > threshholdDoDamageSquared;
 
@@ -170,4 +170,12 @@ void ASword::dealDamageTo(ACharacter* OtherCharacter)
 
 	doRumbleRight();
 	tryLaunchCharacter(OtherCharacter);
+}
+
+FVector ASword::calcRelativeVelocity() const
+{
+	const AActor* owner = GetOwner();
+	const FVector ownerVelocity = owner ? owner->GetVelocity() : FVector::ZeroVector;
+	const FVector myVelocity = GetVelocity();
+	return myVelocity - ownerVelocity;
 }
