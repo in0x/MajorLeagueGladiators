@@ -48,7 +48,6 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	chaperone = ObjectInitializer.CreateDefaultSubobject<USteamVRChaperoneComponent>(this, TEXT("Chaperone"));
 
-	//ConstructorHelpers::FObjectFinder<UStaticMesh> viveMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/vive_controller.vive_controller'"));
 	ConstructorHelpers::FObjectFinder<UStaticMesh> multiMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/MultiTool/MultiTool_MainMesh.MultiTool_MainMesh'"));
 	if (multiMesh.Succeeded())
 	{
