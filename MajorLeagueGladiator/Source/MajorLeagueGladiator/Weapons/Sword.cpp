@@ -11,7 +11,7 @@ namespace
 	const char* MELEE_WEAPON_COLLISION_PROFILE_NAME = "MeleeWeapon";
 }
 
-//TODO: FIX multi hit issue
+//TODO (Flo): FIX multi hit issue
 
 ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -105,14 +105,8 @@ void ASword::damageAllOverlappingActors()
 	{
 		if (UMlgGameplayStatics::CanDealDamageTo(owner, actor))
 		{
-			DealDamageTo(CastChecked<ACharacter>(actor));
-			hasDealtdamage = true;
+			dealDamageTo(CastChecked<ACharacter>(actor));
 		}
-	}
-
-	if (hasDealtdamage)
-	{
-		doRumbleRight();
 	}
 }
 
@@ -127,15 +121,14 @@ void ASword::NotifyActorBeginOverlap(AActor* OtherActor)
 	Super::NotifyActorBeginOverlap(OtherActor);
 	
 	ACharacter* otherCharacter = Cast<ACharacter>(OtherActor);
-	if (otherCharacter && CanDealDamageTo(otherCharacter))
+	if (otherCharacter && canDealDamageTo(otherCharacter))
 	{
-		DealDamageTo(otherCharacter);
-		doRumbleRight();
+		dealDamageTo(otherCharacter);
 	}
 }
 
 
-void ASword::LaunchCharacterInSwingDirection(ACharacter* character) const
+void ASword::tryLaunchCharacter(ACharacter* character) const
 {
 	check(character);
 	UCharacterMovementComponent* charMoveComp = 
@@ -145,7 +138,7 @@ void ASword::LaunchCharacterInSwingDirection(ACharacter* character) const
 	if (moveMode == MOVE_Falling)
 	{
 		charMoveComp->StopMovementImmediately();
-		character->LaunchCharacter(GetVelocity() * 300, true, true);
+		character->LaunchCharacter(GetVelocity(), true, true);
 	}
 }
 
@@ -160,7 +153,7 @@ void ASword::doRumbleRight()
 	
 }
 
-bool ASword::CanDealDamageTo(const ACharacter* OtherCharacter) const
+bool ASword::canDealDamageTo(const ACharacter* OtherCharacter) const
 {
 	check(OtherCharacter)
 	return isSwordFastEnough
@@ -168,10 +161,13 @@ bool ASword::CanDealDamageTo(const ACharacter* OtherCharacter) const
 		&& UMlgGameplayStatics::CanDealDamageTo(this, OtherCharacter);
 }
 
-void ASword::DealDamageTo(ACharacter* OtherCharacter)
+void ASword::dealDamageTo(ACharacter* OtherCharacter)
 {
-	check(OtherCharacter)
+	check(OtherCharacter);
+
 	UGameplayStatics::ApplyDamage(OtherCharacter, damageAppliedOnHit,
 		GetInstigatorController(), this, damageType);
-	LaunchCharacterInSwingDirection(OtherCharacter);
+
+	doRumbleRight();
+	tryLaunchCharacter(OtherCharacter);
 }

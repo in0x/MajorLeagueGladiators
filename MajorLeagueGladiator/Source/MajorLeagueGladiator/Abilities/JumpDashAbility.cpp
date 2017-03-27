@@ -10,7 +10,6 @@
 
 #include "MlgGameplayStatics.h"
 
-
 namespace
 {
 	const char* AIM_SOCKET_NAME = "Aim";
@@ -22,7 +21,7 @@ UJumpDashAbility::UJumpDashAbility()
 	, dashSpeed(1750)
 	, maxDashRange(50'000)
 	, effectDistance(400)
-	, maxEffectAngleDegrees(45)
+	, halfEffectAngleDegrees(45)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
@@ -106,7 +105,6 @@ void UJumpDashAbility::OnLanded()
 void UJumpDashAbility::LauchNearEnemies()
 {
 	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
-		//UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody),
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)
 	};
 
@@ -118,13 +116,18 @@ void UJumpDashAbility::LauchNearEnemies()
 
 	DrawDebugSphere(world, actorLocation, effectDistance, 16, FColor::Silver, true, 2.f);
 
+
 	TArray<FOverlapResult> outOverlapResult;
-	world->GetWorld()->OverlapMultiByObjectType(outOverlapResult, actorLocation, FQuat::Identity, 
-		FCollisionObjectQueryParams(queryTypes), FCollisionShape::MakeSphere(effectDistance));
+	world->GetWorld()->OverlapMultiByObjectType(
+		outOverlapResult,
+		actorLocation,
+		FQuat::Identity, 
+		FCollisionObjectQueryParams(queryTypes),
+		FCollisionShape::MakeSphere(effectDistance)
+	);
 
 	for (FOverlapResult& result : outOverlapResult)
 	{
-
 		if(ACharacter* character = Cast<ACharacter>(result.Actor.Get()))
 		{
 			const FVector2D distance(character->GetActorLocation() - cachedCharacter->GetActorLocation());
@@ -132,22 +135,19 @@ void UJumpDashAbility::LauchNearEnemies()
 
 			const float angleRadiens = acosf(FVector2D::DotProduct(normalizedDistance, normalizedForwardVector));
 			const float angleDegrees = FMath::RadiansToDegrees(angleRadiens);
-			check(angleDegrees != 3000);
-			if (angleDegrees < maxEffectAngleDegrees && CanLaunchCharacter(character))
+
+			if (angleDegrees < halfEffectAngleDegrees && CanLaunchCharacter(character))
 			{
 				character->LaunchCharacter(launchVelocity, true, true);
 			}
 		}
 	}
-
-
 }
 
 bool UJumpDashAbility::CanLaunchCharacter(ACharacter* Character) const
 {
 	return UMlgGameplayStatics::CanDealDamageTo(cachedCharacter, Character);
 }
-
 
 void UJumpDashAbility::BeginTargeting()
 {
