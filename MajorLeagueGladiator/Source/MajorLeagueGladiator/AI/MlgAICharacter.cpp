@@ -7,7 +7,7 @@
 #include "DamageCauserComponent.h"
 #include "DamageReceiverComponent.h"
 #include "DamageVisualizerComponent.h"
-#include "EnemyDamage.h"
+#include "DamageTypes/EnemyDamage.h"
 
 AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -16,8 +16,13 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 
 	health = ObjectInitializer.CreateDefaultSubobject<UHealthComponent>(this, TEXT("Health"));
 	
+	ConstructorHelpers::FObjectFinder<UStaticMesh> cubeMesh(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
 	triggerZone = ObjectInitializer.CreateDefaultSubobject<UTriggerZoneComponent>(this, TEXT("TriggerZone"));
 	triggerZone->SetTriggerType(TriggerType::Health);
+	triggerZone->SetupAttachment(GetRootComponent());
+	triggerZone->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
+	triggerZone->SetRelativeLocation(FVector(0.f, 0.f, -70.f));
+	triggerZone->SetStaticMesh(cubeMesh.Object);
 
 	damageCauser = ObjectInitializer.CreateDefaultSubobject<UDamageCauserComponent>(this, TEXT("DamageCauser"));
 	damageCauser->SetDamageType(UEnemyDamage::StaticClass());
