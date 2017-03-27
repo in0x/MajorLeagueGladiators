@@ -59,9 +59,8 @@ private:
 	void BeginDashing(const FVector& Velocity);
 
 	UFUNCTION()
-	void OnMovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
+	void OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 
-	void OnLanded();
 
 	UFUNCTION()
 	void OnTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data);
