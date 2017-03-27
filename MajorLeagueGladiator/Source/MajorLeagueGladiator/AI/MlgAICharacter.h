@@ -6,6 +6,7 @@
 #include "MlgAICharacter.generated.h"
 
 class UHealthComponent;
+class UWeakpointComponent;
 class UTriggerZoneComponent;
 class UDamageCauserComponent;
 class UDamageReceiverComponent;
@@ -25,6 +26,9 @@ protected:
 private:
 	UPROPERTY(EditAnywhere)
 	UHealthComponent* health;
+
+	UPROPERTY(EditAnywhere)
+	UWeakpointComponent* weakpoints;
 
 	UPROPERTY(EditAnywhere)
 	UTriggerZoneComponent* triggerZone;
