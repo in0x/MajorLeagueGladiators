@@ -60,7 +60,7 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 	}
 
 	cachedCharacter->LaunchCharacter(launchVelocity, true, true);
-	cachedCharacter->MovementModeChangedDelegate.AddDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
+	cachedCharacter->OnActorHit.AddDynamic(this, &UJumpDashAbility::OnCollidedWithWorld);
 	LauchNearEnemies();
 
 	const float targetingDelay = minmalJumpHightBeforeDash / launchVelocity.Z;
@@ -74,11 +74,19 @@ void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
+	if (bWasCancelled)
+	{
+		return;
+	}
+
+	cachedMoveComp->SetMovementMode(MOVE_Falling);
+	cachedMoveComp->StopMovementImmediately();
+
 	FTimerManager& timeManager = cachedCharacter->GetWorldTimerManager();
 	timeManager.ClearTimer(timerHandle);
 	timerHandle.Invalidate();
 
-	cachedCharacter->MovementModeChangedDelegate.RemoveDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
+	cachedCharacter->OnActorHit.RemoveDynamic(this, &UJumpDashAbility::OnCollidedWithWorld);
 	
 	if (waitTargetDataTask)
 	{
@@ -87,18 +95,8 @@ void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 	}
 }
 
-void UJumpDashAbility::OnMovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+void UJumpDashAbility::OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
 {	
-	if (cachedMoveComp->MovementMode == MOVE_Walking)
-	{
-		OnLanded();
-	}	
-}
-
-
-void UJumpDashAbility::OnLanded()
-{
-	cachedMoveComp->StopMovementImmediately();
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
@@ -206,7 +204,7 @@ void UJumpDashAbility::OnTargetingFailed(const FGameplayAbilityTargetDataHandle&
 void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 {
 	cachedMoveComp->StopMovementImmediately();
-	cachedMoveComp->SetMovementMode(MOVE_Custom);
-	cachedMoveComp->Launch(Velocity);
+	cachedMoveComp->SetMovementMode(MOVE_Flying);
+	cachedMoveComp->AddImpulse(Velocity, true);
 }
 
