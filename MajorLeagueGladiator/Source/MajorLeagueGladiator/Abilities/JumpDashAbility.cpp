@@ -22,7 +22,7 @@ UJumpDashAbility::UJumpDashAbility()
 	, dashSpeed(1750)
 	, maxDashRange(50'000)
 	, effectDistance(400)
-	, effectAngle(0.7)
+	, maxEffectAngleDegrees(45)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
@@ -111,8 +111,7 @@ void UJumpDashAbility::LauchNearEnemies()
 	};
 
 	UWorld* world = cachedCharacter->GetWorld();
-	
-	//TODO, use the right one (i.e. the HMD pos)
+
 	const FVector actorLocation = cachedCharacter->GetActorLocation();
 	const FVector2D forwardVector(cachedCharacter->GetVRForwardVector());
 	const FVector2D normalizedForwardVector = forwardVector.GetSafeNormal();
@@ -131,9 +130,10 @@ void UJumpDashAbility::LauchNearEnemies()
 			const FVector2D distance(character->GetActorLocation() - cachedCharacter->GetActorLocation());
 			const FVector2D normalizedDistance = distance.GetSafeNormal();
 
-			const float angle = FVector2D::DotProduct(normalizedDistance, normalizedForwardVector);
-
-			if (effectAngle < angle && CanLaunchCharacter(character))
+			const float angleRadiens = acosf(FVector2D::DotProduct(normalizedDistance, normalizedForwardVector));
+			const float angleDegrees = FMath::RadiansToDegrees(angleRadiens);
+			check(angleDegrees != 3000);
+			if (angleDegrees < maxEffectAngleDegrees && CanLaunchCharacter(character))
 			{
 				character->LaunchCharacter(launchVelocity, true, true);
 			}
