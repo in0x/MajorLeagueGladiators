@@ -59,7 +59,9 @@ private:
 	void tryLaunchCharacter(ACharacter* character) const;
 	void doRumbleRight();
 	bool canDealDamageTo(const ACharacter* OtherCharacter) const;
-	void dealDamageTo(ACharacter* OtherCharacter);
+	void dealDamageTo(ACharacter* OtherCharacter, const FHitResult& HitResult);
+	FHitResult getOverlappingHit();
+	void getOverlappingHits(TMap<AActor*, FHitResult>& outActorToHit);
 
 	FVector calcRelativeVelocity() const;
 };
