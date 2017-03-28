@@ -10,10 +10,6 @@ AParticleSystemManagerActor::AParticleSystemManagerActor()
 
 void AParticleSystemManagerActor::SpawnParticleSystemAtLocation(EParticleSystem particleSystem, FTransform Trans, bool AutoDestroy)
 {
-	//TODO: Sandro
-	//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticleSystemTemplate, Trans, AutoDestroy);
-	//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticleSystemTemplate, Trans.GetLocation(), Trans.GetRotation(), AutoDestroy);
-	//CreateParticleSystem_NetMulticast(particleSystems[(int32)particleSystem], GetWorld(), this, Trans, AutoDestroy);
 }
 
 void AParticleSystemManagerActor::CreateParticleSystemMain(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy)
@@ -34,28 +30,4 @@ bool AParticleSystemManagerActor::CreateParticleSystem_Server_Validate(UParticle
 void AParticleSystemManagerActor::CreateParticleSystem_NetMulticast_Implementation(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy)
 {
 	UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EmitterTemplate, Trans);
-	//psc->SetIsReplicated(true);
-
-	//TODO: Sandro
-
-	//UParticleSystemComponent* PSC = NewObject<UParticleSystemComponent>(this);
-	//PSC->bAutoDestroy = bAutoDestroy;
-	//PSC->bAllowAnyoneToDestroyMe = true;
-	//PSC->SecondsBeforeInactive = 0.0f;
-	//PSC->bAutoActivate = false;
-	//PSC->SetTemplate(ps);
-	//PSC->bOverrideLODMethod = false;
-
-	//PSC->bAbsoluteLocation = true;
-	//PSC->bAbsoluteRotation = true;
-	//PSC->bAbsoluteScale = true;
-	//PSC->RelativeLocation = Trans.GetLocation();
-	//PSC->RelativeRotation = Trans.GetRotation().Rotator();
-	//PSC->RelativeScale3D = Trans.GetScale3D();
-	//PSC->SetIsReplicated(true);
-
-	//PSC->RegisterComponent();
-	////PSC->RegisterComponentWithWorld(GetWorld());
-
-	//PSC->ActivateSystem(true);
 }

@@ -17,7 +17,7 @@ bool UMlgGameplayStatics::CanDealDamageTo(const AActor* DamageDealer, const AAct
 
 	if (DamageDealerPawn == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Damage Dealer Pawn has no instigator"));
+		UE_LOG(DebugLog, Warning, TEXT("Damage Dealer Pawn has no instigator"));
 		return false;
 	}
 
@@ -31,7 +31,7 @@ bool UMlgGameplayStatics::CanDealDamageTo(const APawn* DamageInstigator, const A
 
 	if (DamageInstigator->PlayerState == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT(" \"%s\" has no PlayerState"), *DamageInstigator->GetName());
+		UE_LOG(DebugLog, Warning, TEXT(" \"%s\" has no PlayerState"), *DamageInstigator->GetName());
 		return false;
 	}
 

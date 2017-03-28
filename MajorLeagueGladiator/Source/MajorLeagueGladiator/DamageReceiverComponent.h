@@ -7,8 +7,8 @@
 
 class UHealthComponent;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(DamageReceivedDelegate, AActor*);
-DECLARE_MULTICAST_DELEGATE_TwoParams(PointDamageReceivedDelegate, AActor*, const FVector&);
+DECLARE_MULTICAST_DELEGATE_OneParam(DamageReceivedDelegate, AActor*); //DamagedActor
+DECLARE_MULTICAST_DELEGATE_ThreeParams(PointDamageReceivedDelegate, AActor*, const FVector&, const FVector&); //DamagedActor, HitLocation, OriginDirection
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MAJORLEAGUEGLADIATOR_API UDamageReceiverComponent : public UActorComponent

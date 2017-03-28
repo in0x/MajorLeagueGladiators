@@ -22,7 +22,7 @@ USwordDamageCauserComponent::USwordDamageCauserComponent()
 	}
 	else 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("M_Blade_HeroSword_Red not found."));
+		UE_LOG(DebugLog, Warning, TEXT("M_Blade_HeroSword_Red not found."));
 	}
 	
 	static ConstructorHelpers::FObjectFinder<UMaterial> SwordMaterial(TEXT("Material'/Game/MVRCFPS_Assets/Blade_HeroSword22/M_Blade_HeroSword22.M_Blade_HeroSword22'"));
@@ -33,7 +33,7 @@ USwordDamageCauserComponent::USwordDamageCauserComponent()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("M_Blade_HeroSword22 not found."));
+		UE_LOG(DebugLog, Warning, TEXT("M_Blade_HeroSword22 not found."));
 	}
 }
 
