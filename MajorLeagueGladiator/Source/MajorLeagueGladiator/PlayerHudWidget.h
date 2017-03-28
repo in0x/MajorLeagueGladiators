@@ -20,5 +20,5 @@ protected:
 
 private:
 	UFUNCTION()
-	void setCurrentHealthPercentage(float percentage);
+	void setCurrentHealthPercentage(float newHealthPercentage, float oldHealthPercentage);
 };
