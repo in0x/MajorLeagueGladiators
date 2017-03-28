@@ -28,9 +28,10 @@ AWaveSpawnerManager::AWaveSpawnerManager()
 void AWaveSpawnerManager::BeginPlay()
 {
 	Super::BeginPlay();
+	gatherSpawners();
 }
 
-void AWaveSpawnerManager::GatherSpawners()
+void AWaveSpawnerManager::gatherSpawners()
 {
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaveSpawner::StaticClass(), FoundActors);
@@ -46,12 +47,16 @@ void AWaveSpawnerManager::GatherSpawners()
 }
 
 
-void AWaveSpawnerManager::StartWave(int32 WaveNumber)
+void AWaveSpawnerManager::startWave(int32 WaveNumber)
 {
-	const FWaveDefiniton* waveDefiniton = GetWaveDefinition(WaveNumber);
+	if (waveEnemiesLeft > 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Spawning Enemies while there are still enemies left"));
+	}
+
+	const FWaveDefiniton* waveDefiniton = getWaveDefinition(WaveNumber);
 	const UDataTable* layoutDefinitionTable = waveDefiniton->WaveLayout;
 
-	
 	const TArray<FName> rowNameArray = layoutDefinitionTable->GetRowNames();
 	for (const FName& rowName : rowNameArray)
 	{
@@ -59,11 +64,11 @@ void AWaveSpawnerManager::StartWave(int32 WaveNumber)
 		const FWaveLayoutDefiniton* layoutDefiniton = layoutDefinitionTable->FindRow<FWaveLayoutDefiniton>(rowName,
 			FString::Printf(TEXT("WaveSpawner Manager, spawnGroup: %d"), spawnGroupIndex));
 
-		SpawnForSpawnerGroupIndex(WaveNumber, layoutDefiniton, waveDefiniton);
+		spawnForSpawnerGroupIndex(WaveNumber, layoutDefiniton, waveDefiniton);
 	}
 }
 
-void AWaveSpawnerManager::SpawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const FWaveLayoutDefiniton* LayoutDefiniton,
+void AWaveSpawnerManager::spawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const FWaveLayoutDefiniton* LayoutDefiniton,
 	const FWaveDefiniton* WaveDefinition)
 {
 	FWaveSpawnerGroup* waveSpawnerGroup = spawnGroups.Find(SpawnGroupIndex);
@@ -83,6 +88,8 @@ void AWaveSpawnerManager::SpawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const
 		const int32 EnemyAmountPerSpawner = TotalEnemyAmount / waveSpawnerCount;
 		const int32 EnemyRemainder = TotalEnemyAmount % waveSpawnerCount;
 
+		waveEnemiesLeft += TotalEnemyAmount;
+
 		for (int i = 0; i < waveSpawnerCount; ++i)
 		{
 			// Decides if an additional enemy needs to be added. Can be 0 or 1
@@ -98,7 +105,7 @@ void AWaveSpawnerManager::SpawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const
 	}
 }
 
-const FWaveDefiniton* AWaveSpawnerManager::GetWaveDefinition(int32 WaveNumber) const
+const FWaveDefiniton* AWaveSpawnerManager::getWaveDefinition(int32 WaveNumber) const
 {
 	return waveDefinitonTable->FindRow<FWaveDefiniton>(IntToFName(WaveNumber),
 		FString::Printf(TEXT("WaveSpawner Manager, Wave: %d"), WaveNumber));

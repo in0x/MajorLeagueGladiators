@@ -19,13 +19,15 @@ class MAJORLEAGUEGLADIATOR_API AWaveSpawnerManager : public AActor
 	GENERATED_BODY()
 public:
 	AWaveSpawnerManager();
-	void BeginPlay();
-	void GatherSpawners();
 
-	void StartWave(int32 WaveNumber);
+protected:
+	void BeginPlay();
+
 private:
-	const FWaveDefiniton* GetWaveDefinition(int32 WaveNumber) const;
-	void SpawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const FWaveLayoutDefiniton* LayoutDefiniton,
+	void gatherSpawners();
+	void startWave(int32 WaveNumber);
+	const FWaveDefiniton* getWaveDefinition(int32 WaveNumber) const;
+	void spawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const FWaveLayoutDefiniton* LayoutDefiniton,
 		const FWaveDefiniton* WaveDefinition);
 
 
@@ -34,4 +36,6 @@ private:
 
 	UPROPERTY(Transient)
 	TMap<int, FWaveSpawnerGroup> spawnGroups;
+
+	int32 waveEnemiesLeft;
 };
