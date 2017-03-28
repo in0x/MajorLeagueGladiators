@@ -3,6 +3,13 @@
 #include "MajorLeagueGladiator.h"
 #include "MlgGameState.h"
 #include "ParticleSystemManagerActor.h"
+#include "WaveSystem/WaveSystemComponent.h"
+
+AMlgGameState::AMlgGameState(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	ObjectInitializer.CreateDefaultSubobject<UWaveSystemComponent>(this, TEXT("WaveSystemComponent"));
+}
 
 void AMlgGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

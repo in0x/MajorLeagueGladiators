@@ -32,6 +32,9 @@ private:
 	UClass* GetAndRemoveNextEnemyClass();
 
 	void FinishWave();
+
+	UFUNCTION()
+	void onSpawnedActorDestroyed(AActor* DestroyedActor);
 	
 	UPROPERTY(Transient)
 	TArray<FSpawnCommand> remainingSpawnPool;

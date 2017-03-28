@@ -2,6 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "WaveSpawner.h"
+#include "WaveSystem/WaveSystemComponent.h"
 
 AWaveSpawner::AWaveSpawner()
 	: isCurrentlySpawning(false)
@@ -50,6 +51,7 @@ void AWaveSpawner::SpawnEnemy()
 	UWorld* world = GetWorld();
 
 	AActor* spawnedActor = world->SpawnActor<AActor>(enemyClass, GetActorTransform());
+	spawnedActor->OnDestroyed.AddDynamic(this, &AWaveSpawner::onSpawnedActorDestroyed);
 }
 
 UClass* AWaveSpawner::GetAndRemoveNextEnemyClass()
@@ -78,4 +80,11 @@ void AWaveSpawner::FinishWave()
 {
 	FTimerManager& timermanager = GetWorldTimerManager();
 	timermanager.ClearTimer(spawnTimerHandle);
+}
+
+void AWaveSpawner::onSpawnedActorDestroyed(AActor* DestroyedActor)
+{
+	check(HasAuthority());
+	GetWorld()->GetGameState()->FindComponentByClass<UWaveSystemComponent>()
+		->OnEnemyKilled(CastChecked<ACharacter>(DestroyedActor));
 }

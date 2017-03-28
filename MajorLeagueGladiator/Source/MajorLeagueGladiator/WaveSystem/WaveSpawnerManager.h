@@ -20,22 +20,20 @@ class MAJORLEAGUEGLADIATOR_API AWaveSpawnerManager : public AActor
 public:
 	AWaveSpawnerManager();
 
+	int32 StartWave(int32 WaveNumber);
 protected:
 	void BeginPlay();
 
 private:
 	void gatherSpawners();
-	void startWave(int32 WaveNumber);
+	
 	const FWaveDefiniton* getWaveDefinition(int32 WaveNumber) const;
-	void spawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const FWaveLayoutDefiniton* LayoutDefiniton,
+	int32 spawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const FWaveLayoutDefiniton* LayoutDefiniton,
 		const FWaveDefiniton* WaveDefinition);
-
 
 	UPROPERTY(EditAnywhere)
 	UDataTable* waveDefinitonTable;
 
 	UPROPERTY(Transient)
 	TMap<int, FWaveSpawnerGroup> spawnGroups;
-
-	int32 waveEnemiesLeft;
 };
