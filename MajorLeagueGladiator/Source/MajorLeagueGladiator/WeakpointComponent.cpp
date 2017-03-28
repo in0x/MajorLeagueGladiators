@@ -51,6 +51,11 @@ void UWeakpointComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 
 FWeakpoint UWeakpointComponent::FindHitWeakpoint(const FHitResult& Hit) const
 {
+	if (weakpoints.Num() == 0)
+	{
+		return FWeakpoint();
+	}
+
 	FWeakpoint closest = weakpoints[0];
 	for (const FWeakpoint& wp : weakpoints)
 	{
@@ -65,6 +70,7 @@ FWeakpoint UWeakpointComponent::FindHitWeakpoint(const FHitResult& Hit) const
 	
 	if (FVector::DistSquared(NameToLocation(closest.LocationSocketName), Hit.Location) < affectSqr)
 	{
+		//skeleton->FindClosestBone();
 		return closest;
 	}
 	else
