@@ -9,9 +9,6 @@ struct FWeakpoint
 {
 	GENERATED_USTRUCT_BODY()
 
-	// Will be automatically matched to Socket with name LocationSocketName
-	const USkeletalMeshSocket* MeshSocket;
-
 	UPROPERTY(EditAnywhere, Category="Weakpoint")
 	FName LocationSocketName;
 
@@ -22,8 +19,7 @@ struct FWeakpoint
 	float DamageMultiplier;
 
 	FWeakpoint()
-		: MeshSocket(nullptr)
-		, LocationSocketName(NAME_None)
+		: LocationSocketName(NAME_None)
 		, MaxAffectDistance(0.f)
 		, DamageMultiplier(1.f)
 	{}
