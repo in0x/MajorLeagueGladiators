@@ -38,6 +38,8 @@ void UWeakpointComponent::BeginPlay()
 
 void UWeakpointComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
 	if (bDebugDrawWeakpoints)
 	{
 		for (const FWeakpoint& weakpoint : weakpoints)
