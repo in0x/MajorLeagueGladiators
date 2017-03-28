@@ -22,13 +22,12 @@ public:
 	void Init(const UDataTable* EnemyDefinitions);
 	void SpawnWave(const TArray<FSpawnCommand>& SpawnPool, float WaitTimeBeforeSpawning, float TotalSpawnTime);
 	bool IsSpawningFinished() const;
+	int GetSpawnGroupIndex() const { return spawnGroup; }
 
 private:
 
 	void SpawnEnemy();
-	const FEnemyDefinition* GetAndRemoveNextEnemyDefiniton();
-
-	const FEnemyDefinition* FindEnemyDefiniton(FName Name);
+	UClass* GetAndRemoveNextEnemyClass();
 
 	void FinishWave();
 	
@@ -38,7 +37,8 @@ private:
 	UPROPERTY(Transient)
 	const UDataTable* enemyDefinitions;
 
+	UPROPERTY(EditAnywhere)
+	int spawnGroup;
+
 	FTimerHandle spawnTimerHandle;
-	float waitTimeBeforeSpawning;
-	float spawnInterval;
 };

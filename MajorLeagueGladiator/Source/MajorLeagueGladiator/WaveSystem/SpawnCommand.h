@@ -7,6 +7,6 @@ struct FSpawnCommand
 {
 	GENERATED_USTRUCT_BODY();
 public:
-	FName enemyName;
+	TSubclassOf<ACharacter> enemyClass;
 	int enemyCount;
 };
