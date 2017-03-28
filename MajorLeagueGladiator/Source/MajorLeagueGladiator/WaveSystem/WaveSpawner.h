@@ -20,7 +20,9 @@ public:
 	AWaveSpawner();
 
 	void Init(const UDataTable* EnemyDefinitions);
-	void SpawnWave(const TArray<FSpawnCommand>& SpawnPool, float WaitTimeBeforeSpawning, float TotalSpawnTime);
+
+	void AddToNextWavePool(const FSpawnCommand& spawnCommand);
+	void SpawnWave(float WaitTimeBeforeSpawning, float SpawningDuration);
 	bool IsSpawningFinished() const;
 	int GetSpawnGroupIndex() const { return spawnGroup; }
 
@@ -41,4 +43,6 @@ private:
 	int spawnGroup;
 
 	FTimerHandle spawnTimerHandle;
+
+	bool isCurrentlySpawning;
 };

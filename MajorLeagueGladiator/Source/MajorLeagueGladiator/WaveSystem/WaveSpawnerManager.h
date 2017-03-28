@@ -10,6 +10,8 @@
 #include "WaveSpawnerManager.generated.h"
 
 struct FEnemyDefinition;
+struct FWaveDefiniton;
+struct FWaveLayoutDefiniton;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AWaveSpawnerManager : public AActor
@@ -19,12 +21,16 @@ public:
 	AWaveSpawnerManager();
 	void BeginPlay();
 	void GatherSpawners();
+
+	void StartWave(int32 WaveNumber);
 private:
-	UPROPERTY(EditAnywhere)
-	TArray<UDataTable*> layoutDefinitions;
+	const FWaveDefiniton* GetWaveDefinition(int32 WaveNumber) const;
+	void SpawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const FWaveLayoutDefiniton* LayoutDefiniton,
+		const FWaveDefiniton* WaveDefinition);
+
 
 	UPROPERTY(EditAnywhere)
-	UDataTable* waveDefiniton;
+	UDataTable* waveDefinitonTable;
 
 	UPROPERTY(Transient)
 	TMap<int, FWaveSpawnerGroup> spawnGroups;

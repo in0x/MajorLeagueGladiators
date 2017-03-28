@@ -4,6 +4,7 @@
 #include "WaveSpawner.h"
 
 AWaveSpawner::AWaveSpawner()
+	: isCurrentlySpawning(false)
 {
 	bNetLoadOnClient = false;
 }
@@ -13,32 +14,33 @@ void AWaveSpawner::Init(const UDataTable* EnemyDefinitions)
 	enemyDefinitions = EnemyDefinitions;
 }
 
-void AWaveSpawner::SpawnWave(const TArray<FSpawnCommand>& SpawnPool, float WaitTimeBeforeSpawning, float TotalSpawnTime)
+void AWaveSpawner::AddToNextWavePool(const FSpawnCommand& spawnCommand)
 {
 	if (!IsSpawningFinished())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Wave was starte while previous wave is still running"));
+		UE_LOG(LogTemp, Warning, TEXT("Wave is was still running when next enmies were added to pool!"));
 		FinishWave();
 	}
+	remainingSpawnPool.Add(spawnCommand);
+}
 
-	
+void AWaveSpawner::SpawnWave(float WaitTimeBeforeSpawning, float SpawningDuration)
+{	
 	int numberOfSpawnedEnemies = 0;
-	for (const FSpawnCommand& spawnCommand : SpawnPool)
+	for (const FSpawnCommand& spawnCommand : remainingSpawnPool)
 	{
 		numberOfSpawnedEnemies += spawnCommand.enemyCount;
 	}
 
-	const float intervalTime = TotalSpawnTime / numberOfSpawnedEnemies;
+	const float intervalTime = SpawningDuration / numberOfSpawnedEnemies;
 
-
-	remainingSpawnPool = SpawnPool;
 	FTimerManager& timermanager = GetWorldTimerManager();
 	timermanager.SetTimer(spawnTimerHandle, this, &AWaveSpawner::SpawnEnemy, intervalTime, true, WaitTimeBeforeSpawning);
 }
 
 bool AWaveSpawner::IsSpawningFinished() const
 {
-	return remainingSpawnPool.Num() <= 0;
+	return !isCurrentlySpawning;
 }
 
 void AWaveSpawner::SpawnEnemy()
