@@ -16,7 +16,7 @@ void UPlayerHudWidget::OnAttachPlayer(ACharacter* PlayerCharacter)
 	}
 }
 
-void UPlayerHudWidget::setCurrentHealthPercentage(float Percentage) 
+void UPlayerHudWidget::setCurrentHealthPercentage(float newHealthPercentage, float oldHealthPercentage)
 {
-	healthPercentage = Percentage;
+	healthPercentage = newHealthPercentage;
 }

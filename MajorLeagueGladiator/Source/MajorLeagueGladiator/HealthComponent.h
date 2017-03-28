@@ -14,7 +14,7 @@ class MAJORLEAGUEGLADIATOR_API UHealthComponent : public USceneComponent
 {
 	GENERATED_BODY()
 		
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FloatDelegate, float, healthPercentage);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FloatDelegate, float, newHealthPercentage, float, oldHealthPercentage);
 
 public:	
 	UHealthComponent();
@@ -45,5 +45,5 @@ private:
 	void OnHealthRefill(const FMsgHealthRefill& Msg, const IMessageContextRef& Context);
 
 	UFUNCTION()
-	void onRep_CurrentHealth();
+	void onRep_CurrentHealth(float oldHealth);
 };
