@@ -11,19 +11,16 @@ UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgGameState : public AGameStateBase
 {
 	GENERATED_BODY()
-	
-	
+		
 public:
-
+	AMlgGameState(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	AParticleSystemManagerActor* GetParticleSystemManager();
 
 	void SetGetParticleSystemManager(AParticleSystemManagerActor* psManager);
-
-private:
-
-	UPROPERTY(Replicated)
-	AParticleSystemManagerActor* particleSystemManager;
 	
+private:
+	UPROPERTY(Replicated, Transient)
+	AParticleSystemManagerActor* particleSystemManager;
 };
