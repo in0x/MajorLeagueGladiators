@@ -18,6 +18,6 @@ TEnumAsByte<ECollisionChannel> CollisionStatics::GetCollsionChannelByName(FName 
 
 	FString channelString = ChannelName.ToString();
 
-	UE_LOG(LogTemp, Warning, TEXT("Collisionchannel \"%s\" not found!"), *channelString);
+	UE_LOG(DebugLog, Warning, TEXT("Collisionchannel \"%s\" not found!"), *channelString);
 	return TEnumAsByte<ECollisionChannel>(ECollisionChannel::ECC_MAX);
 }

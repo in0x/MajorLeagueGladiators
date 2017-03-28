@@ -163,7 +163,7 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	const UMlgAbilitySet* abilitySet = GetOrLoadAbilitySet();
 	if (!abilitySet)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Ability Set Is null. GiveAbilities has not been called."));
+		UE_LOG(DebugLog, Warning, TEXT("Ability Set Is null. GiveAbilities has not been called."));
 	}
 	else
 	{
@@ -186,7 +186,7 @@ void AMlgPlayerCharacter::PossessedBy(AController* NewController)
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Ability Set Is null. GiveAbilities has not been called."));
+			UE_LOG(DebugLog, Warning, TEXT("Ability Set Is null. GiveAbilities has not been called."));
 		}
 		
 	} 
@@ -226,7 +226,7 @@ void AMlgPlayerCharacter::SpawnWeapon()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Spawning Start weapon was not set"));
+		UE_LOG(DebugLog, Warning, TEXT("Spawning Start weapon was not set"));
 	}
 }
 

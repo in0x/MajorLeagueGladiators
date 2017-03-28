@@ -40,7 +40,7 @@ void UDamageReceiverComponent::handleDamage(AActor* DamagedActor, float Damage, 
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Couldnt find HealthComponent, cant apply damage"));
+		UE_LOG(DebugLog, Warning, TEXT("Couldnt find HealthComponent, cant apply damage"));
 	}
 }
 
@@ -48,7 +48,7 @@ void UDamageReceiverComponent::handlePointDamage(AActor* DamagedActor, float Dam
 												UPrimitiveComponent* HitComponent, FName BoneName, FVector ShotFromDirection, 
 												const UDamageType* DamageType, AActor* DamageCauser)
 {
-	OnPointDamageReceived.Broadcast(DamagedActor, HitLocation);
+	OnPointDamageReceived.Broadcast(DamagedActor, HitLocation, ShotFromDirection);
 
 	if (healthComponents.Num() > 1) {
 		float minDistance = std::numeric_limits<float>::max();

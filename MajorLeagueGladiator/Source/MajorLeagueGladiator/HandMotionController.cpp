@@ -16,7 +16,7 @@ bool HandMotionController::GetControllerOrientationAndPosition(int32 ControllerI
 {
 	if (DeviceHand != EControllerHand::Left && DeviceHand != EControllerHand::Right)
 	{
-		UE_LOG(LogTemp, Error, TEXT("HandMotionController was queried with neither left or right"));
+		UE_LOG(DebugLog, Error, TEXT("HandMotionController was queried with neither left or right"));
 		return false;
 	}
 

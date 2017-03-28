@@ -30,7 +30,7 @@ UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AControlle
 	{
 		if (dpsClass.Get() == nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("DPS Class not set. Using Default Pawn Class"));
+			UE_LOG(DebugLog, Warning, TEXT("DPS Class not set. Using Default Pawn Class"));
 			return Super::GetDefaultPawnClassForController_Implementation(InController);
 		}
 
@@ -40,7 +40,7 @@ UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AControlle
 	{
 		if (tankClass.Get() == nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Tank Class not set. Using Default Pawn Class"));
+			UE_LOG(DebugLog, Warning, TEXT("Tank Class not set. Using Default Pawn Class"));
 			return Super::GetDefaultPawnClassForController_Implementation(InController);
 		}
 

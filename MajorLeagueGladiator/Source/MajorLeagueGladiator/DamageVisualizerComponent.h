@@ -51,6 +51,9 @@ public:
 	UDamageVisualizerComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION()
+	void onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation, const FVector& OriginDirection);
+on
 	UFUNCTION(NetMulticast, reliable)
 	void AddVisual_NetMulticast(UMeshComponent* affectedMesh, bool bSpawnParticles, const FTransform& particleTrafo = FTransform());
 

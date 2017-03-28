@@ -207,7 +207,7 @@ bool UVRControllerComponent::LaunchActor(FVector Velocity, bool IgnoreWeight)
 {
 	if(GrippedActors.Num() == 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Tried to launch Actor but not actor was present"));
+		UE_LOG(DebugLog, Warning, TEXT("Tried to launch Actor but not actor was present"));
 		return false;
 	}
 	AActor* grippedActor = CastChecked<AActor>(GrippedActors[0].GrippedObject);

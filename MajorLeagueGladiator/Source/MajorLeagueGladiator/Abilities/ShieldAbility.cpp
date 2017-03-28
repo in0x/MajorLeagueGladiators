@@ -91,7 +91,7 @@ void UShieldAbility::SpawnShield()
 {
 	if (shieldActorClass == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Shield Class not set"));
+		UE_LOG(DebugLog, Warning, TEXT("Shield Class not set"));
 	}
 
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
