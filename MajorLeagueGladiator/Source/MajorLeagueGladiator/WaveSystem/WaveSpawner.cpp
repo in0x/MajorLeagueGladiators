@@ -2,7 +2,6 @@
 
 #include "MajorLeagueGladiator.h"
 #include "WaveSpawner.h"
-#include "EnemyDefinition.h"
 
 AWaveSpawner::AWaveSpawner()
 {
@@ -45,13 +44,13 @@ bool AWaveSpawner::IsSpawningFinished() const
 void AWaveSpawner::SpawnEnemy()
 {
 	check(HasAuthority());
-	const FEnemyDefinition* enemyDefinition = GetAndRemoveNextEnemyDefiniton();
+	UClass* enemyClass = GetAndRemoveNextEnemyClass();
 	UWorld* world = GetWorld();
 
-	AActor* spawnedActor = world->SpawnActor<AActor>(enemyDefinition->enemyClass.Get(), GetActorTransform());
+	AActor* spawnedActor = world->SpawnActor<AActor>(enemyClass, GetActorTransform());
 }
 
-const FEnemyDefinition* AWaveSpawner::GetAndRemoveNextEnemyDefiniton()
+UClass* AWaveSpawner::GetAndRemoveNextEnemyClass()
 {
 	if (IsSpawningFinished())
 	{
@@ -59,7 +58,7 @@ const FEnemyDefinition* AWaveSpawner::GetAndRemoveNextEnemyDefiniton()
 		return nullptr;
 	}
 
-	const FEnemyDefinition* enemyDefinition = FindEnemyDefiniton(remainingSpawnPool[0].enemyName);
+	UClass* enemyClass = remainingSpawnPool[0].enemyClass;
 	remainingSpawnPool[0].enemyCount -= 1;
 	if (remainingSpawnPool[0].enemyCount <= 0)
 	{
@@ -70,12 +69,7 @@ const FEnemyDefinition* AWaveSpawner::GetAndRemoveNextEnemyDefiniton()
 		}
 	}
 
-	return enemyDefinition;
-}
-
-const FEnemyDefinition* AWaveSpawner::FindEnemyDefiniton(FName Name)
-{
-	return enemyDefinitions->FindRow<FEnemyDefinition>(Name, FString("WaveSpawner"));
+	return enemyClass;
 }
 
 void AWaveSpawner::FinishWave()
