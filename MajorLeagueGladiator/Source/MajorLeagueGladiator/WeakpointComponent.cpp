@@ -20,23 +20,19 @@ void UWeakpointComponent::BeginPlay()
 		return;
 	}
 
-	for (FWeakpoint& weakpoint : weakpoints)
+	weakpoints = weakpoints.FilterByPredicate([&](const FWeakpoint& wp) 
 	{
-		auto socket = skeleton->GetSocketByName(weakpoint.LocationSocketName);
-		
-		if (!socket)
+		auto socket = skeleton->GetSocketByName(wp.LocationSocketName);
+
+		if (socket)
 		{
-			UE_LOG(DebugLog, Warning, TEXT("Can't find socket for Weakpoint with name %s, removing weakpoint"), *weakpoint.LocationSocketName.ToString());
+			return true;
 		}
 		else
 		{
-			weakpoint.MeshSocket = socket;
+			UE_LOG(DebugLog, Warning, TEXT("Can't find socket for Weakpoint with name %s, removing weakpoint"), *wp.LocationSocketName.ToString());
+			return false;
 		}
-	}
-
-	std::remove_if(weakpoints.GetData(), weakpoints.GetData() + weakpoints.Num(), [](FWeakpoint& wp)
-	{
-		return wp.MeshSocket == nullptr;
 	});
 }
 
@@ -46,22 +42,26 @@ void UWeakpointComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 	{
 		for (const FWeakpoint& weakpoint : weakpoints)
 		{
-			DrawDebugSphere(GetWorld(), weakpoint.MeshSocket->GetSocketLocation(skeleton), weakpoint.MaxAffectDistance, 10, FColor::Red);
+			DrawDebugSphere(GetWorld(), NameToLocation(weakpoint.LocationSocketName), weakpoint.MaxAffectDistance, 10, FColor::Red);
 		}
 	}
 }
 
 FWeakpoint UWeakpointComponent::FindHitWeakpoint(const FHitResult& Hit) const
 {
-	const FWeakpoint& closest = *std::min(weakpoints.GetData(), weakpoints.GetData() + weakpoints.Num(), [&](auto& a, auto& b)
+	FWeakpoint closest = weakpoints[0];
+	for (const FWeakpoint& wp : weakpoints)
 	{
-		return FVector::DistSquared(a->MeshSocket->GetSocketLocation(skeleton), Hit.Location) 
-			 < FVector::DistSquared(b->MeshSocket->GetSocketLocation(skeleton), Hit.Location);
-	});
+		if (FVector::DistSquared(NameToLocation(wp.LocationSocketName), Hit.Location) 
+			< FVector::DistSquared(NameToLocation(closest.LocationSocketName), Hit.Location))
+		{
+			closest = wp;
+		}
+	}
 
 	float affectSqr = closest.MaxAffectDistance * closest.MaxAffectDistance;
 	
-	if (FVector::DistSquared(closest.MeshSocket->GetSocketLocation(skeleton), Hit.Location) < affectSqr)
+	if (FVector::DistSquared(NameToLocation(closest.LocationSocketName), Hit.Location) < affectSqr)
 	{
 		return closest;
 	}
@@ -71,4 +71,8 @@ FWeakpoint UWeakpointComponent::FindHitWeakpoint(const FHitResult& Hit) const
 	}
 }
 
+FVector UWeakpointComponent::NameToLocation(const FName& name) const
+{
+	return skeleton->GetSocketByName(name)->GetSocketLocation(skeleton);
+}
 

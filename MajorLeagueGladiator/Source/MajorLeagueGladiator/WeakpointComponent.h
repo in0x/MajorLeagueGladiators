@@ -22,6 +22,8 @@ public:
 	bool bDebugDrawWeakpoints;
 
 private:
+	FVector NameToLocation(const FName& name) const;
+
 	UPROPERTY(EditAnywhere)
 	TArray<FWeakpoint> weakpoints;
 
