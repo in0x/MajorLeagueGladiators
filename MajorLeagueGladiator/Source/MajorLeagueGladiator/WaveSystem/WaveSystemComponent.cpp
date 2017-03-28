@@ -1,5 +1,6 @@
 #include "MajorLeagueGladiator.h"
 #include "WaveSystemComponent.h"
+#include "MlgGameMode.h"
 
 UWaveSystemComponent::UWaveSystemComponent()
 	: enemyCount(0)
@@ -16,6 +17,17 @@ void UWaveSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 void UWaveSystemComponent::OnEnemyKilled(ACharacter* KilledCharacter)
 {
 	ChangeEnemyCount(-1);
+}
+
+void UWaveSystemComponent::StartWave(int32 WaveNumber)
+{
+	if (!GetOwner()->HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave on client"));
+		return;
+	}
+	currentWaveNumber = WaveNumber;
+	// TODO: FS GetSpawnManager from Gamemode, spawn wave, update spawnend enemies counter
 }
 
 void UWaveSystemComponent::ChangeEnemyCount(int32 ChangeInValue)

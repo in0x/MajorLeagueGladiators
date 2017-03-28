@@ -16,6 +16,8 @@ public:
 	UWaveSystemComponent();
 	void OnEnemyKilled(ACharacter* KilledCharacter);
 
+	void StartWave(int32 WaveNumber);
+
 	void ChangeEnemyCount(int32 ChangeInValue);
 	void SetEnemyCount(int32 NewEnemyCount);
 	int32 GetEnemyCount() const;
@@ -30,5 +32,10 @@ private:
 
 	UPROPERTY(ReplicatedUsing = onRep_EnemyCount, Transient)
 	int32 enemyCount;
+
+	UPROPERTY(EditAnywhere)
+	int32 startWaveNumber;
+
+	int32 currentWaveNumber;
 };
 
