@@ -8,6 +8,14 @@
 DECLARE_MULTICAST_DELEGATE_TwoParams(RemainingEnemiesForWaveChangedDelegate, int32, int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(WaveDelegate, int32)
 
+
+/*
+Manages the Enemy wave timings, such as when to start a new Wave, what wave number it should be and
+when a wave is over. To Spawn a wave it makes a request to WaveSpawnerManagerComponent. Every enemy
+that belongs to wave needs to call the OnEnemyKilly Method to notify this class of its death.
+Holds the the current wave number, as well as the number of enemies that need to be defeated.
+Provides delegates to notify others when the number of enemies changes, when a wave starts an a wave ends
+*/
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UWaveSystemComponent : public UActorComponent
 {

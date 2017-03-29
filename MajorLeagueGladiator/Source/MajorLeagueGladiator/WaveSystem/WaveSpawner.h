@@ -10,6 +10,13 @@
 
 struct FEnemyDefinition;
 
+/*
+Gets information from the WaveSpawnerManagerComponent, what, when and how many enemies to spawn, as well
+as the total spawning duration. Only calculates the spawning interval, but does not further calculation.
+Actually spawns the enemies and registers them to the WaveSystemComponent (currently. last par may change).
+Each wave spawner belongs to a spawnerGroup. The number and kind of enemies that need to be spawned are split
+up between WaveSpawners of the same spawner group.
+*/
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AWaveSpawner : public AActor
 {
