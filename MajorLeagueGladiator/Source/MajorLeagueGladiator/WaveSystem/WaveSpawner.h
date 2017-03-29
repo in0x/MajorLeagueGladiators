@@ -17,7 +17,7 @@ class MAJORLEAGUEGLADIATOR_API AWaveSpawner : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	AWaveSpawner();
+	AWaveSpawner(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	void Init(const UDataTable* EnemyDefinitions);
 

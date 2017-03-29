@@ -6,6 +6,7 @@
 #include "MlgPlayerState.h"
 #include "ParticleSystemManagerActor.h"
 #include "MlgGameState.h"
+#include "WaveSystem/WaveSpawnerManagerComponent.h"
 
 AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 {
@@ -14,6 +15,7 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	PlayerStateClass = AMlgPlayerState::StaticClass();
 	GameStateClass = AMlgGameState::StaticClass();
 	psManagerClass = AParticleSystemManagerActor::StaticClass();
+	ObjectInitializer.CreateDefaultSubobject<UWaveSpawnerManagerComponent>(this, TEXT("WaveSpawnerManager"));
 }
 
 UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
