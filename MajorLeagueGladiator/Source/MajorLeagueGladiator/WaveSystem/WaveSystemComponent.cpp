@@ -21,7 +21,7 @@ void UWaveSystemComponent::BeginPlay()
 	if (GetOwner()->HasAuthority())
 	{
 		FTimerHandle handle;
-		GetWorld()->GetTimerManager().SetTimer(handle, this, &UWaveSystemComponent::Start, 5.f);
+		GetWorld()->GetTimerManager().SetTimer(handle, this, &UWaveSystemComponent::Start, 2.f);
 	}
 }
 

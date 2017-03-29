@@ -36,6 +36,7 @@ void AWaveSpawner::SpawnWave(float WaitTimeBeforeSpawning, float SpawningDuratio
 	}
 
 	const float intervalTime = SpawningDuration / numberOfSpawnedEnemies;
+	isCurrentlySpawning = true;
 
 	FTimerManager& timermanager = GetWorldTimerManager();
 	timermanager.SetTimer(spawnTimerHandle, this, &AWaveSpawner::SpawnEnemy, intervalTime, true, WaitTimeBeforeSpawning);
@@ -52,7 +53,15 @@ void AWaveSpawner::SpawnEnemy()
 	UClass* enemyClass = GetAndRemoveNextEnemyClass();
 	UWorld* world = GetWorld();
 
-	AActor* spawnedActor = world->SpawnActor<AActor>(enemyClass, GetActorTransform());
+	FActorSpawnParameters spawnParams;
+	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	AActor* spawnedActor = world->SpawnActor<AActor>(enemyClass, GetActorTransform(), spawnParams);
+	if (spawnedActor == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Spawning actor failed"));
+		return;
+	}
 	spawnedActor->OnDestroyed.AddDynamic(this, &AWaveSpawner::onSpawnedActorDestroyed);
 }
 
@@ -69,7 +78,7 @@ UClass* AWaveSpawner::GetAndRemoveNextEnemyClass()
 	if (remainingSpawnPool[0].enemyCount <= 0)
 	{
 		remainingSpawnPool.RemoveAt(0);
-		if (IsSpawningFinished())
+		if (remainingSpawnPool.Num() <= 0)
 		{
 			FinishWave();
 		}
@@ -82,6 +91,7 @@ void AWaveSpawner::FinishWave()
 {
 	FTimerManager& timermanager = GetWorldTimerManager();
 	timermanager.ClearTimer(spawnTimerHandle);
+	isCurrentlySpawning = false;
 }
 
 void AWaveSpawner::onSpawnedActorDestroyed(AActor* DestroyedActor)
