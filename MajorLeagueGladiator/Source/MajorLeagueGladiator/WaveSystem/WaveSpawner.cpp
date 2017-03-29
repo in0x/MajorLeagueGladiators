@@ -27,18 +27,29 @@ void AWaveSpawner::AddToNextWavePool(const FSpawnCommand& spawnCommand)
 		UE_LOG(LogTemp, Warning, TEXT("Wave is was still running when next enmies were added to pool!"));
 		FinishWave();
 	}
+
+	if (spawnCommand.enemyCount <= 0)
+	{
+		return;
+	}
+
 	remainingSpawnPool.Add(spawnCommand);
 }
 
 void AWaveSpawner::SpawnWave(float WaitTimeBeforeSpawning, float SpawningDuration)
 {	
-	int numberOfSpawnedEnemies = 0;
-	for (const FSpawnCommand& spawnCommand : remainingSpawnPool)
+	if (remainingSpawnPool.Num() <= 0)
 	{
-		numberOfSpawnedEnemies += spawnCommand.enemyCount;
+		return;
 	}
 
-	const float intervalTime = SpawningDuration / numberOfSpawnedEnemies;
+	int numberOfEnemiesToSpawn = 0;
+	for (const FSpawnCommand& spawnCommand : remainingSpawnPool)
+	{
+		numberOfEnemiesToSpawn += spawnCommand.enemyCount;
+	}
+
+	const float intervalTime = SpawningDuration / numberOfEnemiesToSpawn;
 	isCurrentlySpawning = true;
 
 	FTimerManager& timermanager = GetWorldTimerManager();
@@ -77,6 +88,7 @@ UClass* AWaveSpawner::GetAndRemoveNextEnemyClass()
 	}
 
 	UClass* enemyClass = remainingSpawnPool[0].enemyClass;
+	check(remainingSpawnPool[0].enemyCount > 0);
 	remainingSpawnPool[0].enemyCount -= 1;
 	if (remainingSpawnPool[0].enemyCount <= 0)
 	{

@@ -42,6 +42,7 @@ void UWaveSystemComponent::OnEnemyKilled(ACharacter* KilledCharacter)
 
 void UWaveSystemComponent::StartWave(int32 WaveNumber)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Beginn Spawning Wave %d"), WaveNumber));
 	if (!GetOwner()->HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave on client"));
@@ -79,6 +80,7 @@ void UWaveSystemComponent::SetEnemyCount(int32 NewEnemyCount)
 	OnEnemyCountChanged.Broadcast(enemyCount, oldEnemyCount);
 	if (enemyCount == 0)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Wave %d has been defeated"), currentWaveNumber));
 		OnEnemyCountZero.Broadcast();
 	}
 }
