@@ -41,7 +41,15 @@ void UWaveSpawnerManagerComponent::gatherSpawners()
 	{
 		AWaveSpawner* waveSpawner = CastChecked<AWaveSpawner>(actor);
 
-		const int SpawnGroupIndex = waveSpawner->GetSpawnGroupIndex();
+		const int32 SpawnGroupIndex = waveSpawner->GetSpawnGroupIndex();
+		if (SpawnGroupIndex == AWaveSpawner::INVADLID_SPAWN_GROUP)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("The SpawnGroup for Wavespawner \"s\" has not been set"),
+				*waveSpawner->GetName());
+			continue;
+		}
+
+
 		FWaveSpawnerGroup& spawnerGroup = spawnGroups.FindOrAdd(SpawnGroupIndex);
 		spawnerGroup.WaveSpawners.Add(waveSpawner);		
 	}
@@ -82,7 +90,7 @@ int32 UWaveSpawnerManagerComponent::spawnForSpawnerGroupIndex(int32 SpawnGroupIn
 {
 	int32 spawnedEnemies = 0;
 	FWaveSpawnerGroup* waveSpawnerGroup = spawnGroups.Find(SpawnGroupIndex);
-	if (waveSpawnerGroup == nullptr && waveSpawnerGroup->WaveSpawners.Num() > 0)
+	if (waveSpawnerGroup == nullptr || waveSpawnerGroup->WaveSpawners.Num() <= 0)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Wavespawners for group index %d in level!!"), SpawnGroupIndex);
 		return spawnedEnemies;
