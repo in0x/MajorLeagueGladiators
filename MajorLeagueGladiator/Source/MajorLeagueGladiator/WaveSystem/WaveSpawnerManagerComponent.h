@@ -2,23 +2,21 @@
 
 #pragma once
 
-#include "GameFramework/Actor.h"
-
 #include "SpawnCommand.h"
 #include "WaveSpawnerGroup.h"
 
-#include "WaveSpawnerManager.generated.h"
+#include "WaveSpawnerManagerComponent.generated.h"
 
 struct FEnemyDefinition;
 struct FWaveDefiniton;
 struct FWaveLayoutDefiniton;
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AWaveSpawnerManager : public AActor
+class MAJORLEAGUEGLADIATOR_API UWaveSpawnerManagerComponent : public UActorComponent
 {
 	GENERATED_BODY()
 public:
-	AWaveSpawnerManager();
+	UWaveSpawnerManagerComponent();
 
 	int32 StartWave(int32 WaveNumber);
 protected:
