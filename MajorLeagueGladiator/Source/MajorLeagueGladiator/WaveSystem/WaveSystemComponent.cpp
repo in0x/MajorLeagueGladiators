@@ -3,7 +3,7 @@
 #include "WaveSystem/WaveSpawnerManagerComponent.h"
 
 UWaveSystemComponent::UWaveSystemComponent()
-	: enemyCount(0)
+	: remainingEnemiesForWave(0)
 	, startWaveNumber(1)
 	, initialTimeBeforeStartSeconds(2.0f)
 	, timeBetweenWavesSeconds(2.0f)
@@ -14,7 +14,7 @@ UWaveSystemComponent::UWaveSystemComponent()
 void UWaveSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UWaveSystemComponent, enemyCount);
+	DOREPLIFETIME(UWaveSystemComponent, remainingEnemiesForWave);
 }
 
 void UWaveSystemComponent::BeginPlay()
@@ -39,7 +39,7 @@ void UWaveSystemComponent::Start()
 
 void UWaveSystemComponent::OnEnemyKilled(ACharacter* KilledCharacter)
 {
-	ChangeEnemyCount(-1);
+	ChangeRemainingEnemiesForWave(-1);
 }
 
 void UWaveSystemComponent::StartNextWave()
@@ -55,7 +55,7 @@ void UWaveSystemComponent::StartWave(int32 WaveNumber)
 		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave on client"));
 		return;
 	}
-	if (GetEnemyCount() > 0)
+	if (GetRemainingEnemiesForWave() > 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave while wave is still in progress"));
 		return;
@@ -79,38 +79,54 @@ void UWaveSystemComponent::StartWave(int32 WaveNumber)
 		return;
 	}
 
-	ChangeEnemyCount(spawnendEnemies);
+	ChangeRemainingEnemiesForWave(spawnendEnemies);
 }
 
-void UWaveSystemComponent::ChangeEnemyCount(int32 ChangeInValue)
+void UWaveSystemComponent::ChangeRemainingEnemiesForWave(int32 ChangeInValue)
 {
-	SetEnemyCount(GetEnemyCount() + ChangeInValue);
+	SetRemainingEnemiesForWave(GetRemainingEnemiesForWave() + ChangeInValue);
 }
 
-void UWaveSystemComponent::SetEnemyCount(int32 NewEnemyCount)
+void UWaveSystemComponent::SetRemainingEnemiesForWave(int32 NewRemainingEnemiesForWave)
 {
-	int32 oldEnemyCount = enemyCount;
-	enemyCount = NewEnemyCount;
-	OnEnemyCountChanged.Broadcast(enemyCount, oldEnemyCount);
-	if (enemyCount == 0)
+	if (!GetOwner()->HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can not change remainingEnemiesForWave on client"));
+		return;
+	}
+	check(NewRemainingEnemiesForWave >= 0);
+
+	int32 oldRemainingEnemiesForWave = remainingEnemiesForWave;
+	remainingEnemiesForWave = NewRemainingEnemiesForWave;
+	if (remainingEnemiesForWave == 0)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Wave %d has been defeated"), currentWaveNumber));
 		FTimerHandle handle;
-		GetWorld()->GetTimerManager().SetTimer(handle, this, &UWaveSystemComponent::StartNextWave, timeBetweenWavesSeconds);
-		OnEnemyCountZero.Broadcast();
+		GetWorld()->GetTimerManager().SetTimer(handle, this, &UWaveSystemComponent::StartNextWave, timeBetweenWavesSeconds);	
 	}
+	fireRemainingEnemiesForWaveChangedDelegates(oldRemainingEnemiesForWave);
 }
 
-int32 UWaveSystemComponent::GetEnemyCount() const
+int32 UWaveSystemComponent::GetRemainingEnemiesForWave() const
 {
-	return enemyCount;
+	return remainingEnemiesForWave;
 }
 
-void UWaveSystemComponent::onRep_EnemyCount(int32 oldEnemyCount)
+void UWaveSystemComponent::onRep_remainingEnemiesForWave(int32 oldremainingEnemiesForWave)
 {
-	OnEnemyCountChanged.Broadcast(enemyCount, oldEnemyCount);
-	if (enemyCount == 0)
+	fireRemainingEnemiesForWaveChangedDelegates(oldremainingEnemiesForWave);
+}
+
+void UWaveSystemComponent::fireRemainingEnemiesForWaveChangedDelegates(int32 oldremainingEnemiesForWave)
+{
+	OnRemainingEnemiesForWaveChanged.Broadcast(remainingEnemiesForWave, oldremainingEnemiesForWave);
+	if (remainingEnemiesForWave > oldremainingEnemiesForWave)
 	{
-		OnEnemyCountZero.Broadcast();
+		OnWaveStarted.Broadcast(currentWaveNumber);
+	}
+	else if (remainingEnemiesForWave == 0)
+	{
+		OnWaveCleared.Broadcast(currentWaveNumber);
 	}
 }
+

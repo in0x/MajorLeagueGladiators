@@ -5,8 +5,8 @@
 #include "Components/ActorComponent.h"
 #include "WaveSystemComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(EnemyCountChangedDelegate, int32, int32);
-DECLARE_MULTICAST_DELEGATE(EnemyCountZeroDelegate);
+DECLARE_MULTICAST_DELEGATE_TwoParams(RemainingEnemiesForWaveChangedDelegate, int32, int32);
+DECLARE_MULTICAST_DELEGATE_OneParam(WaveDelegate, int32)
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UWaveSystemComponent : public UActorComponent
@@ -22,20 +22,22 @@ public:
 	void StartNextWave();
 	void StartWave(int32 WaveNumber);
 
-	void ChangeEnemyCount(int32 ChangeInValue);
-	void SetEnemyCount(int32 NewEnemyCount);
-	int32 GetEnemyCount() const;
+	void ChangeRemainingEnemiesForWave(int32 ChangeInValue);
+	void SetRemainingEnemiesForWave(int32 NewRemainingEnemiesForWave);
+	int32 GetRemainingEnemiesForWave() const;
 
-	EnemyCountChangedDelegate OnEnemyCountChanged;
-	EnemyCountZeroDelegate OnEnemyCountZero;
+	RemainingEnemiesForWaveChangedDelegate OnRemainingEnemiesForWaveChanged;
+	WaveDelegate OnWaveStarted;
+	WaveDelegate OnWaveCleared;
 private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION()
-	void onRep_EnemyCount(int32 oldEnemyCount);
+	void onRep_remainingEnemiesForWave(int32 oldRemainingEnemiesForWave);
+	void fireRemainingEnemiesForWaveChangedDelegates(int32 oldRemainingEnemiesForWave);
 
-	UPROPERTY(ReplicatedUsing = onRep_EnemyCount, Transient)
-	int32 enemyCount;
+	UPROPERTY(ReplicatedUsing = onRep_remainingEnemiesForWave, Transient)
+	int32 remainingEnemiesForWave;
 
 	UPROPERTY(EditAnywhere)
 	int32 startWaveNumber;
