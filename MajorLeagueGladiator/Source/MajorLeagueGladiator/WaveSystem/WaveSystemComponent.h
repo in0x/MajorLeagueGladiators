@@ -19,6 +19,7 @@ public:
 	void OnEnemyKilled(ACharacter* KilledCharacter);
 
 	void Start();
+	void StartNextWave();
 	void StartWave(int32 WaveNumber);
 
 	void ChangeEnemyCount(int32 ChangeInValue);
@@ -38,6 +39,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int32 startWaveNumber;
+
+	UPROPERTY(EditAnywhere)
+	float initialTimeBeforeStartSeconds;
+
+	UPROPERTY(EditAnywhere)
+	float timeBetweenWavesSeconds;
 
 	int32 currentWaveNumber;
 };
