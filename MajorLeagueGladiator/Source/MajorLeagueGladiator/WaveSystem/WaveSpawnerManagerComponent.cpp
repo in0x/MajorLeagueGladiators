@@ -52,7 +52,17 @@ int32 UWaveSpawnerManagerComponent::StartWave(int32 WaveNumber)
 {
 	int32 spawnedEnemies = 0;
 	const FWaveDefiniton* waveDefiniton = getWaveDefinition(WaveNumber);
+	if (waveDefiniton == nullptr)
+	{
+		return 0;
+	}
+
 	const UDataTable* layoutDefinitionTable = waveDefiniton->WaveLayout;
+	if (layoutDefinitionTable == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Layout Definiton was not set for Wave %d"), WaveNumber);
+		return 0;
+	}
 
 	const TArray<FName> rowNameArray = layoutDefinitionTable->GetRowNames();
 	for (const FName& rowName : rowNameArray)
@@ -74,7 +84,7 @@ int32 UWaveSpawnerManagerComponent::spawnForSpawnerGroupIndex(int32 SpawnGroupIn
 	FWaveSpawnerGroup* waveSpawnerGroup = spawnGroups.Find(SpawnGroupIndex);
 	if (waveSpawnerGroup == nullptr && waveSpawnerGroup->WaveSpawners.Num() > 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No Wavespawners for group index %d in level!!"), SpawnGroupIndex);
+		UE_LOG(LogTemp, Error, TEXT("No Wavespawners for group index %d in level!!"), SpawnGroupIndex);
 		return spawnedEnemies;
 	}
 
@@ -93,7 +103,7 @@ int32 UWaveSpawnerManagerComponent::spawnForSpawnerGroupIndex(int32 SpawnGroupIn
 		for (int i = 0; i < waveSpawnerCount; ++i)
 		{
 			// Decides if an additional enemy needs to be added. Can be 0 or 1
-			int32 additionalEnemy = EnemyRemainder / i;
+			int32 additionalEnemy = EnemyRemainder / (i+1);
 			waveSpawnerArray[i]->AddToNextWavePool({ spawnDef.EnemyClass, EnemyAmountPerSpawner + additionalEnemy });
 		}
 	}
@@ -109,6 +119,12 @@ int32 UWaveSpawnerManagerComponent::spawnForSpawnerGroupIndex(int32 SpawnGroupIn
 
 const FWaveDefiniton* UWaveSpawnerManagerComponent::getWaveDefinition(int32 WaveNumber) const
 {
+	if (waveDefinitonTable == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Wave Definition Table is not set"));
+		return nullptr;
+	}
+
 	return waveDefinitonTable->FindRow<FWaveDefiniton>(IntToFName(WaveNumber),
 		FString::Printf(TEXT("WaveSpawner Manager, Wave: %d"), WaveNumber));
 }

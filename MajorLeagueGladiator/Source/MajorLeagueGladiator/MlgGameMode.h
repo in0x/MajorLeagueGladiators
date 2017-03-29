@@ -7,6 +7,7 @@
 
 class AMlgPlayerCharacter;
 class AParticleSystemManagerActor;
+class UWaveSpawnerManagerComponent;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgGameMode : public AGameModeBase
@@ -32,4 +33,7 @@ private:
 	// The DPS Class. For now this is always assigned to the server.
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AMlgPlayerCharacter> dpsClass;
+
+	UPROPERTY(EditAnywhere)
+	UWaveSpawnerManagerComponent* waveSpawnerManger;
 };
