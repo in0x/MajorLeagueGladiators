@@ -5,6 +5,8 @@
 UWaveSystemComponent::UWaveSystemComponent()
 	: enemyCount(0)
 	, startWaveNumber(1)
+	, initialTimeBeforeStartSeconds(2.0f)
+	, timeBetweenWavesSeconds(2.0f)
 {
 	SetIsReplicated(true);
 }
@@ -21,7 +23,7 @@ void UWaveSystemComponent::BeginPlay()
 	if (GetOwner()->HasAuthority())
 	{
 		FTimerHandle handle;
-		GetWorld()->GetTimerManager().SetTimer(handle, this, &UWaveSystemComponent::Start, 2.f);
+		GetWorld()->GetTimerManager().SetTimer(handle, this, &UWaveSystemComponent::Start, initialTimeBeforeStartSeconds);
 	}
 }
 
@@ -38,6 +40,11 @@ void UWaveSystemComponent::Start()
 void UWaveSystemComponent::OnEnemyKilled(ACharacter* KilledCharacter)
 {
 	ChangeEnemyCount(-1);
+}
+
+void UWaveSystemComponent::StartNextWave()
+{
+	StartWave(currentWaveNumber + 1);
 }
 
 void UWaveSystemComponent::StartWave(int32 WaveNumber)
@@ -65,6 +72,13 @@ void UWaveSystemComponent::StartWave(int32 WaveNumber)
 	}
 
 	const int32 spawnendEnemies = spawnManager->StartWave(WaveNumber);
+	if (spawnendEnemies == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Enemies were spawned for Wave %d."
+			"Either the definiton is missing or no enemy could be spawned due to the modifier"));
+		return;
+	}
+
 	ChangeEnemyCount(spawnendEnemies);
 }
 
@@ -81,6 +95,8 @@ void UWaveSystemComponent::SetEnemyCount(int32 NewEnemyCount)
 	if (enemyCount == 0)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Wave %d has been defeated"), currentWaveNumber));
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, this, &UWaveSystemComponent::StartNextWave, timeBetweenWavesSeconds);
 		OnEnemyCountZero.Broadcast();
 	}
 }
