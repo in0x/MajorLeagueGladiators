@@ -15,7 +15,7 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	PlayerStateClass = AMlgPlayerState::StaticClass();
 	GameStateClass = AMlgGameState::StaticClass();
 	psManagerClass = AParticleSystemManagerActor::StaticClass();
-	ObjectInitializer.CreateDefaultSubobject<UWaveSpawnerManagerComponent>(this, TEXT("WaveSpawnerManager"));
+	waveSpawnerManger = ObjectInitializer.CreateDefaultSubobject<UWaveSpawnerManagerComponent>(this, TEXT("WaveSpawnerManager"));
 }
 
 UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
