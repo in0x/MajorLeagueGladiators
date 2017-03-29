@@ -18,39 +18,25 @@ void AParticleSystemManagerActor::SpawnParticleSystemAtLocation(EParticleSystem 
 
 void AParticleSystemManagerActor::CreateParticleSystemMain(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy)
 {
-	int index = particleSystems.Find(EmitterTemplate);
-	if (index >= 0)
-	{
-		CreateParticleSystem_Server(index, Trans, bAutoDestroy);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No particle system available!"));
-	}
-	
+	CreateParticleSystem_Server(EmitterTemplate, Trans, bAutoDestroy);
 }
 
-void AParticleSystemManagerActor::CreateParticleSystem_Server_Implementation(int Index, FTransform Trans, bool bAutoDestroy)
+void AParticleSystemManagerActor::CreateParticleSystem_Server_Implementation(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy)
 {
-	CreateParticleSystem_NetMulticast(Index, Trans, bAutoDestroy);
+	CreateParticleSystem_NetMulticast(EmitterTemplate, Trans, bAutoDestroy);
 }
 
-bool AParticleSystemManagerActor::CreateParticleSystem_Server_Validate(int Index, FTransform Trans, bool bAutoDestroy)
+bool AParticleSystemManagerActor::CreateParticleSystem_Server_Validate(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy)
 {
 	return true;
 }
 
-void AParticleSystemManagerActor::CreateParticleSystem_NetMulticast_Implementation(int Index, FTransform Trans, bool bAutoDestroy)
+void AParticleSystemManagerActor::CreateParticleSystem_NetMulticast_Implementation(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy)
 {
-	UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleSystems[Index], Trans);
+	UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EmitterTemplate, Trans);
 	//psc->SetIsReplicated(true);
 
 	//TODO: Sandro
-	//UParticleSystem* ps = particleSystems[Index];
-	//if (!ps)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("Particle system is null!"));
-	//}
 
 	//UParticleSystemComponent* PSC = NewObject<UParticleSystemComponent>(this);
 	//PSC->bAutoDestroy = bAutoDestroy;
