@@ -26,12 +26,8 @@ public:
 private:
 
 	UFUNCTION(Server, unreliable, WithValidation)
-	void CreateParticleSystem_Server(int Index, FTransform Trans, bool bAutoDestroy);
+	void CreateParticleSystem_Server(UParticleSystem* EmitterTemplate , FTransform Trans, bool bAutoDestroy);
 	
 	UFUNCTION(NetMulticast, unreliable)
-	void CreateParticleSystem_NetMulticast(int Index, FTransform Trans, bool bAutoDestroy);
-
-	UPROPERTY(EditAnywhere)
-	TArray<UParticleSystem*> particleSystems;
-
+	void CreateParticleSystem_NetMulticast(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy);
 };
