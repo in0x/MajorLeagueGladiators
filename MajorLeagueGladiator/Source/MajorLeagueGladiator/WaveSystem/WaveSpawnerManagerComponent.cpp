@@ -1,5 +1,5 @@
 #include "MajorLeagueGladiator.h"
-#include "WaveSpawnerManager.h"
+#include "WaveSpawnerManagerComponent.h"
 #include "WaveSystem/WaveSpawner.h"
 #include "WaveSystem/WaveDefiniton.h"
 #include "WaveSystem/WaveLayoutDefinition.h"
@@ -21,18 +21,18 @@ namespace
 	}
 }
 
-AWaveSpawnerManager::AWaveSpawnerManager()
+UWaveSpawnerManagerComponent::UWaveSpawnerManagerComponent()
 {
 }
 
-void AWaveSpawnerManager::BeginPlay()
+void UWaveSpawnerManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	gatherSpawners();
 	UWorld* world = GetWorld();
 }
 
-void AWaveSpawnerManager::gatherSpawners()
+void UWaveSpawnerManagerComponent::gatherSpawners()
 {
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaveSpawner::StaticClass(), FoundActors);
@@ -48,7 +48,7 @@ void AWaveSpawnerManager::gatherSpawners()
 }
 
 
-int32 AWaveSpawnerManager::StartWave(int32 WaveNumber)
+int32 UWaveSpawnerManagerComponent::StartWave(int32 WaveNumber)
 {
 	int32 spawnedEnemies = 0;
 	const FWaveDefiniton* waveDefiniton = getWaveDefinition(WaveNumber);
@@ -67,7 +67,7 @@ int32 AWaveSpawnerManager::StartWave(int32 WaveNumber)
 	return spawnedEnemies;
 }
 
-int32 AWaveSpawnerManager::spawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const FWaveLayoutDefiniton* LayoutDefiniton,
+int32 UWaveSpawnerManagerComponent::spawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const FWaveLayoutDefiniton* LayoutDefiniton,
 	const FWaveDefiniton* WaveDefinition)
 {
 	int32 spawnedEnemies = 0;
@@ -107,7 +107,7 @@ int32 AWaveSpawnerManager::spawnForSpawnerGroupIndex(int32 SpawnGroupIndex, cons
 	return spawnedEnemies;
 }
 
-const FWaveDefiniton* AWaveSpawnerManager::getWaveDefinition(int32 WaveNumber) const
+const FWaveDefiniton* UWaveSpawnerManagerComponent::getWaveDefinition(int32 WaveNumber) const
 {
 	return waveDefinitonTable->FindRow<FWaveDefiniton>(IntToFName(WaveNumber),
 		FString::Printf(TEXT("WaveSpawner Manager, Wave: %d"), WaveNumber));
