@@ -4,9 +4,12 @@
 #include "WaveSpawner.h"
 #include "WaveSystem/WaveSystemComponent.h"
 
+const int32 AWaveSpawner::INVADLID_SPAWN_GROUP = -1;
+
 AWaveSpawner::AWaveSpawner(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, isCurrentlySpawning(false)
+	, spawnGroup(INVADLID_SPAWN_GROUP)
 {
 	RootComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, "rootComp");
 	bNetLoadOnClient = false;

@@ -16,6 +16,8 @@ class MAJORLEAGUEGLADIATOR_API AWaveSpawner : public AActor
 	GENERATED_BODY()
 	
 public:	
+	static const int32 INVADLID_SPAWN_GROUP;
+
 	// Sets default values for this actor's properties
 	AWaveSpawner(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
