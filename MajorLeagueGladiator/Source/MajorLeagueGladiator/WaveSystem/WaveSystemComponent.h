@@ -14,8 +14,11 @@ class MAJORLEAGUEGLADIATOR_API UWaveSystemComponent : public UActorComponent
 	GENERATED_BODY()
 public:
 	UWaveSystemComponent();
+
+	virtual void BeginPlay() override;
 	void OnEnemyKilled(ACharacter* KilledCharacter);
 
+	void Start();
 	void StartWave(int32 WaveNumber);
 
 	void ChangeEnemyCount(int32 ChangeInValue);

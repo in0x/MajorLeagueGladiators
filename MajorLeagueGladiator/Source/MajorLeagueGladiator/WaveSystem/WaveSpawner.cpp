@@ -4,9 +4,11 @@
 #include "WaveSpawner.h"
 #include "WaveSystem/WaveSystemComponent.h"
 
-AWaveSpawner::AWaveSpawner()
-	: isCurrentlySpawning(false)
+AWaveSpawner::AWaveSpawner(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+	, isCurrentlySpawning(false)
 {
+	RootComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, "rootComp");
 	bNetLoadOnClient = false;
 }
 

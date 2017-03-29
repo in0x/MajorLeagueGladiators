@@ -1,9 +1,10 @@
 #include "MajorLeagueGladiator.h"
 #include "WaveSystemComponent.h"
-#include "MlgGameMode.h"
+#include "WaveSystem/WaveSpawnerManagerComponent.h"
 
 UWaveSystemComponent::UWaveSystemComponent()
 	: enemyCount(0)
+	, startWaveNumber(1)
 {
 	SetIsReplicated(true);
 }
@@ -12,6 +13,26 @@ void UWaveSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UWaveSystemComponent, enemyCount);
+}
+
+void UWaveSystemComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	if (GetOwner()->HasAuthority())
+	{
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, this, &UWaveSystemComponent::Start, 5.f);
+	}
+}
+
+void UWaveSystemComponent::Start()
+{
+	if (!GetOwner()->HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave on client"));
+		return;
+	}
+	StartWave(startWaveNumber);
 }
 
 void UWaveSystemComponent::OnEnemyKilled(ACharacter* KilledCharacter)
@@ -26,8 +47,24 @@ void UWaveSystemComponent::StartWave(int32 WaveNumber)
 		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave on client"));
 		return;
 	}
+	if (GetEnemyCount() > 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave while wave is still in progress"));
+		return;
+	}
+
 	currentWaveNumber = WaveNumber;
-	// TODO: FS GetSpawnManager from Gamemode, spawn wave, update spawnend enemies counter
+	UWaveSpawnerManagerComponent* spawnManager = GetWorld()->GetAuthGameMode()
+		->FindComponentByClass<UWaveSpawnerManagerComponent>();
+
+	if (spawnManager == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No spawn manager on Gamemode"));
+		return;
+	}
+
+	const int32 spawnendEnemies = spawnManager->StartWave(WaveNumber);
+	ChangeEnemyCount(spawnendEnemies);
 }
 
 void UWaveSystemComponent::ChangeEnemyCount(int32 ChangeInValue)
