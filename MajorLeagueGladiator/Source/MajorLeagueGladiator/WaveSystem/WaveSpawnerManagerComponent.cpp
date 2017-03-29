@@ -71,7 +71,7 @@ int32 UWaveSpawnerManagerComponent::StartWave(int32 WaveNumber)
 		const FWaveLayoutDefiniton* layoutDefiniton = layoutDefinitionTable->FindRow<FWaveLayoutDefiniton>(rowName,
 			FString::Printf(TEXT("WaveSpawner Manager, spawnGroup: %d"), spawnGroupIndex));
 
-		spawnedEnemies += spawnForSpawnerGroupIndex(WaveNumber, layoutDefiniton, waveDefiniton);
+		spawnedEnemies += spawnForSpawnerGroupIndex(spawnGroupIndex, layoutDefiniton, waveDefiniton);
 	}
 
 	return spawnedEnemies;
