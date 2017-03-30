@@ -131,20 +131,18 @@ void AMlgPlayerCharacter::OnLand(const FHitResult& hit)
 	StopMovementImmediately_NetMulticast();
 }
 
-FVector AMlgPlayerCharacter::GetAbilityMoveTargetLocation() const
+FVector AMlgPlayerCharacter::GetProjectedLocation() const
 {
 	return abilityMoveTargetLocation == INVALID_TARGET_LOCATION ? GetActorLocation() : abilityMoveTargetLocation;
 }
 
 void AMlgPlayerCharacter::SetAbilityMoveTargetLocation(FVector Location)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, Location.ToString());
 	abilityMoveTargetLocation = Location;
 }
 
 void AMlgPlayerCharacter::InvalidateAbilityMoveTargetLocation()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Invalidate Target Location"));
 	abilityMoveTargetLocation = INVALID_TARGET_LOCATION;
 }
 
