@@ -142,6 +142,12 @@ void UVRControllerComponent::EndUseGrippedActors()
 	}
 }
 
+bool UVRControllerComponent::HasGrip() const
+{
+	return GrippedActors.Num() > 0 || LocallyGrippedActors.Num() > 0;
+}
+
+
 AMlgPlayerController* UVRControllerComponent::GetMlgPlayerController()
 {
 	AActor* owner = GetOwner();
