@@ -140,6 +140,7 @@ FVector AMlgPlayerCharacter::GetProjectedLocation() const
 void AMlgPlayerCharacter::SetAbilityMoveTargetLocation(FVector Location)
 {
 	abilityMoveTargetLocation = Location;
+	OnAbilityMoveTargetLocationSet.Broadcast(abilityMoveTargetLocation);
 }
 
 void AMlgPlayerCharacter::InvalidateAbilityMoveTargetLocation()

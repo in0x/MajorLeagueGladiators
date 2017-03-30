@@ -18,6 +18,8 @@ class AMlgGrippableStaticMeshActor;
 class USteamVRChaperoneComponent;
 class UTriggerZoneComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityMoveTargetLocationSet, FVector, NewLocation);
+
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgPlayerCharacter : public AVRSimpleCharacter, public IAbilitySystemInterface
 {
@@ -56,6 +58,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FVector GetProjectedLocation() const;
+
+	UPROPERTY(BlueprintAssignable, meta = (DisplayName = "AbilityMoveTargetLocation Set"))
+	FAbilityMoveTargetLocationSet OnAbilityMoveTargetLocationSet;
 	
 	void SetAbilityMoveTargetLocation(FVector Location);
 	
