@@ -47,13 +47,20 @@ class MAJORLEAGUEGLADIATOR_API UDamageVisualizerComponent : public UActorCompone
 {
 	GENERATED_BODY()
 
+
 public:	
 	UDamageVisualizerComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
 	void onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation, const FVector& OriginDirection);
-on
+
+	UFUNCTION()
+	void onDamageReceived(AActor* DamagedActor, const UDamageType* DamageType);
+
+	UFUNCTION()
+	void onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation, const FVector& OriginDirection, const UDamageType* DamageType);
+	
 	UFUNCTION(NetMulticast, reliable)
 	void AddVisual_NetMulticast(UMeshComponent* affectedMesh, bool bSpawnParticles, const FTransform& particleTrafo = FTransform());
 
