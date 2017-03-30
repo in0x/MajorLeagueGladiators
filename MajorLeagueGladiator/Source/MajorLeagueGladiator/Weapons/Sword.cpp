@@ -19,7 +19,7 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	, oldSwingSpeed(FVector::ZeroVector)
 	, threshholdDoDamageSquared(16)
 	, slashVelocityLearnRate(0.1f)
-	, isSwordFastEnough(false)
+	, bIsSwordFastEnough(false)
 	, damageAppliedOnHit(15.f)
 {
 	GetStaticMeshComponent()->bGenerateOverlapEvents = true;
@@ -58,22 +58,20 @@ void ASword::Tick(float DeltaTime)
 
 	bool newIsSwordFastEnough = oldSwingSpeed.SizeSquared() > threshholdDoDamageSquared;
 
-	if (newIsSwordFastEnough && !isSwordFastEnough)
+	if (newIsSwordFastEnough && !bIsSwordFastEnough)
 	{
 		onStartSlash();
 	}
-	else if (!newIsSwordFastEnough && isSwordFastEnough)
+	else if (!newIsSwordFastEnough && bIsSwordFastEnough)
 	{
 		onEndSlash();
 	}
 
-	isSwordFastEnough = newIsSwordFastEnough;
+	bIsSwordFastEnough = newIsSwordFastEnough;
 }
 
 void ASword::onStartSlash()
 {
-	damageAllOverlappingActors();
-
 	if (materialRedObject_Dyn == nullptr)
 	{
 		materialRedObject_Dyn = UMaterialInstanceDynamic::Create(materialRedObject, this);
@@ -92,38 +90,23 @@ void ASword::onEndSlash()
 	setMaterialOfOwnerMesh(materialObject_Dyn);
 }
 
-FHitResult ASword::getOverlappingHit()
-{
-	FHitResult hitResult;
-	FCollisionShape shape;
-
-	const FBoxSphereBounds& Bounds = GetStaticMeshComponent()->Bounds;
-
-	shape.SetBox(Bounds.BoxExtent);
-	ECollisionChannel hitScanChannel = CollisionStatics::GetCollsionChannelByName(CollisionStatics::HITSCAN_TRACE_CHANNEL_NAME);
-
-	GetWorld()->SweepSingleByChannel(hitResult, GetActorLocation(), GetActorLocation(),
-		GetActorRotation().Quaternion(), hitScanChannel, shape);
-
-	//FQuat Rotation = GetRootComponent()->GetComponentToWorld().GetRotation();
-	//DrawDebugBox(GetWorld(), Bounds.Origin, Bounds.BoxExtent, Rotation, FColor::Red, false, 3, 0);
-	//DrawDebugSphere(GetWorld(), hitResult.Location, 5.f, 20, FColor::Cyan, false, 1.5f);
-
-	return hitResult;
-}
-
-void ASword::getOverlappingHits(TMap<AActor*, FHitResult>& outActorToHit)
+void ASword::getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHit) const
 {
 	TArray<FHitResult> hitResults;
-	FCollisionShape shape;
-	const FBoxSphereBounds& Bounds = GetStaticMeshComponent()->Bounds;
-	shape.SetBox(Bounds.BoxExtent);
-	ECollisionChannel hitScanChannel = CollisionStatics::GetCollsionChannelByName(CollisionStatics::HITSCAN_TRACE_CHANNEL_NAME);
+	UStaticMeshComponent* mesh = GetStaticMeshComponent();
+	FVector meshLoc = mesh->GetComponentLocation();
+	FVector meshVel = mesh->GetComponentVelocity();
 
-	GetWorld()->SweepMultiByChannel(hitResults, GetActorLocation(), GetActorLocation(), GetActorRotation().Quaternion(), hitScanChannel, shape);
+	FComponentQueryParams params;
+	params.bTraceComplex = false;
+	params.bFindInitialOverlaps = false;
 
+	// We only add 10% velocity for the end of the sweep since we need to sweep past the current position for it to work. 
+	// However, if we sweep too far into the future we'll generate hits we don't want this frame.
+	GetWorld()->ComponentSweepMulti(hitResults, mesh, meshLoc - meshVel, meshLoc+ (0.1f * meshVel), mesh->GetComponentRotation(), params);
+	
 	AActor* actorToMatch;
-	auto pred = [&](FHitResult& hit) 
+	auto pred = [&actorToMatch](FHitResult& hit) 
 	{
 		return hit.Actor == actorToMatch;
 	};
@@ -131,28 +114,53 @@ void ASword::getOverlappingHits(TMap<AActor*, FHitResult>& outActorToHit)
 	for (auto& pair : outActorToHit)
 	{
 		actorToMatch = pair.Key;
-		pair.Value = *hitResults.FindByPredicate(pred);
+		FHitResult* h = hitResults.FindByPredicate(pred); 
+
+		if (h != nullptr)
+		{
+			pair.Value = *h;
+			DrawDebugSphere(GetWorld(), (*h).ImpactPoint, 3.f, 20, FColor::Cyan, false, 3.0f);
+		}
 	}
 }
 
-void ASword::damageAllOverlappingActors()
+void ASword::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	TArray <AActor*> overlappingActors;
-	AActor* owner = GetOwner();
-	owner->GetOverlappingActors(overlappingActors);
+	Super::NotifyActorBeginOverlap(OtherActor);
 
+	if (bIsSwordFastEnough)
+	{
+		damageAllOverlappingActors();
+	}
+}
+
+void ASword::damageAllOverlappingActors()  
+{
+	TArray<AActor*> overlappingActors;
+	GetOverlappingActors(overlappingActors, TSubclassOf<APawn>());
 	int32 overlaps = overlappingActors.Num();
 
-	TMap<AActor*, FHitResult> actorToHit;
+	if (overlaps == 0)
+	{
+		return;
+	}
 
+	TArray<TPair<AActor*, FHitResult>> actorToHit;
+	
 	for (AActor* actor : overlappingActors)
 	{
-		actorToHit.Add(actor);
+		int idx = actorToHit.Add(TPair<AActor*, FHitResult>());
+		actorToHit[idx].Key = actor;
 	}
 
 	getOverlappingHits(actorToHit);
+	actorToHit.RemoveAll([](const auto& pair) 
+	{
+		return pair.Value.Actor == nullptr;
+	});
 
 	bool hasDealtdamage = false;
+	AActor* owner = GetOwner();
 	for (auto& pair : actorToHit)
 	{
 		if (UMlgGameplayStatics::CanDealDamageTo(owner, pair.Key))
@@ -168,22 +176,10 @@ void ASword::setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn)
 	mesh->SetMaterial(0, material_Dyn);
 }
 
-void ASword::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorBeginOverlap(OtherActor);
-
-	ACharacter* otherCharacter = Cast<ACharacter>(OtherActor);
-	if (otherCharacter && canDealDamageTo(otherCharacter))
-	{
-		dealDamageTo(otherCharacter, getOverlappingHit());
-	}
-}
-
 void ASword::tryLaunchCharacter(ACharacter* character) const
 {
 	check(character);
-	UCharacterMovementComponent* charMoveComp = 
-		CastChecked<UCharacterMovementComponent>(character->GetMovementComponent());
+	UCharacterMovementComponent* charMoveComp = CastChecked<UCharacterMovementComponent>(character->GetMovementComponent());
 	EMovementMode moveMode = charMoveComp->MovementMode;
 
 	if (moveMode == MOVE_Falling)
@@ -192,7 +188,6 @@ void ASword::tryLaunchCharacter(ACharacter* character) const
 		character->LaunchCharacter(GetVelocity(), true, true);
 	}
 }
-
 
 void ASword::doRumbleRight()
 {	
@@ -207,17 +202,14 @@ void ASword::doRumbleRight()
 bool ASword::canDealDamageTo(const ACharacter* OtherCharacter) const
 {
 	check(OtherCharacter)
-	return isSwordFastEnough
+	return bIsSwordFastEnough
 		&& GetOwner() != OtherCharacter
 		&& UMlgGameplayStatics::CanDealDamageTo(this, OtherCharacter);
 }
 
-void ASword::dealDamageTo(ACharacter* OtherCharacter, const FHitResult& HitResult)
+void ASword::dealDamageTo(ACharacter* OtherCharacter, const FHitResult& HitResult) 
 {
 	check(OtherCharacter);
-
-	//UGameplayStatics::ApplyDamage(OtherCharacter, damageAppliedOnHit,
-		//GetInstigatorController(), this, damageType);
 
 	UGameplayStatics::ApplyPointDamage(OtherCharacter, damageAppliedOnHit, HitResult.TraceEnd - HitResult.TraceStart, 
 		HitResult, GetInstigatorController(), this, damageType);
