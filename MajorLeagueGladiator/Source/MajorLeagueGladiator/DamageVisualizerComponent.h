@@ -42,6 +42,9 @@ struct FDamageVisual
 	{}
 };
 
+	
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MAJORLEAGUEGLADIATOR_API UDamageVisualizerComponent : public UActorComponent
 {
@@ -69,4 +72,10 @@ private:
 
 	UPROPERTY(EditAnywhere, Category= "Damage Visualizer")
 	UParticleSystem* particleTemplate;
+	
+	UPROPERTY(EditAnywhere, Category = "Visualizer")
+	TArray<UParticleSystem*> gunDamageParticleSystems;
+
+	UPROPERTY(EditAnywhere, Category = "Visualizer")
+	TArray<UParticleSystem*> swordDamageParticleSystems;
 };
