@@ -77,7 +77,7 @@ void UDamageVisualizerComponent::AddVisual_NetMulticast_Implementation(UMeshComp
 // Damage Receive Functions //
 //////////////////////////////
 
-void UDamageVisualizerComponent::onDamageReceived(AActor* DamagedActor)
+void UDamageVisualizerComponent::onDamageReceived(AActor* DamagedActor, const UDamageType* DamageType)
 {
 
 	startMaterialVisualization_NetMulticast();
@@ -85,7 +85,7 @@ void UDamageVisualizerComponent::onDamageReceived(AActor* DamagedActor)
 	//TODO: General Damage PS
 }
 
-void UDamageVisualizerComponent::onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation, const FVector& OriginDirection)
+void UDamageVisualizerComponent::onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation, const FVector& OriginDirection, const UDamageType* DamageType)
 {
 	FTransform visualizationOrigin;
 	visualizationOrigin.SetLocation(HitLocation);
