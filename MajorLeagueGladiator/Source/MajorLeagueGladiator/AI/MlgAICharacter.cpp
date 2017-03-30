@@ -10,6 +10,11 @@
 #include "DamageReceiverComponent.h"
 #include "DamageVisualizerComponent.h"
 
+namespace
+{
+	const char* PAWN_COLLISION_PROFILE_NAME = "Pawn";
+}
+
 AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -26,11 +31,16 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	triggerZone->SetRelativeLocation(FVector(0.f, 0.f, -70.f));
 	triggerZone->SetStaticMesh(cubeMesh.Object);
 
+	
+
 	damageCauser = ObjectInitializer.CreateDefaultSubobject<UDamageCauserComponent>(this, TEXT("DamageCauser"));
 	damageCauser->SetDamageType(UEnemyDamage::StaticClass());
 
 	damageReciever = ObjectInitializer.CreateDefaultSubobject<UDamageReceiverComponent>(this, TEXT("DamageReciever"));
 	damageVisualizer = ObjectInitializer.CreateDefaultSubobject<UDamageVisualizerComponent>(this, TEXT("DamageVisualizer"));
+
+	GetMesh()->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
+	GetMesh()->bGenerateOverlapEvents = true;
 }
 
 float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageEvent& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
