@@ -3,7 +3,6 @@
 #pragma once
 
 #include "SpawnCommand.h"
-#include "WaveSpawnerGroup.h"
 
 #include "WaveSpawnerManagerComponent.generated.h"
 

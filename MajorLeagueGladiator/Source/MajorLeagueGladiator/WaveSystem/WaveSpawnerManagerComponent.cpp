@@ -12,13 +12,6 @@ namespace
 		const FName numberName(*numberString);
 		return numberName;
 	}
-
-	int32 FNameToInt(const FName& Name)
-	{
-		const FString string = Name.ToString();
-		const int32 number = FCString::Atoi(*string);
-		return number;
-	}
 }
 
 UWaveSpawnerManagerComponent::UWaveSpawnerManagerComponent()
