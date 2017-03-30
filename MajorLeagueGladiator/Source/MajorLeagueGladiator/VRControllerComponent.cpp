@@ -137,7 +137,7 @@ void UVRControllerComponent::EndUseGrippedActors()
 
 		if (gripActor)
 		{
-			gripActor->OnUsed();
+			gripActor->OnEndUsed();
 		}
 	}
 }
