@@ -11,14 +11,24 @@ class MAJORLEAGUEGLADIATOR_API ASword : public AMlgGrippableStaticMeshActor
 	GENERATED_BODY()	
 public:
 	ASword(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 private:
+	void onStartSlash();
+	void onEndSlash();
+	void doRumbleRight();
+	void setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn);
+	void dealDamageTo(ACharacter* OtherCharacter, const FHitResult& HitResult);
+
+	void damageAllOverlappingActors();
+	void tryLaunchCharacter(ACharacter* character) const;
+	bool canDealDamageTo(const ACharacter* OtherCharacter) const;
+	void getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHit) const;
+	FVector calcRelativeVelocity() const;
+
 	FVector oldSwingSpeed;
 
 	UPROPERTY(EditAnywhere)
@@ -42,26 +52,10 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInstanceDynamic* materialObject_Dyn;
-
-	// between 0 and 1
-	// defines how fast new sword speed influences overall speedvalue
+ 
+	// Between 0 and 1 defines how fast new sword speed influences overall speedvalue
 	UPROPERTY(EditAnywhere)
 	float slashVelocityLearnRate;
 
-	void onStartSlash();
-	void onEndSlash();
-	void damageAllOverlappingActors();
-
-	void setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn);
-
-	bool isSwordFastEnough;
-
-	void tryLaunchCharacter(ACharacter* character) const;
-	void doRumbleRight();
-	bool canDealDamageTo(const ACharacter* OtherCharacter) const;
-	void dealDamageTo(ACharacter* OtherCharacter, const FHitResult& HitResult);
-	FHitResult getOverlappingHit();
-	void getOverlappingHits(TMap<AActor*, FHitResult>& outActorToHit);
-
-	FVector calcRelativeVelocity() const;
+	bool bIsSwordFastEnough;
 };

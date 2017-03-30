@@ -59,8 +59,8 @@ FWeakpoint UWeakpointComponent::FindHitWeakpoint(const FHitResult& Hit) const
 	FWeakpoint closest = weakpoints[0];
 	for (const FWeakpoint& wp : weakpoints)
 	{
-		if (FVector::DistSquared(NameToLocation(wp.LocationSocketName), Hit.Location) 
-			< FVector::DistSquared(NameToLocation(closest.LocationSocketName), Hit.Location))
+		if (FVector::DistSquared(NameToLocation(wp.LocationSocketName), Hit.ImpactPoint)
+			< FVector::DistSquared(NameToLocation(closest.LocationSocketName), Hit.ImpactPoint))
 		{
 			closest = wp;
 		}
@@ -68,9 +68,8 @@ FWeakpoint UWeakpointComponent::FindHitWeakpoint(const FHitResult& Hit) const
 
 	float affectSqr = closest.MaxAffectDistance * closest.MaxAffectDistance;
 	
-	if (FVector::DistSquared(NameToLocation(closest.LocationSocketName), Hit.Location) < affectSqr)
+	if (FVector::DistSquared(NameToLocation(closest.LocationSocketName), Hit.ImpactPoint) < affectSqr)
 	{
-		//skeleton->FindClosestBone();
 		return closest;
 	}
 	else
