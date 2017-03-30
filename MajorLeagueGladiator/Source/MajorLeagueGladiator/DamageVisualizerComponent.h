@@ -5,6 +5,43 @@
 #include "Components/ActorComponent.h"
 #include "DamageVisualizerComponent.generated.h"
 
+// On Damage, instead of setting class members, add another FDamageVisual
+// In Tick, process them all
+// In OnPointDamage, check if we have a SkeletalMesh, if yes, use the skinned submesh
+
+USTRUCT()
+struct FDamageVisual
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, Category="DamageVisual")
+	UParticleSystemComponent* ParticleSystem;
+
+	UPROPERTY(EditAnywhere, Category = "DamageVisual")
+	UMeshComponent* AffectedMesh;
+
+	UPROPERTY(EditAnywhere, Category = "DamageVisual")
+	UMaterialInstanceDynamic* MatInstance;
+
+	UPROPERTY(EditAnywhere, Category = "DamageVisual")
+	FName DamageValParamName;
+
+	UPROPERTY(EditAnywhere, Category = "DamageVisual")
+	float MatVisDuration;
+	
+	UPROPERTY(EditAnywhere, Category = "DamageVisual")
+	float CurrentMatVisDuration;
+
+	FDamageVisual()
+		: ParticleSystem(nullptr)
+		, AffectedMesh(nullptr)
+		, MatInstance(nullptr)
+		, DamageValParamName(FName("DamageValue"))
+		, MatVisDuration(0.3f)
+		, CurrentMatVisDuration(0.f)
+	{}
+};
+
 class UDamageReceiverComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -13,40 +50,15 @@ class MAJORLEAGUEGLADIATOR_API UDamageVisualizerComponent : public UActorCompone
 	GENERATED_BODY()
 
 public:	
-
 	UDamageVisualizerComponent();
-
-	virtual void BeginPlay() override;
-
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION(NetMulticast, reliable)
+	void AddVisual_NetMulticast(UMeshComponent* affectedMesh, bool bSpawnParticles, const FTransform& particleTrafo = FTransform());
+
 private:
+	TArray<FDamageVisual> visuals;
 
-	UPROPERTY(EditAnywhere, Category = "Visualizer")
-	UParticleSystem* particleSystem;
-
-	UPROPERTY(EditAnywhere, Category = "Visualizer")
-	float materialVisualizationDuration;
-
-	const char* DAMAGE_VALUE_PARAMETER_NAME = "DamageValue";
-
-	UMaterialInstanceDynamic* matInstance;
-
-	bool isVisualizingMaterial;
-
-	float currentMatVisualizationDuration;
-
-	UFUNCTION()
-	void onDamageReceived(AActor* DamagedActor);
-
-	UFUNCTION()
-	void onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation);
-	
-	UFUNCTION(NetMulticast, reliable)
-	void startMaterialVisualization_NetMulticast();
-
-	UFUNCTION(NetMulticast, reliable)
-	void startParticleSystemVisualization_NetMulticast(const FTransform& visualizationTransform);
-
-	void stopMaterialVisualization();
+	UPROPERTY(EditAnywhere, Category= "Damage Visualizer")
+	UParticleSystem* particleTemplate;
 };
