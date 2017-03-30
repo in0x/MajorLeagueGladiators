@@ -4,12 +4,12 @@
 #include "WaveSpawner.h"
 #include "WaveSystem/WaveSystemComponent.h"
 
-const FName AWaveSpawner::INVADLID_NAME(TEXT("INVALID_NAME"));
+const FName AWaveSpawner::INVALID_NAME(TEXT("INVALID_NAME"));
 
 AWaveSpawner::AWaveSpawner(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, isCurrentlySpawning(false)
-	, uniqueName(INVADLID_NAME)
+	, uniqueName(INVALID_NAME)
 {
 	RootComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, "rootComp");
 	bNetLoadOnClient = false;

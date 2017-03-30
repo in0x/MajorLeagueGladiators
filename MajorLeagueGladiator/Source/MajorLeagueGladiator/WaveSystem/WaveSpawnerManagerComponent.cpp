@@ -44,7 +44,7 @@ void UWaveSpawnerManagerComponent::gatherSpawners()
 		const FName& uniqueName = waveSpawner->GetUniqueName();
 
 
-		if (uniqueName == AWaveSpawner::INVADLID_NAME)
+		if (uniqueName == AWaveSpawner::INVALID_NAME)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("The uniqueName for Wavespawner \"%s\" has not been set"),
 				*waveSpawner->GetName());
