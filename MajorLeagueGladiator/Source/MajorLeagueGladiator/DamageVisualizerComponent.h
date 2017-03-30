@@ -55,23 +55,17 @@ public:
 	UDamageVisualizerComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION()
-	void onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation, const FVector& OriginDirection);
-
-	UFUNCTION()
+	/*UFUNCTION()
 	void onDamageReceived(AActor* DamagedActor, const UDamageType* DamageType);
 
 	UFUNCTION()
-	void onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation, const FVector& OriginDirection, const UDamageType* DamageType);
+	void onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation, const FVector& OriginDirection, const UDamageType* DamageType);*/
 	
 	UFUNCTION(NetMulticast, reliable)
-	void AddVisual_NetMulticast(UMeshComponent* affectedMesh, bool bSpawnParticles, const FTransform& particleTrafo = FTransform());
+	void AddVisual_NetMulticast(UMeshComponent* affectedMesh, bool bSpawnParticles, const FTransform& particleTrafo = FTransform(), const UDamageType* DamageType = nullptr);
 
 private:
 	TArray<FDamageVisual> visuals;
-
-	UPROPERTY(EditAnywhere, Category= "Damage Visualizer")
-	UParticleSystem* particleTemplate;
 	
 	UPROPERTY(EditAnywhere, Category = "Visualizer")
 	TArray<UParticleSystem*> gunDamageParticleSystems;
