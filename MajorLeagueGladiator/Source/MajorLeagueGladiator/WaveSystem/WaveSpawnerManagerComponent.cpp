@@ -41,17 +41,23 @@ void UWaveSpawnerManagerComponent::gatherSpawners()
 	{
 		AWaveSpawner* waveSpawner = CastChecked<AWaveSpawner>(actor);
 
-		const int32 SpawnGroupIndex = waveSpawner->GetSpawnGroupIndex();
-		if (SpawnGroupIndex == AWaveSpawner::INVADLID_SPAWN_GROUP)
+		const FName& uniqueName = waveSpawner->GetUniqueName();
+
+
+		if (uniqueName == AWaveSpawner::INVADLID_NAME)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("The SpawnGroup for Wavespawner \"s\" has not been set"),
+			UE_LOG(LogTemp, Warning, TEXT("The uniqueName for Wavespawner \"%s\" has not been set"),
 				*waveSpawner->GetName());
 			continue;
 		}
 
-
-		FWaveSpawnerGroup& spawnerGroup = spawnGroups.FindOrAdd(SpawnGroupIndex);
-		spawnerGroup.WaveSpawners.Add(waveSpawner);		
+		if(waveSpawners.Contains(uniqueName))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("The for Wavespawner \"%s\" is not unique"),
+				*waveSpawner->GetName());
+		}
+		
+		waveSpawners.Add(uniqueName, waveSpawner);
 	}
 }
 
@@ -72,56 +78,53 @@ int32 UWaveSpawnerManagerComponent::StartWave(int32 WaveNumber)
 		return 0;
 	}
 
-	const TArray<FName> rowNameArray = layoutDefinitionTable->GetRowNames();
-	for (const FName& rowName : rowNameArray)
+	TArray<FWaveLayoutDefiniton*> outLayoutDefinitions;
+	layoutDefinitionTable->GetAllRows(TEXT("WaveSpawner Manager"), outLayoutDefinitions);
+	for (const FWaveLayoutDefiniton* waveLayout : outLayoutDefinitions)
 	{
-		int32 spawnGroupIndex = FNameToInt(rowName);
-		const FWaveLayoutDefiniton* layoutDefiniton = layoutDefinitionTable->FindRow<FWaveLayoutDefiniton>(rowName,
-			FString::Printf(TEXT("WaveSpawner Manager, spawnGroup: %d"), spawnGroupIndex));
 
-		spawnedEnemies += spawnForSpawnerGroupIndex(spawnGroupIndex, layoutDefiniton, waveDefiniton);
+		spawnedEnemies += spawnForLayout(waveLayout, waveDefiniton);
 	}
 
 	return spawnedEnemies;
 }
 
-int32 UWaveSpawnerManagerComponent::spawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const FWaveLayoutDefiniton* LayoutDefiniton,
-	const FWaveDefiniton* WaveDefinition)
+int32 UWaveSpawnerManagerComponent::spawnForLayout(const FWaveLayoutDefiniton* LayoutDefiniton, const FWaveDefiniton* WaveDefinition)
 {
+	const TArray<FName>& waveSpawnerNames = LayoutDefiniton->SpawnerNames;
+	const int32 waveSpawnerCount = waveSpawnerNames.Num();
+	if (waveSpawnerCount == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Wavespawners set for Layout"));
+		return 0;
+	}
+	
+	const TArray<FSpawnDefiniton>& spawnDefArray = LayoutDefiniton->EnemySpawnDefinitons;
+
+	TArray<FSpawnCommand> spawnCommandArray;
+	spawnCommandArray.Reserve(spawnDefArray.Num());
+
+	const float spawnMultipier = WaveDefinition->EnemyNumberModifier;
+
+	for (const FSpawnDefiniton& spawnDef : spawnDefArray)
+	{
+		const int32 numberToSpawn = static_cast<int32>(spawnDef.BaseAmount * spawnMultipier);
+		spawnCommandArray.Add({ spawnDef.EnemyClass, numberToSpawn });
+	}
+
 	int32 spawnedEnemies = 0;
-	FWaveSpawnerGroup* waveSpawnerGroup = spawnGroups.Find(SpawnGroupIndex);
-	if (waveSpawnerGroup == nullptr || waveSpawnerGroup->WaveSpawners.Num() <= 0)
-	{
-		UE_LOG(LogTemp, Error, TEXT("No Wavespawners for group index %d in level!!"), SpawnGroupIndex);
-		return spawnedEnemies;
-	}
 
-	const int32 waveSpawnerCount = waveSpawnerGroup->WaveSpawners.Num();
-	TArray<AWaveSpawner*> waveSpawnerArray = waveSpawnerGroup->WaveSpawners;
-
-	// Add Commands to the spawner's pools
-	for (const FSpawnDefiniton& spawnDef : LayoutDefiniton->EnemySpawnDefinitons)
-	{
-		const int32 TotalEnemyAmount = static_cast<int32>(spawnDef.baseAmount * WaveDefinition->enemyNumberModifier);
-		const int32 EnemyAmountPerSpawner = TotalEnemyAmount / waveSpawnerCount;
-		const int32 EnemyRemainder = TotalEnemyAmount % waveSpawnerCount;
-
-		spawnedEnemies += TotalEnemyAmount;
-
-		for (int i = 0; i < waveSpawnerCount; ++i)
-		{
-			// Decides if an additional enemy needs to be added. Can be 0 or 1
-			int32 additionalEnemy = EnemyRemainder / (i+1);
-			waveSpawnerArray[i]->AddToNextWavePool({ spawnDef.EnemyClass, EnemyAmountPerSpawner + additionalEnemy });
-		}
-	}
-
-
-	// Start the spawners
+	TArray<AWaveSpawner*> waveSpawnerArray = FindWaveSpawnersByNames(waveSpawnerNames);
 	for (AWaveSpawner* waveSpawner : waveSpawnerArray)
 	{
+		for (const FSpawnCommand& spawnCommand : spawnCommandArray)
+		{
+			waveSpawner->AddToNextWavePool(spawnCommand);
+			spawnedEnemies += spawnCommand.EnemyCount;
+		}
 		waveSpawner->SpawnWave(LayoutDefiniton->WaitTimeBeforeSpawning, LayoutDefiniton->SpawningDuration);
-	}
+	}	
+
 	return spawnedEnemies;
 }
 
@@ -137,3 +140,19 @@ const FWaveDefiniton* UWaveSpawnerManagerComponent::getWaveDefinition(int32 Wave
 		FString::Printf(TEXT("WaveSpawner Manager, Wave: %d"), WaveNumber));
 }
 
+TArray<AWaveSpawner*> UWaveSpawnerManagerComponent::FindWaveSpawnersByNames(const TArray<FName>& Names)
+{
+	TArray<AWaveSpawner*> foundWaveSpawners;
+	foundWaveSpawners.Reserve(Names.Num());
+	for (const FName& name : Names)
+	{
+		AWaveSpawner** spawner = waveSpawners.Find(name);
+		if (spawner == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("WaveSpawner \"%s\" not found in level"), *name.ToString());
+			continue;
+		}
+		foundWaveSpawners.Add(*spawner);
+	}
+	return foundWaveSpawners;
+}

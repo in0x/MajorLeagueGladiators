@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/DataTable.h"
+#include "AI/MlgAICharacter.h"
 #include "WaveLayoutDefinition.generated.h"
 
 USTRUCT(BlueprintType)
@@ -10,10 +11,10 @@ struct FSpawnDefiniton
 
 public:
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ACharacter> EnemyClass;
+	TSubclassOf<AMlgAICharacter> EnemyClass;
 
 	UPROPERTY(EditAnywhere)
-	float baseAmount;
+	float BaseAmount;
 };
 
 USTRUCT(BlueprintType)
@@ -21,6 +22,8 @@ struct FWaveLayoutDefiniton : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY();
 public:
+	UPROPERTY(EditAnywhere)
+	TArray<FName> SpawnerNames;
 
 	UPROPERTY(EditAnywhere)
 	float WaitTimeBeforeSpawning;

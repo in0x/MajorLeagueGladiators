@@ -7,6 +7,7 @@
 
 #include "WaveSpawnerManagerComponent.generated.h"
 
+class AWaveSpawner;
 struct FEnemyDefinition;
 struct FWaveDefiniton;
 struct FWaveLayoutDefiniton;
@@ -32,12 +33,13 @@ private:
 	void gatherSpawners();
 	
 	const FWaveDefiniton* getWaveDefinition(int32 WaveNumber) const;
-	int32 spawnForSpawnerGroupIndex(int32 SpawnGroupIndex, const FWaveLayoutDefiniton* LayoutDefiniton,
-		const FWaveDefiniton* WaveDefinition);
+	int32 spawnForLayout(const FWaveLayoutDefiniton* LayoutDefiniton, const FWaveDefiniton* WaveDefinition);
+	
+	TArray<AWaveSpawner*> FindWaveSpawnersByNames(const TArray<FName>& Names);
 
 	UPROPERTY(EditAnywhere)
 	UDataTable* waveDefinitonTable;
 
 	UPROPERTY(Transient)
-	TMap<int, FWaveSpawnerGroup> spawnGroups;
+	TMap<FName, AWaveSpawner*> waveSpawners;
 };
