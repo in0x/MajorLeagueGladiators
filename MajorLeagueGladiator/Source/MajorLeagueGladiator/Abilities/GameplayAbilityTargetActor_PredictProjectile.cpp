@@ -103,7 +103,6 @@ void AGameplayAbilityTargetActor_PredictProjectile::ConfirmTargetingAndContinue(
 	{
 		if (predictResult.HitResult.bBlockingHit)
 		{
-			TargetProjectileLandLocation = predictResult.PathData.Last().Location;
 			TargetDataReadyDelegate.Broadcast(makeDataHandle());
 		}
 		else

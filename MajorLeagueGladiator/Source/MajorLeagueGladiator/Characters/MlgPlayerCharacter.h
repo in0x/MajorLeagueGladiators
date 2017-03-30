@@ -55,7 +55,7 @@ public:
 	FVector CalcFeetPosition() const;
 
 	UFUNCTION(BlueprintCallable)
-	FVector GetAbilityMoveTargetLocation() const;
+	FVector GetProjectedLocation() const;
 	
 	void SetAbilityMoveTargetLocation(FVector Location);
 	
