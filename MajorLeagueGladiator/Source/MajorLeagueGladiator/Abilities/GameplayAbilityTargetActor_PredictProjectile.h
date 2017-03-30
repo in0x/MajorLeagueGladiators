@@ -30,6 +30,7 @@ public:
 	virtual void StartTargeting(UGameplayAbility* Ability) override;
 	virtual void ConfirmTargetingAndContinue() override;
 	
+	FVector TargetProjectileLandLocation;
 	float TargetProjectileSpeed;
 	float TargetProjectileFlightTime;
 	

@@ -88,9 +88,14 @@ void AGameplayAbilityTargetActor_Raycast::ConfirmTargetingAndContinue()
 	if (IsConfirmTargetingAllowed())
 	{
 		if (EvalTargetFunc(hitResult))
+		{
+
 			TargetDataReadyDelegate.Broadcast(makeDataHandle());
+		}
 		else
+		{
 			CancelTargeting();
+		}
 	}
 }
 

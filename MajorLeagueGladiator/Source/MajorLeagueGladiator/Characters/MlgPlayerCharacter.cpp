@@ -21,6 +21,7 @@ namespace
 	const char* PAWN_COLLISION_PROFILE_NAME = "Pawn";
 	const char* NO_COLLISION_PROFILE_NAME = "NoCollision";
 	const char* VR_CAPSULE_COLLISION_NAME = "VrCapsule";
+	const FVector INVALID_TARGET_LOCATION = FVector(0,0, 9'999'999);
 }
 
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -128,6 +129,23 @@ void AMlgPlayerCharacter::BeginPlay()
 void AMlgPlayerCharacter::OnLand(const FHitResult& hit)
 {
 	StopMovementImmediately_NetMulticast();
+}
+
+FVector AMlgPlayerCharacter::GetAbilityMoveTargetLocation() const
+{
+	return abilityMoveTargetLocation == INVALID_TARGET_LOCATION ? GetActorLocation() : abilityMoveTargetLocation;
+}
+
+void AMlgPlayerCharacter::SetAbilityMoveTargetLocation(FVector Location)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, Location.ToString());
+	abilityMoveTargetLocation = Location;
+}
+
+void AMlgPlayerCharacter::InvalidateAbilityMoveTargetLocation()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Invalidate Target Location"));
+	abilityMoveTargetLocation = INVALID_TARGET_LOCATION;
 }
 
 void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

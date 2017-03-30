@@ -54,6 +54,13 @@ public:
 
 	FVector CalcFeetPosition() const;
 
+	UFUNCTION(BlueprintCallable)
+	FVector GetAbilityMoveTargetLocation() const;
+	
+	void SetAbilityMoveTargetLocation(FVector Location);
+	
+	void InvalidateAbilityMoveTargetLocation();
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* leftMesh;
@@ -67,6 +74,8 @@ protected:
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
 	std::unique_ptr<ChaperoneBounds> pChaperoneBounds;
+
+	FVector abilityMoveTargetLocation;
 
 	UPROPERTY(EditAnywhere)
 	USteamVRChaperoneComponent* chaperone;
