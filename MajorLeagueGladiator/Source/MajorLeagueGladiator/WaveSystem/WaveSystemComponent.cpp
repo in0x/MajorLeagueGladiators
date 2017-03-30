@@ -75,7 +75,7 @@ void UWaveSystemComponent::StartWave(int32 WaveNumber)
 	if (spawnendEnemies == 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Enemies were spawned for Wave %d."
-			"Either the definiton is missing or no enemy could be spawned due to the modifier"));
+			"Either the definiton is missing or no enemy could be spawned due to the modifier"), WaveNumber);
 		return;
 	}
 
