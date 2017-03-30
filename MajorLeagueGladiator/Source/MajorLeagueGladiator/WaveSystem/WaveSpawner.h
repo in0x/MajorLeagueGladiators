@@ -26,10 +26,8 @@ public:
 	// Sets default values for this actor's properties
 	AWaveSpawner(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	void Init(const UDataTable* EnemyDefinitions);
-
 	void AddToNextWavePool(const FSpawnCommand& spawnCommand);
-	void SpawnWave(float WaitTimeBeforeSpawning, float SpawningDuration);
+	void BeginSpawning(float WaitTimeBeforeSpawning, float SpawningDuration);
 	bool IsSpawningFinished() const;
 	const FName& GetUniqueName() const { return uniqueName; }
 
@@ -38,16 +36,13 @@ private:
 	void spawnEnemy();
 	UClass* getAndRemoveNextEnemyClass();
 
-	void finishWave();
+	void endSpawning();
 
 	UFUNCTION()
 	void onSpawnedActorDestroyed(AActor* DestroyedActor);
 	
 	UPROPERTY(Transient)
 	TArray<FSpawnCommand> remainingSpawnPool;
-
-	UPROPERTY(Transient)
-	const UDataTable* enemyDefinitions;
 
 	UPROPERTY(EditAnywhere)
 	FName uniqueName;

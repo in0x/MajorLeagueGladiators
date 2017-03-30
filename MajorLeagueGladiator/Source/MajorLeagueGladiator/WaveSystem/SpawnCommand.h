@@ -10,5 +10,5 @@ struct FSpawnCommand
 public:
 
 	TSubclassOf<AMlgAICharacter> EnemyClass;
-	int EnemyCount;
+	int32 EnemyCount;
 };
