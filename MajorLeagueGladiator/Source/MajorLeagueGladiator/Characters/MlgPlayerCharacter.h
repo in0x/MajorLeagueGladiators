@@ -16,6 +16,7 @@ class UMlgAbilitySet;
 class UVRControllerComponent;
 class AMlgGrippableStaticMeshActor;
 class USteamVRChaperoneComponent;
+class UTriggerZoneComponent;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgPlayerCharacter : public AVRSimpleCharacter, public IAbilitySystemInterface
@@ -78,6 +79,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* bodyMesh;
+
+	UPROPERTY(EditAnywhere)
+	UTriggerZoneComponent* myHealthTriggerZone;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AMlgGrippableStaticMeshActor> startWeaponClass;

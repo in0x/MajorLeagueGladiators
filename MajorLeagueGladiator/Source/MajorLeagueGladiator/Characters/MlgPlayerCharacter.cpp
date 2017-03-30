@@ -14,6 +14,7 @@
 #include "Abilities/MlgAbilitySet.h"
 #include "MlgGrippableStaticMeshActor.h"
 #include "../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Classes/SteamVRChaperoneComponent.h"
+#include "TriggerZoneComponent.h"
 
 namespace 
 {
@@ -41,7 +42,6 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	leftMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftMesh"));
 	rightMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightMesh"));
-
 	bodyMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh"));
 	
 	leftMesh->SetupAttachment(LeftMotionController);
@@ -70,6 +70,13 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	hudHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 	hudHealth->SetupAttachment(leftMesh, FName(TEXT("Touch")));
 	hudHealth->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+
+	myHealthTriggerZone = ObjectInitializer.CreateDefaultSubobject<UTriggerZoneComponent>(this, TEXT("TriggerZoneHealth"));
+	myHealthTriggerZone->SetupAttachment(VRReplicatedCamera);
+	myHealthTriggerZone->SetTriggerType(TriggerType::Health);
+	myHealthTriggerZone->SetRelativeScale3D({ 0.2, 0.2, 0.2 });
+	myHealthTriggerZone->SetRelativeLocation({ 0, 0, -20});
+
 
 	auto classString = TEXT("WidgetBlueprint'/Game/BluePrints/PlayerHudBP.PlayerHudBP'");
 	classString = TEXT("/Game/BluePrints/PlayerHudBP");
