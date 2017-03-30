@@ -23,7 +23,7 @@ class MAJORLEAGUEGLADIATOR_API AWaveSpawner : public AActor
 	GENERATED_BODY()
 	
 public:	
-	static const FName INVADLID_NAME;
+	static const FName INVALID_NAME;
 
 	// Sets default values for this actor's properties
 	AWaveSpawner(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
