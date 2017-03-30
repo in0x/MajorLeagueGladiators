@@ -35,10 +35,10 @@ public:
 
 private:
 
-	void SpawnEnemy();
-	UClass* GetAndRemoveNextEnemyClass();
+	void spawnEnemy();
+	UClass* getAndRemoveNextEnemyClass();
 
-	void FinishWave();
+	void finishWave();
 
 	UFUNCTION()
 	void onSpawnedActorDestroyed(AActor* DestroyedActor);
