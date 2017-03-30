@@ -19,6 +19,7 @@ namespace
 {
 	const char* PAWN_COLLISION_PROFILE_NAME = "Pawn";
 	const char* NO_COLLISION_PROFILE_NAME = "NoCollision";
+	const char* VR_CAPSULE_COLLISION_NAME = "VrCapsule";
 }
 
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -54,6 +55,8 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 		leftMesh->SetStaticMesh(multiMesh.Object);
 		rightMesh->SetStaticMesh(multiMesh.Object);
 	}
+	
+	GetCapsuleComponent()->SetCollisionProfileName(VR_CAPSULE_COLLISION_NAME);
 
 	LeftMotionController->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	RightMotionController->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
@@ -62,10 +65,11 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	bodyMesh->SetupAttachment(VRReplicatedCamera);
 	bodyMesh->SetOwnerNoSee(true);
-	bodyMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+	bodyMesh->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
 
 	hudHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 	hudHealth->SetupAttachment(leftMesh, FName(TEXT("Touch")));
+	hudHealth->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
 	auto classString = TEXT("WidgetBlueprint'/Game/BluePrints/PlayerHudBP.PlayerHudBP'");
 	classString = TEXT("/Game/BluePrints/PlayerHudBP");
@@ -103,26 +107,6 @@ void AMlgPlayerCharacter::BeginPlay()
 		bUseControllerRotationYaw = true;
 #endif
 	}
-
-	if (healthTriggerClass)
-	{
-		auto healthTrigger = GetWorld()->SpawnActor<AActor>(healthTriggerClass, FTransform());
-		healthTrigger->AttachToComponent(VRReplicatedCamera, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
-		healthTrigger->SetOwner(this);
-		auto triggerComp = healthTrigger->GetComponentByClass(UTriggerZoneComponent::StaticClass());
-
-		healthTrigger->SetActorScale3D(FVector(1, 1, 1));
-
-		if (triggerComp)
-		{
-			CastChecked<UTriggerZoneComponent>(triggerComp)->SetTriggerType(TriggerType::Health);
-		}
-	}
-	else
-	{
-		UE_LOG(DebugLog, Warning, TEXT("No class set for playercharacter health trigger"))
-	}
-
 	auto healthWidget = CastChecked<UPlayerHudWidget>(hudHealth->GetUserWidgetObject());
 	healthWidget->OnAttachPlayer(this);
 
