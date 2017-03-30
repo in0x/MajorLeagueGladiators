@@ -87,6 +87,8 @@ void UDamageVisualizerComponent::onDamageReceived(AActor* DamagedActor, const UD
 
 void UDamageVisualizerComponent::onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation, const FVector& OriginDirection, const UDamageType* DamageType)
 {
+	UE_LOG(DebugLog, Log, TEXT("UDamageVisualizerComponent::onPointDamageReceived: DamageType class fullname: %s"), *DamageType->GetClass()->GetFullName());
+
 	FTransform visualizationOrigin;
 	visualizationOrigin.SetLocation(HitLocation);
 	//The emitter's pitch has to be rotated by 90 to get the expected look at rotation
