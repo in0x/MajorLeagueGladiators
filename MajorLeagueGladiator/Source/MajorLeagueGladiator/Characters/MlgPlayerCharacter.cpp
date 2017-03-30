@@ -71,13 +71,14 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	hudHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 	hudHealth->SetupAttachment(leftMesh, FName(TEXT("Touch")));
 	hudHealth->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
-
+	
+	ConstructorHelpers::FObjectFinder<UStaticMesh> cubeMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Sphere.Shape_Sphere'"));
 	healthTriggerZone = ObjectInitializer.CreateDefaultSubobject<UTriggerZoneComponent>(this, TEXT("healthTriggerZone"));
 	healthTriggerZone->SetupAttachment(VRReplicatedCamera);
 	healthTriggerZone->SetTriggerType(TriggerType::Health);
 	healthTriggerZone->SetRelativeScale3D({ 0.2, 0.2, 0.2 });
 	healthTriggerZone->SetRelativeLocation({ 0, 0, -20});
-
+	healthTriggerZone->SetStaticMesh(cubeMesh.Object);
 
 	auto classString = TEXT("WidgetBlueprint'/Game/BluePrints/PlayerHudBP.PlayerHudBP'");
 	classString = TEXT("/Game/BluePrints/PlayerHudBP");
