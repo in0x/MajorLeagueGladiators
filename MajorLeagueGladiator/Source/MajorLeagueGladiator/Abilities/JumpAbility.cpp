@@ -53,11 +53,12 @@ void UJumpAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 
 void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data) 
 {
-	auto player = CastChecked<ACharacter>(GetOwningActorFromActorInfo());
+	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
 
 	if (player->HasAuthority())
 	{
 		player->LaunchCharacter(Data.Data[0]->GetHitResult()->TraceStart, true, true); 
+		player->SetAbilityMoveTargetLocation(targetingSpawnedActor->TargetProjectileLandLocation);
 	}
 
 	player->MovementModeChangedDelegate.AddDynamic(this, &UJumpAbility::OnMovementModeChanged);
@@ -73,8 +74,11 @@ void UJumpAbility::OnMovementModeChanged(ACharacter* Character, EMovementMode Pr
 	if (Character->GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Walking)
 	{
 		Character->MovementModeChangedDelegate.RemoveDynamic(this, &UJumpAbility::OnMovementModeChanged);
+	
 		AMlgPlayerCharacter* mlgPlayerChar = CastChecked<AMlgPlayerCharacter>(Character);
 		mlgPlayerChar->StopMovementImmediately_NetMulticast();
+		mlgPlayerChar->InvalidateAbilityMoveTargetLocation();
+		
 		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 	}
 }

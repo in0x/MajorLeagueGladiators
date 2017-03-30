@@ -93,6 +93,9 @@ void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 		waitTargetDataTask->EndTask();
 		waitTargetDataTask = nullptr;
 	}
+
+	AMlgPlayerCharacter* player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	player->InvalidateAbilityMoveTargetLocation();
 }
 
 void UJumpDashAbility::OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
@@ -192,7 +195,9 @@ void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle
 	const FVector direction = feetToTargetVector.GetUnsafeNormal();
 	const FVector zNormalizedDirection = direction / std::abs(direction.Z);
 	const FVector velocity = zNormalizedDirection * dashSpeed;
-
+	
+	AMlgPlayerCharacter* player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	player->SetAbilityMoveTargetLocation(targetLocation);
 	BeginDashing(velocity);
 }
 
