@@ -350,8 +350,14 @@ bool AMlgPlayerCharacter::leftHandDrop_Server_Validate()
 void AMlgPlayerCharacter::leftHandDrop_Server_Implementation()
 {
 	UVRControllerComponent* leftController = CastChecked<UVRControllerComponent>(LeftMotionController);
-	leftController->EndUseGrippedActors();
-	leftController->DropAllGrips();
+	if (leftController->HasGrip())
+	{
+		leftController->UseGrippedActors();
+	}
+	else
+	{
+		leftController->GrabNearestActor();
+	}
 }
 
 // Right hand.
@@ -363,8 +369,14 @@ bool AMlgPlayerCharacter::rightHandGrab_Server_Validate()
 void AMlgPlayerCharacter::rightHandGrab_Server_Implementation()
 {
 	UVRControllerComponent* rightController = CastChecked<UVRControllerComponent>(RightMotionController);
-	rightController->UseGrippedActors();
-	rightController->GrabNearestActor();
+	if (rightController->HasGrip())
+	{
+		rightController->UseGrippedActors();
+	}
+	else
+	{
+		rightController->GrabNearestActor();
+	}
 }
 
 bool AMlgPlayerCharacter::rightHandRelease_Server_Validate()
