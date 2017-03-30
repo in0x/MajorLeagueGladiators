@@ -9,6 +9,11 @@
 #include "MlgPlayerController.h"
 #include "Projectiles/HitscanProjectile.h"
 
+namespace
+{
+	const char* NO_COLLISION_PROFILE_NAME = "NoCollision";
+}
+
 AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, recoilAnimBackDuration(0.5f)
@@ -28,6 +33,7 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 
 	laserMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LaserMeshComponent"));
 	laserMesh->SetupAttachment(GetStaticMeshComponent(), FName("ProjectileSpawn"));
+	laserMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
 	/*boltAction = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, TEXT("BoltAction")); // Removed until we upgrade to 4.15
 	boltAction->SetupAttachment(GetRootComponent(), FName("BoltAction"));
@@ -41,12 +47,15 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	scopeMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("ScopeMesh"));
 	scopeMesh->SetIsReplicated(true);
 	scopeMesh->SetupAttachment(GetRootComponent(), FName("UI"));
+	scopeMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+	
 
 	ammoComponent = ObjectInitializer.CreateDefaultSubobject<UAmmoComponent>(this, TEXT("AmmoComponent"));
 
 	ammoCountWidget = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("AmmoCounterWidget"));
 	ammoCountWidget->SetupAttachment(GetRootComponent(), FName(TEXT("UI")));
 	ammoCountWidget->SetIsReplicated(true);
+	ammoCountWidget->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 } 
 
 void AHitScanGunActor::BeginPlay()
