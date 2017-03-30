@@ -68,7 +68,7 @@ void UPlayAreaMeshComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 
 	SetWorldScale3D(FVector(outLengthX, outLengthY, 100));
 	SetRelativeRotation(outRotator);
-	AddRelativeLocation(curLoc);
+	AddRelativeLocation(-curLoc);
 }
 
 void UPlayAreaMeshComponent::SetIsTargetValid(bool bIsTargetValid)
