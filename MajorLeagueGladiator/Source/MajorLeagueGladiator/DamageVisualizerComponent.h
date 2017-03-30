@@ -42,8 +42,6 @@ struct FDamageVisual
 	{}
 };
 
-class UDamageReceiverComponent;
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MAJORLEAGUEGLADIATOR_API UDamageVisualizerComponent : public UActorComponent
 {
