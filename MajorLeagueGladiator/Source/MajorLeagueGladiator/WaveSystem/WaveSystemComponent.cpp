@@ -15,6 +15,7 @@ void UWaveSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UWaveSystemComponent, remainingEnemiesForWave);
+	DOREPLIFETIME(UWaveSystemComponent, currentWaveNumber);
 }
 
 void UWaveSystemComponent::BeginPlay()
@@ -49,12 +50,13 @@ void UWaveSystemComponent::StartNextWave()
 
 void UWaveSystemComponent::StartWave(int32 WaveNumber)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Beginn Spawning Wave %d"), WaveNumber));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Beginn Spawning Wave %d"), WaveNumber));
 	if (!GetOwner()->HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave on client"));
 		return;
 	}
+
 	if (GetRemainingEnemiesForWave() > 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave while wave is still in progress"));
@@ -71,15 +73,15 @@ void UWaveSystemComponent::StartWave(int32 WaveNumber)
 		return;
 	}
 
-	const int32 spawnendEnemies = spawnManager->StartWave(WaveNumber);
-	if (spawnendEnemies == 0)
+	const int32 waveEnemyCount = spawnManager->StartWave(WaveNumber);
+	if (waveEnemyCount == 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Enemies were spawned for Wave %d."
 			"Either the definiton is missing or no enemy could be spawned due to the modifier"), WaveNumber);
 		return;
 	}
 
-	ChangeRemainingEnemiesForWave(spawnendEnemies);
+	ChangeRemainingEnemiesForWave(waveEnemyCount);
 }
 
 void UWaveSystemComponent::ChangeRemainingEnemiesForWave(int32 ChangeInValue)
@@ -95,15 +97,16 @@ void UWaveSystemComponent::SetRemainingEnemiesForWave(int32 NewRemainingEnemiesF
 		return;
 	}
 	check(NewRemainingEnemiesForWave >= 0);
-
-	int32 oldRemainingEnemiesForWave = remainingEnemiesForWave;
-	remainingEnemiesForWave = NewRemainingEnemiesForWave;
-	if (remainingEnemiesForWave == 0)
+	
+	if (NewRemainingEnemiesForWave == 0)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Wave %d has been defeated"), currentWaveNumber));
+		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Wave %d has been defeated"), currentWaveNumber));
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, this, &UWaveSystemComponent::StartNextWave, timeBetweenWavesSeconds);	
 	}
+
+	int32 oldRemainingEnemiesForWave = remainingEnemiesForWave;
+	remainingEnemiesForWave = NewRemainingEnemiesForWave;
 	fireRemainingEnemiesForWaveChangedDelegates(oldRemainingEnemiesForWave);
 }
 

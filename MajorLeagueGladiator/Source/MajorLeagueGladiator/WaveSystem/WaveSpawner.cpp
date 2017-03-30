@@ -15,17 +15,12 @@ AWaveSpawner::AWaveSpawner(const FObjectInitializer& ObjectInitializer)
 	bNetLoadOnClient = false;
 }
 
-void AWaveSpawner::Init(const UDataTable* EnemyDefinitions)
-{
-	enemyDefinitions = EnemyDefinitions;
-}
-
 void AWaveSpawner::AddToNextWavePool(const FSpawnCommand& spawnCommand)
 {
 	if (!IsSpawningFinished())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Wave is was still running when next enmies were added to pool!"));
-		finishWave();
+		endSpawning();
 	}
 
 	if (spawnCommand.EnemyCount <= 0)
@@ -36,9 +31,9 @@ void AWaveSpawner::AddToNextWavePool(const FSpawnCommand& spawnCommand)
 	remainingSpawnPool.Add(spawnCommand);
 }
 
-void AWaveSpawner::SpawnWave(float WaitTimeBeforeSpawning, float SpawningDuration)
+void AWaveSpawner::BeginSpawning(float WaitTimeBeforeSpawning, float SpawningDuration)
 {	
-	if (remainingSpawnPool.Num() <= 0)
+	if (remainingSpawnPool.Num() == 0)
 	{
 		return;
 	}
@@ -86,23 +81,24 @@ UClass* AWaveSpawner::getAndRemoveNextEnemyClass()
 		UE_LOG(LogTemp, Warning, TEXT("Trying getting next enemy while spawning has already been finished"));
 		return nullptr;
 	}
+	check(remainingSpawnPool.Num() > 0);
 
 	UClass* enemyClass = remainingSpawnPool[0].EnemyClass;
 	check(remainingSpawnPool[0].EnemyCount > 0);
 	remainingSpawnPool[0].EnemyCount -= 1;
-	if (remainingSpawnPool[0].EnemyCount <= 0)
+	if (remainingSpawnPool[0].EnemyCount == 0)
 	{
 		remainingSpawnPool.RemoveAt(0);
-		if (remainingSpawnPool.Num() <= 0)
+		if (remainingSpawnPool.Num() == 0)
 		{
-			finishWave();
+			endSpawning();
 		}
 	}
 
 	return enemyClass;
 }
 
-void AWaveSpawner::finishWave()
+void AWaveSpawner::endSpawning()
 {
 	FTimerManager& timermanager = GetWorldTimerManager();
 	timermanager.ClearTimer(spawnTimerHandle);
@@ -111,6 +107,7 @@ void AWaveSpawner::finishWave()
 
 void AWaveSpawner::onSpawnedActorDestroyed(AActor* DestroyedActor)
 {
+	// TODO: (FS) possible refactoring
 	check(HasAuthority());
 	GetWorld()->GetGameState()->FindComponentByClass<UWaveSystemComponent>()
 		->OnEnemyKilled(CastChecked<ACharacter>(DestroyedActor));

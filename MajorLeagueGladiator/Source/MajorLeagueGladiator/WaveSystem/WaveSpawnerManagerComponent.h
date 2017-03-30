@@ -22,8 +22,8 @@ class MAJORLEAGUEGLADIATOR_API UWaveSpawnerManagerComponent : public UActorCompo
 {
 	GENERATED_BODY()
 public:
-	UWaveSpawnerManagerComponent();
 
+	// returns how many enemies will be spawned in this wave
 	int32 StartWave(int32 WaveNumber);
 protected:
 	void BeginPlay();

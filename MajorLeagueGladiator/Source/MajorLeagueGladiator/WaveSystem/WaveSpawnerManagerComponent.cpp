@@ -14,15 +14,11 @@ namespace
 	}
 }
 
-UWaveSpawnerManagerComponent::UWaveSpawnerManagerComponent()
-{
-}
-
 void UWaveSpawnerManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
 	gatherSpawners();
-	UWorld* world = GetWorld();
 }
 
 void UWaveSpawnerManagerComponent::gatherSpawners()
@@ -36,7 +32,6 @@ void UWaveSpawnerManagerComponent::gatherSpawners()
 
 		const FName& uniqueName = waveSpawner->GetUniqueName();
 
-
 		if (uniqueName == AWaveSpawner::INVALID_NAME)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("The uniqueName for Wavespawner \"%s\" has not been set"),
@@ -48,16 +43,15 @@ void UWaveSpawnerManagerComponent::gatherSpawners()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("The for Wavespawner \"%s\" is not unique"),
 				*waveSpawner->GetName());
+			continue;
 		}
 		
 		waveSpawners.Add(uniqueName, waveSpawner);
 	}
 }
 
-
 int32 UWaveSpawnerManagerComponent::StartWave(int32 WaveNumber)
 {
-	int32 spawnedEnemies = 0;
 	const FWaveDefiniton* waveDefiniton = getWaveDefinition(WaveNumber);
 	if (waveDefiniton == nullptr)
 	{
@@ -71,15 +65,16 @@ int32 UWaveSpawnerManagerComponent::StartWave(int32 WaveNumber)
 		return 0;
 	}
 
+	int32 waveEnemyCount = 0;
+
 	TArray<FWaveLayoutDefiniton*> outLayoutDefinitions;
 	layoutDefinitionTable->GetAllRows(TEXT("WaveSpawner Manager"), outLayoutDefinitions);
 	for (const FWaveLayoutDefiniton* waveLayout : outLayoutDefinitions)
 	{
-
-		spawnedEnemies += spawnForLayout(waveLayout, waveDefiniton);
+		waveEnemyCount += spawnForLayout(waveLayout, waveDefiniton);
 	}
 
-	return spawnedEnemies;
+	return waveEnemyCount;
 }
 
 int32 UWaveSpawnerManagerComponent::spawnForLayout(const FWaveLayoutDefiniton* LayoutDefiniton, const FWaveDefiniton* WaveDefinition)
@@ -105,7 +100,7 @@ int32 UWaveSpawnerManagerComponent::spawnForLayout(const FWaveLayoutDefiniton* L
 		spawnCommandArray.Add({ spawnDef.EnemyClass, numberToSpawn });
 	}
 
-	int32 spawnedEnemies = 0;
+	int32 layoutEnemyCount = 0;
 
 	TArray<AWaveSpawner*> waveSpawnerArray = FindWaveSpawnersByNames(waveSpawnerNames);
 	for (AWaveSpawner* waveSpawner : waveSpawnerArray)
@@ -113,12 +108,12 @@ int32 UWaveSpawnerManagerComponent::spawnForLayout(const FWaveLayoutDefiniton* L
 		for (const FSpawnCommand& spawnCommand : spawnCommandArray)
 		{
 			waveSpawner->AddToNextWavePool(spawnCommand);
-			spawnedEnemies += spawnCommand.EnemyCount;
+			layoutEnemyCount += spawnCommand.EnemyCount;
 		}
-		waveSpawner->SpawnWave(LayoutDefiniton->WaitTimeBeforeSpawning, LayoutDefiniton->SpawningDuration);
+		waveSpawner->BeginSpawning(LayoutDefiniton->WaitTimeBeforeSpawning, LayoutDefiniton->SpawningDuration);
 	}	
 
-	return spawnedEnemies;
+	return layoutEnemyCount;
 }
 
 const FWaveDefiniton* UWaveSpawnerManagerComponent::getWaveDefinition(int32 WaveNumber) const

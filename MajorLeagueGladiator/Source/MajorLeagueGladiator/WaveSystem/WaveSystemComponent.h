@@ -42,6 +42,7 @@ private:
 
 	UFUNCTION()
 	void onRep_remainingEnemiesForWave(int32 oldRemainingEnemiesForWave);
+
 	void fireRemainingEnemiesForWaveChangedDelegates(int32 oldRemainingEnemiesForWave);
 
 	UPROPERTY(ReplicatedUsing = onRep_remainingEnemiesForWave, Transient)
@@ -56,6 +57,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	float timeBetweenWavesSeconds;
 
+	UPROPERTY(Replicated, Transient)
 	int32 currentWaveNumber;
 };
 
