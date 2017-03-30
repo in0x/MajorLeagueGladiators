@@ -4,6 +4,7 @@
 #include "WeakpointComponent.h"
 
 UWeakpointComponent::UWeakpointComponent()
+	: bDebugDrawWeakpoints(false)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
