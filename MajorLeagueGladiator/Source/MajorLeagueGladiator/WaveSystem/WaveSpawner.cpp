@@ -25,7 +25,7 @@ void AWaveSpawner::AddToNextWavePool(const FSpawnCommand& spawnCommand)
 	if (!IsSpawningFinished())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Wave is was still running when next enmies were added to pool!"));
-		FinishWave();
+		finishWave();
 	}
 
 	if (spawnCommand.EnemyCount <= 0)
@@ -53,7 +53,7 @@ void AWaveSpawner::SpawnWave(float WaitTimeBeforeSpawning, float SpawningDuratio
 	isCurrentlySpawning = true;
 
 	FTimerManager& timermanager = GetWorldTimerManager();
-	timermanager.SetTimer(spawnTimerHandle, this, &AWaveSpawner::SpawnEnemy, intervalTime, true, WaitTimeBeforeSpawning);
+	timermanager.SetTimer(spawnTimerHandle, this, &AWaveSpawner::spawnEnemy, intervalTime, true, WaitTimeBeforeSpawning);
 }
 
 bool AWaveSpawner::IsSpawningFinished() const
@@ -61,10 +61,10 @@ bool AWaveSpawner::IsSpawningFinished() const
 	return !isCurrentlySpawning;
 }
 
-void AWaveSpawner::SpawnEnemy()
+void AWaveSpawner::spawnEnemy()
 {
 	check(HasAuthority());
-	UClass* enemyClass = GetAndRemoveNextEnemyClass();
+	UClass* enemyClass = getAndRemoveNextEnemyClass();
 	UWorld* world = GetWorld();
 
 	FActorSpawnParameters spawnParams;
@@ -79,7 +79,7 @@ void AWaveSpawner::SpawnEnemy()
 	spawnedActor->OnDestroyed.AddDynamic(this, &AWaveSpawner::onSpawnedActorDestroyed);
 }
 
-UClass* AWaveSpawner::GetAndRemoveNextEnemyClass()
+UClass* AWaveSpawner::getAndRemoveNextEnemyClass()
 {
 	if (IsSpawningFinished())
 	{
@@ -95,14 +95,14 @@ UClass* AWaveSpawner::GetAndRemoveNextEnemyClass()
 		remainingSpawnPool.RemoveAt(0);
 		if (remainingSpawnPool.Num() <= 0)
 		{
-			FinishWave();
+			finishWave();
 		}
 	}
 
 	return enemyClass;
 }
 
-void AWaveSpawner::FinishWave()
+void AWaveSpawner::finishWave()
 {
 	FTimerManager& timermanager = GetWorldTimerManager();
 	timermanager.ClearTimer(spawnTimerHandle);
