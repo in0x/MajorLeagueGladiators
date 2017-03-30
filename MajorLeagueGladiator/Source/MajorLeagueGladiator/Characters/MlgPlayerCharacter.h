@@ -80,9 +80,6 @@ private:
 	UStaticMeshComponent* bodyMesh;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AActor> healthTriggerClass;
-
-	UPROPERTY(EditAnywhere)
 	TSubclassOf<AMlgGrippableStaticMeshActor> startWeaponClass;
 
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_AttachedWeapon)
