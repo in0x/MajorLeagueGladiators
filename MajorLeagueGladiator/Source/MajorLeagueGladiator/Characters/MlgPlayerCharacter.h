@@ -81,7 +81,7 @@ private:
 	UStaticMeshComponent* bodyMesh;
 
 	UPROPERTY(EditAnywhere)
-	UTriggerZoneComponent* myHealthTriggerZone;
+	UTriggerZoneComponent* healthTriggerZone;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AMlgGrippableStaticMeshActor> startWeaponClass;
