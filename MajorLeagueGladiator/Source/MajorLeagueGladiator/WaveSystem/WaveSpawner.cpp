@@ -4,12 +4,12 @@
 #include "WaveSpawner.h"
 #include "WaveSystem/WaveSystemComponent.h"
 
-const int32 AWaveSpawner::INVADLID_SPAWN_GROUP = -1;
+const FName AWaveSpawner::INVADLID_NAME(TEXT("INVALID_NAME"));
 
 AWaveSpawner::AWaveSpawner(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, isCurrentlySpawning(false)
-	, spawnGroup(INVADLID_SPAWN_GROUP)
+	, uniqueName(INVADLID_NAME)
 {
 	RootComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, "rootComp");
 	bNetLoadOnClient = false;
@@ -28,7 +28,7 @@ void AWaveSpawner::AddToNextWavePool(const FSpawnCommand& spawnCommand)
 		FinishWave();
 	}
 
-	if (spawnCommand.enemyCount <= 0)
+	if (spawnCommand.EnemyCount <= 0)
 	{
 		return;
 	}
@@ -46,7 +46,7 @@ void AWaveSpawner::SpawnWave(float WaitTimeBeforeSpawning, float SpawningDuratio
 	int numberOfEnemiesToSpawn = 0;
 	for (const FSpawnCommand& spawnCommand : remainingSpawnPool)
 	{
-		numberOfEnemiesToSpawn += spawnCommand.enemyCount;
+		numberOfEnemiesToSpawn += spawnCommand.EnemyCount;
 	}
 
 	const float intervalTime = SpawningDuration / numberOfEnemiesToSpawn;
@@ -87,10 +87,10 @@ UClass* AWaveSpawner::GetAndRemoveNextEnemyClass()
 		return nullptr;
 	}
 
-	UClass* enemyClass = remainingSpawnPool[0].enemyClass;
-	check(remainingSpawnPool[0].enemyCount > 0);
-	remainingSpawnPool[0].enemyCount -= 1;
-	if (remainingSpawnPool[0].enemyCount <= 0)
+	UClass* enemyClass = remainingSpawnPool[0].EnemyClass;
+	check(remainingSpawnPool[0].EnemyCount > 0);
+	remainingSpawnPool[0].EnemyCount -= 1;
+	if (remainingSpawnPool[0].EnemyCount <= 0)
 	{
 		remainingSpawnPool.RemoveAt(0);
 		if (remainingSpawnPool.Num() <= 0)

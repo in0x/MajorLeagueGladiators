@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AI/MlgAICharacter.h"
 #include "SpawnCommand.generated.h"
 
 USTRUCT()
@@ -7,6 +8,7 @@ struct FSpawnCommand
 {
 	GENERATED_USTRUCT_BODY();
 public:
-	TSubclassOf<ACharacter> enemyClass;
-	int enemyCount;
+
+	TSubclassOf<AMlgAICharacter> EnemyClass;
+	int EnemyCount;
 };

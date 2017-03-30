@@ -23,7 +23,7 @@ class MAJORLEAGUEGLADIATOR_API AWaveSpawner : public AActor
 	GENERATED_BODY()
 	
 public:	
-	static const int32 INVADLID_SPAWN_GROUP;
+	static const FName INVADLID_NAME;
 
 	// Sets default values for this actor's properties
 	AWaveSpawner(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
@@ -33,7 +33,7 @@ public:
 	void AddToNextWavePool(const FSpawnCommand& spawnCommand);
 	void SpawnWave(float WaitTimeBeforeSpawning, float SpawningDuration);
 	bool IsSpawningFinished() const;
-	int GetSpawnGroupIndex() const { return spawnGroup; }
+	const FName& GetUniqueName() const { return uniqueName; }
 
 private:
 
@@ -52,7 +52,7 @@ private:
 	const UDataTable* enemyDefinitions;
 
 	UPROPERTY(EditAnywhere)
-	int spawnGroup;
+	FName uniqueName;
 
 	FTimerHandle spawnTimerHandle;
 

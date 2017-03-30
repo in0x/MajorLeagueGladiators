@@ -13,5 +13,5 @@ public:
 	UDataTable* WaveLayout;
 
 	UPROPERTY(EditAnywhere)
-	float enemyNumberModifier;
+	float EnemyNumberModifier;
 };
