@@ -3,7 +3,7 @@
 #include "MajorLeagueGladiator.h"
 #include "DpsGrenadeProjectile.h"
 #include "ShieldActor.h"
-#include "CollisionStatics.h"
+#include "MlgGameplayStatics.h"
 
 namespace
 {
@@ -12,6 +12,13 @@ namespace
 
 ADpsGrenadeProjectile::ADpsGrenadeProjectile(const FObjectInitializer& ObjectInitializer)
 	: projectileMovementComponent(ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, TEXT("ProjectileMovementComponent")))
+	, explosionMaxDamageRadius(20.f)
+	, explosionRadius(200.f)
+	, maxDamage(50.f)
+	, minDamage(10.f)
+	, damageFalloff(0.5f)
+	, explosionMaxKnockBack(100.f)
+	, timeToExplode(5.f)
 {
 	bReplicates = true;
 	bReplicateMovement = true;
@@ -30,13 +37,10 @@ ADpsGrenadeProjectile::ADpsGrenadeProjectile(const FObjectInitializer& ObjectIni
 
 void ADpsGrenadeProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
-	//TODO(Phil): This copied from PhysicsProjectile, change what we dont need
-
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
-	ADpsGrenadeProjectile* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<ADpsGrenadeProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
-	UPrimitiveComponent* spawnedRootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
+	auto* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<ADpsGrenadeProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
+	auto* spawnedRootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
 
-	spawnedActor->SetLifeSpan(15.f);
 	spawnedActor->FinishSpawning(projectileTransform);
 }
 
@@ -47,7 +51,6 @@ void ADpsGrenadeProjectile::OnProjectileBounce(const FHitResult& ImpactResult, c
 	if (ImpactResult.Actor->GetRootComponent()->Mobility.GetValue() == EComponentMobility::Static)
 	{
 		projectileMovementComponent->Velocity = FVector::ZeroVector;
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Orange, TEXT("STOP"));
 	}	
 }
 
@@ -55,44 +58,82 @@ void ADpsGrenadeProjectile::OnProjectileStop(const FHitResult& ImpactResult)
 {
 	if (AShieldActor* shield = Cast<AShieldActor>(ImpactResult.Actor.Get()))
 	{
-		// Instant Explosion
+		Explode();
 	}
 	else 
 	{
-		// Set off timer and explode
+		FTimerManager& timer = GetWorldTimerManager();
+		timer.SetTimer(explodeTimer, this, &ADpsGrenadeProjectile::Explode, timeToExplode, false);
 	}
 }
 
 void ADpsGrenadeProjectile::Explode()
 {
-	CollisionStatics::GetCollsionChannelByName(PROJECTILE_COLLISION_PROFILE_NAME);
-	//FCollisionQueryParams TraceParams;
-	//TraceParams.bTraceComplex = true;
-	//TraceParams.bReturnPhysicalMaterial = false;
+	TArray<FHitResult> hitResults;
+	FindExplodeAffectedActors(hitResults, true);
 
-	////Ignore Actors
-	//TraceParams.AddIgnoredActor(ActorToIgnore);
+	for (const FHitResult& hit : hitResults)
+	{
+		if (UMlgGameplayStatics::CanDealDamageTo(this, hit.Actor.Get()))
+		{
+			UGameplayStatics::ApplyRadialDamageWithFalloff(
+				GetWorld(), 
+				maxDamage, 
+				minDamage, 
+				GetActorLocation(), 
+				explosionMaxDamageRadius, 
+				explosionRadius,
+				damageFalloff,
+				DamageType,
+				TArray<AActor*>(),
+				this,
+				Instigator->GetController());
+		}
+	}
 
-	//
-	//TArray<FHitResult> hitResults;
-	//ECollisionChannel traceChannel = CollisionStatics::GetCollsionChannelByName(CollisionStatics::GRIPSCAN_TRACE_CHANNEL_NAME);
-
-	//GetWorld()->SweepMultiByChannel(
-	//	hitResults,
-	//	GetActorLocation(),
-	//	GetActorLocation(),
-	//	FQuat(),
-	//	traceChannel,
-	//	FCollisionShape::MakeSphere(Radius),
-	//	TraceParams
-	//	);
-	//
+	Destroy();
 }
 
-void FindExplodeAffectedActors()
+void ADpsGrenadeProjectile::FindExplodeAffectedActors(TArray<FHitResult>& outHits, bool bDrawDebug)
 {
+	GetWorld()->SweepMultiByChannel(
+		outHits,
+		GetActorLocation(),
+		GetActorLocation(),
+		FQuat(),
+		ECollisionChannel::ECC_Pawn,
+		FCollisionShape::MakeSphere(explosionRadius),
+		FCollisionQueryParams()
+		);
 
+	outHits.Sort([](const FHitResult& a, const FHitResult& b)
+	{
+		return a.Actor.Get() < b.Actor.Get();
+	});
+
+	for (int32 i = outHits.Num() - 1; i > 0; --i)
+	{
+		if (outHits[i].Actor == outHits[i - 1].Actor)
+		{
+			outHits.RemoveAt(i - 1);
+		}
+	}
+	
+	if (bDrawDebug)
+	{
+		UWorld* world = GetWorld();
+
+		DrawDebugSphere(world, GetActorLocation(), explosionRadius, 30, FColor::Magenta, false, 5.0f);
+
+		for (const FHitResult& hit : outHits)
+		{
+			DrawDebugSphere(world, hit.Actor->GetActorLocation(), 20.0f, 10, FColor::Red, false, 5.f);
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("%s"), *hit.Actor->GetName()));
+		}
+	}
 }
+
+
 
 
 
