@@ -7,12 +7,12 @@
 #include "MlgPlayerController.h"
 #include "CollisionStatics.h"
 
+//TODO (Flo): FIX multi hit issue
+
 namespace
 {
 	const char* MELEE_WEAPON_COLLISION_PROFILE_NAME = "MeleeWeapon";
 }
-
-//TODO (Flo): FIX multi hit issue
 
 ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
