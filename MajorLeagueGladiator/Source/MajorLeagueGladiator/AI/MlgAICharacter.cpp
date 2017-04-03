@@ -9,6 +9,7 @@
 #include "DamageTypes/EnemyDamage.h"
 #include "DamageReceiverComponent.h"
 #include "DamageVisualizerComponent.h"
+#include "MlgGameplayStatics.h"
 
 namespace
 {
@@ -45,6 +46,8 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 
 float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageEvent& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	Damage = Super::InternalTakePointDamage(Damage, PointDamageEvent, EventInstigator, DamageCauser);
+
 	FWeakpoint hitWeakpoint = weakpoints->FindHitWeakpoint(PointDamageEvent.HitInfo);
 
 	UMeshComponent* mesh = FindComponentByClass<UMeshComponent>();
@@ -59,6 +62,13 @@ float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageE
 	}
 
 	return Damage * hitWeakpoint.DamageMultiplier;
+}
+
+float AMlgAICharacter::InternalTakeRadialDamage(float Damage, const FRadialDamageEvent& RadialDamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Damage = Super::InternalTakeRadialDamage(Damage, RadialDamageEvent, EventInstigator, DamageCauser);
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("RadialDmg: %f"), Damage));
+	return Damage;
 }
 
 

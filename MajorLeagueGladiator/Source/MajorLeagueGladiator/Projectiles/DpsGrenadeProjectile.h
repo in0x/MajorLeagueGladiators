@@ -5,6 +5,9 @@
 #include "Projectiles/BaseProjectile.h"
 #include "DpsGrenadeProjectile.generated.h"
 
+//TODO(Phil): Shield special move: Spawn 4 new DPSGrenades with smaller radius but same damage, throw in random direction in front of shield
+//TODO(Phil): Build a virtual CanBeReflected into baseProjectile, so shield doesnt reflect grenade
+
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API ADpsGrenadeProjectile : public ABaseProjectile
 {
@@ -50,5 +53,4 @@ private:
 	void OnProjectileStop(const FHitResult& ImpactResult);
 
 	void Explode();
-	void FindExplodeAffectedActors(TArray<FHitResult>& outHits, bool bDrawDebug = false);
 };

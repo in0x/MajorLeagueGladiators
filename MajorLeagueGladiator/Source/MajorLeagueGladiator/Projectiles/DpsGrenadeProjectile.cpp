@@ -5,11 +5,6 @@
 #include "ShieldActor.h"
 #include "MlgGameplayStatics.h"
 
-namespace
-{
-	const char* PROJECTILE_COLLISION_PROFILE_NAME = "Projectile";
-}
-
 ADpsGrenadeProjectile::ADpsGrenadeProjectile(const FObjectInitializer& ObjectInitializer)
 	: projectileMovementComponent(ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, TEXT("ProjectileMovementComponent")))
 	, explosionMaxDamageRadius(20.f)
@@ -69,73 +64,20 @@ void ADpsGrenadeProjectile::OnProjectileStop(const FHitResult& ImpactResult)
 
 void ADpsGrenadeProjectile::Explode()
 {
-	TArray<FHitResult> hitResults;
-	FindExplodeAffectedActors(hitResults, true);
-
-	for (const FHitResult& hit : hitResults)
-	{
-		if (UMlgGameplayStatics::CanDealDamageTo(this, hit.Actor.Get()))
-		{
-			UGameplayStatics::ApplyRadialDamageWithFalloff(
-				GetWorld(), 
-				maxDamage, 
-				minDamage, 
-				GetActorLocation(), 
-				explosionMaxDamageRadius, 
-				explosionRadius,
-				damageFalloff,
-				DamageType,
-				TArray<AActor*>(),
-				this,
-				Instigator->GetController());
-		}
-	}
-
+	UMlgGameplayStatics::ApplyRadialDamageWithFalloff(
+		GetWorld(),
+		maxDamage,
+		minDamage,
+		GetActorLocation(),
+		explosionMaxDamageRadius,
+		explosionRadius,
+		damageFalloff,
+		DamageType,
+		this,
+		Instigator->GetController());
+	
 	Destroy();
 }
-
-void ADpsGrenadeProjectile::FindExplodeAffectedActors(TArray<FHitResult>& outHits, bool bDrawDebug)
-{
-	GetWorld()->SweepMultiByChannel(
-		outHits,
-		GetActorLocation(),
-		GetActorLocation(),
-		FQuat(),
-		ECollisionChannel::ECC_Pawn,
-		FCollisionShape::MakeSphere(explosionRadius),
-		FCollisionQueryParams()
-		);
-
-	outHits.Sort([](const FHitResult& a, const FHitResult& b)
-	{
-		return a.Actor.Get() < b.Actor.Get();
-	});
-
-	for (int32 i = outHits.Num() - 1; i > 0; --i)
-	{
-		if (outHits[i].Actor == outHits[i - 1].Actor)
-		{
-			outHits.RemoveAt(i - 1);
-		}
-	}
-	
-	if (bDrawDebug)
-	{
-		UWorld* world = GetWorld();
-
-		DrawDebugSphere(world, GetActorLocation(), explosionRadius, 30, FColor::Magenta, false, 5.0f);
-
-		for (const FHitResult& hit : outHits)
-		{
-			DrawDebugSphere(world, hit.Actor->GetActorLocation(), 20.0f, 10, FColor::Red, false, 5.f);
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("%s"), *hit.Actor->GetName()));
-		}
-	}
-}
-
-
-
-
 
 
 
