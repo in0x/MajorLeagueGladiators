@@ -5,18 +5,15 @@
 #include "Projectiles/BaseProjectile.h"
 #include "DpsGrenadeProjectile.generated.h"
 
-//TODO(Phil): Shield special move: Spawn 4 new DPSGrenades with smaller radius but same damage, throw in random direction in front of shield
-//TODO(Phil): Build a virtual CanBeReflected into baseProjectile, so shield doesnt reflect grenade
-
 class AShieldActor;
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API ADpsGrenadeProjectile : public ABaseProjectile
+class MAJORLEAGUEGLADIATOR_API AGrenadeProjectile : public ABaseProjectile
 {
 	GENERATED_BODY()
 	
 public:
-	ADpsGrenadeProjectile(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	AGrenadeProjectile(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const override;
 	
 	// Radius until which maximum damage will be applied.
@@ -37,16 +34,10 @@ public:
 	float damageFalloff;
 
 	UPROPERTY(EditAnywhere)
-	float explosionMaxKnockBack;
-
-	UPROPERTY(EditAnywhere)
 	float timeToExplode;
 
 	UPROPERTY(EditAnywhere)
-	int32 RefractCount = 4;
-
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* ParticlesTemplate;
+	int32 RefractCount;
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -62,4 +53,5 @@ private:
 
 	void Refract(AShieldActor* ShieldActor);
 	void Explode();
+	void TimedExplode();
 };

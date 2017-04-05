@@ -5,15 +5,15 @@
 #include "ShieldActor.h"
 #include "MlgGameplayStatics.h"
 
-ADpsGrenadeProjectile::ADpsGrenadeProjectile(const FObjectInitializer& ObjectInitializer)
+AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializer)
 	: projectileMovementComponent(ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, TEXT("ProjectileMovementComponent")))
 	, explosionMaxDamageRadius(20.f)
 	, explosionRadius(200.f)
 	, maxDamage(50.f)
 	, minDamage(10.f)
 	, damageFalloff(0.5f)
-	, explosionMaxKnockBack(100.f)
 	, timeToExplode(5.f)
+	, RefractCount(4)
 {
 	bReplicates = true;
 	bReplicateMovement = true;
@@ -26,25 +26,21 @@ ADpsGrenadeProjectile::ADpsGrenadeProjectile(const FObjectInitializer& ObjectIni
 	projectileMovementComponent->ProjectileGravityScale = 0.5f;
 	projectileMovementComponent->Bounciness = 0.1f;
 	
-	projectileMovementComponent->OnProjectileBounce.AddDynamic(this, &ADpsGrenadeProjectile::OnProjectileBounce);
-	projectileMovementComponent->OnProjectileStop.AddDynamic(this, &ADpsGrenadeProjectile::OnProjectileStop);	
-
-	ConstructorHelpers::FObjectFinder<UParticleSystem> particles(TEXT("ParticleSystem'/Game/ParticleSystems/PS_Grenade_Burst.PS_Grenade_Burst'"));
-	
-	ParticlesTemplate = particles.Object;
+	projectileMovementComponent->OnProjectileBounce.AddDynamic(this, &AGrenadeProjectile::OnProjectileBounce);
+	projectileMovementComponent->OnProjectileStop.AddDynamic(this, &AGrenadeProjectile::OnProjectileStop);	
 }
 
-ABaseProjectile* ADpsGrenadeProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
+ABaseProjectile* AGrenadeProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
-	auto* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<ADpsGrenadeProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
+	auto* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<AGrenadeProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
 	auto* spawnedRootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
 
 	spawnedActor->FinishSpawning(projectileTransform);
 	return spawnedActor;
 }
 
-void ADpsGrenadeProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
+void AGrenadeProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
 {
 	// This event is called by HandleImpact, and checks the velocity after calling it.
 	// So by setting the velocity to below the stop threshold, we can stop the projectile.
@@ -53,9 +49,12 @@ void ADpsGrenadeProjectile::OnProjectileBounce(const FHitResult& ImpactResult, c
 	{
 		projectileMovementComponent->Velocity = FVector::ZeroVector;
 	}	
+
+	projectileMovementComponent->ProjectileGravityScale = 1.f;
+	projectileMovementComponent->MaxSpeed = 500.f;
 }
 
-void ADpsGrenadeProjectile::OnProjectileStop(const FHitResult& ImpactResult)
+void AGrenadeProjectile::OnProjectileStop(const FHitResult& ImpactResult)
 {
 	AActor* impactActor = ImpactResult.Actor.Get();
 	
@@ -65,12 +64,11 @@ void ADpsGrenadeProjectile::OnProjectileStop(const FHitResult& ImpactResult)
 	}
 	else 
 	{
-		FTimerManager& timer = GetWorldTimerManager();
-		timer.SetTimer(explodeTimer, this, &ADpsGrenadeProjectile::Explode, timeToExplode, false);
+		TimedExplode();
 	}
 }
 
-void ADpsGrenadeProjectile::Refract(AShieldActor* ShieldActor)  
+void AGrenadeProjectile::Refract(AShieldActor* ShieldActor)  
 {
 	const FTransform spawnTransform = ShieldActor->GetReflectSpawnTransform();
 	const FVector sourceLoc = spawnTransform.GetLocation();
@@ -82,7 +80,7 @@ void ADpsGrenadeProjectile::Refract(AShieldActor* ShieldActor)
 		const FRotator rot(FMath::RandRange(-45, 45), FMath::RandRange(-45, 45), FMath::RandRange(-45, 45)); 
 		const FVector dir = rot.RotateVector(sourceDir);
 
-		auto* proj = CastChecked<ADpsGrenadeProjectile>(FireProjectile(sourceLoc + sourceDir * 10, dir, GetOwner(), Instigator->GetController()));
+		auto* proj = CastChecked<AGrenadeProjectile>(FireProjectile(sourceLoc + sourceDir * 10, dir, GetOwner(), Instigator->GetController()));
 		proj->timeToExplode = 1.f;
 
 		auto* projMovement = proj->FindComponentByClass<UProjectileMovementComponent>();
@@ -96,7 +94,7 @@ void ADpsGrenadeProjectile::Refract(AShieldActor* ShieldActor)
 	Destroy();
 }
 
-void ADpsGrenadeProjectile::Explode()
+void AGrenadeProjectile::Explode()
 {
 	UMlgGameplayStatics::ApplyRadialDamageWithFalloff(
 		GetWorld(),
@@ -108,15 +106,17 @@ void ADpsGrenadeProjectile::Explode()
 		damageFalloff,
 		DamageType,
 		this,
-		Instigator->GetController());
-
-	FTransform particleTrafo = GetTransform();
-	particleTrafo.SetScale3D(FVector(1.f, 1.f, 1.f));
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticlesTemplate, particleTrafo);
+		Instigator->GetController(),
+		true);
 	
 	Destroy();
 }
 
+void AGrenadeProjectile::TimedExplode()
+{
+	FTimerManager& timer = GetWorldTimerManager();
+	timer.SetTimer(explodeTimer, this, &AGrenadeProjectile::Explode, timeToExplode, false);
+}
 
 
 
