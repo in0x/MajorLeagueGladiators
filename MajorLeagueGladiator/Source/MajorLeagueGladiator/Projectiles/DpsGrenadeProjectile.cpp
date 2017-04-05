@@ -12,7 +12,7 @@ AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializ
 	, maxDamage(50.f)
 	, minDamage(10.f)
 	, damageFalloff(0.5f)
-	, timeToExplode(5.f)
+	, timeToExplode(3.f)
 	, RefractCount(4)
 {
 	bReplicates = true;
@@ -76,12 +76,13 @@ void AGrenadeProjectile::Refract(AShieldActor* ShieldActor)
 
 	for (int32 i = 0; i < RefractCount; ++i)
 	{
-		// Sample random dir in hemisphere around source forward
 		const FRotator rot(FMath::RandRange(-45, 45), FMath::RandRange(-45, 45), FMath::RandRange(-45, 45)); 
 		const FVector dir = rot.RotateVector(sourceDir);
 
 		auto* proj = CastChecked<AGrenadeProjectile>(FireProjectile(sourceLoc + sourceDir * 10, dir, GetOwner(), Instigator->GetController()));
 		proj->timeToExplode = 1.f;
+		proj->explosionRadius = explosionRadius * 0.5f;
+		proj->explosionMaxDamageRadius = proj->explosionRadius;
 
 		auto* projMovement = proj->FindComponentByClass<UProjectileMovementComponent>();
 		projMovement->ProjectileGravityScale = 1.f;
@@ -89,6 +90,8 @@ void AGrenadeProjectile::Refract(AShieldActor* ShieldActor)
 
 		auto* mesh = proj->FindComponentByClass<UStaticMeshComponent>();
 		mesh->IgnoreActorWhenMoving(ShieldActor, true);
+
+		proj->TimedExplode();
 	}
 
 	Destroy();
@@ -116,6 +119,9 @@ void AGrenadeProjectile::TimedExplode()
 {
 	FTimerManager& timer = GetWorldTimerManager();
 	timer.SetTimer(explodeTimer, this, &AGrenadeProjectile::Explode, timeToExplode, false);
+
+	projectileMovementComponent->OnProjectileBounce.RemoveDynamic(this, &AGrenadeProjectile::OnProjectileBounce);
+	projectileMovementComponent->OnProjectileStop.RemoveDynamic(this, &AGrenadeProjectile::OnProjectileStop);
 }
 
 
