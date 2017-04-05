@@ -12,7 +12,8 @@ class MAJORLEAGUEGLADIATOR_API AShieldActor : public AMlgGrippableStaticMeshActo
 {
 	GENERATED_BODY()
 public:
-	AShieldActor();
+	AShieldActor(); 
 
 	void OnHitInteractable(const ABaseProjectile* projectile);	
+	FTransform GetReflectSpawnTransform() const;
 };

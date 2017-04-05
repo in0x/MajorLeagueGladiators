@@ -12,8 +12,8 @@ class MAJORLEAGUEGLADIATOR_API ABaseProjectile : public AStaticMeshActor
 public:	
 	ABaseProjectile();
 
-	virtual void FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const {	checkNoEntry();	}
-	
+	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const { checkNoEntry(); return nullptr; }
+
 	UPROPERTY(EditAnywhere)
 	float damage;
 

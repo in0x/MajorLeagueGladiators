@@ -27,7 +27,7 @@ APhysicsProjectile::APhysicsProjectile(const FObjectInitializer& ObjectInitializ
 	projectileMovementComponent->ProjectileGravityScale = 0;
 }
 
-void APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
+ABaseProjectile* APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
 	APhysicsProjectile* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<APhysicsProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
@@ -40,6 +40,7 @@ void APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 
 	spawnedActor->projectileMovementComponent->OnProjectileStop.AddDynamic(spawnedActor, &APhysicsProjectile::OnProjectileStop);
 	spawnedActor->FinishSpawning(projectileTransform);
+	return spawnedActor;
 }
 
 void APhysicsProjectile::NotifyActorBeginOverlap(AActor* OtherActor)

@@ -28,22 +28,28 @@ ADpsGrenadeProjectile::ADpsGrenadeProjectile(const FObjectInitializer& ObjectIni
 	
 	projectileMovementComponent->OnProjectileBounce.AddDynamic(this, &ADpsGrenadeProjectile::OnProjectileBounce);
 	projectileMovementComponent->OnProjectileStop.AddDynamic(this, &ADpsGrenadeProjectile::OnProjectileStop);	
+
+	ConstructorHelpers::FObjectFinder<UParticleSystem> particles(TEXT("ParticleSystem'/Game/ParticleSystems/PS_Grenade_Burst.PS_Grenade_Burst'"));
+	
+	ParticlesTemplate = particles.Object;
 }
 
-void ADpsGrenadeProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
+ABaseProjectile* ADpsGrenadeProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
 	auto* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<ADpsGrenadeProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
 	auto* spawnedRootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
 
 	spawnedActor->FinishSpawning(projectileTransform);
+	return spawnedActor;
 }
 
 void ADpsGrenadeProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
 {
 	// This event is called by HandleImpact, and checks the velocity after calling it.
-	// So by setting the velocity to below the stop threshould, we can stop the projectile.
-	if (ImpactResult.Actor->GetRootComponent()->Mobility.GetValue() == EComponentMobility::Static)
+	// So by setting the velocity to below the stop threshold, we can stop the projectile.
+	if (ImpactResult.Actor->GetRootComponent()->Mobility.GetValue() == EComponentMobility::Static ||
+		Cast<AShieldActor>(ImpactResult.Actor.Get()))
 	{
 		projectileMovementComponent->Velocity = FVector::ZeroVector;
 	}	
@@ -51,15 +57,43 @@ void ADpsGrenadeProjectile::OnProjectileBounce(const FHitResult& ImpactResult, c
 
 void ADpsGrenadeProjectile::OnProjectileStop(const FHitResult& ImpactResult)
 {
-	if (AShieldActor* shield = Cast<AShieldActor>(ImpactResult.Actor.Get()))
+	AActor* impactActor = ImpactResult.Actor.Get();
+	
+	if (AShieldActor* shield = Cast<AShieldActor>(impactActor))
 	{
-		Explode();
+		Refract(shield);
 	}
 	else 
 	{
 		FTimerManager& timer = GetWorldTimerManager();
 		timer.SetTimer(explodeTimer, this, &ADpsGrenadeProjectile::Explode, timeToExplode, false);
 	}
+}
+
+void ADpsGrenadeProjectile::Refract(AShieldActor* ShieldActor)  
+{
+	const FTransform spawnTransform = ShieldActor->GetReflectSpawnTransform();
+	const FVector sourceLoc = spawnTransform.GetLocation();
+	const FVector sourceDir = spawnTransform.GetRotation().GetForwardVector();
+
+	for (int32 i = 0; i < RefractCount; ++i)
+	{
+		// Sample random dir in hemisphere around source forward
+		const FRotator rot(FMath::RandRange(-45, 45), FMath::RandRange(-45, 45), FMath::RandRange(-45, 45)); 
+		const FVector dir = rot.RotateVector(sourceDir);
+
+		auto* proj = CastChecked<ADpsGrenadeProjectile>(FireProjectile(sourceLoc + sourceDir * 10, dir, GetOwner(), Instigator->GetController()));
+		proj->timeToExplode = 1.f;
+
+		auto* projMovement = proj->FindComponentByClass<UProjectileMovementComponent>();
+		projMovement->ProjectileGravityScale = 1.f;
+		projMovement->MaxSpeed = 500.f;
+
+		auto* mesh = proj->FindComponentByClass<UStaticMeshComponent>();
+		mesh->IgnoreActorWhenMoving(ShieldActor, true);
+	}
+
+	Destroy();
 }
 
 void ADpsGrenadeProjectile::Explode()
@@ -75,6 +109,10 @@ void ADpsGrenadeProjectile::Explode()
 		DamageType,
 		this,
 		Instigator->GetController());
+
+	FTransform particleTrafo = GetTransform();
+	particleTrafo.SetScale3D(FVector(1.f, 1.f, 1.f));
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticlesTemplate, particleTrafo);
 	
 	Destroy();
 }

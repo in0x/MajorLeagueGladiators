@@ -14,10 +14,10 @@ class MAJORLEAGUEGLADIATOR_API AHitscanProjectile : public ABaseProjectile
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AHitscanProjectile();
 
-	virtual void FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const override;
+	// Returns nullptr as no actual projectile is spawned.
+	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const override;
 
 	FHitResult Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const;
 

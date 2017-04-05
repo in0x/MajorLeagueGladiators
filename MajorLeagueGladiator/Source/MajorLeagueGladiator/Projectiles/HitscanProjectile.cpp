@@ -14,12 +14,12 @@ AHitscanProjectile::AHitscanProjectile()
 {
 }
 
-void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
+ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
 	if (Role < ROLE_Authority)
 	{
 		UE_LOG(DebugLog, Warning, TEXT("Fire Projectile should not be called on client"));
-		return;
+		return nullptr;
 	}
 
 	FHitResult hitresult = Trace(ProjectileOwner->GetWorld(), Location, DirectionVector, { ProjectileOwner });
@@ -31,7 +31,7 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 
 	if (hitActor == nullptr)
 	{
-		return;
+		return nullptr;
 	}
 
 	if (AShieldActor* interactable = Cast<AShieldActor>(hitActor))
@@ -42,6 +42,8 @@ void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVecto
 	{
 		UGameplayStatics::ApplyPointDamage(hitActor, damage, -DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UPlayerDamage::StaticClass());
 	}
+
+	return nullptr;
 }
 
 FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const
