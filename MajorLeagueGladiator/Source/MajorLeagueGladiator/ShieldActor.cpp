@@ -19,11 +19,15 @@ AShieldActor::AShieldActor()
 	GetStaticMeshComponent()->SetCollisionProfileName(SHIELD_COLLISION_PRESET_NAME);
 }
 
-void AShieldActor::OnHitInteractable(const ABaseProjectile* projectile)
+FTransform AShieldActor::GetReflectSpawnTransform() const
 {
 	checkf(GetStaticMeshComponent()->GetSocketByName(REFLECT_SOCKET_NAME), TEXT("Socket \"AbilityActor\" is missing in the shield actor mesh"));
+	return GetStaticMeshComponent()->GetSocketTransform(REFLECT_SOCKET_NAME);
+}
 
-	FTransform socketTransform = GetStaticMeshComponent()->GetSocketTransform(REFLECT_SOCKET_NAME);
+void AShieldActor::OnHitInteractable(const ABaseProjectile* projectile)
+{
+	FTransform socketTransform = GetReflectSpawnTransform();
 	projectile->FireProjectile(socketTransform.GetLocation(), socketTransform.Rotator().Vector(), this, Instigator->GetController());
 
 	if (AMlgPlayerController* playerController = GetMlgPlayerController())

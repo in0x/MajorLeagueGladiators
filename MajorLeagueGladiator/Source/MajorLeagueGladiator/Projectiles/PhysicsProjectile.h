@@ -16,7 +16,7 @@ class MAJORLEAGUEGLADIATOR_API APhysicsProjectile : public ABaseProjectile
 public:
 	APhysicsProjectile(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	
-	virtual void FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const override;
+	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const override;
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 private:
