@@ -39,6 +39,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 RefractCount;
 
+	void TimedExplode();
+
 private:
 	UPROPERTY(EditAnywhere)
 	UProjectileMovementComponent* projectileMovementComponent;
@@ -53,5 +55,4 @@ private:
 
 	void Refract(AShieldActor* ShieldActor);
 	void Explode();
-	void TimedExplode();
 };
