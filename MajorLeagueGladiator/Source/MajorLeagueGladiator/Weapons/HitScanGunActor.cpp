@@ -94,7 +94,7 @@ void AHitScanGunActor::BeginPlay()
 	chargeWidget = CastChecked<UPlayerHudWidget>(chargeShotHud->GetUserWidgetObject());
 	chargeWidget->SetCurrentPercentage(1.0f, 1.0f);
 
-	chargeShot->OnChargeValueChanged.AddLambda([this](float newValue)
+	chargeShot->OnChargeValueChangedPercentage.AddLambda([this](float newValue)
 	{
 		chargeWidget->SetCurrentPercentage(newValue, newValue);
 	});
@@ -140,7 +140,7 @@ void AHitScanGunActor::shoot()
 
 	ABaseProjectile* defaultProjectile = projectileClass.GetDefaultObject();
 	float baseDamage = defaultProjectile->damage;
-	defaultProjectile->damage = baseDamage * chargeShot->ResetAndGetValue();
+	defaultProjectile->damage = baseDamage * chargeShot->GetValueAndReset();
 
 	defaultProjectile->FireProjectile(actorTransform.GetLocation(), actorTransform.GetRotation().GetForwardVector(), this, Instigator->GetController());
 	defaultProjectile->damage = baseDamage;
