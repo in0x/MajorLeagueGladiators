@@ -12,6 +12,7 @@ class UWidgetComponent;
 struct FBPActorGripInformation;
 class AHitscanProjectile;
 class UChargeShotComponent;
+class UPlayerHudWidget;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AHitScanGunActor : public AMlgRangedWeapon
@@ -51,6 +52,11 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* ammoCountWidget;
+
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* chargeShotHud;
+
+	UPlayerHudWidget* chargeWidget;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AHitscanProjectile> projectileClass;

@@ -9,6 +9,7 @@
 #include "MlgPlayerController.h"
 #include "Projectiles/HitscanProjectile.h"
 #include "ChargeShotComponent.h"
+#include "PlayerHudWidget.h"
 
 namespace
 {
@@ -51,6 +52,11 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	ammoCountWidget->SetIsReplicated(true);
 	ammoCountWidget->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
+	chargeShotHud = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("ChargeShotHUD"));
+	chargeShotHud->SetupAttachment(GetRootComponent(), FName(TEXT("UI")));
+	chargeShotHud->SetIsReplicated(true);
+	chargeShotHud->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+
 	chargeShot = ObjectInitializer.CreateDefaultSubobject<UChargeShotComponent>(this, TEXT("ChargeShot"));
 } 
 
@@ -83,6 +89,14 @@ void AHitScanGunActor::BeginPlay()
 	ammoComponent->OnAmmoChanged.AddLambda([this](int32 newCount)
 	{
 		textWidget->SetText(FString::FromInt(newCount));
+	});
+
+	chargeWidget = CastChecked<UPlayerHudWidget>(chargeShotHud->GetUserWidgetObject());
+	chargeWidget->SetCurrentPercentage(1.0f, 1.0f);
+
+	chargeShot->OnChargeValueChanged.AddLambda([this](float newValue)
+	{
+		chargeWidget->SetCurrentPercentage(newValue, newValue);
 	});
 }
 
