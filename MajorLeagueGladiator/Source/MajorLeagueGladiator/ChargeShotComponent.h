@@ -5,7 +5,7 @@
 #include "Components/ActorComponent.h"
 #include "ChargeShotComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(ChargeValueChangedPercentDelegate, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(ChargeValueChangedPercentageDelegate, float);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MAJORLEAGUEGLADIATOR_API UChargeShotComponent : public UActorComponent
@@ -16,9 +16,9 @@ public:
 	UChargeShotComponent();
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	float ResetAndGetValue();
+	float GetValueAndReset();
 
-	ChargeValueChangedPercentDelegate OnChargeValueChanged;
+	ChargeValueChangedPercentageDelegate OnChargeValueChangedPercentage;
 
 private:
 	float maxValue;
