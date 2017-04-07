@@ -106,14 +106,14 @@ void UJumpDashAbility::OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor
 
 void UJumpDashAbility::BeginFindingActorsToLaunch()
 {
-	waitTargetDataTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "WaitTargetDataTask",
-		EGameplayTargetingConfirmation::Custom, AGameplayAbilityTargetActor_Cone::StaticClass());
+	UAbilityTask_WaitTargetData* findActorsToLaunchTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "findActorsToLaunchTask",
+		EGameplayTargetingConfirmation::Instant, AGameplayAbilityTargetActor_Cone::StaticClass());
 
-	waitTargetDataTask->ValidData.AddDynamic(this, &UJumpDashAbility::LaunchFoundActorsUpwards);
+	findActorsToLaunchTask->ValidData.AddDynamic(this, &UJumpDashAbility::LaunchFoundActorsUpwards);
 
 	AGameplayAbilityTargetActor* spawnedTargetingActor = nullptr;
 
-	if (!waitTargetDataTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Cone::StaticClass(), spawnedTargetingActor))
+	if (!findActorsToLaunchTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Cone::StaticClass(), spawnedTargetingActor))
 	{
 		return;
 	}
@@ -121,46 +121,24 @@ void UJumpDashAbility::BeginFindingActorsToLaunch()
 	AGameplayAbilityTargetActor_Cone* targetingConeActor = CastChecked<AGameplayAbilityTargetActor_Cone>(spawnedTargetingActor);
 	targetingConeActor->Distance = effectDistance;
 	targetingConeActor->HalfAngleDegrees = halfEffectAngleDegrees;
+	targetingConeActor->StartLocation = MakeTargetLocationInfoFromOwnerActor();
+
+	findActorsToLaunchTask->FinishSpawningActor(this, spawnedTargetingActor);
 }
 
-void UJumpDashAbility::LauchNearEnemies()
+void UJumpDashAbility::LaunchFoundActorsUpwards(const FGameplayAbilityTargetDataHandle& Data)
 {
-	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)
-	};
-
-	UWorld* world = cachedCharacter->GetWorld();
-
-	const FVector actorLocation = cachedCharacter->GetActorLocation();
-	const FVector2D forwardVector(cachedCharacter->GetVRForwardVector());
-	const FVector2D normalizedForwardVector = forwardVector.GetSafeNormal();
-
-	DrawDebugSphere(world, actorLocation, effectDistance, 16, FColor::Silver, true, 2.f);
-
-
-	TArray<FOverlapResult> outOverlapResult;
-	world->GetWorld()->OverlapMultiByObjectType(
-		outOverlapResult,
-		actorLocation,
-		FQuat::Identity, 
-		FCollisionObjectQueryParams(queryTypes),
-		FCollisionShape::MakeSphere(effectDistance)
-	);
-
-	for (FOverlapResult& result : outOverlapResult)
+	const FGameplayAbilityTargetData* targetData = Data.Get(0);
+	for (const auto& actor : targetData->GetActors())
 	{
-		if(ACharacter* character = Cast<ACharacter>(result.Actor.Get()))
+		if (actor.IsValid())
 		{
-			const FVector2D distance(character->GetActorLocation() - cachedCharacter->GetActorLocation());
-			const FVector2D normalizedDistance = distance.GetSafeNormal();
-
-			const float angleRadiens = acosf(FVector2D::DotProduct(normalizedDistance, normalizedForwardVector));
-			const float angleDegrees = FMath::RadiansToDegrees(angleRadiens);
-
-			if (angleDegrees < halfEffectAngleDegrees && CanLaunchCharacter(character))
+			ACharacter* characterToLaunch = CastChecked<ACharacter>(actor.Get());
+			if (CanLaunchCharacter(characterToLaunch))
 			{
-				character->LaunchCharacter(launchVelocity, true, true);
-			}
+				characterToLaunch->LaunchCharacter(launchVelocity, true, true);
+				affectedCharacters.Add(characterToLaunch);
+			}		
 		}
 	}
 }
@@ -186,7 +164,6 @@ void UJumpDashAbility::BeginTargeting()
 	}
 
 	AGameplayAbilityTargetActor_Raycast* targetingRayCastActor = CastChecked<AGameplayAbilityTargetActor_Raycast>(spawnedTargetingActor);
-
 	
 	auto gripController = cachedCharacter->GetMotionControllerMesh(EControllerHand::Left);
 	targetingRayCastActor->StartLocation.SourceComponent = gripController;
@@ -232,17 +209,5 @@ void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 	cachedMoveComp->AddImpulse(Velocity, true);
 }
 
-void UJumpDashAbility::LaunchFoundActorsUpwards(const FGameplayAbilityTargetDataHandle& Data)
-{
-	const FGameplayAbilityTargetData* targetData = Data.Get(0);
-	for (const auto& actor : targetData->GetActors())
-	{
-		if (actor.IsValid())
-		{
-			ACharacter* characterToLaunch = CastChecked<ACharacter>(actor.Get());
-			characterToLaunch->LaunchCharacter(launchVelocity, true, true);
-		}
-	}	
-}
 
 
