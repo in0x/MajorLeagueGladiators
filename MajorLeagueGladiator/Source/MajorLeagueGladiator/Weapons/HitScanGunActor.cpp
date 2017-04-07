@@ -35,12 +35,6 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	laserMesh->SetupAttachment(GetStaticMeshComponent(), FName("ProjectileSpawn"));
 	laserMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
-	/*boltAction = ObjectInitializer.CreateDefaultSubobject<UChildActorComponent>(this, TEXT("BoltAction")); // Removed until we upgrade to 4.15
-	boltAction->SetupAttachment(GetRootComponent(), FName("BoltAction"));
-
-	static ConstructorHelpers::FObjectFinder<UBlueprint> BoltActionBP(TEXT("/Game/BluePrints/BoltActionBP"));
-	boltAction->SetChildActorClass(*BoltActionBP.Object->GeneratedClass);*/
-
 	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
 	sceneCapture->SetupAttachment(GetRootComponent());
 
@@ -49,7 +43,6 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	scopeMesh->SetupAttachment(GetRootComponent(), FName("UI"));
 	scopeMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	
-
 	ammoComponent = ObjectInitializer.CreateDefaultSubobject<UAmmoComponent>(this, TEXT("AmmoComponent"));
 
 	ammoCountWidget = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("AmmoCounterWidget"));

@@ -30,9 +30,6 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void playShotEffect_NetMulticast();
 
-	//UPROPERTY(EditAnywhere) // Removed until we upgrade to 4.15
-	//UChildActorComponent* boltAction;
-
 	UPROPERTY(EditAnywhere)
 	USceneCaptureComponent2D* sceneCapture;
 
@@ -53,7 +50,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AHitscanProjectile> projectileClass;
-	
+
 	UTextWidget* textWidget;
 
 	UPROPERTY(EditAnywhere)

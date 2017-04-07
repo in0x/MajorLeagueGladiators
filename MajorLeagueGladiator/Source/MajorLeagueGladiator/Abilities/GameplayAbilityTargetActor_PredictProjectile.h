@@ -8,8 +8,9 @@ namespace EPickMoveLocationTargeting
 {
 	enum Type
 	{
-		FromController				UMETA(DisplayName = "FromController"),
+		FromSourceComponent			UMETA(DisplayName = "FromSourceComponent"), // Requires you to set the SourceComponent manually.
 		FromPlayerCapsule			UMETA(DisplayName = "FromPlayerCapsule"),
+		FromController				UMETA(DisplayName = "FromController")
 	};
 }
 
@@ -37,22 +38,31 @@ public:
 	
 	EPickMoveLocationTargeting::Type targetingType;
 
+	void SetTargetHitColor(FLinearColor Color);
+	void SetTargetMissColor(FLinearColor Color);
+
+	static FVector GetVelocityFromTargetDataHandle(const FGameplayAbilityTargetDataHandle& Data);
+
+	UPROPERTY(EditAnywhere)
+	UTargetingSplineMeshComponent* TargetingSplineMesh;
+
+	UPROPERTY(EditAnywhere)
+	UPlayAreaMeshComponent* PlayAreaMesh;
+
+	float OverrideGravityZ;
+
+	bool bShowPlayArea;
+	
 private:
 	FGameplayAbilityTargetDataHandle makeDataHandle();
 	
 	void GetPlayerCapsuleFromAbility(AMlgPlayerCharacter* owner);
 	void GetVrControllerFromAbility(AMlgPlayerCharacter* owner);
-	
 	bool PickTarget();
-
-	UPROPERTY(EditAnywhere)
-	UTargetingSplineMeshComponent* splineMesh;
-
-	UPROPERTY(EditAnywhere)
-	UPlayAreaMeshComponent* playAreaMesh;
 	
 	UCapsuleComponent* playerCapsule;
 	UVRControllerComponent* vrController;
+	UMovementComponent* sourceMovementComponent;
 
 	FPredictProjectilePathResult predictResult;
 	FVector launchVelocity;

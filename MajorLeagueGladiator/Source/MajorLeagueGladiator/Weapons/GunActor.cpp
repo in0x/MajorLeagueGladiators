@@ -65,7 +65,7 @@ void AGunActor::Tick(float DeltaTime)
 		projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
 
 		ammoComponent->GetProjectileType().GetDefaultObject()->FireProjectile(
-			trafo.GetLocation(), trafo.Rotator().Vector() , this, GetMlgPlayerController());
+			trafo.GetLocation(), trafo.Rotator().Vector() , this, Instigator->GetController());
 
 
 		auto* controller = this->GetMlgPlayerController();

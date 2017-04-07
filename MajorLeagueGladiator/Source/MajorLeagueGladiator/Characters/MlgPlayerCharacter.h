@@ -53,6 +53,7 @@ public:
 
 	UStaticMeshComponent* GetMotionControllerMesh(EControllerHand Hand);
 	UVRControllerComponent* GetMotionController(EControllerHand Hand);
+	AMlgGrippableStaticMeshActor* GetAttachedWeapon();
 
 	FVector CalcFeetPosition() const;
 

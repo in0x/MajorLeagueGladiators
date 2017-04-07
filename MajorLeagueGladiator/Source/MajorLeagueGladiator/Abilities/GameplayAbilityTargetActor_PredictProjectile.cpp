@@ -10,11 +10,13 @@ AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_Predi
 	: Super(ObjectInitializer)
 	, TargetProjectileSpeed(1000.f)
 	, TargetProjectileFlightTime(2.f)
+	, bShowPlayArea(true)
+	, OverrideGravityZ(0.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	splineMesh = ObjectInitializer.CreateDefaultSubobject<UTargetingSplineMeshComponent>(this, TEXT("SplineMesh"));
-	playAreaMesh = ObjectInitializer.CreateDefaultSubobject<UPlayAreaMeshComponent>(this, TEXT("PlayAreaMesh"));
+	TargetingSplineMesh = ObjectInitializer.CreateDefaultSubobject<UTargetingSplineMeshComponent>(this, TEXT("SplineMesh"));
+	PlayAreaMesh = ObjectInitializer.CreateDefaultSubobject<UPlayAreaMeshComponent>(this, TEXT("PlayAreaMesh"));
 }
 
 void AGameplayAbilityTargetActor_PredictProjectile::StartTargeting(UGameplayAbility* Ability)
@@ -25,6 +27,16 @@ void AGameplayAbilityTargetActor_PredictProjectile::StartTargeting(UGameplayAbil
 	
 	GetPlayerCapsuleFromAbility(owner);
 	GetVrControllerFromAbility(owner);
+}
+
+void AGameplayAbilityTargetActor_PredictProjectile::SetTargetHitColor(FLinearColor Color)
+{
+	TargetingSplineMesh->TargetHitColor = Color;
+}
+
+void AGameplayAbilityTargetActor_PredictProjectile::SetTargetMissColor(FLinearColor Color)
+{
+	TargetingSplineMesh->TargetMissColor = Color;
 }
 
 void AGameplayAbilityTargetActor_PredictProjectile::GetPlayerCapsuleFromAbility(AMlgPlayerCharacter* owner)
@@ -45,11 +57,11 @@ void AGameplayAbilityTargetActor_PredictProjectile::Tick(float DeltaSeconds)
 	
 	PickTarget();
 	
-	splineMesh->SetFromProjectilePath(predictResult.PathData);
-	splineMesh->SetIsTargetValid(predictResult.HitResult.bBlockingHit);
+	TargetingSplineMesh->SetFromProjectilePath(predictResult.PathData);
+	TargetingSplineMesh->SetIsTargetValid(predictResult.HitResult.bBlockingHit);
 
-	playAreaMesh->SetWorldLocation(splineMesh->GetEndPositionWorld());
-	playAreaMesh->SetIsTargetValid(predictResult.HitResult.bBlockingHit);
+	PlayAreaMesh->SetWorldLocation(TargetingSplineMesh->GetEndPositionWorld());
+	PlayAreaMesh->SetIsTargetValid(bShowPlayArea && predictResult.HitResult.bBlockingHit);
 }
 
 bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
@@ -58,8 +70,6 @@ bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic)
 	};
 
-	launchVelocity = vrController->GetForwardVector() * TargetProjectileSpeed;
-
 	FPredictProjectilePathParams params;
 
 	if (targetingType == EPickMoveLocationTargeting::FromPlayerCapsule)
@@ -67,9 +77,16 @@ bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
 		params = FPredictProjectilePathParams(0.f, playerCapsule->GetComponentLocation() - (playerCapsule->GetUpVector() * playerCapsule->GetScaledCapsuleHalfHeight()), 
 			launchVelocity, TargetProjectileFlightTime);
 	}
-	else // EPickMoveLocationTargeting == EPickMoveLocationTargeting::FromController
+	else if (targetingType == EPickMoveLocationTargeting::FromController)
 	{
-		params = FPredictProjectilePathParams(0.f, vrController->GetComponentLocation(), launchVelocity, 2.f);
+		launchVelocity = vrController->GetForwardVector() * TargetProjectileSpeed;
+		params = FPredictProjectilePathParams(0.f, vrController->GetComponentLocation(), launchVelocity, TargetProjectileFlightTime);
+	}
+	else // FromSourceComponent
+	{
+		FTransform targetingTransform = StartLocation.GetTargetingTransform();
+		launchVelocity = targetingTransform.GetRotation().GetForwardVector() * TargetProjectileSpeed;
+		params = FPredictProjectilePathParams(0.f, targetingTransform.GetLocation(), launchVelocity, TargetProjectileFlightTime);
 	}
 
 	params.ObjectTypes = queryTypes;
@@ -77,6 +94,11 @@ bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
 	params.bTraceComplex = false;
 	params.bTraceWithCollision = true;
 
+	if (OverrideGravityZ != 0.f)
+	{
+		params.OverrideGravityZ = OverrideGravityZ;
+	}
+	
 	return UGameplayStatics::PredictProjectilePath(GetWorld(), params, predictResult);
 }
 
@@ -110,4 +132,9 @@ void AGameplayAbilityTargetActor_PredictProjectile::ConfirmTargetingAndContinue(
 			CancelTargeting();
 		}
 	}
+}
+
+FVector AGameplayAbilityTargetActor_PredictProjectile::GetVelocityFromTargetDataHandle(const FGameplayAbilityTargetDataHandle& Data)
+{
+	return Data.Data[0]->GetHitResult()->TraceStart;
 }

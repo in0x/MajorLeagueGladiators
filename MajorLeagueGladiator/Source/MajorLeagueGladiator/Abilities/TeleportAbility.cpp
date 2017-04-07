@@ -36,7 +36,7 @@ void UTeleportAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 	targetingSpawnedActor->TargetProjectileSpeed = PredictProjectileSpeed;
 	targetingSpawnedActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
 	targetingSpawnedActor->targetingType = EPickMoveLocationTargeting::FromController;
-
+	
 	waitForTargetTask->FinishSpawningActor(this, spawnedActor);
 }
 

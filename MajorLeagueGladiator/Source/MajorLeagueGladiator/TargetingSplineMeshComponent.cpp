@@ -4,6 +4,8 @@
 #include "TargetingSplineMeshComponent.h"
 
 UTargetingSplineMeshComponent::UTargetingSplineMeshComponent()
+	: TargetHitColor(FLinearColor::Green)
+	, TargetMissColor(FLinearColor::Red)
 {
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> splineMaterial(TEXT("Material'/Game/Materials/M_SplineArcMat.M_SplineArcMat'"));
 	material = splineMaterial.Object;
@@ -33,11 +35,11 @@ void UTargetingSplineMeshComponent::SetIsTargetValid(bool bIsTargetValid)
 
 	if (bIsTargetValid)
 	{
-		matInstance->SetVectorParameterValue(FName("Color"), FLinearColor::Green);
+		matInstance->SetVectorParameterValue(FName("Color"), TargetHitColor);
 	}
 	else
 	{
-		matInstance->SetVectorParameterValue(FName("Color"), FLinearColor::Red);
+		matInstance->SetVectorParameterValue(FName("Color"), TargetMissColor);
 	}
 }
 
