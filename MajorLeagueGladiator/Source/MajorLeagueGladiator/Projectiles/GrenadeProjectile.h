@@ -18,23 +18,23 @@ public:
 	
 	// Radius until which maximum damage will be applied.
 	UPROPERTY(EditAnywhere)
-	float explosionMaxDamageRadius;
+	float ExplosionMaxDamageRadius;
 
 	// Radius that is affected by explosion
 	UPROPERTY(EditAnywhere)
-	float explosionRadius;
+	float ExplosionRadius;
 
 	UPROPERTY(EditAnywhere)
-	float maxDamage;
+	float MaxDamage;
 
 	UPROPERTY(EditAnywhere)
-	float minDamage;
+	float MinDamage;
 
 	UPROPERTY(EditAnywhere)
-	float damageFalloff;
+	float DamageFalloff;
 
 	UPROPERTY(EditAnywhere)
-	float timeToExplode;
+	float TimeToExplode;
 
 	UPROPERTY(EditAnywhere)
 	float InitialSpeed;
@@ -51,11 +51,11 @@ private:
 	FTimerHandle explodeTimer;
 	
 	UFUNCTION()
-	void OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity);
+	void onProjectileBounce(const FHitResult& impactResult, const FVector& impactVelocity);
 
 	UFUNCTION()
-	void OnProjectileStop(const FHitResult& ImpactResult);
+	void onProjectileStop(const FHitResult& impactResult);
 
-	void Refract(AShieldActor* ShieldActor);
-	void Explode();
+	void refract(AShieldActor* shieldActor);
+	void explode();
 };

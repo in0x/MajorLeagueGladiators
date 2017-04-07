@@ -19,8 +19,3 @@ void AMeleePlayerCharacter::BeginPlay()
 	rightMesh->SetMaterial(0, instance);
 }
 
-void AMeleePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) 
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-

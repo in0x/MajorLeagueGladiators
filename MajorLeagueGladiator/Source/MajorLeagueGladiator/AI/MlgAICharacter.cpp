@@ -32,8 +32,6 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	triggerZone->SetRelativeLocation(FVector(0.f, 0.f, -70.f));
 	triggerZone->SetStaticMesh(cubeMesh.Object);
 
-	
-
 	damageCauser = ObjectInitializer.CreateDefaultSubobject<UDamageCauserComponent>(this, TEXT("DamageCauser"));
 	damageCauser->SetDamageType(UEnemyDamage::StaticClass());
 
@@ -64,11 +62,5 @@ float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageE
 	return Damage * hitWeakpoint.DamageMultiplier;
 }
 
-float AMlgAICharacter::InternalTakeRadialDamage(float Damage, const FRadialDamageEvent& RadialDamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	Damage = Super::InternalTakeRadialDamage(Damage, RadialDamageEvent, EventInstigator, DamageCauser);
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("RadialDmg: %f"), Damage));
-	return Damage;
-}
 
 

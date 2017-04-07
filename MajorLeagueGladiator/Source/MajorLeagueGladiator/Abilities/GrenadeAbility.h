@@ -28,8 +28,8 @@ private:
 	void fireGrenade();
 
 	UFUNCTION()
-	void onTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data);
+	void onTargetingSuccess(const FGameplayAbilityTargetDataHandle& data);
 
 	UFUNCTION()
-	void onTargetingFailed(const FGameplayAbilityTargetDataHandle& Data);
+	void onTargetingFailed(const FGameplayAbilityTargetDataHandle& data);
 };

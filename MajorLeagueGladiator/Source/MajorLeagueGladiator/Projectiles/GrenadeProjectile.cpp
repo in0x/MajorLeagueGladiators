@@ -7,12 +7,12 @@
 
 AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializer)
 	: projectileMovementComponent(ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, TEXT("ProjectileMovementComponent")))
-	, explosionMaxDamageRadius(20.f)
-	, explosionRadius(200.f)
-	, maxDamage(50.f)
-	, minDamage(10.f)
-	, damageFalloff(0.5f)
-	, timeToExplode(3.f)
+	, ExplosionMaxDamageRadius(20.f)
+	, ExplosionRadius(200.f)
+	, MaxDamage(50.f)
+	, MinDamage(10.f)
+	, DamageFalloff(0.5f)
+	, TimeToExplode(3.f)
 	, InitialSpeed(5000.f)
 	, RefractCount(4)
 {
@@ -35,23 +35,23 @@ AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializ
 	projectileMovementComponent->ProjectileGravityScale = 0.5f;
 	projectileMovementComponent->Bounciness = 0.1f;
 	
-	projectileMovementComponent->OnProjectileBounce.AddDynamic(this, &AGrenadeProjectile::OnProjectileBounce);
-	projectileMovementComponent->OnProjectileStop.AddDynamic(this, &AGrenadeProjectile::OnProjectileStop);	
+	projectileMovementComponent->OnProjectileBounce.AddDynamic(this, &AGrenadeProjectile::onProjectileBounce);
+	projectileMovementComponent->OnProjectileStop.AddDynamic(this, &AGrenadeProjectile::onProjectileStop);	
 }
 
 ABaseProjectile* AGrenadeProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
 {
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
 	auto* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<AGrenadeProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
+	
 	auto* spawnedRootComponent = CastChecked<UStaticMeshComponent>(spawnedActor->GetRootComponent());
-
 	spawnedRootComponent->IgnoreActorWhenMoving(ProjectileOwner, true);
 
 	spawnedActor->FinishSpawning(projectileTransform);
 	return spawnedActor;
 }
 
-void AGrenadeProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
+void AGrenadeProjectile::onProjectileBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
 {
 	// This event is called by HandleImpact, and checks the velocity after calling it.
 	// So by setting the velocity to below the stop threshold, we can stop the projectile.
@@ -65,13 +65,11 @@ void AGrenadeProjectile::OnProjectileBounce(const FHitResult& ImpactResult, cons
 	projectileMovementComponent->MaxSpeed = 500.f;
 }
 
-void AGrenadeProjectile::OnProjectileStop(const FHitResult& ImpactResult)
+void AGrenadeProjectile::onProjectileStop(const FHitResult& ImpactResult)
 {
-	AActor* impactActor = ImpactResult.Actor.Get();
-	
-	if (AShieldActor* shield = Cast<AShieldActor>(impactActor))
+	if (AShieldActor* shield = Cast<AShieldActor>(ImpactResult.Actor.Get()))
 	{
-		Refract(shield);
+		refract(shield);
 	}
 	else 
 	{
@@ -79,45 +77,45 @@ void AGrenadeProjectile::OnProjectileStop(const FHitResult& ImpactResult)
 	}
 }
 
-void AGrenadeProjectile::Refract(AShieldActor* ShieldActor)  
+void AGrenadeProjectile::refract(AShieldActor* ShieldActor)  
 {
 	const FTransform spawnTransform = ShieldActor->GetReflectSpawnTransform();
-	const FVector sourceLoc = spawnTransform.GetLocation();
-	const FVector sourceDir = spawnTransform.GetRotation().GetForwardVector();
+	const FVector sourceLocation = spawnTransform.GetLocation();
+	const FVector sourceDirection = spawnTransform.GetRotation().GetForwardVector();
 
 	for (int32 i = 0; i < RefractCount; ++i)
 	{
-		const FRotator rot(FMath::RandRange(-45, 45), FMath::RandRange(-45, 45), FMath::RandRange(-45, 45)); 
-		const FVector dir = rot.RotateVector(sourceDir);
+		const FRotator randomRotation(FMath::RandRange(-45, 45), FMath::RandRange(-45, 45), FMath::RandRange(-45, 45)); 
+		const FVector launchDirection = randomRotation.RotateVector(sourceDirection);
 
-		auto* proj = CastChecked<AGrenadeProjectile>(FireProjectile(sourceLoc + sourceDir * 10, dir, GetOwner(), Instigator->GetController()));
-		proj->timeToExplode = 1.f;
-		proj->explosionRadius = explosionRadius * 0.5f;
-		proj->explosionMaxDamageRadius = proj->explosionRadius;
+		auto* spawnedProjectile = CastChecked<AGrenadeProjectile>(FireProjectile(sourceLocation + sourceDirection * 10, launchDirection, GetOwner(), Instigator->GetController()));
+		spawnedProjectile->TimeToExplode = 1.f;
+		spawnedProjectile->ExplosionRadius = ExplosionRadius * 0.5f;
+		spawnedProjectile->ExplosionMaxDamageRadius = spawnedProjectile->ExplosionRadius;
 
-		auto* projMovement = proj->FindComponentByClass<UProjectileMovementComponent>();
-		projMovement->ProjectileGravityScale = 1.f;
-		projMovement->MaxSpeed = 500.f;
+		auto* spawnedMovement = spawnedProjectile->FindComponentByClass<UProjectileMovementComponent>();
+		spawnedMovement->ProjectileGravityScale = 1.f;
+		spawnedMovement->MaxSpeed = 500.f;
 
-		auto* mesh = proj->FindComponentByClass<UStaticMeshComponent>();
-		mesh->IgnoreActorWhenMoving(ShieldActor, true);
+		auto* spawnedMesh = spawnedProjectile->FindComponentByClass<UStaticMeshComponent>();
+		spawnedMesh->IgnoreActorWhenMoving(ShieldActor, true);
 
-		proj->TimedExplode();
+		spawnedProjectile->TimedExplode();
 	}
 
 	Destroy();
 }
 
-void AGrenadeProjectile::Explode()
+void AGrenadeProjectile::explode()
 {
 	UMlgGameplayStatics::ApplyRadialDamageWithFalloff(
 		GetWorld(),
-		maxDamage,
-		minDamage,
+		MaxDamage,
+		MinDamage,
 		GetActorLocation(),
-		explosionMaxDamageRadius,
-		explosionRadius,
-		damageFalloff,
+		ExplosionMaxDamageRadius,
+		ExplosionRadius,
+		DamageFalloff,
 		DamageType,
 		this,
 		Instigator->GetController(),
@@ -128,11 +126,11 @@ void AGrenadeProjectile::Explode()
 
 void AGrenadeProjectile::TimedExplode()
 {
-	FTimerManager& timer = GetWorldTimerManager();
-	timer.SetTimer(explodeTimer, this, &AGrenadeProjectile::Explode, timeToExplode, false);
+	FTimerManager& timerManager = GetWorldTimerManager();
+	timerManager.SetTimer(explodeTimer, this, &AGrenadeProjectile::explode, TimeToExplode, false);
 
-	projectileMovementComponent->OnProjectileBounce.RemoveDynamic(this, &AGrenadeProjectile::OnProjectileBounce);
-	projectileMovementComponent->OnProjectileStop.RemoveDynamic(this, &AGrenadeProjectile::OnProjectileStop);
+	projectileMovementComponent->OnProjectileBounce.RemoveDynamic(this, &AGrenadeProjectile::onProjectileBounce);
+	projectileMovementComponent->OnProjectileStop.RemoveDynamic(this, &AGrenadeProjectile::onProjectileStop);
 }
 
 
