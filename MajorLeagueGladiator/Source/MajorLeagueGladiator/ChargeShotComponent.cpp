@@ -27,6 +27,7 @@ void UChargeShotComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 		currentTime += DeltaTime;
 		currentTime = FMath::Min(currentTime, timeToReachMaxValue);
 		currentValue = FMath::Lerp(minValue, maxValue, currentTime / timeToReachMaxValue);
+		OnChargeValueChanged.Broadcast(currentValue / maxValue);
 	}
 }
 

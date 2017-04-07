@@ -5,18 +5,7 @@
 
 #include "HealthComponent.h"
 
-
-void UPlayerHudWidget::OnAttachPlayer(ACharacter* PlayerCharacter)
+void UPlayerHudWidget::SetCurrentPercentage(float newPercentage, float oldPercentage)
 {
-	UHealthComponent* curHealthComp = Cast<UHealthComponent>(PlayerCharacter->GetComponentByClass(UHealthComponent::StaticClass()));
-	if (curHealthComp != nullptr) 
-	{
-		curHealthComp->HealthChangedDelegate.AddDynamic(this, &UPlayerHudWidget::setCurrentHealthPercentage);
-		healthPercentage = curHealthComp->GetCurrentHealthPercentage();
-	}
-}
-
-void UPlayerHudWidget::setCurrentHealthPercentage(float newHealthPercentage, float oldHealthPercentage)
-{
-	healthPercentage = newHealthPercentage;
+	CurrentPercentage = newPercentage;
 }

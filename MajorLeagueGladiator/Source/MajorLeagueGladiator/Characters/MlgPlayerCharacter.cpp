@@ -116,9 +116,11 @@ void AMlgPlayerCharacter::BeginPlay()
 		bUseControllerRotationYaw = true;
 #endif
 	}
+	
 	auto healthWidget = CastChecked<UPlayerHudWidget>(hudHealth->GetUserWidgetObject());
-	healthWidget->OnAttachPlayer(this);
-
+	healthComp->HealthChangedDelegate.AddDynamic(healthWidget, &UPlayerHudWidget::SetCurrentPercentage);
+	healthWidget->SetCurrentPercentage(healthComp->GetCurrentHealthPercentage(), 1.0f);
+	
 	LandedDelegate.AddDynamic(this, &AMlgPlayerCharacter::OnLand);
 	
 	if (HasAuthority())
