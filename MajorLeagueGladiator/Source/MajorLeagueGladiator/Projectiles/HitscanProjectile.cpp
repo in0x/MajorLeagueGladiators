@@ -12,7 +12,6 @@
 AHitscanProjectile::AHitscanProjectile()
 	: range(1000000.f)
 {
-	
 }
 
 void AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const

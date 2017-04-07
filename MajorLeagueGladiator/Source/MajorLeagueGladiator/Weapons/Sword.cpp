@@ -20,7 +20,7 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	, threshholdDoDamageSquared(9)
 	, slashVelocityLearnRate(0.1f)
 	, bIsSwordFastEnough(false)
-	, damageAppliedOnHit(15.f)
+	, damageAppliedOnHit(40.f)
 {
 	GetStaticMeshComponent()->bGenerateOverlapEvents = true;
 	GetStaticMeshComponent()->SetCollisionProfileName(MELEE_WEAPON_COLLISION_PROFILE_NAME);
