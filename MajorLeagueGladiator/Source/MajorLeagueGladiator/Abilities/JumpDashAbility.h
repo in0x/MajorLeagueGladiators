@@ -60,6 +60,7 @@ private:
 	void BeginTargeting();
 
 	void BeginDashing(const FVector& Velocity);
+	void PushAffectedEnemiesInDirection(const FVector& Velocity);
 
 	UFUNCTION()
 	void OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
