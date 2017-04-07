@@ -209,5 +209,14 @@ void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 	cachedMoveComp->AddImpulse(Velocity, true);
 }
 
+void UJumpDashAbility::PushAffectedEnemiesInDirection(const FVector& Velocity)
+{
+	for (ACharacter* character : affectedCharacters)
+	{
+		UCharacterMovementComponent
+	}
+}
+
+
 
 
