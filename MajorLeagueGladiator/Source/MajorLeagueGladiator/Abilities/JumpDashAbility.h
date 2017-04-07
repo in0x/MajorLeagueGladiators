@@ -45,10 +45,16 @@ private:
 	UAbilityTask_WaitTargetData* waitTargetDataTask;
 
 	UPROPERTY(Transient)
+
+	AMlgPlayerCharacter* cachedCharacter;
+
+	UPROPERTY(Transient)
 	UCharacterMovementComponent* cachedMoveComp;
 
 	UPROPERTY(Transient)
-	AMlgPlayerCharacter* cachedCharacter;
+	TArray<ACharacter*> affectedCharacters;
+
+	void BeginFindingActorsToLaunch();
 
 	void LauchNearEnemies();
 
@@ -61,6 +67,10 @@ private:
 	UFUNCTION()
 	void OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 
+	void OnLanded();
+
+	UFUNCTION()
+	void LaunchFoundActorsUpwards(const FGameplayAbilityTargetDataHandle& Data);
 
 	UFUNCTION()
 	void OnTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data);

@@ -5,6 +5,7 @@
 
 #include "AbilityTask_WaitTargetData.h"
 #include "Abilities/GameplayAbilityTargetActor_Raycast.h"
+#include "Abilities/GameplayAbilityTargetActor_Cone.h"
 
 #include "Characters/MlgPlayerCharacter.h"
 
@@ -61,8 +62,13 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 
 	cachedCharacter->SetAbilityMoveTargetLocation(cachedCharacter->GetActorLocation());
 	cachedCharacter->LaunchCharacter(launchVelocity, true, true);
+
 	cachedCharacter->OnActorHit.AddDynamic(this, &UJumpDashAbility::OnCollidedWithWorld);
 	LauchNearEnemies();
+
+
+	cachedCharacter->OnActorHit.AddDynamic(this, &UJumpDashAbility::OnCollidedWithWorld);
+	BeginFindingActorsToLaunch();
 
 	const float targetingDelay = minmalJumpHightBeforeDash / launchVelocity.Z;
 
@@ -101,6 +107,25 @@ void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 void UJumpDashAbility::OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
 {	
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+}
+
+void UJumpDashAbility::BeginFindingActorsToLaunch()
+{
+	waitTargetDataTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "WaitTargetDataTask",
+		EGameplayTargetingConfirmation::Custom, AGameplayAbilityTargetActor_Cone::StaticClass());
+
+	waitTargetDataTask->ValidData.AddDynamic(this, &UJumpDashAbility::LaunchFoundActorsUpwards);
+
+	AGameplayAbilityTargetActor* spawnedTargetingActor = nullptr;
+
+	if (!waitTargetDataTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Cone::StaticClass(), spawnedTargetingActor))
+	{
+		return;
+	}
+
+	AGameplayAbilityTargetActor_Cone* targetingConeActor = CastChecked<AGameplayAbilityTargetActor_Cone>(spawnedTargetingActor);
+	targetingConeActor->Distance = effectDistance;
+	targetingConeActor->HalfAngleDegrees = halfEffectAngleDegrees;
 }
 
 void UJumpDashAbility::LauchNearEnemies()
@@ -211,4 +236,18 @@ void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 	cachedMoveComp->SetMovementMode(MOVE_Flying);
 	cachedMoveComp->AddImpulse(Velocity, true);
 }
+
+void UJumpDashAbility::LaunchFoundActorsUpwards(const FGameplayAbilityTargetDataHandle& Data)
+{
+	const FGameplayAbilityTargetData* targetData = Data.Get(0);
+	for (const auto& actor : targetData->GetActors())
+	{
+		if (actor.IsValid())
+		{
+			ACharacter* characterToLaunch = CastChecked<ACharacter>(actor.Get());
+			characterToLaunch->LaunchCharacter(launchVelocity, true, true);
+		}
+	}	
+}
+
 
