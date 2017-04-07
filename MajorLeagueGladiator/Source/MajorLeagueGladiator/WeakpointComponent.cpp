@@ -71,8 +71,6 @@ FWeakpoint UWeakpointComponent::FindHitWeakpoint(const FHitResult& Hit) const
 	
 	if (FVector::DistSquared(NameToLocation(closest.LocationSocketName), Hit.ImpactPoint) < affectSqr)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald,
-			FString::Printf(TEXT("Weak point hit, mult: %f"), closest.DamageMultiplier));
 		return closest;
 	}
 	else
