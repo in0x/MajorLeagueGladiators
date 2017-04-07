@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Projectiles/BaseProjectile.h"
-#include "DpsGrenadeProjectile.generated.h"
+#include "GrenadeProjectile.generated.h"
 
 class AShieldActor;
 
@@ -35,6 +35,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float timeToExplode;
+
+	UPROPERTY(EditAnywhere)
+	float InitialSpeed;
 
 	UPROPERTY(EditAnywhere)
 	int32 RefractCount;

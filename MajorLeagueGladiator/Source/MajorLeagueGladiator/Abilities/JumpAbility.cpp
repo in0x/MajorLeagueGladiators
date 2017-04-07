@@ -57,7 +57,7 @@ void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 
 	if (player->HasAuthority())
 	{
-		player->LaunchCharacter(Data.Data[0]->GetHitResult()->TraceStart, true, true); 
+		player->LaunchCharacter(AGameplayAbilityTargetActor_PredictProjectile::GetVelocityFromTargetDataHandle(Data), true, true);
 		player->SetAbilityMoveTargetLocation(Data.Data[0]->GetHitResult()->ImpactPoint);
 	}
 

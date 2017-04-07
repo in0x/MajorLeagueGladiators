@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MajorLeagueGladiator.h"
-#include "DpsGrenadeProjectile.h"
+#include "GrenadeProjectile.h"
 #include "ShieldActor.h"
 #include "MlgGameplayStatics.h"
 
@@ -13,15 +13,24 @@ AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializ
 	, minDamage(10.f)
 	, damageFalloff(0.5f)
 	, timeToExplode(3.f)
+	, InitialSpeed(5000.f)
 	, RefractCount(4)
 {
 	bReplicates = true;
 	bReplicateMovement = true;
 	bStaticMeshReplicateMovement = true;
-	GetStaticMeshComponent()->Mobility = EComponentMobility::Movable;
-	GetStaticMeshComponent()->SetCollisionObjectType(ECC_Pawn);
 
-	projectileMovementComponent->InitialSpeed = 5000.f;
+	ConstructorHelpers::FObjectFinder<UMaterialInterface> material(TEXT("Material'/Game/Materials/M_Grenade.M_Grenade'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> mesh(TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
+
+	UStaticMeshComponent* meshComponent = GetStaticMeshComponent();
+	meshComponent->Mobility = EComponentMobility::Movable;
+	meshComponent->SetCollisionObjectType(ECC_Pawn);
+	meshComponent->SetWorldScale3D(FVector(0.1f, 0.1f, 0.1f));
+	meshComponent->SetStaticMesh(mesh.Object);
+	meshComponent->SetMaterial(0, material.Object);
+
+	projectileMovementComponent->InitialSpeed = InitialSpeed;
 	projectileMovementComponent->bShouldBounce = true;
 	projectileMovementComponent->ProjectileGravityScale = 0.5f;
 	projectileMovementComponent->Bounciness = 0.1f;
@@ -34,7 +43,9 @@ ABaseProjectile* AGrenadeProjectile::FireProjectile(FVector Location, FVector Di
 {
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
 	auto* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<AGrenadeProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
-	auto* spawnedRootComponent = CastChecked<UPrimitiveComponent>(spawnedActor->GetRootComponent());
+	auto* spawnedRootComponent = CastChecked<UStaticMeshComponent>(spawnedActor->GetRootComponent());
+
+	spawnedRootComponent->IgnoreActorWhenMoving(ProjectileOwner, true);
 
 	spawnedActor->FinishSpawning(projectileTransform);
 	return spawnedActor;

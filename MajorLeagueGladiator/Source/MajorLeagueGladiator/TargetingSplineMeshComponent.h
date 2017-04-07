@@ -21,6 +21,9 @@ public:
 
 	FVector GetStartPositionWorld() const;
 	FVector GetEndPositionWorld() const;
+
+	FLinearColor TargetHitColor;
+	FLinearColor TargetMissColor;
 	
 private:
 	UPROPERTY(EditAnywhere, Category="TargetingSpline")

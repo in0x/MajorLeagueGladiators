@@ -257,6 +257,11 @@ void AMlgPlayerCharacter::OnAttachedWeaponSet()
 		EGripMovementReplicationSettings::LocalOnly_Not_Replicated, 1500000, 2000);
 }
 
+AMlgGrippableStaticMeshActor* AMlgPlayerCharacter::GetAttachedWeapon()
+{
+	return attachedWeapon;
+}
+
 void AMlgPlayerCharacter::MoveForward(float Value)
 {
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
