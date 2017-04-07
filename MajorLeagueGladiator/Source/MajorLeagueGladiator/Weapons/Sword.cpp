@@ -17,7 +17,7 @@ namespace
 ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, oldSwingSpeed(FVector::ZeroVector)
-	, threshholdDoDamageSquared(9)
+	, threshholdDoDamageSquared(2)
 	, slashVelocityLearnRate(0.1f)
 	, bIsSwordFastEnough(false)
 	, damageAppliedOnHit(40.f)
