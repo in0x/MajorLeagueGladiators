@@ -55,8 +55,6 @@ private:
 
 	void BeginFindingActorsToLaunch();
 
-	void LauchNearEnemies();
-
 	bool CanLaunchCharacter(ACharacter* Character) const;
 
 	void BeginTargeting();
@@ -65,8 +63,6 @@ private:
 
 	UFUNCTION()
 	void OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
-
-	void OnLanded();
 
 	UFUNCTION()
 	void LaunchFoundActorsUpwards(const FGameplayAbilityTargetDataHandle& Data);
