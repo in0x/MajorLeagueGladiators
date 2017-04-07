@@ -87,6 +87,7 @@ void UGrenadeAbility::beginTargeting()
 	auto* player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
 
 	auto* weapon = player->GetAttachedWeapon();
+	targetingActor->targetingType = EPickMoveLocationTargeting::FromSourceComponent;
 	targetingActor->StartLocation.SourceComponent = weapon->GetStaticMeshComponent();
 	targetingActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
 	targetingActor->StartLocation.SourceSocketName = SHOT_SOCKET_NAME;
@@ -119,7 +120,7 @@ void UGrenadeAbility::onTargetingFailed(const FGameplayAbilityTargetDataHandle& 
 // much farther than the short targeting draw.
 void UGrenadeAbility::fireGrenade()
 {
-	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	auto* player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
 
 	if (player->HasAuthority())
 	{
