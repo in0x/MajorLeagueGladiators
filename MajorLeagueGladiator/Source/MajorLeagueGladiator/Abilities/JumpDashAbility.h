@@ -45,7 +45,6 @@ private:
 	UAbilityTask_WaitTargetData* waitTargetDataTask;
 
 	UPROPERTY(Transient)
-
 	AMlgPlayerCharacter* cachedCharacter;
 
 	UPROPERTY(Transient)

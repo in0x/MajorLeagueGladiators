@@ -62,11 +62,6 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 
 	cachedCharacter->SetAbilityMoveTargetLocation(cachedCharacter->GetActorLocation());
 	cachedCharacter->LaunchCharacter(launchVelocity, true, true);
-
-	cachedCharacter->OnActorHit.AddDynamic(this, &UJumpDashAbility::OnCollidedWithWorld);
-	LauchNearEnemies();
-
-
 	cachedCharacter->OnActorHit.AddDynamic(this, &UJumpDashAbility::OnCollidedWithWorld);
 	BeginFindingActorsToLaunch();
 
