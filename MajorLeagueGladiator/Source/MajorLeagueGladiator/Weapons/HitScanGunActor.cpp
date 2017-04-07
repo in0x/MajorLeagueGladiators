@@ -8,6 +8,7 @@
 #include "TextWidget.h"
 #include "MlgPlayerController.h"
 #include "Projectiles/HitscanProjectile.h"
+#include "ChargeShotComponent.h"
 
 namespace
 {
@@ -49,6 +50,8 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	ammoCountWidget->SetupAttachment(GetRootComponent(), FName(TEXT("UI")));
 	ammoCountWidget->SetIsReplicated(true);
 	ammoCountWidget->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+
+	chargeShot = ObjectInitializer.CreateDefaultSubobject<UChargeShotComponent>(this, TEXT("ChargeShot"));
 } 
 
 void AHitScanGunActor::BeginPlay()
@@ -118,10 +121,15 @@ void AHitScanGunActor::OnGrip(UGripMotionControllerComponent* GrippingController
 
 void AHitScanGunActor::shoot() 
 {
-	FTransform trafo;
-	shotOriginSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
+	FTransform actorTransform;
+	shotOriginSocket->GetSocketTransform(actorTransform, GetStaticMeshComponent());
 
-	projectileClass.GetDefaultObject()->FireProjectile(trafo.GetLocation(), trafo.GetRotation().GetForwardVector(), this, Instigator->GetController());
+	ABaseProjectile* defaultProjectile = projectileClass.GetDefaultObject();
+	float baseDamage = defaultProjectile->damage;
+	defaultProjectile->damage = baseDamage * chargeShot->ResetAndGetValue();
+
+	defaultProjectile->FireProjectile(actorTransform.GetLocation(), actorTransform.GetRotation().GetForwardVector(), this, Instigator->GetController());
+	defaultProjectile->damage = baseDamage;
 }
 
 void AHitScanGunActor::Tick(float DeltaTime)
