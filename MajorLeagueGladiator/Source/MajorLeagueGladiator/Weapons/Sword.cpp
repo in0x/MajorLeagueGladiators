@@ -149,7 +149,7 @@ void ASword::damageAllOverlappingActors()
 	
 	for (AActor* actor : overlappingActors)
 	{
-		int idx = actorToHit.Add(TPair<AActor*, FHitResult>());
+		int32 idx = actorToHit.Add(TPair<AActor*, FHitResult>());
 		actorToHit[idx].Key = actor;
 	}
 
