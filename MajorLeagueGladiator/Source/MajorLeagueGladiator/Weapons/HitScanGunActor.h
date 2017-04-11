@@ -30,7 +30,7 @@ private:
 	void shoot();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void playShotEffect_NetMulticast();
+	void playShotEffect_NetMulticast(float charge);
 
 	UPROPERTY(EditAnywhere)
 	USceneCaptureComponent2D* sceneCapture;
@@ -84,6 +84,8 @@ private:
 	// How far the gun should move back after firing.
 	UPROPERTY(EditAnywhere)
 	float recoilDistance;
+
+	float adjustedRecoilDistance;
 
 	UStaticMeshSocket* shotOriginSocket;
 	
