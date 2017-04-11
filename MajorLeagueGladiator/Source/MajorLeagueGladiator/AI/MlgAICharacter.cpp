@@ -42,6 +42,10 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	GetMesh()->bGenerateOverlapEvents = true;
 }
 
+void AMlgAICharacter::ApplyStagger_Implementation(float DurationSeconds)
+{
+}
+
 float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageEvent& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Damage = Super::InternalTakePointDamage(Damage, PointDamageEvent, EventInstigator, DamageCauser);
