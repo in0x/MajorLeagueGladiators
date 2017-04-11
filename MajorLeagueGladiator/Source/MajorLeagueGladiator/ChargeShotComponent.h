@@ -19,7 +19,6 @@ public:
 
 	void Reset();
 	float GetValue();
-	float GetValueAndReset();
 	float GetValuePercentage();
 
 	ChargeValueChangedPercentageDelegate OnChargeValueChangedPercentage;

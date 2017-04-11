@@ -3,13 +3,8 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "EmitterSpawnParams.h"
 #include "ParticleSystemManagerActor.generated.h"
-
-UENUM()
-enum class EParticleSystem : uint8
-{
-	HitscanBeam 	UMETA(DisplayName = "HitscanBeam")
-};
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AParticleSystemManagerActor : public AActor
@@ -19,15 +14,12 @@ class MAJORLEAGUEGLADIATOR_API AParticleSystemManagerActor : public AActor
 public:	
 	AParticleSystemManagerActor();
 
-	void SpawnParticleSystemAtLocation(EParticleSystem particleSystem, FTransform Trans, bool AutoDestroy = true);
-
-	void CreateParticleSystemMain(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy);
+	void CreateParticleSystemAtLocation(const FEmitterSpawnParams& Params) const;
 
 private:
-
 	UFUNCTION(Server, unreliable, WithValidation)
-	void CreateParticleSystem_Server(UParticleSystem* EmitterTemplate , FTransform Trans, bool bAutoDestroy);
+	void createParticleSystem_Server(const FEmitterSpawnParams& Params) const;
 	
 	UFUNCTION(NetMulticast, unreliable)
-	void CreateParticleSystem_NetMulticast(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy);
+	void createParticleSystem_NetMulticast(const FEmitterSpawnParams& Params) const;
 };

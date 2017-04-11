@@ -44,7 +44,7 @@ ABaseProjectile* AGrenadeProjectile::FireProjectile(FVector Location, FVector Di
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
 	
 	auto* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<AGrenadeProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
-	spawnedActor->SetActorScale3D(OptionalParams.Scale3D);
+	spawnedActor->SetActorScale3D(spawnedActor->GetActorScale3D() * OptionalParams.Scale3DMultiplier);
 	spawnedActor->Damage *= OptionalParams.DamageScale;
 
 	auto* spawnedRootComponent = CastChecked<UStaticMeshComponent>(spawnedActor->GetRootComponent());

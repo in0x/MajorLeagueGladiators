@@ -118,13 +118,13 @@ void AHitScanGunActor::OnUsed()
 	}
 }
 
-void AHitScanGunActor::playShotEffect_NetMulticast_Implementation(float charge)
+void AHitScanGunActor::playShotEffect_NetMulticast_Implementation(float Charge)
 {
 	currentAnimDuration = recoilAnimBackDuration;
-	adjustedRecoilDistance = recoilDistance * charge;
+	adjustedRecoilDistance = recoilDistance * Charge;
 	bIsApplyingRecoil = true;
 
-	shotAudioComponent->SetVolumeMultiplier(charge);
+	shotAudioComponent->SetVolumeMultiplier(Charge);
 	shotAudioComponent->Play();
 }
 
@@ -145,7 +145,7 @@ void AHitScanGunActor::shoot()
 
 	FProjectileSpawnParams params;
 	params.DamageScale = charge;
-	params.Scale3D = FVector(charge, charge, 1.f);
+	params.Scale3DMultiplier = FVector(charge, charge, 1.f);
 
 	ABaseProjectile* defaultProjectile = projectileClass.GetDefaultObject();
 

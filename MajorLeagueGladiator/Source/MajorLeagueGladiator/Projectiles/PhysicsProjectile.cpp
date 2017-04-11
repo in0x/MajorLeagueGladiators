@@ -38,7 +38,7 @@ ABaseProjectile* APhysicsProjectile::FireProjectile(FVector Location, FVector Di
 	
 	spawnedActor->SetLifeSpan(5.f);
 	spawnedActor->projectileMovementComponent->OnProjectileStop.AddDynamic(spawnedActor, &APhysicsProjectile::OnProjectileStop);
-	spawnedActor->SetActorScale3D(OptionalParams.Scale3D);
+	spawnedActor->SetActorScale3D(spawnedActor->GetActorScale3D() * OptionalParams.Scale3DMultiplier);
 	spawnedActor->Damage *= OptionalParams.DamageScale;
 
 	spawnedActor->FinishSpawning(projectileTransform);

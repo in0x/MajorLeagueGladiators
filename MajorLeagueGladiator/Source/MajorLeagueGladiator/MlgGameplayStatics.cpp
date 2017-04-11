@@ -207,6 +207,6 @@ void UMlgGameplayStatics::SpawnEmitterNetworked(UWorld* World, const FEmitterSpa
 	auto gameState = World->GetGameState<AMlgGameState>();
 	check(gameState);
 
-	gameState->GetParticleSystemManager()->CreateParticleSystemMain(Params.Template, Params.Transform, Params.bAutoDestroy);
+	gameState->GetParticleSystemManager()->CreateParticleSystemAtLocation(Params);
 }
 

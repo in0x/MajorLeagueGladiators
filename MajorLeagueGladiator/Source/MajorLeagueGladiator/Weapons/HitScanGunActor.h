@@ -30,7 +30,7 @@ private:
 	void shoot();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void playShotEffect_NetMulticast(float charge);
+	void playShotEffect_NetMulticast(float Charge);
 
 	UPROPERTY(EditAnywhere)
 	USceneCaptureComponent2D* sceneCapture;

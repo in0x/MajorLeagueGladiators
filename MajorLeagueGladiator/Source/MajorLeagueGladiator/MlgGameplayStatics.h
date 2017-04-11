@@ -1,32 +1,12 @@
-// Fill out your copyright notice in the Descriptio page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "EmitterSpawnParams.h"
 #include "MlgGameplayStatics.generated.h"
 
 class AMlgPlayerState;
-
-USTRUCT()
-struct FEmitterSpawnParams
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY()
-	UParticleSystem* Template;
-
-	UPROPERTY()
-	FTransform	Transform;
-
-	UPROPERTY()
-	bool bAutoDestroy;
-
-	FEmitterSpawnParams()
-		: Template(nullptr)
-		, Transform(FTransform())
-		, bAutoDestroy(false)
-	{}
-};
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UMlgGameplayStatics : public UBlueprintFunctionLibrary

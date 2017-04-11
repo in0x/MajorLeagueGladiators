@@ -26,7 +26,7 @@ ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector Di
 	AActor* hitActor = hitresult.GetActor();
 
 	FTransform transform = FTransform(DirectionVector.Rotation().Quaternion(), Location);
-	transform.SetScale3D(OptionalParams.Scale3D);
+	transform.SetScale3D(OptionalParams.Scale3DMultiplier);
 
 	FEmitterSpawnParams params;
 	params.Template = beamParticleSystem;
