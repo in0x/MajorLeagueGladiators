@@ -108,7 +108,8 @@ void AHitScanGunActor::OnUsed()
 	ammoComponent->ConsumeAmmo();
 	shoot();
 
-	playShotEffect_NetMulticast();
+	playShotEffect_NetMulticast(chargeShot->GetValuePercentage());
+	chargeShot->Reset();
 
 	auto* controller = this->GetMlgPlayerController();
 	if (controller != nullptr)
@@ -117,11 +118,13 @@ void AHitScanGunActor::OnUsed()
 	}
 }
 
-void AHitScanGunActor::playShotEffect_NetMulticast_Implementation()
+void AHitScanGunActor::playShotEffect_NetMulticast_Implementation(float charge)
 {
 	currentAnimDuration = recoilAnimBackDuration;
+	adjustedRecoilDistance = recoilDistance * charge;
 	bIsApplyingRecoil = true;
 
+	shotAudioComponent->SetVolumeMultiplier(charge);
 	shotAudioComponent->Play();
 }
 
@@ -157,7 +160,7 @@ void AHitScanGunActor::Tick(float DeltaTime)
 	{
 		elapsedAnimTime += DeltaTime;
 
-		auto recoil = FMath::Lerp(FVector(0, recoilOrigin, 0), FVector(0, recoilDistance, 0), elapsedAnimTime / currentAnimDuration);
+		FVector recoil = FMath::Lerp(FVector(0, recoilOrigin, 0), FVector(0, adjustedRecoilDistance, 0), elapsedAnimTime / currentAnimDuration);
 
 		EBPVRResultSwitch result;
 		FTransform addTrafo;
@@ -169,15 +172,14 @@ void AHitScanGunActor::Tick(float DeltaTime)
 		{
 			elapsedAnimTime = 0.f;
 
-			if (recoilDistance < 0) // Gun finished moving back
+			if (adjustedRecoilDistance < 0.f) // Gun finished moving back
 			{
-				recoilOrigin = recoilDistance;
-				recoilDistance = 0.f;
+				recoilOrigin = adjustedRecoilDistance;
+				adjustedRecoilDistance = 0.f;
 				currentAnimDuration = recoilAnimForwardDuration;
 			}
 			else // Gun is back at original position 
 			{
-				recoilDistance = recoilOrigin;
 				recoilOrigin = 0.f;
 				bIsApplyingRecoil = false;
 			}
