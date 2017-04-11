@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Descriptio page of Project Settings.
 
 #pragma once
 
@@ -6,6 +6,27 @@
 #include "MlgGameplayStatics.generated.h"
 
 class AMlgPlayerState;
+
+USTRUCT()
+struct FEmitterSpawnParams
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	UParticleSystem* Template;
+
+	UPROPERTY()
+	FTransform	Transform;
+
+	UPROPERTY()
+	bool bAutoDestroy;
+
+	FEmitterSpawnParams()
+		: Template(nullptr)
+		, Transform(FTransform())
+		, bAutoDestroy(false)
+	{}
+};
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UMlgGameplayStatics : public UBlueprintFunctionLibrary
@@ -20,4 +41,5 @@ public:
 	static bool CanDealDamageTo(const AMlgPlayerState* DamageDealer, const AMlgPlayerState* DamageReceiver);
 	static bool ComponentIsDamageableFrom(UPrimitiveComponent* VictimComp, FVector const& Origin, AActor const* IgnoredActor, const TArray<AActor*>& IgnoreActors, ECollisionChannel TraceChannel, FHitResult& OutHitResult);
 	static bool ApplyRadialDamageWithFalloff(const UObject* WorldContextObject, float BaseDamage, float MinimumDamage, const FVector& Origin, float DamageInnerRadius, float DamageOuterRadius, float DamageFalloff, TSubclassOf<class UDamageType> DamageTypeClass, AActor* DamageCauser, AController* InstigatedByController, bool bDrawDebug = false, const TArray<AActor*>& IgnoreActors = TArray<AActor*>(), ECollisionChannel DamagePreventionChannel = ECC_Visibility);
+	static void SpawnEmitterNetworked(UWorld* World, const FEmitterSpawnParams& Params);
 };

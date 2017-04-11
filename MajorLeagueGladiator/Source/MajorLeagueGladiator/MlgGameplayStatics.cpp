@@ -3,6 +3,8 @@
 #include "MajorLeagueGladiator.h"
 #include "MlgGameplayStatics.h"
 #include "MlgPlayerState.h"
+#include "MlgGameState.h"
+#include "ParticleSystemManagerActor.h"
 
 bool UMlgGameplayStatics::CanDealDamageTo(const AActor* DamageDealer, const AActor* DamageReceiver)
 {
@@ -198,5 +200,13 @@ bool UMlgGameplayStatics::ApplyRadialDamageWithFalloff(const UObject* WorldConte
 	}
 
 	return bAppliedDamage;
+}
+
+void UMlgGameplayStatics::SpawnEmitterNetworked(UWorld* World, const FEmitterSpawnParams& Params)
+{
+	auto gameState = World->GetGameState<AMlgGameState>();
+	check(gameState);
+
+	gameState->GetParticleSystemManager()->CreateParticleSystemMain(Params.Template, Params.Transform, Params.bAutoDestroy);
 }
 
