@@ -33,7 +33,7 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	triggerZone->SetStaticMesh(cubeMesh.Object);
 
 	damageCauser = ObjectInitializer.CreateDefaultSubobject<UDamageCauserComponent>(this, TEXT("DamageCauser"));
-	damageCauser->SetDamageType(UEnemyDamage::StaticClass());
+	damageCauser->DamageType = UEnemyDamage::StaticClass();
 
 	damageReciever = ObjectInitializer.CreateDefaultSubobject<UDamageReceiverComponent>(this, TEXT("DamageReciever"));
 	damageVisualizer = ObjectInitializer.CreateDefaultSubobject<UDamageVisualizerComponent>(this, TEXT("DamageVisualizer"));
