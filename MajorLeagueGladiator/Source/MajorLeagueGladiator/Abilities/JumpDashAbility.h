@@ -39,6 +39,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	float halfEffectAngleDegrees;
 
+	UPROPERTY(EditAnywhere)
+	float stunRadius;
+
+	UPROPERTY(EditAnywhere)
+	float stunTimeSeconds;
+
 	FTimerHandle timerHandle;
 
 	UPROPERTY(Transient)
@@ -73,5 +79,8 @@ private:
 	UFUNCTION()
 	void OnTargetingFailed(const FGameplayAbilityTargetDataHandle& Data);
 
-	void DealAreaStun();
+	void BeginFindingEnemiesInArea();
+
+	UFUNCTION()
+	void StunFoundEnemies(const FGameplayAbilityTargetDataHandle& Data);
 };

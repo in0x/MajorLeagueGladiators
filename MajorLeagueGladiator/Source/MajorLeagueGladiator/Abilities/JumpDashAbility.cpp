@@ -11,6 +11,8 @@
 
 #include "MlgGameplayStatics.h"
 
+#include "AI/MlgAICharacter.h"
+
 namespace
 {
 	const char* AIM_SOCKET_NAME = "Aim";
@@ -23,6 +25,8 @@ UJumpDashAbility::UJumpDashAbility()
 	, maxDashRange(50'000)
 	, effectDistance(400)
 	, halfEffectAngleDegrees(45)
+	, stunRadius(400)
+	, stunTimeSeconds(2.0f)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
@@ -101,7 +105,7 @@ void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 
 void UJumpDashAbility::OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
 {	
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+	BeginFindingEnemiesInArea();
 }
 
 void UJumpDashAbility::BeginFindingActorsToLaunch()
@@ -209,9 +213,43 @@ void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 	cachedMoveComp->AddImpulse(Velocity, true);
 }
 
-void UJumpDashAbility::DealAreaStun()
+void UJumpDashAbility::BeginFindingEnemiesInArea()
 {
+	UAbilityTask_WaitTargetData* findActorsToStunTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "findActorsToStunTask",
+		EGameplayTargetingConfirmation::Instant, AGameplayAbilityTargetActor_Cone::StaticClass());
 
+	findActorsToStunTask->ValidData.AddDynamic(this, &UJumpDashAbility::StunFoundEnemies);
+
+	AGameplayAbilityTargetActor* spawnedTargetingActor = nullptr;
+
+	if (!findActorsToStunTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Cone::StaticClass(), spawnedTargetingActor))
+	{
+		return;
+	}
+
+	AGameplayAbilityTargetActor_Cone* targetingConeActor = CastChecked<AGameplayAbilityTargetActor_Cone>(spawnedTargetingActor);
+	targetingConeActor->Distance = stunRadius;
+	targetingConeActor->HalfAngleDegrees = 360; // Target around me. 180 Would be enough, but just in case.
+	targetingConeActor->StartLocation = MakeTargetLocationInfoFromOwnerActor();
+
+	findActorsToStunTask->FinishSpawningActor(this, spawnedTargetingActor);
+
+	// TODO: Call Particle Affect
 }
 
 
+void UJumpDashAbility::StunFoundEnemies(const FGameplayAbilityTargetDataHandle& Data)
+{
+	const FGameplayAbilityTargetData* targetData = Data.Get(0);
+	for (const auto& actor : targetData->GetActors())
+	{
+		if (actor.IsValid())
+		{
+			if (AMlgAICharacter* characterToStun = Cast<AMlgAICharacter>(actor.Get()))
+			{
+				characterToStun->ApplyStagger(stunTimeSeconds);
+			}
+		}
+	}
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+}
