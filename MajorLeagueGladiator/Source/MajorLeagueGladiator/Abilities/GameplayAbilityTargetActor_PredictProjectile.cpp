@@ -71,6 +71,7 @@ bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
 	};
 
 	FPredictProjectilePathParams params;
+	launchVelocity = vrController->GetForwardVector() * TargetProjectileSpeed;
 
 	if (targetingType == EPickMoveLocationTargeting::FromPlayerCapsule)
 	{
@@ -79,7 +80,6 @@ bool AGameplayAbilityTargetActor_PredictProjectile::PickTarget()
 	}
 	else if (targetingType == EPickMoveLocationTargeting::FromController)
 	{
-		launchVelocity = vrController->GetForwardVector() * TargetProjectileSpeed;
 		params = FPredictProjectilePathParams(0.f, vrController->GetComponentLocation(), launchVelocity, TargetProjectileFlightTime);
 	}
 	else // FromSourceComponent
