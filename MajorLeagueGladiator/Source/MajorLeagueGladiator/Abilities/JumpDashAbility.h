@@ -60,13 +60,9 @@ private:
 	void BeginTargeting();
 
 	void BeginDashing(const FVector& Velocity);
-	void PushAffectedEnemiesInDirection(const FVector& Velocity);
 
 	UFUNCTION()
 	void OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
-
-	UFUNCTION()
-	void OnCollidedAffectedCharacterWithWorld(AActor* AffectedActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION()
 	void LaunchFoundActorsUpwards(const FGameplayAbilityTargetDataHandle& Data);
@@ -76,4 +72,6 @@ private:
 
 	UFUNCTION()
 	void OnTargetingFailed(const FGameplayAbilityTargetDataHandle& Data);
+
+	void DealAreaStun();
 };
