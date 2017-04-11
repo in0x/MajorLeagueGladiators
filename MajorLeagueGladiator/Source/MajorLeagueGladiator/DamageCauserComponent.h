@@ -14,10 +14,8 @@ public:
 	UDamageCauserComponent();
 	virtual void BeginPlay() override;	
 
-	void SetDamageType(TSubclassOf<UDamageType> Type)
-	{
-		damageType = Type;
-	}
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	TSubclassOf<UDamageType> DamageType;
 
 protected:
 	UFUNCTION()
@@ -27,5 +25,7 @@ protected:
 	float damageAppliedOnHit;
 
 	UPROPERTY(EditAnywhere, Category = "Damage")
-	TSubclassOf<UDamageType> damageType;
+	float cooldownBetweenDamage;
+
+	FTimerHandle cooldownTimer;
 };

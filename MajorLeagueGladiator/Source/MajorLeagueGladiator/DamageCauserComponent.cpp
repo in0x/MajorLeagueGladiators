@@ -7,7 +7,8 @@
 
 
 UDamageCauserComponent::UDamageCauserComponent()
-	: damageAppliedOnHit(0)
+	: damageAppliedOnHit(0.0f)
+	, cooldownBetweenDamage(1.0f)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
@@ -20,7 +21,11 @@ void UDamageCauserComponent::BeginPlay()
 
 void UDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	if (GetOwnerRole() >= ROLE_Authority && UMlgGameplayStatics::CanDealDamageTo(OverlappedActor, OtherActor))
+	FTimerManager& timerManager = GetWorld()->GetTimerManager();
+
+	if (timerManager.GetTimerRemaining(cooldownTimer) <= 0.f &&
+		GetOwnerRole() >= ROLE_Authority && 
+		UMlgGameplayStatics::CanDealDamageTo(OverlappedActor, OtherActor))
 	{
 		APawn* damageInstigatorPawn = Cast<APawn>(OverlappedActor);
 		if (damageInstigatorPawn == nullptr)
@@ -29,7 +34,8 @@ void UDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor* Oth
 		}
 		check(damageInstigatorPawn);
 
-		UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, damageInstigatorPawn->GetController(), OverlappedActor, damageType);
+		UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, damageInstigatorPawn->GetController(), OverlappedActor, DamageType);
+		timerManager.SetTimer(cooldownTimer, cooldownBetweenDamage, false);
 	}
 }
 

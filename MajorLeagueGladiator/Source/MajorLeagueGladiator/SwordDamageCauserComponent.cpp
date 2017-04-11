@@ -93,7 +93,7 @@ void USwordDamageCauserComponent::damageAllOverlappingActors()
 	{
 		if (UMlgGameplayStatics::CanDealDamageTo(owner, actor))
 		{
-			UGameplayStatics::ApplyDamage(actor, damageAppliedOnHit, owner->GetInstigatorController(), owner, damageType);
+			UGameplayStatics::ApplyDamage(actor, damageAppliedOnHit, owner->GetInstigatorController(), owner, DamageType);
 			hasDealtdamage = true;
 		}
 	}
@@ -119,7 +119,7 @@ void USwordDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor
 {
 	if (canDealDamage && UMlgGameplayStatics::CanDealDamageTo(OverlappedActor, OtherActor))
 	{
-		UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, OverlappedActor->GetInstigatorController(), OverlappedActor, damageType);
+		UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, OverlappedActor->GetInstigatorController(), OverlappedActor, DamageType);
 		doRumbleRight(OtherActor);
 	}
 }
