@@ -104,6 +104,17 @@ void UJumpDashAbility::OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
+
+void UJumpDashAbility::OnCollidedAffectedCharacterWithWorld(AActor* AffectedActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
+{
+	ACharacter* character = CastChecked<ACharacter>(AffectedActor);
+	UCharacterMovementComponent* moveComp = CastChecked<UCharacterMovementComponent>(character->GetMovementComponent());
+	moveComp->StopMovementImmediately();
+	moveComp->SetMovementMode(MOVE_Falling);
+	character->OnActorHit.RemoveDynamic(this, &UJumpDashAbility::OnCollidedAffectedCharacterWithWorld);
+}
+
+
 void UJumpDashAbility::BeginFindingActorsToLaunch()
 {
 	UAbilityTask_WaitTargetData* findActorsToLaunchTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "findActorsToLaunchTask",
@@ -137,7 +148,8 @@ void UJumpDashAbility::LaunchFoundActorsUpwards(const FGameplayAbilityTargetData
 			if (CanLaunchCharacter(characterToLaunch))
 			{
 				characterToLaunch->LaunchCharacter(launchVelocity, true, true);
-				affectedCharacters.Add(characterToLaunch);
+				characterToLaunch->OnActorHit.AddDynamic(this, &UJumpDashAbility::OnCollidedAffectedCharacterWithWorld);
+				affectedCharacters.Add(characterToLaunch);				
 			}		
 		}
 	}
@@ -207,13 +219,20 @@ void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 	cachedMoveComp->StopMovementImmediately();
 	cachedMoveComp->SetMovementMode(MOVE_Flying);
 	cachedMoveComp->AddImpulse(Velocity, true);
+	PushAffectedEnemiesInDirection(Velocity);
 }
 
 void UJumpDashAbility::PushAffectedEnemiesInDirection(const FVector& Velocity)
 {
 	for (ACharacter* character : affectedCharacters)
 	{
-		UCharacterMovementComponent
+		if (character)
+		{
+			UCharacterMovementComponent* moveComp = CastChecked<UCharacterMovementComponent>(character->GetMovementComponent());
+			moveComp->StopMovementImmediately();
+			moveComp->SetMovementMode(MOVE_Flying);
+			moveComp->AddImpulse(Velocity, true);
+		}
 	}
 }
 

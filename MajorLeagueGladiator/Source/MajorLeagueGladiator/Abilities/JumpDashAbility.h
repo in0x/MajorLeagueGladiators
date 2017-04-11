@@ -66,11 +66,14 @@ private:
 	void OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION()
+	void OnCollidedAffectedCharacterWithWorld(AActor* AffectedActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION()
 	void LaunchFoundActorsUpwards(const FGameplayAbilityTargetDataHandle& Data);
 
 	UFUNCTION()
 	void OnTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data);
 
 	UFUNCTION()
-	void OnTargetingFailed(const FGameplayAbilityTargetDataHandle& Data);	
+	void OnTargetingFailed(const FGameplayAbilityTargetDataHandle& Data);
 };
