@@ -19,6 +19,9 @@ class MAJORLEAGUEGLADIATOR_API AMlgAICharacter : public ACharacter
 
 public:
 	AMlgAICharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	UFUNCTION(BlueprintNativeEvent)
+	void ApplyStagger(float DurationSeconds);
 	
 protected:
 	virtual float InternalTakePointDamage(float Damage, const FPointDamageEvent& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
