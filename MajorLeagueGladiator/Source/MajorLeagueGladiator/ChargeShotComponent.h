@@ -16,15 +16,19 @@ public:
 	UChargeShotComponent();
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	void Reset();
+	float GetValue();
 	float GetValueAndReset();
+	float GetValuePercentage();
 
 	ChargeValueChangedPercentageDelegate OnChargeValueChangedPercentage;
 
-private:
-	float maxValue;
-	float currentValue;
-	float minValue;
+	float MaxValue;
+	float MinValue;
+	float TimeToReachMaxValue;
 
-	float timeToReachMaxValue;
+private:
+	float currentValue;
 	float currentTime;
 };

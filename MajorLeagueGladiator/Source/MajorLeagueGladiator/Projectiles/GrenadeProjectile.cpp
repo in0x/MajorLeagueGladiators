@@ -39,11 +39,14 @@ AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializ
 	projectileMovementComponent->OnProjectileStop.AddDynamic(this, &AGrenadeProjectile::onProjectileStop);	
 }
 
-ABaseProjectile* AGrenadeProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
+ABaseProjectile* AGrenadeProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator, const FProjectileSpawnParams& OptionalParams) const
 {
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
-	auto* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<AGrenadeProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
 	
+	auto* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<AGrenadeProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
+	spawnedActor->SetActorScale3D(OptionalParams.Scale3D);
+	spawnedActor->Damage *= OptionalParams.DamageScale;
+
 	auto* spawnedRootComponent = CastChecked<UStaticMeshComponent>(spawnedActor->GetRootComponent());
 	spawnedRootComponent->IgnoreActorWhenMoving(ProjectileOwner, true);
 

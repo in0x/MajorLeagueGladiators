@@ -4,6 +4,23 @@
 
 #include "BaseProjectile.generated.h"
 
+USTRUCT()
+struct FProjectileSpawnParams
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	FVector Scale3D;
+
+	UPROPERTY()
+	float DamageScale;
+
+	FProjectileSpawnParams()
+		: Scale3D(FVector(1.0f, 1.0f, 1.0f))
+		, DamageScale(1.0f)
+	{}
+};
+
 UCLASS(abstract)
 class MAJORLEAGUEGLADIATOR_API ABaseProjectile : public AStaticMeshActor
 {
@@ -12,10 +29,12 @@ class MAJORLEAGUEGLADIATOR_API ABaseProjectile : public AStaticMeshActor
 public:	
 	ABaseProjectile();
 
-	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const { checkNoEntry(); return nullptr; }
+	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator, 
+											const FProjectileSpawnParams& OptionalParams = FProjectileSpawnParams()) const 
+	{ checkNoEntry(); return nullptr; }
 
 	UPROPERTY(EditAnywhere)
-	float damage;
+	float Damage;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UDamageType> DamageType;

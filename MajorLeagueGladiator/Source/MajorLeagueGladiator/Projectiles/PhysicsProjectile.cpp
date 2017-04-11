@@ -27,7 +27,7 @@ APhysicsProjectile::APhysicsProjectile(const FObjectInitializer& ObjectInitializ
 	projectileMovementComponent->ProjectileGravityScale = 0;
 }
 
-ABaseProjectile* APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
+ABaseProjectile* APhysicsProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator, const FProjectileSpawnParams& OptionalParams) const
 {
 	FTransform projectileTransform(DirectionVector.ToOrientationRotator(), Location);
 	APhysicsProjectile* spawnedActor = ProjectileOwner->GetWorld()->SpawnActorDeferred<APhysicsProjectile>(GetClass(), projectileTransform, ProjectileOwner, ProjectileInstigator->GetPawn());
@@ -37,8 +37,10 @@ ABaseProjectile* APhysicsProjectile::FireProjectile(FVector Location, FVector Di
 	spawnedRootComponent->MoveIgnoreActors.Add(ProjectileOwner);
 	
 	spawnedActor->SetLifeSpan(5.f);
-
 	spawnedActor->projectileMovementComponent->OnProjectileStop.AddDynamic(spawnedActor, &APhysicsProjectile::OnProjectileStop);
+	spawnedActor->SetActorScale3D(OptionalParams.Scale3D);
+	spawnedActor->Damage *= OptionalParams.DamageScale;
+
 	spawnedActor->FinishSpawning(projectileTransform);
 	return spawnedActor;
 }
@@ -68,7 +70,7 @@ void APhysicsProjectile::DealDamage(AActor* OtherActor)
 {
 	FVector travelingDir = GetRootComponent()->GetComponentVelocity().GetSafeNormal();
 
-	UGameplayStatics::ApplyPointDamage(OtherActor, damage, travelingDir, FHitResult{}, Instigator->Controller, this, DamageType);	
+	UGameplayStatics::ApplyPointDamage(OtherActor, Damage, travelingDir, FHitResult{}, Instigator->Controller, this, DamageType);	
 }
 
 bool APhysicsProjectile::IsIgnoredActor(const AActor* Actor) const
