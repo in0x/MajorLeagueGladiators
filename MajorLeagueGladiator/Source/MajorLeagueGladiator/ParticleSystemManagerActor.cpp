@@ -8,26 +8,22 @@ AParticleSystemManagerActor::AParticleSystemManagerActor()
 	bAlwaysRelevant = true;
 }
 
-void AParticleSystemManagerActor::SpawnParticleSystemAtLocation(EParticleSystem particleSystem, FTransform Trans, bool AutoDestroy)
+void AParticleSystemManagerActor::CreateParticleSystemAtLocation(const FEmitterSpawnParams& Params) const
 {
+	createParticleSystem_Server(Params);
 }
 
-void AParticleSystemManagerActor::CreateParticleSystemMain(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy)
+void AParticleSystemManagerActor::createParticleSystem_Server_Implementation(const FEmitterSpawnParams& Params) const
 {
-	CreateParticleSystem_Server(EmitterTemplate, Trans, bAutoDestroy);
+	createParticleSystem_NetMulticast(Params);
 }
 
-void AParticleSystemManagerActor::CreateParticleSystem_Server_Implementation(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy)
-{
-	CreateParticleSystem_NetMulticast(EmitterTemplate, Trans, bAutoDestroy);
-}
-
-bool AParticleSystemManagerActor::CreateParticleSystem_Server_Validate(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy)
+bool AParticleSystemManagerActor::createParticleSystem_Server_Validate(const FEmitterSpawnParams& Params)
 {
 	return true;
 }
 
-void AParticleSystemManagerActor::CreateParticleSystem_NetMulticast_Implementation(UParticleSystem* EmitterTemplate, FTransform Trans, bool bAutoDestroy)
+void AParticleSystemManagerActor::createParticleSystem_NetMulticast_Implementation(const FEmitterSpawnParams& Params) const
 {
-	UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EmitterTemplate, Trans);
+	UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Params.Template, Params.Transform, Params.bAutoDestroy);
 }

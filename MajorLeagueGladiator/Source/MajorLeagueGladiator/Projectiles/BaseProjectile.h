@@ -10,13 +10,13 @@ struct FProjectileSpawnParams
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
-	FVector Scale3D;
+	FVector Scale3DMultiplier;
 
 	UPROPERTY()
 	float DamageScale;
 
 	FProjectileSpawnParams()
-		: Scale3D(FVector(1.0f, 1.0f, 1.0f))
+		: Scale3DMultiplier(FVector(1.0f, 1.0f, 1.0f))
 		, DamageScale(1.0f)
 	{}
 };
@@ -31,7 +31,10 @@ public:
 
 	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator, 
 											const FProjectileSpawnParams& OptionalParams = FProjectileSpawnParams()) const 
-	{ checkNoEntry(); return nullptr; }
+	{ 
+		checkNoEntry(); 
+		return nullptr; 
+	}
 
 	UPROPERTY(EditAnywhere)
 	float Damage;

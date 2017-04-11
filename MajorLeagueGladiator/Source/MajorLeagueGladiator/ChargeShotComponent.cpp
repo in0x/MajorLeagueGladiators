@@ -27,7 +27,7 @@ void UChargeShotComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 		currentTime += DeltaTime;
 		currentTime = FMath::Min(currentTime, TimeToReachMaxValue);
 		currentValue = FMath::Lerp(MinValue, MaxValue, currentTime / TimeToReachMaxValue);
-		OnChargeValueChangedPercentage.Broadcast(currentValue / MaxValue);
+		OnChargeValueChangedPercentage.Broadcast(GetValuePercentage());
 	}
 }
 
@@ -44,12 +44,6 @@ float UChargeShotComponent::GetValuePercentage()
 void UChargeShotComponent::Reset()
 {
 	currentTime = 0.f;
-}
-
-float UChargeShotComponent::GetValueAndReset()
-{
-	currentTime = 0.f;
-	return currentValue;
 }
 
 
