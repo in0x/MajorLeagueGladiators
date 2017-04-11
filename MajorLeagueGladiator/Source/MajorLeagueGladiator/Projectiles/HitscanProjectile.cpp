@@ -14,7 +14,7 @@ AHitscanProjectile::AHitscanProjectile()
 {
 }
 
-ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const
+ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator, const FProjectileSpawnParams& OptionalParams) const
 {
 	if (Role < ROLE_Authority)
 	{
@@ -25,9 +25,15 @@ ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector Di
 	FHitResult hitresult = Trace(ProjectileOwner->GetWorld(), Location, DirectionVector, { ProjectileOwner });
 	AActor* hitActor = hitresult.GetActor();
 
-	UGameplayStatics::SpawnEmitterAtLocation(ProjectileOwner->GetWorld(), beamParticleSystem, FTransform(DirectionVector.Rotation().Quaternion(), Location));
-	FTransform transf = FTransform(DirectionVector.Rotation().Quaternion(), Location);
-	ProjectileOwner->GetWorld()->GetGameState<AMlgGameState>()->GetParticleSystemManager()->CreateParticleSystemMain(beamParticleSystem, transf, true);
+	FTransform transform = FTransform(DirectionVector.Rotation().Quaternion(), Location);
+	transform.SetScale3D(OptionalParams.Scale3D);
+
+	FEmitterSpawnParams params;
+	params.Template = beamParticleSystem;
+	params.Transform = transform;
+	params.bAutoDestroy = true;
+
+	UMlgGameplayStatics::SpawnEmitterNetworked(ProjectileOwner->GetWorld(), params);
 
 	if (hitActor == nullptr)
 	{
@@ -40,7 +46,7 @@ ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector Di
 	}
 	else if (UMlgGameplayStatics::CanDealDamageTo(ProjectileInstigator, hitActor))
 	{
-		UGameplayStatics::ApplyPointDamage(hitActor, damage, -DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UPlayerDamage::StaticClass());
+		UGameplayStatics::ApplyPointDamage(hitActor, Damage * OptionalParams.DamageScale, -DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UPlayerDamage::StaticClass());
 	}
 
 	return nullptr;

@@ -4,10 +4,10 @@
 #include "ChargeShotComponent.h"
 
 UChargeShotComponent::UChargeShotComponent()
-	: maxValue(2.0f)
+	: MaxValue(2.0f)
+	, MinValue(0.5f)
+	, TimeToReachMaxValue(3.0f)
 	, currentValue(0.0f)
-	, minValue(0.5f)
-	, timeToReachMaxValue(3.0f)
 	, currentTime(0.0f)
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -22,13 +22,28 @@ void UChargeShotComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (currentTime < timeToReachMaxValue)
+	if (currentTime < TimeToReachMaxValue)
 	{
 		currentTime += DeltaTime;
-		currentTime = FMath::Min(currentTime, timeToReachMaxValue);
-		currentValue = FMath::Lerp(minValue, maxValue, currentTime / timeToReachMaxValue);
-		OnChargeValueChangedPercentage.Broadcast(currentValue / maxValue);
+		currentTime = FMath::Min(currentTime, TimeToReachMaxValue);
+		currentValue = FMath::Lerp(MinValue, MaxValue, currentTime / TimeToReachMaxValue);
+		OnChargeValueChangedPercentage.Broadcast(currentValue / MaxValue);
 	}
+}
+
+float UChargeShotComponent::GetValue()
+{
+	return currentValue;
+}
+
+float UChargeShotComponent::GetValuePercentage()
+{
+	return currentValue / MaxValue;
+}
+
+void UChargeShotComponent::Reset()
+{
+	currentTime = 0.f;
 }
 
 float UChargeShotComponent::GetValueAndReset()

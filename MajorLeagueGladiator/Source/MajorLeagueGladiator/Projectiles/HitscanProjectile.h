@@ -17,12 +17,12 @@ public:
 	AHitscanProjectile();
 
 	// Returns nullptr as no actual projectile is spawned.
-	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const override;
+	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator,
+											const FProjectileSpawnParams& OptionalParams = FProjectileSpawnParams()) const override;
 
 	FHitResult Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const;
 
 private:
-
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* beamParticleSystem;
 

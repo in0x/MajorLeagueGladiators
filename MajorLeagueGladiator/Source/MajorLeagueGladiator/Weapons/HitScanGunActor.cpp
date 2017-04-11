@@ -138,12 +138,15 @@ void AHitScanGunActor::shoot()
 	FTransform actorTransform;
 	shotOriginSocket->GetSocketTransform(actorTransform, GetStaticMeshComponent());
 
-	ABaseProjectile* defaultProjectile = projectileClass.GetDefaultObject();
-	float baseDamage = defaultProjectile->damage;
-	defaultProjectile->damage = baseDamage * chargeShot->GetValueAndReset();
+	float charge = chargeShot->GetValue();
 
-	defaultProjectile->FireProjectile(actorTransform.GetLocation(), actorTransform.GetRotation().GetForwardVector(), this, Instigator->GetController());
-	defaultProjectile->damage = baseDamage;
+	FProjectileSpawnParams params;
+	params.DamageScale = charge;
+	params.Scale3D = FVector(charge, charge, 1.f);
+
+	ABaseProjectile* defaultProjectile = projectileClass.GetDefaultObject();
+
+	defaultProjectile->FireProjectile(actorTransform.GetLocation(), actorTransform.GetRotation().GetForwardVector(), this, Instigator->GetController(), params);
 }
 
 void AHitScanGunActor::Tick(float DeltaTime)

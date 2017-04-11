@@ -14,8 +14,10 @@ class MAJORLEAGUEGLADIATOR_API AGrenadeProjectile : public ABaseProjectile
 	
 public:
 	AGrenadeProjectile(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator) const override;
-	
+
+	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator,
+											const FProjectileSpawnParams& OptionalParams = FProjectileSpawnParams()) const override;
+
 	// Radius until which maximum damage will be applied.
 	UPROPERTY(EditAnywhere)
 	float ExplosionMaxDamageRadius;
