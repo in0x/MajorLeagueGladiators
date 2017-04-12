@@ -75,7 +75,13 @@ protected:
 	USkeletalMeshComponent* rightMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* bodyMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UMaterialInterface* multiToolMaterial;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UMaterialInterface* bodyMaterial;
 
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
@@ -91,9 +97,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UDamageReceiverComponent* dmgReceiverComp;
-
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* bodyMesh;
 
 	UPROPERTY(EditAnywhere)
 	UTriggerZoneComponent* healthTriggerZone;

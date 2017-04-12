@@ -8,6 +8,8 @@ ARangedPlayerCharacter::ARangedPlayerCharacter(const FObjectInitializer& ObjectI
 {
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> multiMat(TEXT("Material'/Game/Materials/M_RangedMultiTool.M_RangedMultiTool'"));
 	multiToolMaterial = multiMat.Object;
+	ConstructorHelpers::FObjectFinder<UMaterialInterface> bodyMat(TEXT("Material'/Game/Materials/M_DPS.M_DPS'"));
+	bodyMaterial = bodyMat.Object;
 }
 
 void ARangedPlayerCharacter::BeginPlay()
@@ -15,8 +17,10 @@ void ARangedPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	auto instance = UMaterialInstanceDynamic::Create(multiToolMaterial, nullptr);
+	auto bodyInstance = UMaterialInstanceDynamic::Create(bodyMaterial, nullptr);
 	leftMesh->SetMaterial(0, instance);
 	rightMesh->SetMaterial(0, instance);
+	bodyMesh->SetMaterial(0, bodyInstance);
 }
 
 
