@@ -67,6 +67,8 @@ public:
 	
 	void InvalidateAbilityMoveTargetLocation();
 
+	virtual void Tick(float DelataTime) override;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	USkeletalMeshComponent* leftMesh;
@@ -97,6 +99,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UDamageReceiverComponent* dmgReceiverComp;
+
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* bodyMesh2;
+
+	UPROPERTY(EditAnywhere)
+	FVector BodyOffsetFromHead;
 
 	UPROPERTY(EditAnywhere)
 	UTriggerZoneComponent* healthTriggerZone;
