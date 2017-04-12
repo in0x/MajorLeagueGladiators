@@ -17,6 +17,7 @@ class UVRControllerComponent;
 class AMlgGrippableStaticMeshActor;
 class USteamVRChaperoneComponent;
 class UTriggerZoneComponent;
+class UCooldownWidgetComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityMoveTargetLocationSet, FVector, NewLocation);
 
@@ -33,6 +34,10 @@ public:
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+
+	void OnLeftTouchpadX(float Value);
+	void OnLeftTouchpadY(float Value);
+
 	void OnLeftTriggerClicked();
 	void OnLeftTriggerReleased();
 	void OnRightTriggerClicked();
@@ -117,6 +122,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* hudHealth;
+
+	UPROPERTY(EditAnywhere)
+	UCooldownWidgetComponent* abilityWidgetTop;
+
+	UPROPERTY(EditAnywhere)
+	UCooldownWidgetComponent* abilityWidgetBottom;
 
 	UPROPERTY(EditAnywhere)
 	UAbilitySystemComponent* abilitySystemComponent;
