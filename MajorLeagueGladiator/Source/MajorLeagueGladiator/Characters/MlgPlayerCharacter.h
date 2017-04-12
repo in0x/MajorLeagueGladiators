@@ -80,6 +80,9 @@ protected:
 	UStaticMeshComponent* headMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* bodyMesh2;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UMaterialInterface* multiToolMaterial;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
@@ -99,9 +102,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UDamageReceiverComponent* dmgReceiverComp;
-
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* bodyMesh2;
 
 	UPROPERTY(EditAnywhere)
 	FVector BodyOffsetFromHead;

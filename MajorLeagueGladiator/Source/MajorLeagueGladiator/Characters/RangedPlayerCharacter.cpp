@@ -21,6 +21,8 @@ void ARangedPlayerCharacter::BeginPlay()
 	leftMesh->SetMaterial(0, instance);
 	rightMesh->SetMaterial(0, instance);
 	headMesh->SetMaterial(0, bodyInstance);
+	bodyMesh2->SetMaterial(0, bodyInstance);
+
 }
 
 
