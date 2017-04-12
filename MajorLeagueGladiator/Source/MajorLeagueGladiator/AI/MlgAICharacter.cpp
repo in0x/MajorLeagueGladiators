@@ -10,11 +10,14 @@
 #include "DamageReceiverComponent.h"
 #include "DamageVisualizerComponent.h"
 #include "MlgGameplayStatics.h"
+#include "DamageFeedbackComponent.h"
 
 namespace
 {
 	const char* PAWN_COLLISION_PROFILE_NAME = "Pawn";
 }
+
+
 
 AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -36,7 +39,7 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	damageCauser->DamageType = UEnemyDamage::StaticClass();
 
 	damageReciever = ObjectInitializer.CreateDefaultSubobject<UDamageReceiverComponent>(this, TEXT("DamageReciever"));
-	damageVisualizer = ObjectInitializer.CreateDefaultSubobject<UDamageVisualizerComponent>(this, TEXT("DamageVisualizer"));
+	//damageVisualizer = ObjectInitializer.CreateDefaultSubobject<UDamageVisualizerComponent>(this, TEXT("DamageVisualizer"));
 
 	GetMesh()->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
 	GetMesh()->bGenerateOverlapEvents = true;
@@ -44,6 +47,7 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 
 void AMlgAICharacter::ApplyStagger_Implementation(float DurationSeconds)
 {
+	//damageVisualizer = ObjectInitializer.CreateDefaultSubobject<UDamageVisualizerComponent>(this, TEXT("DamageVisualizer")); //TODO: Remove
 }
 
 float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageEvent& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -53,15 +57,22 @@ float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageE
 	FWeakpoint hitWeakpoint = weakpoints->FindHitWeakpoint(PointDamageEvent.HitInfo);
 
 	UMeshComponent* mesh = FindComponentByClass<UMeshComponent>();
+	UDamageFeedbackComponent* damageFeedback = FindComponentByClass<UDamageFeedbackComponent>(); //concrete damage feedback component is created in respective AI characters
 
-	if (hitWeakpoint.LocationSocketName != NAME_None)
+	if (damageFeedback)
 	{
-		damageVisualizer->AddVisual_NetMulticast(mesh, true, FTransform(PointDamageEvent.HitInfo.ImpactPoint));
+		if (hitWeakpoint.LocationSocketName != NAME_None)
+		{
+			//damageVisualizer->AddVisual_NetMulticast(mesh, true, FTransform(PointDamageEvent.HitInfo.ImpactPoint));
+			damageFeedback->AddVisual_NetMulticast(mesh, true, PointDamageEvent);
+		}
+		else
+		{
+			//damageVisualizer->AddVisual_NetMulticast(mesh, false);
+			damageFeedback->AddVisual_NetMulticast(mesh, true, PointDamageEvent);
+		}
 	}
-	else
-	{
-		damageVisualizer->AddVisual_NetMulticast(mesh, false);
-	}
+	
 
 	return Damage * hitWeakpoint.DamageMultiplier;
 }
