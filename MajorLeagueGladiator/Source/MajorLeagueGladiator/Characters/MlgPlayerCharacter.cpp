@@ -15,6 +15,7 @@
 #include "MlgGrippableStaticMeshActor.h"
 #include "../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Classes/SteamVRChaperoneComponent.h"
 #include "TriggerZoneComponent.h"
+#include "CooldownWidgetComponent.h"
 
 namespace 
 {
@@ -87,8 +88,10 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	hudHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 	hudHealth->SetupAttachment(leftMesh, FName(TEXT("Touch")));
 	hudHealth->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
-	
+
 	ConstructorHelpers::FObjectFinder<UStaticMesh> sphereMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Sphere.Shape_Sphere'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> cubeMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Sphere.Shape_Sphere'"));
+	
 	healthTriggerZone = ObjectInitializer.CreateDefaultSubobject<UTriggerZoneComponent>(this, TEXT("healthTriggerZone"));
 	healthTriggerZone->SetupAttachment(VRReplicatedCamera);
 	healthTriggerZone->SetTriggerType(TriggerType::Health);
@@ -190,12 +193,14 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("Turn", this, &AMlgPlayerCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &AMlgPlayerCharacter::AddControllerPitchInput);
 
+	PlayerInputComponent->BindAxis("LeftTouchpadX", this, &AMlgPlayerCharacter::OnLeftTouchpadX);
+	PlayerInputComponent->BindAxis("LeftTouchpadY", this, &AMlgPlayerCharacter::OnLeftTouchpadY);
+
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &AMlgPlayerCharacter::OnRightTriggerClicked);
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerReleased);
 
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
-
 
 	// SUPER IMPORTANT, must be called, when playercontroller status changes (in this case we are sure that we now possess a Controller so its different than before)
 	// Though we might move it to a different place
@@ -304,6 +309,22 @@ void AMlgPlayerCharacter::MoveRight(float Value)
 {
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
 	AddMovementInput(direction, Value);
+}
+
+void AMlgPlayerCharacter::OnLeftTouchpadX(float Value)
+{
+	abilityWidgetTop->SetTouchInputX(Value);
+	abilityWidgetBottom->SetTouchInputX(Value);
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("X: %f"), Value));
+}
+
+void AMlgPlayerCharacter::OnLeftTouchpadY(float Value)
+{
+	abilityWidgetTop->SetTouchInputY(Value);
+	abilityWidgetBottom->SetTouchInputY(Value);
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Y: %f"), Value));
 }
 
 void AMlgPlayerCharacter::OnLeftTriggerClicked()
