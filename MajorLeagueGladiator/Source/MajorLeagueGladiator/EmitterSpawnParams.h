@@ -22,6 +22,6 @@ struct FEmitterSpawnParams
 	FEmitterSpawnParams()
 		: Template(nullptr)
 		, Transform(FTransform::Identity)
-		, bAutoDestroy(false)
+		, bAutoDestroy(true)
 	{}
 };
