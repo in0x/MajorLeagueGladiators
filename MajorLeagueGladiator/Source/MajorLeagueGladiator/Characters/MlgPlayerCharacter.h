@@ -51,7 +51,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UStaticMeshComponent* GetMotionControllerMesh(EControllerHand Hand);
+	USkeletalMeshComponent* GetMotionControllerMesh(EControllerHand Hand);
 	UVRControllerComponent* GetMotionController(EControllerHand Hand);
 	AMlgGrippableStaticMeshActor* GetAttachedWeapon();
 
@@ -69,10 +69,10 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* leftMesh;
+	USkeletalMeshComponent* leftMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* rightMesh;
+	USkeletalMeshComponent* rightMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UMaterialInterface* multiToolMaterial;

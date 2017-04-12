@@ -41,8 +41,8 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	dmgReceiverComp = ObjectInitializer.CreateDefaultSubobject<UDamageReceiverComponent>(this, TEXT("DmgReceiverComp"));
 
-	leftMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftMesh"));
-	rightMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightMesh"));
+	leftMesh = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("LeftMesh"));
+	rightMesh = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("RightMesh"));
 	bodyMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh"));
 	
 	leftMesh->SetupAttachment(LeftMotionController);
@@ -50,11 +50,11 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	chaperone = ObjectInitializer.CreateDefaultSubobject<USteamVRChaperoneComponent>(this, TEXT("Chaperone"));
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> multiMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/MultiTool/MultiTool_MainMesh.MultiTool_MainMesh'"));
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> multiMesh(TEXT("SkeletalMesh'/Game/MVRCFPS_Assets/MultiTool/Gun_handle.Gun_handle'"));
 	if (multiMesh.Succeeded())
 	{
-		leftMesh->SetStaticMesh(multiMesh.Object);
-		rightMesh->SetStaticMesh(multiMesh.Object);
+		leftMesh->SetSkeletalMesh(multiMesh.Object);
+		rightMesh->SetSkeletalMesh(multiMesh.Object);
 	}
 	
 	GetCapsuleComponent()->SetCollisionProfileName(VR_CAPSULE_COLLISION_NAME);
@@ -306,7 +306,7 @@ void AMlgPlayerCharacter::OnSideGripButtonRight()
 	rightHandDrop_Server();
 }
 
-UStaticMeshComponent* AMlgPlayerCharacter::GetMotionControllerMesh(EControllerHand Hand)
+USkeletalMeshComponent* AMlgPlayerCharacter::GetMotionControllerMesh(EControllerHand Hand)
 {
 	switch (Hand)
 	{
