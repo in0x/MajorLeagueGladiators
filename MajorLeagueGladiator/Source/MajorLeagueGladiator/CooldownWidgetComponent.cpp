@@ -10,6 +10,13 @@ UCooldownWidgetComponent::UCooldownWidgetComponent()
 
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> material(TEXT("Material'/Game/Materials/M_AbilityUI_World.M_AbilityUI_World'"));
 	materialInterface = material.Object;
+	//OverrideMaterials.Add(material.Object);
+}
+
+void UCooldownWidgetComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	SetMaterial(0, materialInterface);
 }
 
 FVector UCooldownWidgetComponent::GetVectorFromWidgetLocation()
@@ -112,26 +119,29 @@ void UCooldownWidgetComponent::SetActivated(TSubclassOf<UGameplayAbility> Abilit
 	}
 }
 
-void UCooldownWidgetComponent::SetUsed(TSubclassOf<UGameplayAbility> AbilityType, float CooldownSeconds)
-{
-	// Start cooldown effect
-}
-
 void UCooldownWidgetComponent::SelectWidget()
 {
-	RelativeLocation.Z = 5.0f;
-	UE_LOG(DebugLog, Log, TEXT("%s selected"), *GetName());
+	UMaterialInstanceDynamic* materialInstance =  GetMaterialInstance();
+	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), 50.0f);
 }
 
 void UCooldownWidgetComponent::UnselectWidget()
 {
-	RelativeLocation.Z = 0.0f;
+	UMaterialInstanceDynamic* materialInstance = GetMaterialInstance();
+	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), 5.0f);
 }
 
 void UCooldownWidgetComponent::ActivateWidget()
 {
+	//RelativeLocation.X = -2.5f;
 }
 
 void UCooldownWidgetComponent::DeactivateWidget()
 {
+	//RelativeLocation.X = 0.0f;
+}
+
+void UCooldownWidgetComponent::SetUsed(TSubclassOf<UGameplayAbility> AbilityType, float CooldownSeconds)
+{
+	// Start cooldown effect
 }

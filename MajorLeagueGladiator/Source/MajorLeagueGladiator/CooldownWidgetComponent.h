@@ -39,7 +39,8 @@ class MAJORLEAGUEGLADIATOR_API UCooldownWidgetComponent : public UWidgetComponen
 public:
 	UCooldownWidgetComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
+	virtual void BeginPlay() override;
+
 	void SetTouchInputX(float ValueX);
 	void SetTouchInputY(float ValueY);
 
@@ -57,7 +58,10 @@ public:
 	
 private:
 	UPROPERTY(EditAnywhere)
-	UTexture* AbilityIcon;
+	UTexture* IconTexture;
+
+	UPROPERTY(EditAnywhere)
+	UTexture* BaseShapeTexture;
 
 	void SelectWidget();
 	void UnselectWidget();
