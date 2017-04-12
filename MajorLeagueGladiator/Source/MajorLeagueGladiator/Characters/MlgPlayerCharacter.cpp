@@ -44,7 +44,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	leftMesh = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("LeftMesh"));
 	rightMesh = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("RightMesh"));
-	bodyMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh"));
+	headMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh"));
 	bodyMesh2 = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh2"));
 	
 	leftMesh->SetupAttachment(LeftMotionController);
@@ -66,9 +66,9 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	leftMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	rightMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
-	bodyMesh->SetupAttachment(VRReplicatedCamera);
-	bodyMesh->SetOwnerNoSee(true);
-	bodyMesh->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
+	headMesh->SetupAttachment(VRReplicatedCamera);
+	headMesh->SetOwnerNoSee(true);
+	headMesh->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
 
 	bodyMesh2->SetupAttachment(VRReplicatedCamera);
 	bodyMesh2->SetOwnerNoSee(true);
