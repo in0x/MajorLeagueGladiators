@@ -19,7 +19,6 @@ public:
 	*/
 private:
 
-	UPROPERTY(EditAnywhere, Category = "Melee Feedback")
-	UParticleSystem* weakpointParticleSystem;
+	
 	
 };

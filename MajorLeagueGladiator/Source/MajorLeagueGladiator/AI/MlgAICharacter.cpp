@@ -61,15 +61,19 @@ float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageE
 
 	if (damageFeedback)
 	{
+		damageFeedback->DoMaterialVisualization_NetMulticast(mesh);
+
 		if (hitWeakpoint.LocationSocketName != NAME_None)
 		{
 			//damageVisualizer->AddVisual_NetMulticast(mesh, true, FTransform(PointDamageEvent.HitInfo.ImpactPoint));
-			damageFeedback->AddVisual_NetMulticast(mesh, true, PointDamageEvent);
+			damageFeedback->DoParticleSystemVisualization_NetMulticast(PointDamageEvent.HitInfo.ImpactPoint, PointDamageEvent.ShotDirection, PointDamageEvent.DamageTypeClass);
+			damageFeedback->DoWeakpointParticleSystemVisualization_NetMulticast(PointDamageEvent.HitInfo.ImpactPoint, PointDamageEvent.ShotDirection, PointDamageEvent.DamageTypeClass);
+			//damageFeedback->PlaySound_NetMulticast()
 		}
 		else
 		{
 			//damageVisualizer->AddVisual_NetMulticast(mesh, false);
-			damageFeedback->AddVisual_NetMulticast(mesh, true, PointDamageEvent);
+			damageFeedback->DoParticleSystemVisualization_NetMulticast(PointDamageEvent.HitInfo.ImpactPoint, PointDamageEvent.ShotDirection, PointDamageEvent.DamageTypeClass);
 		}
 	}
 	

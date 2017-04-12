@@ -9,9 +9,9 @@ UMeleeDamageFeedbackComponent::UMeleeDamageFeedbackComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> smokePS(TEXT("ParticleSystem'/Game/ParticleSystems/PS_HitscanSmoke.PS_HitscanSmoke'"));
-	particleSystems.Add(smokePS.Object);
+	damageParticleSystems.Add(smokePS.Object);
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> burstPS(TEXT("ParticleSystem'/Game/ParticleSystems/PS_MeleeHitscanBurst.PS_MeleeHitscanBurst'"));
-	weakpointParticleSystem = burstPS.Object;
+	weakpointParticleSystems.Add(burstPS.Object);
 	//TODO: add minor PS with sparks....
 }
 //
