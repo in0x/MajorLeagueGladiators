@@ -155,8 +155,7 @@ void UJumpDashAbility::LaunchFoundActorsUpwards(const FGameplayAbilityTargetData
 			ACharacter* characterToLaunch = CastChecked<ACharacter>(actor.Get());
 			if (CanLaunchCharacter(characterToLaunch))
 			{
-				characterToLaunch->LaunchCharacter(launchVelocity, true, true);
-				affectedCharacters.Add(characterToLaunch);				
+				characterToLaunch->LaunchCharacter(launchVelocity, true, true);		
 			}		
 		}
 	}
@@ -209,8 +208,6 @@ void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle
 	check(hitresult);
 
 	const FVector targetLocation = hitresult->Location;
-	
-	check(cachedCharacter);
 	const FVector actorFeetLocation = cachedCharacter->CalcFeetPosition();
 	const FVector feetToTargetVector = targetLocation - actorFeetLocation;
 	const FVector direction = feetToTargetVector.GetUnsafeNormal();
@@ -235,9 +232,7 @@ void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 
 void UJumpDashAbility::StunEnemiesInArea()
 {
-
 	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody),
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)
 	};
 
@@ -289,13 +284,13 @@ void UJumpDashAbility::PlayJumpParticleEffects()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Jump Particle Effect not set"));
+		UE_LOG(DebugLog, Warning, TEXT("Jump Particle Effect not set"));
 	}
 }
 
 void UJumpDashAbility::PlayLandingParticleEffects()
 {
-
+	if (!GetOwningActorFromActorInfo()->HasAuthority()) { return; }
 
 	if (landingParticleEffect)
 	{
@@ -308,6 +303,6 @@ void UJumpDashAbility::PlayLandingParticleEffects()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Landing Particle Effect not set"));
+		UE_LOG(DebugLog, Warning, TEXT("Landing Particle Effect not set"));
 	}
 }

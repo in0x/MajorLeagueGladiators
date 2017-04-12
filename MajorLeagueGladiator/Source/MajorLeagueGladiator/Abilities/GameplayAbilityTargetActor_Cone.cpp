@@ -14,7 +14,6 @@ void AGameplayAbilityTargetActor_Cone::ConfirmTargetingAndContinue()
 TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 {
 	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody),
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)
 	};
 

@@ -62,9 +62,6 @@ private:
 	UPROPERTY(Transient)
 	UCharacterMovementComponent* cachedMoveComp;
 
-	UPROPERTY(Transient)
-	TArray<ACharacter*> affectedCharacters;
-
 	void BeginFindingActorsToLaunch();
 
 	bool CanLaunchCharacter(ACharacter* Character) const;
