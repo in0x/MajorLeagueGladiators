@@ -31,29 +31,48 @@ void UDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	});
 }
 
-void UDamageFeedbackComponent::AddVisual_NetMulticast_Implementation(UMeshComponent* AffectedMesh, bool bSpawnParticles, const FPointDamageEvent& PointDamageEvent, const UDamageType* DamageType)
+void UDamageFeedbackComponent::DoMaterialVisualization_NetMulticast_Implementation(UMeshComponent* AffectedMesh)
 {
 	FDamageFeedbackData feedback;
-	//TODO: UGameplayStatics::PlaySoundAtLocation for concrete FeedbackComponents
-	if (bSpawnParticles)
-	{
-		for (UParticleSystem* ps : particleSystems)
-		{
-			feedback.ParticleSystems.Push(UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ps, FTransform(PointDamageEvent.HitInfo.ImpactPoint)));
-		}
-	}
-
 	bool hasVisual = feedbackData.ContainsByPredicate([&](const FDamageFeedbackData& d)
 	{
 		return d.AffectedMesh == AffectedMesh;
 	});
-
-	if (hasVisual) // If we already have a mesh effect, we disregard the new one and just play particles.
+	if (hasVisual)
 	{
 		return;
 	}
-
 	feedback.MatInstance = AffectedMesh->CreateAndSetMaterialInstanceDynamic(0);
 	feedback.MatInstance->SetScalarParameterValue(feedback.DamageValParamName, 1.0f);
 	feedbackData.Add(feedback);
+}
+
+void UDamageFeedbackComponent::DoParticleSystemVisualization_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
+{
+	for (UParticleSystem* ps : damageParticleSystems)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ps, FTransform(HitLocation));
+	}
+}
+
+void UDamageFeedbackComponent::DoWeakpointParticleSystemVisualization_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
+{
+	
+	for (UParticleSystem* ps : weakpointParticleSystems)
+	{
+		FTransform visualizationOrigin;
+		visualizationOrigin.SetLocation(HitLocation);
+		//The emitter's pitch has to be rotated by 90 to get the expected look at rotation
+		FRotator emitterRotator = UKismetMathLibrary::FindLookAtRotation(HitLocation, HitLocation + OriginDirection).Add(-90, 0, 0);
+		visualizationOrigin.SetRotation(FQuat(emitterRotator));
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ps, visualizationOrigin);
+	}
+}
+
+void UDamageFeedbackComponent::PlaySound_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, const UDamageType* DamageType)
+{
+	for (USoundBase* sound : sounds)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), sound, HitLocation);
+	}
 }

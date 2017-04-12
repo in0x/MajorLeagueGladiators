@@ -10,23 +10,20 @@ struct FDamageFeedbackData
 {
 	GENERATED_USTRUCT_BODY()
 
-		UPROPERTY(EditAnywhere, Category = "DamageVisual")
-		TArray<UParticleSystemComponent*> ParticleSystems;
+	UPROPERTY(EditAnywhere, Category = "DamageVisual")
+	UMeshComponent* AffectedMesh;
 
 	UPROPERTY(EditAnywhere, Category = "DamageVisual")
-		UMeshComponent* AffectedMesh;
+	UMaterialInstanceDynamic* MatInstance;
 
 	UPROPERTY(EditAnywhere, Category = "DamageVisual")
-		UMaterialInstanceDynamic* MatInstance;
+	FName DamageValParamName;
 
 	UPROPERTY(EditAnywhere, Category = "DamageVisual")
-		FName DamageValParamName;
+	float MatVisDuration;
 
 	UPROPERTY(EditAnywhere, Category = "DamageVisual")
-		float MatVisDuration;
-
-	UPROPERTY(EditAnywhere, Category = "DamageVisual")
-		float CurrentMatVisDuration;
+	float CurrentMatVisDuration;
 
 	FDamageFeedbackData()
 		: AffectedMesh(nullptr)
@@ -49,14 +46,26 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(NetMulticast, reliable)
-	virtual void AddVisual_NetMulticast(UMeshComponent* affectedMesh, bool bSpawnParticles, const FPointDamageEvent& PointDamageEvent = FPointDamageEvent(), const UDamageType* DamageType = nullptr);
+	virtual void DoMaterialVisualization_NetMulticast(UMeshComponent* AffectedMesh);
+
+	UFUNCTION(NetMulticast, reliable)
+	virtual void DoParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr);
+
+	UFUNCTION(NetMulticast, reliable)
+	virtual void DoWeakpointParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr);
+
+	UFUNCTION(NetMulticast, reliable)
+	virtual void PlaySound_NetMulticast(const FVector& location, const FVector& OriginDirection, const UDamageType* DamageType = nullptr);
 		
 protected:
 
 	TArray<FDamageFeedbackData> feedbackData;
 
 	UPROPERTY(EditAnywhere, Category = "Feedback")
-	TArray<UParticleSystem*> particleSystems;
+	TArray<UParticleSystem*> damageParticleSystems;
+
+	UPROPERTY(EditAnywhere, Category = "Feedback")
+	TArray<UParticleSystem*> weakpointParticleSystems;
 
 	UPROPERTY(EditAnywhere, Category = "Feedback")
 	TArray<USoundBase*> sounds;
