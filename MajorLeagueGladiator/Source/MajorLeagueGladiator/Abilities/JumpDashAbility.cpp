@@ -30,6 +30,9 @@ UJumpDashAbility::UJumpDashAbility()
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
+	ConstructorHelpers::FObjectFinder<UParticleSystem> particleSystemRef(TEXT("ParticleSystem'/Game/MobileStarterContent/Particles/P_Explosion.P_Explosion'"));
+	jumpParticleEffect = particleSystemRef.Object;
+	landingParticleEffect = particleSystemRef.Object;
 }
 
 void UJumpDashAbility::InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
