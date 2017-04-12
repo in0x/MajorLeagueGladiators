@@ -33,6 +33,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	BaseEyeHeight = 0.0f;
 	CrouchedEyeHeight = 0.0f;
 	bUseControllerRotationYaw = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	CastChecked<UPrimitiveComponent>(RootComponent)->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
 
@@ -44,6 +45,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	leftMesh = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("LeftMesh"));
 	rightMesh = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("RightMesh"));
 	bodyMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh"));
+	bodyMesh2 = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh2"));
 	
 	leftMesh->SetupAttachment(LeftMotionController);
 	rightMesh->SetupAttachment(RightMotionController);
@@ -68,17 +70,31 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	bodyMesh->SetOwnerNoSee(true);
 	bodyMesh->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
 
+	bodyMesh2->SetupAttachment(VRReplicatedCamera);
+	bodyMesh2->SetOwnerNoSee(true);
+	bodyMesh2->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
+	bodyMesh2->SetRelativeLocation({ 0,0,0 });
+	bodyMesh2->bAbsoluteRotation = true;
+	bodyMesh2->bAbsoluteScale = true;
+	bodyMesh2->bAbsoluteLocation = true;
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> bodyMeshAsset(TEXT("StaticMesh'/Game/MVRCFPS_Assets/PlayerCharacters/tank_body.tank_body'"));
+	bodyMesh2->SetStaticMesh(bodyMeshAsset.Object);
+
+	BodyOffsetFromHead = { 0,0,-190 };
+	
+
 	hudHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 	hudHealth->SetupAttachment(leftMesh, FName(TEXT("Touch")));
 	hudHealth->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	
-	ConstructorHelpers::FObjectFinder<UStaticMesh> cubeMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Sphere.Shape_Sphere'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> sphereMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Sphere.Shape_Sphere'"));
 	healthTriggerZone = ObjectInitializer.CreateDefaultSubobject<UTriggerZoneComponent>(this, TEXT("healthTriggerZone"));
 	healthTriggerZone->SetupAttachment(VRReplicatedCamera);
 	healthTriggerZone->SetTriggerType(TriggerType::Health);
 	healthTriggerZone->SetRelativeScale3D({ 0.2, 0.2, 0.2 });
 	healthTriggerZone->SetRelativeLocation({ 0, 0, -20});
-	healthTriggerZone->SetStaticMesh(cubeMesh.Object);
+	healthTriggerZone->SetStaticMesh(sphereMesh.Object);
 
 	auto classString = TEXT("WidgetBlueprint'/Game/BluePrints/PlayerHudBP.PlayerHudBP'");
 	classString = TEXT("/Game/BluePrints/PlayerHudBP");
@@ -149,6 +165,20 @@ void AMlgPlayerCharacter::InvalidateAbilityMoveTargetLocation()
 {
 	abilityMoveTargetLocation = INVALID_TARGET_LOCATION;
 }
+
+void AMlgPlayerCharacter::Tick(float DelataTime)
+{
+	Super::Tick(DelataTime);
+
+	FTransform cameraTrans = VRReplicatedCamera->GetComponentTransform();
+
+	FRotator rot(0, cameraTrans.Rotator().Yaw, 0);
+
+	FRotator bodyRotation = bodyMesh2->GetComponentRotation();
+	
+	bodyMesh2->SetWorldTransform(FTransform(rot, BodyOffsetFromHead + cameraTrans.GetLocation()));
+}
+
 
 void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
