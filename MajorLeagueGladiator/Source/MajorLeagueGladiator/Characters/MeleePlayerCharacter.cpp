@@ -24,5 +24,6 @@ void AMeleePlayerCharacter::BeginPlay()
 	leftMesh->SetMaterial(0, instance);
 	rightMesh->SetMaterial(0, swordInstance);
 	headMesh->SetMaterial(0, bodyInstance);
+	bodyMesh2->SetMaterial(0, bodyInstance);
 }
 
