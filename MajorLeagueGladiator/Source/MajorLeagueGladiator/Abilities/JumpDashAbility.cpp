@@ -74,6 +74,8 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 	FTimerManager& timeManager = cachedCharacter->GetWorldTimerManager();
 	timeManager.SetTimer(timerHandle, this, &UJumpDashAbility::BeginTargeting,
 		targetingDelay, false);
+
+	PlayJumpParticleEffects();
 }
 
 void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -99,13 +101,23 @@ void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 		waitTargetDataTask->EndTask();
 		waitTargetDataTask = nullptr;
 	}
-
+	PlayLandingParticleEffects();
 	cachedCharacter->InvalidateAbilityMoveTargetLocation();
 }
 
 void UJumpDashAbility::OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
 {	
-	BeginFindingEnemiesInArea();
+	cachedCharacter->OnActorHit.RemoveDynamic(this, &UJumpDashAbility::OnCollidedWithWorld);
+
+	if (waitTargetDataTask)
+	{
+		waitTargetDataTask->EndTask();
+		waitTargetDataTask = nullptr;
+	}
+
+	StunEnemiesInArea();
+
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
 void UJumpDashAbility::BeginFindingActorsToLaunch()
@@ -190,7 +202,12 @@ void UJumpDashAbility::BeginTargeting()
 
 void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data)
 {
-	const FVector targetLocation = Data.Data[0]->GetHitResult()->Location;
+	const FHitResult* hitresult = Data.Data[0]->GetHitResult();
+	check(hitresult);
+
+	const FVector targetLocation = hitresult->Location;
+	
+	check(cachedCharacter);
 	const FVector actorFeetLocation = cachedCharacter->CalcFeetPosition();
 	const FVector feetToTargetVector = targetLocation - actorFeetLocation;
 	const FVector direction = feetToTargetVector.GetUnsafeNormal();
@@ -213,36 +230,36 @@ void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 	cachedMoveComp->AddImpulse(Velocity, true);
 }
 
-void UJumpDashAbility::BeginFindingEnemiesInArea()
+void UJumpDashAbility::StunEnemiesInArea()
 {
-	UAbilityTask_WaitTargetData* findActorsToStunTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "findActorsToStunTask",
-		EGameplayTargetingConfirmation::Instant, AGameplayAbilityTargetActor_Cone::StaticClass());
 
-	findActorsToStunTask->ValidData.AddDynamic(this, &UJumpDashAbility::StunFoundEnemies);
+	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
+		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody),
+		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)
+	};
 
-	AGameplayAbilityTargetActor* spawnedTargetingActor = nullptr;
+	TArray<FOverlapResult> outOverlaps;
+	const FTransform ownerTransform = cachedCharacter->GetTransform();
+	const FVector ownerLocation = ownerTransform.GetLocation();
+	const FQuat ownerRotation = ownerTransform.GetRotation();
 
-	if (!findActorsToStunTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Cone::StaticClass(), spawnedTargetingActor))
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(GetOwningActorFromActorInfo());
+
+	UWorld* world = cachedCharacter->GetWorld();
+	world->OverlapMultiByObjectType(
+		outOverlaps,
+		ownerLocation,
+		ownerRotation,
+		FCollisionObjectQueryParams(queryTypes),
+		FCollisionShape::MakeSphere(stunRadius),
+		CollisionParams
+		);
+
+
+	for (const auto& overlap : outOverlaps)
 	{
-		return;
-	}
-
-	AGameplayAbilityTargetActor_Cone* targetingConeActor = CastChecked<AGameplayAbilityTargetActor_Cone>(spawnedTargetingActor);
-	targetingConeActor->Distance = stunRadius;
-	targetingConeActor->HalfAngleDegrees = 360; // Target around me. 180 Would be enough, but just in case.
-	targetingConeActor->StartLocation = MakeTargetLocationInfoFromOwnerActor();
-
-	findActorsToStunTask->FinishSpawningActor(this, spawnedTargetingActor);
-
-	// TODO: Call Particle Affect
-}
-
-
-void UJumpDashAbility::StunFoundEnemies(const FGameplayAbilityTargetDataHandle& Data)
-{
-	const FGameplayAbilityTargetData* targetData = Data.Get(0);
-	for (const auto& actor : targetData->GetActors())
-	{
+		auto actor = overlap.Actor;
 		if (actor.IsValid())
 		{
 			if (AMlgAICharacter* characterToStun = Cast<AMlgAICharacter>(actor.Get()))
@@ -251,5 +268,43 @@ void UJumpDashAbility::StunFoundEnemies(const FGameplayAbilityTargetDataHandle& 
 			}
 		}
 	}
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+
+}
+
+void UJumpDashAbility::PlayJumpParticleEffects()
+{
+	if (!GetOwningActorFromActorInfo()->HasAuthority()) { return; }
+
+	if (jumpParticleEffect)
+	{
+		FEmitterSpawnParams emitterParams;
+		emitterParams.Transform.SetTranslation(cachedCharacter->CalcFeetPosition());
+		emitterParams.Template = jumpParticleEffect;
+		emitterParams.bAutoDestroy = true;
+
+		UMlgGameplayStatics::SpawnEmitterNetworked(cachedCharacter->GetWorld(), emitterParams);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Jump Particle Effect not set"));
+	}
+}
+
+void UJumpDashAbility::PlayLandingParticleEffects()
+{
+
+
+	if (landingParticleEffect)
+	{
+		FEmitterSpawnParams emitterParams;
+		emitterParams.Transform.SetTranslation(cachedCharacter->CalcFeetPosition());
+		emitterParams.Template = landingParticleEffect;
+		emitterParams.bAutoDestroy = true;
+
+		UMlgGameplayStatics::SpawnEmitterNetworked(cachedCharacter->GetWorld(), emitterParams);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Landing Particle Effect not set"));
+	}
 }

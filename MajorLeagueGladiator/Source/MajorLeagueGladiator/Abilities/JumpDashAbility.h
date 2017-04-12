@@ -45,6 +45,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	float stunTimeSeconds;
 
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* jumpParticleEffect;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* landingParticleEffect;
+
 	FTimerHandle timerHandle;
 
 	UPROPERTY(Transient)
@@ -79,8 +85,9 @@ private:
 	UFUNCTION()
 	void OnTargetingFailed(const FGameplayAbilityTargetDataHandle& Data);
 
-	void BeginFindingEnemiesInArea();
+	void StunEnemiesInArea();
 
-	UFUNCTION()
-	void StunFoundEnemies(const FGameplayAbilityTargetDataHandle& Data);
+	void PlayJumpParticleEffects();
+
+	void PlayLandingParticleEffects();
 };
