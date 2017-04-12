@@ -77,7 +77,7 @@ protected:
 	USkeletalMeshComponent* rightMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* bodyMesh;
+	UStaticMeshComponent* headMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UMaterialInterface* multiToolMaterial;

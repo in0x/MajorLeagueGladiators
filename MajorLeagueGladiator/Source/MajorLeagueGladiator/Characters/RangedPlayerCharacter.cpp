@@ -20,7 +20,7 @@ void ARangedPlayerCharacter::BeginPlay()
 	auto bodyInstance = UMaterialInstanceDynamic::Create(bodyMaterial, nullptr);
 	leftMesh->SetMaterial(0, instance);
 	rightMesh->SetMaterial(0, instance);
-	bodyMesh->SetMaterial(0, bodyInstance);
+	headMesh->SetMaterial(0, bodyInstance);
 }
 
 

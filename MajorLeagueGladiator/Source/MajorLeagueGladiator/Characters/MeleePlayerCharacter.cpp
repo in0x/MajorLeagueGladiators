@@ -23,6 +23,6 @@ void AMeleePlayerCharacter::BeginPlay()
 	auto bodyInstance = UMaterialInstanceDynamic::Create(bodyMaterial, nullptr);
 	leftMesh->SetMaterial(0, instance);
 	rightMesh->SetMaterial(0, swordInstance);
-	bodyMesh->SetMaterial(0, bodyInstance);
+	headMesh->SetMaterial(0, bodyInstance);
 }
 
