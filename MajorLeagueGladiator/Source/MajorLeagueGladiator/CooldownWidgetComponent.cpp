@@ -77,11 +77,8 @@ void UCooldownWidgetComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 		else
 		{
 			const FVector locationVector = GetVectorFromWidgetLocation();
-
 			const float touchAngle = FMath::RadiansToDegrees(FMath::Acos(locationVector.CosineAngle2D(touchInputVector)));
-
-			UE_LOG(DebugLog, Log, TEXT("%s | Touch: %f"), *GetName(), touchAngle);
-
+			
 			if (WidgetShape == ECooldownWidgetShape::Half)
 			{
 				bTouchedThis = FMath::Abs(touchAngle) < 22.5f;
@@ -95,6 +92,10 @@ void UCooldownWidgetComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 		if (bTouchedThis)
 		{
 			SelectWidget();
+		}
+		else
+		{
+			UnselectWidget();
 		}
 	}
 }
