@@ -181,8 +181,6 @@ void UAbilityWidgetComponent::SetUsed(float CooldownSeconds)
 {
 	totalCooldown = CooldownSeconds;
 	remainingCooldown = CooldownSeconds;
-
-	//materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), 0.0f);
 }
 
 
