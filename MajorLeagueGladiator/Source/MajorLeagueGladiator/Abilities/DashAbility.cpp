@@ -42,8 +42,8 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	targetingSpawnedActor = CastChecked<AGameplayAbilityTargetActor_Raycast>(spawnedActor);
 
-	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());	
-	auto gripController = player->GetMotionControllerMesh(EControllerHand::Left);
+	cachedPlayer = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	auto gripController = cachedPlayer->GetMotionControllerMesh(EControllerHand::Left);
 	targetingSpawnedActor->StartLocation.SourceComponent = gripController;
 	targetingSpawnedActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
 	targetingSpawnedActor->StartLocation.SourceSocketName = AIM_SOCKET_NAME;
@@ -54,57 +54,59 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	targetingSpawnedActor->EvalTargetFunc = [](const FHitResult& result)
 	{
-		auto isNotVertical = FVector::DotProduct(result.ImpactNormal, FVector(0,0,1)) > 0.7f; 
+		auto isNotVertical = FVector::DotProduct(result.ImpactNormal, FVector(0, 0, 1)) > 0.7f;
 		auto hitSurface = result.bBlockingHit > 0;
 		return isNotVertical && hitSurface;
 	};
 
 	waitForTargetTask->FinishSpawningActor(this, spawnedActor);
+
+	cachedPlayer->OnAbilityActivated.Broadcast(StaticClass());
 }
 
 void UDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	waitForTargetTask = nullptr;
 	targetingSpawnedActor = nullptr;
-	
+
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
-	if (GetOwningActorFromActorInfo()->HasAuthority())
+	if (cachedPlayer->HasAuthority())
 	{
-		auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());	
-		auto capsule = player->GetCapsuleComponent();
+		auto capsule = cachedPlayer->GetCapsuleComponent();
 
 		// Add capsule halfheight to Z since our "location" is the capsule 
 		// center, otherwise we would move our body into the ground.
-		auto location = Data.Data[0]->GetHitResult()->Location;	
+		auto location = Data.Data[0]->GetHitResult()->Location;
 		location += capsule->GetUpVector() * capsule->GetScaledCapsuleHalfHeight();
-		
-		moveToTask = UAbilityTask_MoveTo::Create(this, "MoveTo Task", location, MoveSpeed, player);
+
+		moveToTask = UAbilityTask_MoveTo::Create(this, "MoveTo Task", location, MoveSpeed, cachedPlayer);
 		moveToTask->Activate();
 		moveToTask->OnLocationReached.AddUObject(this, &UDashAbility::OnLocationReached);
 
-		player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
-		player->EnableActorCollison_NetMulticast(false);
-		player->SetAbilityMoveTargetLocation(location);
+		cachedPlayer->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+		cachedPlayer->EnableActorCollison_NetMulticast(false);
+		cachedPlayer->SetAbilityMoveTargetLocation(location);
 	}
+
+	cachedPlayer->OnAbilityUseSuccess.Broadcast(StaticClass(), 3.0f);
 }
 
 void UDashAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
 {
+	cachedPlayer->OnAbilityUseFail.Broadcast(StaticClass());
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
 void UDashAbility::OnLocationReached()
 {
-	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
-	player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-	player->EnableActorCollison_NetMulticast(true);
-	player->InvalidateAbilityMoveTargetLocation();
+	cachedPlayer->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	cachedPlayer->EnableActorCollison_NetMulticast(true);
+	cachedPlayer->InvalidateAbilityMoveTargetLocation();
 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
-
 
