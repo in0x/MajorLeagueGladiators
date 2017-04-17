@@ -33,8 +33,8 @@ void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 		return;
 	}
 
-	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
-	player->OnAbilityActivated.Broadcast(StaticClass());
+	cachedPlayer = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	cachedPlayer->OnAbilityActivated.Broadcast(StaticClass());
 
 	targetingSpawnedActor = CastChecked<AGameplayAbilityTargetActor_PredictProjectile>(spawnedActor);
 
@@ -54,25 +54,21 @@ void UJumpAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data) 
+void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
-	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
-
-	if (player->HasAuthority())
+	if (cachedPlayer->HasAuthority())
 	{
-		player->LaunchCharacter(AGameplayAbilityTargetActor_PredictProjectile::GetVelocityFromTargetDataHandle(Data), true, true);
-		player->SetAbilityMoveTargetLocation(Data.Data[0]->GetHitResult()->ImpactPoint);
+		cachedPlayer->LaunchCharacter(AGameplayAbilityTargetActor_PredictProjectile::GetVelocityFromTargetDataHandle(Data), true, true);
+		cachedPlayer->SetAbilityMoveTargetLocation(Data.Data[0]->GetHitResult()->ImpactPoint);
 	}
 
-	player->MovementModeChangedDelegate.AddDynamic(this, &UJumpAbility::OnMovementModeChanged);
-	player->OnAbilityUseSuccess.Broadcast(StaticClass(), 3.0f);
+	cachedPlayer->MovementModeChangedDelegate.AddDynamic(this, &UJumpAbility::OnMovementModeChanged);
+	cachedPlayer->OnAbilityUseSuccess.Broadcast(StaticClass(), 3.0f);
 }
 
 void UJumpAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
 {
-	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
-	player->OnAbilityUseFail.Broadcast(StaticClass());
-
+	cachedPlayer->OnAbilityUseFail.Broadcast(StaticClass());
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
@@ -81,11 +77,11 @@ void UJumpAbility::OnMovementModeChanged(ACharacter* Character, EMovementMode Pr
 	if (Character->GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Walking)
 	{
 		Character->MovementModeChangedDelegate.RemoveDynamic(this, &UJumpAbility::OnMovementModeChanged);
-	
-		AMlgPlayerCharacter* mlgPlayerChar = CastChecked<AMlgPlayerCharacter>(Character);
-		mlgPlayerChar->StopMovementImmediately_NetMulticast();
-		mlgPlayerChar->InvalidateAbilityMoveTargetLocation();
-		
+
+		cachedPlayer->StopMovementImmediately_NetMulticast();
+		cachedPlayer->InvalidateAbilityMoveTargetLocation();
+
 		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 	}
 }
+

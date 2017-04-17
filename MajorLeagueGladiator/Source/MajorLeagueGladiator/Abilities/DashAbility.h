@@ -5,6 +5,7 @@
 #include "Abilities/GameplayAbility.h"
 #include "DashAbility.generated.h"
 
+class AMlgPlayerCharacter;
 class UAbilityTask_MoveTo;
 class UAbilityTask_WaitTargetData;
 class AGameplayAbilityTargetActor_Raycast;
@@ -44,4 +45,7 @@ private:
 
 	UPROPERTY()
 	AGameplayAbilityTargetActor_Raycast* targetingSpawnedActor;
+
+	AMlgPlayerCharacter* cachedPlayer;
 };
+

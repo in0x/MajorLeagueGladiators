@@ -5,6 +5,7 @@
 #include "Abilities/GameplayAbility.h"
 #include "JumpAbility.generated.h"
 
+class AMlgPlayerCharacter;
 class UAbilityTask_WaitTargetData;
 class AGameplayAbilityTargetActor_PredictProjectile;
 
@@ -42,4 +43,7 @@ private:
 
 	UPROPERTY(Transient)
 	AGameplayAbilityTargetActor_PredictProjectile* targetingSpawnedActor;
+
+	AMlgPlayerCharacter* cachedPlayer;
 };
+

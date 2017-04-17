@@ -152,7 +152,7 @@ void UAbilityWidgetComponent::OnAbilityUseSuccess(TSubclassOf<UGameplayAbility> 
 void UAbilityWidgetComponent::SelectWidget()
 {
 	RelativeLocation.X = -1.0f;
-	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), 50.0f);
+	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), 25.0f);
 }
 
 void UAbilityWidgetComponent::UnselectWidget()
