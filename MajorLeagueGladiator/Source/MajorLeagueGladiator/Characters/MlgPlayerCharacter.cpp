@@ -15,7 +15,7 @@
 #include "MlgGrippableStaticMeshActor.h"
 #include "../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Classes/SteamVRChaperoneComponent.h"
 #include "TriggerZoneComponent.h"
-#include "CooldownWidgetComponent.h"
+#include "AbilityWidgetComponent.h"
 
 namespace 
 {
@@ -193,9 +193,6 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("Turn", this, &AMlgPlayerCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &AMlgPlayerCharacter::AddControllerPitchInput);
 
-	PlayerInputComponent->BindAxis("LeftTouchpadX", this, &AMlgPlayerCharacter::OnLeftTouchpadX);
-	PlayerInputComponent->BindAxis("LeftTouchpadY", this, &AMlgPlayerCharacter::OnLeftTouchpadY);
-
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &AMlgPlayerCharacter::OnRightTriggerClicked);
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerReleased);
 
@@ -309,22 +306,6 @@ void AMlgPlayerCharacter::MoveRight(float Value)
 {
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
 	AddMovementInput(direction, Value);
-}
-
-void AMlgPlayerCharacter::OnLeftTouchpadX(float Value)
-{
-	abilityWidgetTop->SetTouchInputX(Value);
-	abilityWidgetBottom->SetTouchInputX(Value);
-
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("X: %f"), Value));
-}
-
-void AMlgPlayerCharacter::OnLeftTouchpadY(float Value)
-{
-	abilityWidgetTop->SetTouchInputY(Value);
-	abilityWidgetBottom->SetTouchInputY(Value);
-
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Y: %f"), Value));
 }
 
 void AMlgPlayerCharacter::OnLeftTriggerClicked()

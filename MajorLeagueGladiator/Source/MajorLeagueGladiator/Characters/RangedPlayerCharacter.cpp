@@ -2,6 +2,10 @@
 
 #include "MajorLeagueGladiator.h"
 #include "RangedPlayerCharacter.h"
+#include "AbilityWidgetComponent.h"
+#include "GameplayAbility.h"
+#include "Abilities/JumpAbility.h"
+#include "Abilities/DashAbility.h"
 
 ARangedPlayerCharacter::ARangedPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer)
@@ -23,6 +27,16 @@ void ARangedPlayerCharacter::BeginPlay()
 	headMesh->SetMaterial(0, bodyInstance);
 	bodyMesh2->SetMaterial(0, bodyInstance);
 
+	auto setBindings = [this](UAbilityWidgetComponent* widget, TSubclassOf<UGameplayAbility> boundAbilityType)
+	{
+		OnAbilityUseSuccess.AddDynamic(widget, &UAbilityWidgetComponent::OnAbilityUseSuccess);
+		OnAbilityActivated.AddDynamic(widget, &UAbilityWidgetComponent::OnAbilityActivated);
+		OnAbilityUseFail.AddDynamic(widget, &UAbilityWidgetComponent::OnAbilityUseFail);
+		widget->RelatedAbilityType = boundAbilityType;
+	};
+
+	setBindings(topAbilityWidget, UDashAbility::StaticClass());
+	setBindings(bottomAbilityWidget, UJumpAbility::StaticClass());
 }
 
 

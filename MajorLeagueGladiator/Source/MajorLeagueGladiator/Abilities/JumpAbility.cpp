@@ -33,6 +33,9 @@ void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 		return;
 	}
 
+	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	player->OnAbilityActivated.Broadcast(StaticClass());
+
 	targetingSpawnedActor = CastChecked<AGameplayAbilityTargetActor_PredictProjectile>(spawnedActor);
 
 	targetingSpawnedActor->TargetProjectileSpeed = PredictProjectileSpeed;
@@ -62,10 +65,14 @@ void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 	}
 
 	player->MovementModeChangedDelegate.AddDynamic(this, &UJumpAbility::OnMovementModeChanged);
+	player->OnAbilityUseSuccess.Broadcast(StaticClass(), 3.0f);
 }
 
 void UJumpAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
 {
+	auto player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	player->OnAbilityUseFail.Broadcast(StaticClass());
+
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 

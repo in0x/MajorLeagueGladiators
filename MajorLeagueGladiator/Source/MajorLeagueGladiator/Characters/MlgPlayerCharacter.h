@@ -17,9 +17,13 @@ class UVRControllerComponent;
 class AMlgGrippableStaticMeshActor;
 class USteamVRChaperoneComponent;
 class UTriggerZoneComponent;
-class UCooldownWidgetComponent;
+class UAbilityWidgetComponent;
+class UGameplayAbility;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityMoveTargetLocationSet, FVector, NewLocation);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityActivated, TSubclassOf<UGameplayAbility>, AbilityType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityUseFail, TSubclassOf<UGameplayAbility>, AbilityType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FAbilityUseSuccess, TSubclassOf<UGameplayAbility>, AbilityType, float, CooldownSeconds);
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgPlayerCharacter : public AVRSimpleCharacter, public IAbilitySystemInterface
@@ -27,16 +31,13 @@ class MAJORLEAGUEGLADIATOR_API AMlgPlayerCharacter : public AVRSimpleCharacter, 
 	GENERATED_BODY()
 public:
 	AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	
+
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void PossessedBy(AController* NewController) override;
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
-
-	void OnLeftTouchpadX(float Value);
-	void OnLeftTouchpadY(float Value);
 
 	void OnLeftTriggerClicked();
 	void OnLeftTriggerReleased();
@@ -67,12 +68,16 @@ public:
 
 	UPROPERTY(BlueprintAssignable, meta = (DisplayName = "AbilityMoveTargetLocation Set"))
 	FAbilityMoveTargetLocationSet OnAbilityMoveTargetLocationSet;
-	
+
 	void SetAbilityMoveTargetLocation(FVector Location);
-	
+
 	void InvalidateAbilityMoveTargetLocation();
 
 	virtual void Tick(float DelataTime) override;
+
+	FAbilityActivated OnAbilityActivated;
+	FAbilityUseFail OnAbilityUseFail;
+	FAbilityUseSuccess OnAbilityUseSuccess;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
@@ -124,12 +129,6 @@ private:
 	UWidgetComponent* hudHealth;
 
 	UPROPERTY(EditAnywhere)
-	UCooldownWidgetComponent* abilityWidgetTop;
-
-	UPROPERTY(EditAnywhere)
-	UCooldownWidgetComponent* abilityWidgetBottom;
-
-	UPROPERTY(EditAnywhere)
 	UAbilitySystemComponent* abilitySystemComponent;
 
 	UPROPERTY(EditAnywhere)
@@ -168,7 +167,7 @@ private:
 	virtual void BecomeViewTarget(APlayerController* PC) override;
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const { return abilitySystemComponent; }
-	
+
 	UFUNCTION()
 	void OnLand(const FHitResult& hit);
 };
