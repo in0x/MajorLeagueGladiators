@@ -86,7 +86,7 @@ void UGrenadeAbility::beginTargeting()
 
 	AGameplayAbilityTargetActor_PredictProjectile* targetingActor = CastChecked<AGameplayAbilityTargetActor_PredictProjectile>(spawnedTargetingActor);
 
-	auto* weapon = player->GetAttachedWeapon();
+	auto weapon = cachedPlayer->GetAttachedWeapon();
 	targetingActor->targetingType = EPickMoveLocationTargeting::FromSourceComponent;
 	targetingActor->StartLocation.SourceComponent = weapon->GetStaticMeshComponent();
 	targetingActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
@@ -120,11 +120,9 @@ void UGrenadeAbility::onTargetingFailed(const FGameplayAbilityTargetDataHandle& 
 // much farther than the short targeting draw.
 void UGrenadeAbility::fireGrenade()
 {
-	auto* player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
-
-	if (player->HasAuthority())
+	if (cachedPlayer->HasAuthority())
 	{
-		auto* weapon = player->GetAttachedWeapon();
+		auto weapon = cachedPlayer->GetAttachedWeapon();
 		const FTransform targetingTransform = weapon->GetStaticMeshComponent()->GetSocketTransform(SHOT_SOCKET_NAME);
 		
 		grenadeDefaultObject->FireProjectile(targetingTransform.GetLocation(), targetingTransform.GetRotation().GetForwardVector(), weapon, weapon->Instigator->GetController());
