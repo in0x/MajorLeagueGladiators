@@ -5,9 +5,8 @@
 #include "MlgPlayerCharacter.h"
 #include "RangedPlayerCharacter.generated.h"
 
-/**
- * 
- */
+class UAbilityWidgetComponent;
+
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API ARangedPlayerCharacter : public AMlgPlayerCharacter
 {
@@ -15,5 +14,16 @@ class MAJORLEAGUEGLADIATOR_API ARangedPlayerCharacter : public AMlgPlayerCharact
 	
 public:
 	ARangedPlayerCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
+
+private:
+	void OnLeftTouchpadX(float Value);
+	void OnLeftTouchpadY(float Value);
+
+	UPROPERTY(EditAnywhere)
+	UAbilityWidgetComponent* topAbilityWidget;
+
+	UPROPERTY(EditAnywhere)
+	UAbilityWidgetComponent* bottomAbilityWidget;
 };

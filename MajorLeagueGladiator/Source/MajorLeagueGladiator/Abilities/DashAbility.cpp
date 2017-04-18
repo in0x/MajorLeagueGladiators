@@ -9,6 +9,7 @@
 namespace
 {
 	const char* AIM_SOCKET_NAME = "Aim";
+	const float TEMPORARY_COOLDOWN = 3.0f;
 }
 
 UDashAbility::UDashAbility()
@@ -92,7 +93,7 @@ void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 		cachedPlayer->SetAbilityMoveTargetLocation(location);
 	}
 
-	cachedPlayer->OnAbilityUseSuccess.Broadcast(StaticClass(), 3.0f);
+	cachedPlayer->OnAbilityUseSuccess.Broadcast(StaticClass(), TEMPORARY_COOLDOWN);
 }
 
 void UDashAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)

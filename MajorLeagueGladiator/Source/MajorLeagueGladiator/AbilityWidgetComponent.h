@@ -6,7 +6,7 @@
 #include "AbilityWidgetComponent.generated.h"
 
 UENUM(BlueprintType)
-namespace ECooldownWidgetShape // Determines how much angle for hit test can deviate
+namespace EAbilityWidgetAngle // Determines how much angle for hit test can deviate
 {
 	enum Type
 	{
@@ -17,7 +17,7 @@ namespace ECooldownWidgetShape // Determines how much angle for hit test can dev
 }
 
 UENUM(BlueprintType)
-namespace ECooldownWidgetLocation // Determines from were angle for hit test is measured
+namespace EAbilityWidgetTriggerLocation // Determines from where angle for hit test is measured
 {
 	enum Type
 	{
@@ -57,10 +57,25 @@ public:
 	TSubclassOf<UGameplayAbility> RelatedAbilityType;
 
 	UPROPERTY(EditAnywhere)
-	TEnumAsByte<ECooldownWidgetShape::Type> WidgetShape;
+	TEnumAsByte<EAbilityWidgetAngle::Type> WidgetShape;
 
 	UPROPERTY(EditAnywhere)
-	TEnumAsByte<ECooldownWidgetLocation::Type> WidgetLocation;
+	TEnumAsByte<EAbilityWidgetTriggerLocation::Type> WidgetTriggerLocation;
+
+	UPROPERTY(EditAnywhere)
+	float SelectDepressDepth;
+
+	UPROPERTY(EditAnywhere)
+	float ActivateDepressDepth;
+
+	UPROPERTY(EditAnywhere)
+	float BaseGlowStrength;
+
+	UPROPERTY(EditAnywhere)
+	float SelectGlowStrength;
+
+	UPROPERTY(EditAnywhere)
+	float ActivateGlowStrength;
 
 private:
 	void SelectWidget();
@@ -69,12 +84,6 @@ private:
 	void DeactivateWidget();
 	void SetUsed(float CooldownSeconds);
 	FVector GetVectorFromWidgetLocation();
-
-	UPROPERTY(EditAnywhere)
-	UTexture* IconTexture;
-
-	UPROPERTY(EditAnywhere)
-	UTexture* BaseShapeTexture;
 
 	FVector touchInputVector;
 	UMaterialInterface* materialInterface;

@@ -5,7 +5,12 @@
 #include "GameplayAbility.h"
 
 UAbilityWidgetComponent::UAbilityWidgetComponent()
-	: touchInputVector(FVector::ZeroVector)
+	: SelectDepressDepth(-1.0f)
+	, ActivateDepressDepth(-2.5f)
+	, BaseGlowStrength(5.0f)
+	, SelectGlowStrength(25.0f)
+	, ActivateGlowStrength(50.0f)
+	, touchInputVector(FVector::ZeroVector)
 	, totalCooldown(0.0f)
 	, remainingCooldown(0.0f)
 	, bIsActivated(false)
@@ -21,32 +26,39 @@ void UAbilityWidgetComponent::BeginPlay()
 	Super::BeginPlay();
 	SetMaterial(0, materialInterface);
 	materialInstance = CreateAndSetMaterialInstanceDynamic(0);
+	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), BaseGlowStrength);
 }
 
 FVector UAbilityWidgetComponent::GetVectorFromWidgetLocation()
 {
 	FVector widgetLocation;
 
-	switch (WidgetLocation)
+	switch (WidgetTriggerLocation)
 	{
-	case ECooldownWidgetLocation::Top:
+	case EAbilityWidgetTriggerLocation::Center:
 	{
 		widgetLocation = FVector(0.0f, 1.0f, 0.0f);
 		break;
 	}
 
-	case ECooldownWidgetLocation::Bottom:
+	case EAbilityWidgetTriggerLocation::Top:
+	{
+		widgetLocation = FVector(0.0f, 1.0f, 0.0f);
+		break;
+	}
+
+	case EAbilityWidgetTriggerLocation::Bottom:
 	{
 		widgetLocation = FVector(0.0f, -1.0f, 0.0f);
 		break;
 	}
 
-	case ECooldownWidgetLocation::Left:
+	case EAbilityWidgetTriggerLocation::Left:
 	{
 		widgetLocation = FVector(1.0f, 0.0f, 0.0f);
 	}
 
-	case ECooldownWidgetLocation::Right:
+	case EAbilityWidgetTriggerLocation::Right:
 	{
 		widgetLocation = FVector(-1.0f, 0.0f, 0.0f);
 	}
@@ -94,7 +106,7 @@ void UAbilityWidgetComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	{
 		bool bTouchedThis = false;
 
-		if (WidgetShape == ECooldownWidgetShape::Full)
+		if (WidgetShape == EAbilityWidgetAngle::Full)
 		{
 			bTouchedThis = true;
 		}
@@ -103,7 +115,7 @@ void UAbilityWidgetComponent::TickComponent(float DeltaTime, ELevelTick TickType
 			const FVector locationVector = GetVectorFromWidgetLocation();
 			const float touchAngle = FMath::RadiansToDegrees(FMath::Acos(locationVector.CosineAngle2D(touchInputVector)));
 
-			if (WidgetShape == ECooldownWidgetShape::Half)
+			if (WidgetShape == EAbilityWidgetAngle::Half)
 			{
 				bTouchedThis = FMath::Abs(touchAngle) < 22.5f;
 			}
@@ -151,22 +163,22 @@ void UAbilityWidgetComponent::OnAbilityUseSuccess(TSubclassOf<UGameplayAbility> 
 
 void UAbilityWidgetComponent::SelectWidget()
 {
-	RelativeLocation.X = -1.0f;
-	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), 25.0f);
+	RelativeLocation.X = SelectDepressDepth;
+	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), SelectGlowStrength);
 }
 
 void UAbilityWidgetComponent::UnselectWidget()
 {
 	RelativeLocation.X = 0.0f;
-	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), 5.0f);
+	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), BaseGlowStrength);
 }
 
 void UAbilityWidgetComponent::ActivateWidget()
 {
 	bIsActivated = true;
 
-	RelativeLocation.X = -2.5f;
-	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), 50.0f);
+	RelativeLocation.X = ActivateDepressDepth;
+	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), ActivateGlowStrength);
 }
 
 void UAbilityWidgetComponent::DeactivateWidget()
@@ -174,7 +186,7 @@ void UAbilityWidgetComponent::DeactivateWidget()
 	bIsActivated = false;
 
 	RelativeLocation.X = 0.0f;
-	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), 5.0f);
+	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), BaseGlowStrength);
 }
 
 void UAbilityWidgetComponent::SetUsed(float CooldownSeconds)

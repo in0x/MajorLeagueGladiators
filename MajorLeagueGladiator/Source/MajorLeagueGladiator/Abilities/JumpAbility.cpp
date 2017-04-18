@@ -4,6 +4,11 @@
 #include "GameplayAbilityTargetActor_PredictProjectile.h"
 #include "Characters/MlgPlayerCharacter.h"
 
+namespace 
+{
+	const float TEMPORARY_COOLDOWN = 3.0f;
+}
+
 UJumpAbility::UJumpAbility()
 	: PredictProjectileSpeed(1000.f)
 	, MaxTimeInFlight(2.f)
@@ -63,7 +68,7 @@ void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 	}
 
 	cachedPlayer->MovementModeChangedDelegate.AddDynamic(this, &UJumpAbility::OnMovementModeChanged);
-	cachedPlayer->OnAbilityUseSuccess.Broadcast(StaticClass(), 3.0f);
+	cachedPlayer->OnAbilityUseSuccess.Broadcast(StaticClass(), TEMPORARY_COOLDOWN);
 }
 
 void UJumpAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)
