@@ -6,6 +6,7 @@
 #include "GrenadeAbility.generated.h"
 
 class UAbilityTask_WaitTargetData;
+class AMlgPlayerCharacter;
 class AGrenadeProjectile;
 
 UCLASS()
@@ -23,6 +24,8 @@ private:
 	UAbilityTask_WaitTargetData* waitTargetDataTask;
 	
 	AGrenadeProjectile* grenadeDefaultObject;
+
+	AMlgPlayerCharacter* cachedPlayer;
 
 	void beginTargeting();
 	void fireGrenade();

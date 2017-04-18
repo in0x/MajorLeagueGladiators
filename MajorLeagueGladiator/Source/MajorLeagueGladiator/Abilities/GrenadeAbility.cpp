@@ -47,8 +47,10 @@ void UGrenadeAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
 	}
 
 	grenadeDefaultObject = CastChecked<AGrenadeProjectile>(AGrenadeProjectile::StaticClass()->GetDefaultObject());
+	cachedPlayer = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
 
 	beginTargeting();
+	cachedPlayer->OnAbilityActivated.Broadcast(StaticClass());
 }
 
 void UGrenadeAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -83,8 +85,6 @@ void UGrenadeAbility::beginTargeting()
 	}
 
 	AGameplayAbilityTargetActor_PredictProjectile* targetingActor = CastChecked<AGameplayAbilityTargetActor_PredictProjectile>(spawnedTargetingActor);
-
-	auto* player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
 
 	auto* weapon = player->GetAttachedWeapon();
 	targetingActor->targetingType = EPickMoveLocationTargeting::FromSourceComponent;
@@ -130,6 +130,7 @@ void UGrenadeAbility::fireGrenade()
 		grenadeDefaultObject->FireProjectile(targetingTransform.GetLocation(), targetingTransform.GetRotation().GetForwardVector(), weapon, weapon->Instigator->GetController());
 	}
 
+	cachedPlayer->OnAbilityUseSuccess.Broadcast(StaticClass(), 3.0f);
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
