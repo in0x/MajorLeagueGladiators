@@ -15,7 +15,6 @@
 #include "MlgGrippableStaticMeshActor.h"
 #include "../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Classes/SteamVRChaperoneComponent.h"
 #include "TriggerZoneComponent.h"
-#include "AbilityWidgetComponent.h"
 
 namespace 
 {
@@ -90,7 +89,6 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	hudHealth->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> sphereMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Sphere.Shape_Sphere'"));
-	ConstructorHelpers::FObjectFinder<UStaticMesh> cubeMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Sphere.Shape_Sphere'"));
 	
 	healthTriggerZone = ObjectInitializer.CreateDefaultSubobject<UTriggerZoneComponent>(this, TEXT("healthTriggerZone"));
 	healthTriggerZone->SetupAttachment(VRReplicatedCamera);

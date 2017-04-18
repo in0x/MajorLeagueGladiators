@@ -16,6 +16,7 @@
 namespace
 {
 	const char* AIM_SOCKET_NAME = "Aim";
+	const float TEMPORARY_COOLDOWN = 3.0f;
 }
 
 UJumpDashAbility::UJumpDashAbility()
@@ -216,7 +217,7 @@ void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle
 	const FVector velocity = zNormalizedDirection * dashSpeed;
 	
 	cachedCharacter->SetAbilityMoveTargetLocation(targetLocation);
-	cachedCharacter->OnAbilityUseSuccess.Broadcast(StaticClass(), 3.0f);
+	cachedCharacter->OnAbilityUseSuccess.Broadcast(StaticClass(), TEMPORARY_COOLDOWN);
 	BeginDashing(velocity);
 }
 

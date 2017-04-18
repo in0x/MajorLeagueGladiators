@@ -14,6 +14,7 @@
 namespace
 {
 	const char* SHOT_SOCKET_NAME = "ProjectileSpawn";
+	const float TEMPORARY_COOLDOWN = 3.0f;
 }
 
 UGrenadeAbility::UGrenadeAbility()

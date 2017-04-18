@@ -17,7 +17,6 @@ class UVRControllerComponent;
 class AMlgGrippableStaticMeshActor;
 class USteamVRChaperoneComponent;
 class UTriggerZoneComponent;
-class UAbilityWidgetComponent;
 class UGameplayAbility;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityMoveTargetLocationSet, FVector, NewLocation);
