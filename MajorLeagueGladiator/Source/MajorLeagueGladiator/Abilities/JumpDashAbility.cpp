@@ -79,6 +79,7 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 		targetingDelay, false);
 
 	PlayJumpParticleEffects();
+	cachedCharacter->OnAbilityActivated.Broadcast(StaticClass());
 }
 
 void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -215,11 +216,13 @@ void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle
 	const FVector velocity = zNormalizedDirection * dashSpeed;
 	
 	cachedCharacter->SetAbilityMoveTargetLocation(targetLocation);
+	cachedCharacter->OnAbilityUseSuccess.Broadcast(StaticClass(), 3.0f);
 	BeginDashing(velocity);
 }
 
 void UJumpDashAbility::OnTargetingFailed(const FGameplayAbilityTargetDataHandle& Data)
 {
+	cachedCharacter->OnAbilityUseFail.Broadcast(StaticClass());
 	BeginDashing(FVector(0, 0, -dashSpeed));
 }
 
