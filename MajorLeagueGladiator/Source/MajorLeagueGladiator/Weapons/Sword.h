@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "MlgGrippableStaticMeshActor.h"
+#include "MlgGrippableMeshActor.h"
 #include "Sword.generated.h"
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API ASword : public AMlgGrippableStaticMeshActor
+class MAJORLEAGUEGLADIATOR_API ASword : public AMlgGrippableMeshActor
 {
 	GENERATED_BODY()	
 public:

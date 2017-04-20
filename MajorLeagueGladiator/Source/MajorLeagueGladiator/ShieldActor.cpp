@@ -15,14 +15,14 @@ namespace
 AShieldActor::AShieldActor()
 {
 	bReplicates = true;
-	GetStaticMeshComponent()->bGenerateOverlapEvents = true;
-	GetStaticMeshComponent()->SetCollisionProfileName(SHIELD_COLLISION_PRESET_NAME);
+	MeshComponent->bGenerateOverlapEvents = true;
+	MeshComponent->SetCollisionProfileName(SHIELD_COLLISION_PRESET_NAME);
 }
 
 FTransform AShieldActor::GetReflectSpawnTransform() const
 {
-	checkf(GetStaticMeshComponent()->GetSocketByName(REFLECT_SOCKET_NAME), TEXT("Socket \"AbilityActor\" is missing in the shield actor mesh"));
-	return GetStaticMeshComponent()->GetSocketTransform(REFLECT_SOCKET_NAME);
+	checkf(MeshComponent->DoesSocketExist(REFLECT_SOCKET_NAME), TEXT("Socket \"AbilityActor\" is missing in the shield actor mesh"));
+	return MeshComponent->GetSocketTransform(REFLECT_SOCKET_NAME);
 }
 
 void AShieldActor::OnHitInteractable(const ABaseProjectile* projectile)

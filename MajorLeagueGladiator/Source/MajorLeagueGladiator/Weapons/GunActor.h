@@ -39,7 +39,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Gun")
 	float shotFrequency = 0.1f;
 
-	UStaticMeshSocket* projectileSpawnSocket;
 	UTextWidget* textWidget;
 	bool bShooting;
 };

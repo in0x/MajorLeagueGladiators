@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "MlgGrippableStaticMeshActor.h"
+#include "MlgGrippableMeshActor.h"
 #include "Usable.h"
 #include "UsableItem.generated.h"
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AUsableItem : public AMlgGrippableStaticMeshActor, public IUsable
+class MAJORLEAGUEGLADIATOR_API AUsableItem : public AMlgGrippableMeshActor, public IUsable
 {
 	GENERATED_BODY()
 	

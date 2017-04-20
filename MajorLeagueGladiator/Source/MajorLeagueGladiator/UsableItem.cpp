@@ -5,13 +5,8 @@
 
 AUsableItem::AUsableItem()
 {
-	auto meshComp = GetStaticMeshComponent();
-
-	if (meshComp)
-	{
-		meshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		meshComp->bGenerateOverlapEvents = true;
-	}
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	MeshComponent->bGenerateOverlapEvents = true;
 
 	SetReplicates(true);
 	bReplicateMovement = true;

@@ -9,7 +9,7 @@
 
 #include "Projectiles/GrenadeProjectile.h"
 #include "Characters/MlgPlayerCharacter.h"
-#include "MlgGrippableStaticMeshActor.h"
+#include "MlgGrippableMeshActor.h"
 
 namespace
 {
@@ -82,7 +82,7 @@ void UGrenadeAbility::beginTargeting()
 
 	auto weapon = cachedPlayer->GetAttachedWeapon();
 	targetingActor->targetingType = EPickMoveLocationTargeting::FromSourceComponent;
-	targetingActor->StartLocation.SourceComponent = weapon->GetStaticMeshComponent();
+	targetingActor->StartLocation.SourceComponent = weapon->MeshComponent;
 	targetingActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
 	targetingActor->StartLocation.SourceSocketName = SHOT_SOCKET_NAME;
 	targetingActor->TargetProjectileSpeed = grenadeDefaultObject->InitialSpeed;
@@ -116,8 +116,8 @@ void UGrenadeAbility::fireGrenade()
 {
 	if (cachedPlayer->HasAuthority())
 	{
-		auto weapon = cachedPlayer->GetAttachedWeapon();
-		const FTransform targetingTransform = weapon->GetStaticMeshComponent()->GetSocketTransform(SHOT_SOCKET_NAME);
+		auto* weapon = player->GetAttachedWeapon();
+		const FTransform targetingTransform = weapon->MeshComponent->GetSocketTransform(SHOT_SOCKET_NAME);
 		
 		grenadeDefaultObject->FireProjectile(targetingTransform.GetLocation(), targetingTransform.GetRotation().GetForwardVector(), weapon, weapon->Instigator->GetController());
 	}
