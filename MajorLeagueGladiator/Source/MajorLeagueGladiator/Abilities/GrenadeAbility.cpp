@@ -116,7 +116,7 @@ void UGrenadeAbility::fireGrenade()
 {
 	if (cachedPlayer->HasAuthority())
 	{
-		auto* weapon = player->GetAttachedWeapon();
+		auto* weapon = cachedPlayer->GetAttachedWeapon();
 		const FTransform targetingTransform = weapon->MeshComponent->GetSocketTransform(SHOT_SOCKET_NAME);
 		
 		grenadeDefaultObject->FireProjectile(targetingTransform.GetLocation(), targetingTransform.GetRotation().GetForwardVector(), weapon, weapon->Instigator->GetController());
