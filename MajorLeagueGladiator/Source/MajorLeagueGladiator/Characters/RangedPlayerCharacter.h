@@ -20,10 +20,15 @@ public:
 private:
 	void OnLeftTouchpadX(float Value);
 	void OnLeftTouchpadY(float Value);
+	void OnRightTouchpadX(float Value);
+	void OnRightTouchpadY(float Value);
 
 	UPROPERTY(EditAnywhere)
-	UAbilityWidgetComponent* topAbilityWidget;
+	UAbilityWidgetComponent* lefthandTopAbilityWidget;
 
 	UPROPERTY(EditAnywhere)
-	UAbilityWidgetComponent* bottomAbilityWidget;
+	UAbilityWidgetComponent* lefthandBottomAbilityWidget;
+
+	UPROPERTY(EditAnywhere)
+	UAbilityWidgetComponent* rightHandAbilityWidget;
 };

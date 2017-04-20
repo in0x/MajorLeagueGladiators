@@ -6,6 +6,7 @@
 #include "GameplayAbility.h"
 #include "Abilities/JumpAbility.h"
 #include "Abilities/DashAbility.h"
+#include "Abilities/GrenadeAbility.h"
 
 namespace 
 {
@@ -21,11 +22,11 @@ ARangedPlayerCharacter::ARangedPlayerCharacter(const FObjectInitializer& ObjectI
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> bodyMat(TEXT("Material'/Game/Materials/M_DPS.M_DPS'"));
 	bodyMaterial = bodyMat.Object;
 
-	auto createWidget = [&](TSubclassOf<UGameplayAbility> boundAbilityType, EAbilityWidgetAngle::Type angle, EAbilityWidgetTriggerLocation::Type triggerLocation,
+	auto createWidget = [&](USceneComponent* attachTo, TSubclassOf<UGameplayAbility> boundAbilityType, EAbilityWidgetAngle::Type angle, EAbilityWidgetTriggerLocation::Type triggerLocation,
 		const TCHAR* WidgetName, const FName& SocketName) -> UAbilityWidgetComponent*
 	{
 		UAbilityWidgetComponent* widget = ObjectInitializer.CreateDefaultSubobject<UAbilityWidgetComponent>(this, WidgetName);
-		widget->SetupAttachment(leftMesh, SocketName);
+		widget->SetupAttachment(attachTo, SocketName);
 		widget->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 		widget->WidgetShape = angle;
 		widget->WidgetTriggerLocation = triggerLocation;
@@ -33,8 +34,9 @@ ARangedPlayerCharacter::ARangedPlayerCharacter(const FObjectInitializer& ObjectI
 		return widget;
 	};
 
-	topAbilityWidget = createWidget(UDashAbility::StaticClass(), EAbilityWidgetAngle::Half, EAbilityWidgetTriggerLocation::Top, TEXT("TopAbilityWidget"), FName(TEXT("Ability_Widget_Top")));
-	bottomAbilityWidget = createWidget(UJumpAbility::StaticClass(), EAbilityWidgetAngle::Half, EAbilityWidgetTriggerLocation::Bottom, TEXT("BottomAbilityWidget"), FName(TEXT("Ability_Widget_Bottom")));
+	lefthandTopAbilityWidget = createWidget(leftMesh, UDashAbility::StaticClass(), EAbilityWidgetAngle::Half, EAbilityWidgetTriggerLocation::Top, TEXT("TopAbilityWidget"), FName(TEXT("Ability_Widget_Top")));
+	lefthandBottomAbilityWidget = createWidget(leftMesh, UJumpAbility::StaticClass(), EAbilityWidgetAngle::Half, EAbilityWidgetTriggerLocation::Bottom, TEXT("BottomAbilityWidget"), FName(TEXT("Ability_Widget_Bottom")));
+	rightHandAbilityWidget = createWidget(rightMesh, UGrenadeAbility::StaticClass(), EAbilityWidgetAngle::Full, EAbilityWidgetTriggerLocation::Center, TEXT("RighthandAbilityWidget"), FName(TEXT("Ability_Widget_Center")));
 }
 
 void ARangedPlayerCharacter::BeginPlay()
@@ -55,8 +57,9 @@ void ARangedPlayerCharacter::BeginPlay()
 		OnAbilityUseFail.AddDynamic(widget, &UAbilityWidgetComponent::OnAbilityUseFail);
 	};
 
-	setupBindings(topAbilityWidget);
-	setupBindings(bottomAbilityWidget);
+	setupBindings(lefthandTopAbilityWidget);
+	setupBindings(lefthandBottomAbilityWidget);
+	setupBindings(rightHandAbilityWidget);
 }
 
 void ARangedPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -65,19 +68,30 @@ void ARangedPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 	PlayerInputComponent->BindAxis("LeftTouchpadX", this, &ARangedPlayerCharacter::OnLeftTouchpadX);
 	PlayerInputComponent->BindAxis("LeftTouchpadY", this, &ARangedPlayerCharacter::OnLeftTouchpadY);
+	PlayerInputComponent->BindAxis("RightTouchpadX", this, &ARangedPlayerCharacter::OnRightTouchpadX);
+	PlayerInputComponent->BindAxis("RightTouchpadY", this, &ARangedPlayerCharacter::OnRightTouchpadY);
 }
 
 void ARangedPlayerCharacter::OnLeftTouchpadX(float Value)
 {
-	topAbilityWidget->SetTouchInputX(Value);
-	bottomAbilityWidget->SetTouchInputX(Value);
+	lefthandTopAbilityWidget->SetTouchInputX(Value);
+	lefthandBottomAbilityWidget->SetTouchInputX(Value);
 }
 
 void ARangedPlayerCharacter::OnLeftTouchpadY(float Value)
 {
-	topAbilityWidget->SetTouchInputY(Value);
-	bottomAbilityWidget->SetTouchInputY(Value);
+	lefthandTopAbilityWidget->SetTouchInputY(Value);
+	lefthandBottomAbilityWidget->SetTouchInputY(Value);
 }
 
+void ARangedPlayerCharacter::OnRightTouchpadX(float Value)
+{
+	rightHandAbilityWidget->SetTouchInputX(Value);
+}
+
+void ARangedPlayerCharacter::OnRightTouchpadY(float Value)
+{
+	rightHandAbilityWidget->SetTouchInputY(Value);
+}
 
 

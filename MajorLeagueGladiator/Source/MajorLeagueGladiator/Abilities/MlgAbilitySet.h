@@ -11,12 +11,12 @@ namespace EMlgAbilityInputBinds
 {
 	enum Type
 	{
-		Ability1				UMETA(DisplayName = "Ability1"),
-		Ability2				UMETA(DisplayName = "Ability2"),
-		Ability3				UMETA(DisplayName = "Ability3"),
-		Ability4				UMETA(DisplayName = "Ability4"),
-		Ability5				UMETA(DisplayName = "Ability5"),
-		Ability6				UMETA(DisplayName = "Ability6"),
+		Ability1				UMETA(DisplayName = "Ability1 (Left Touchpad Top)"),
+		Ability2				UMETA(DisplayName = "Ability2 (Left Touchpad Bottom)"),
+		Ability3				UMETA(DisplayName = "Ability3 (Left Trigger)"),
+		Ability4				UMETA(DisplayName = "Ability4 (Left Grip Button)"),
+		Ability5				UMETA(DisplayName = "Ability5 (Right Touch Pad Press)"),
+		Ability6				UMETA(DisplayName = "Ability6 (Right Grip Button)"),
 		Ability7				UMETA(DisplayName = "Ability7"),
 		Ability8				UMETA(DisplayName = "Ability8"),
 		Ability9				UMETA(DisplayName = "Ability9"),
