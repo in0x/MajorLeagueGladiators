@@ -165,11 +165,11 @@ void AHitScanGunActor::Tick(float DeltaTime)
 
 		FVector recoil = FMath::Lerp(FVector(0, recoilOrigin, 0), FVector(0, adjustedRecoilDistance, 0), elapsedAnimTime / currentAnimDuration);
 
-		EBPVRResultSwitch result;
-		FTransform addTrafo;
-		addTrafo.AddToTranslation(recoil);
-
-		grippingController->SetGripAdditionTransform(gripInfo, result, addTrafo, true);
+		// NOTE(Phil): Temporarily disabled, since the attachments are now different.
+		//EBPVRResultSwitch result;
+		//FTransform addTrafo;
+		//addTrafo.AddToTranslation(recoil);
+		//grippingController->SetGripAdditionTransform(gripInfo, result, addTrafo, true);
 
 		if (elapsedAnimTime >= currentAnimDuration)
 		{

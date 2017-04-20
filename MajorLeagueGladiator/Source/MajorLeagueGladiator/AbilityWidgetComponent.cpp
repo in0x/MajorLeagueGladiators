@@ -5,8 +5,8 @@
 #include "GameplayAbility.h"
 
 UAbilityWidgetComponent::UAbilityWidgetComponent()
-	: SelectDepressDepth(-1.0f)
-	, ActivateDepressDepth(-2.5f)
+	: SelectDepressDepth(-0.5f)
+	, ActivateDepressDepth(-1.0f)
 	, BaseGlowStrength(5.0f)
 	, SelectGlowStrength(25.0f)
 	, ActivateGlowStrength(50.0f)
@@ -19,6 +19,8 @@ UAbilityWidgetComponent::UAbilityWidgetComponent()
 
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> material(TEXT("Material'/Game/Materials/M_AbilityUI_World.M_AbilityUI_World'"));
 	materialInterface = material.Object;
+
+	SetRelativeScale3D(FVector(0.00125, 0.02, 0.01));
 }
 
 void UAbilityWidgetComponent::BeginPlay()
