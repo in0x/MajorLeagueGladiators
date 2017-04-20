@@ -23,6 +23,8 @@ void UJumpAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const 
 
 void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	cachedPlayer = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+
 	waitForTargetTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Pick Target Task", EGameplayTargetingConfirmation::Custom, AGameplayAbilityTargetActor_PredictProjectile::StaticClass());
 	waitForTargetTask->ValidData.AddDynamic(this, &UJumpAbility::OnTargetPickSuccessful);
 	waitForTargetTask->Cancelled.AddDynamic(this, &UJumpAbility::OnTargetPickCanceled);
@@ -33,7 +35,6 @@ void UJumpAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 		return;
 	}
 
-	cachedPlayer = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
 	cachedPlayer->OnAbilityActivated.Broadcast(StaticClass());
 
 	targetingSpawnedActor = CastChecked<AGameplayAbilityTargetActor_PredictProjectile>(spawnedActor);
