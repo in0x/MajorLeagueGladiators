@@ -18,7 +18,7 @@ namespace
 }
 
 AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponent>(Super::MESH_COMPONENT_NAME))
 	, recoilAnimBackDuration(0.5f)
 	, recoilAnimForwardDuration(0.5f)
 	, elapsedAnimTime(0.f)
@@ -33,13 +33,14 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 
 	shotAudioComponent = ObjectInitializer.CreateDefaultSubobject<UAudioComponent>(this, TEXT("ShotAudioComponent"));
 	shotAudioComponent->SetIsReplicated(true);
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> GunStaticMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/FPWeapon/SK_FPGun.SK_FPGun'"));
+	
+	MeshComponent->SetSimulatePhysics(false);
+	/*static ConstructorHelpers::FObjectFinder<UStaticMesh> GunStaticMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/FPWeapon/SK_FPGun.SK_FPGun'"));
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
 	if (GunStaticMesh.Succeeded() && staticMeshComp)
 	{
 		staticMeshComp->SetStaticMesh(GunStaticMesh.Object);
-	}
+	}*/
 
 	laserMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LaserMeshComponent"));
 	laserMesh->SetupAttachment(MeshComponent, PROJECTILE_SPAWN_SOCKET_NAME);
