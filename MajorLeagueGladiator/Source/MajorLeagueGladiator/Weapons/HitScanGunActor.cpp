@@ -35,6 +35,10 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	shotAudioComponent->SetIsReplicated(true);
 	
 	MeshComponent->SetSimulatePhysics(false);
+
+	USkeletalMeshComponent* skelletalMeshComp = CastChecked<USkeletalMeshComponent>(MeshComponent);
+	skelletalMeshComp->SetAllBodiesSimulatePhysics(false);
+
 	/*static ConstructorHelpers::FObjectFinder<UStaticMesh> GunStaticMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/FPWeapon/SK_FPGun.SK_FPGun'"));
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
 	if (GunStaticMesh.Succeeded() && staticMeshComp)
