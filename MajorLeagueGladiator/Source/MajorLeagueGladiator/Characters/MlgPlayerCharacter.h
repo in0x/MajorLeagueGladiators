@@ -14,7 +14,7 @@ class UAbilitySystemComponent;
 class UGameplayAbilitySet;
 class UMlgAbilitySet;
 class UVRControllerComponent;
-class AMlgGrippableStaticMeshActor;
+class AMlgGrippableMeshActor;
 class USteamVRChaperoneComponent;
 class UTriggerZoneComponent;
 class UGameplayAbility;
@@ -58,7 +58,7 @@ public:
 
 	USkeletalMeshComponent* GetMotionControllerMesh(EControllerHand Hand);
 	UVRControllerComponent* GetMotionController(EControllerHand Hand);
-	AMlgGrippableStaticMeshActor* GetAttachedWeapon();
+	AMlgGrippableMeshActor* GetAttachedWeapon();
 
 	FVector CalcFeetPosition() const;
 
@@ -119,10 +119,10 @@ private:
 	UTriggerZoneComponent* healthTriggerZone;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AMlgGrippableStaticMeshActor> startWeaponClass;
+	TSubclassOf<AMlgGrippableMeshActor> startWeaponClass;
 
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_AttachedWeapon)
-	AMlgGrippableStaticMeshActor* attachedWeapon;
+	AMlgGrippableMeshActor* attachedWeapon;
 
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* hudHealth;

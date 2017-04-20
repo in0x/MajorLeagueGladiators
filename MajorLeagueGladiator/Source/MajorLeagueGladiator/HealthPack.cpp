@@ -8,14 +8,9 @@
 AHealthPack::AHealthPack()
 {
 	SetReplicates(true);
-	bStaticMeshReplicateMovement = true;
-	auto mesh = GetStaticMeshComponent();
 
-	if (mesh)
-	{
-		mesh->bGenerateOverlapEvents = true;
-		mesh->bMultiBodyOverlap = true;
-	}
+	MeshComponent->bGenerateOverlapEvents = true;
+	MeshComponent->bMultiBodyOverlap = true;
 }
 
 void AHealthPack::Use(AActor* User, TriggerType Type)

@@ -8,6 +8,11 @@
 #include "WidgetComponent.h"
 #include "MlgPlayerController.h"
 
+namespace
+{
+	const FName PROJECTILE_SPAWN_SOCKET_NAME("ProjectileSpawn");
+}
+
 AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -18,7 +23,7 @@ AGunActor::AGunActor(const FObjectInitializer& ObjectInitializer)
 	ammoComponent = ObjectInitializer.CreateDefaultSubobject<UAmmoComponent>(this, TEXT("AmmoComponent"));
 	
 	ammoCountWidget = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("AmmoCounterWidget"));
-	ammoCountWidget->SetupAttachment(GetStaticMeshComponent(), FName(TEXT("UI"), EFindName::FNAME_Find));
+	ammoCountWidget->SetupAttachment(MeshComponent, FName(TEXT("UI"), EFindName::FNAME_Find));
 	ammoCountWidget->SetIsReplicated(true);
 }
 
@@ -31,15 +36,9 @@ void AGunActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	auto mesh = GetStaticMeshComponent()->GetStaticMesh();
-	if (mesh)
+	if (!(MeshComponent->DoesSocketExist(PROJECTILE_SPAWN_SOCKET_NAME)))
 	{
-		projectileSpawnSocket = mesh->FindSocket(FName("ProjectileSpawn"));
-
-		if (!projectileSpawnSocket)
-		{
-			UE_LOG(DebugLog, Warning, TEXT("Gun Mesh does not have a 'ProjectileSpawn' socket, projectiles will be spawned at incorrect position"));
-		}
+		UE_LOG(DebugLog, Warning, TEXT("HitscanGun Mesh does not have a 'ProjectileSpawn' socket, shots will originate from incorrect position"));
 	}
 
 	textWidget = CastChecked<UTextWidget>(ammoCountWidget->GetUserWidgetObject());
@@ -61,8 +60,7 @@ void AGunActor::Tick(float DeltaTime)
 	{
 		ammoComponent->ConsumeAmmo(); 
 
-		FTransform trafo;
-		projectileSpawnSocket->GetSocketTransform(trafo, GetStaticMeshComponent());
+		FTransform trafo = MeshComponent->GetSocketTransform(PROJECTILE_SPAWN_SOCKET_NAME);
 
 		ammoComponent->GetProjectileType().GetDefaultObject()->FireProjectile(
 			trafo.GetLocation(), trafo.Rotator().Vector() , this, Instigator->GetController());

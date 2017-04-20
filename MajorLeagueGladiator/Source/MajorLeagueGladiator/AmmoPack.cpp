@@ -8,14 +8,9 @@
 AAmmoPack::AAmmoPack()
 {
 	SetReplicates(true);
-	bStaticMeshReplicateMovement = true;
-	auto mesh = GetStaticMeshComponent();
 
-	if (mesh)
-	{
-		mesh->bGenerateOverlapEvents = true;
-		mesh->bMultiBodyOverlap = true;
-	}
+	MeshComponent->bGenerateOverlapEvents = true;
+	MeshComponent->bMultiBodyOverlap = true;
 }
 
 void AAmmoPack::Use(AActor* User, TriggerType Type)

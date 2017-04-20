@@ -86,8 +86,6 @@ private:
 	float recoilDistance;
 
 	float adjustedRecoilDistance;
-
-	UStaticMeshSocket* shotOriginSocket;
 	
 	UGripMotionControllerComponent* grippingController;
 	

@@ -22,8 +22,8 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	, bIsSwordFastEnough(false)
 	, damageAppliedOnHit(40.f)
 {
-	GetStaticMeshComponent()->bGenerateOverlapEvents = true;
-	GetStaticMeshComponent()->SetCollisionProfileName(MELEE_WEAPON_COLLISION_PROFILE_NAME);
+	MeshComponent->bGenerateOverlapEvents = true;
+	MeshComponent->SetCollisionProfileName(MELEE_WEAPON_COLLISION_PROFILE_NAME);
 	PrimaryActorTick.bCanEverTick = true;
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> SwordMaterialRed(TEXT("Material'/Game/MVRCFPS_Assets/Blade_HeroSword22/M_Blade_HeroSword_Red.M_Blade_HeroSword_Red'"));
@@ -93,9 +93,9 @@ void ASword::onEndSlash()
 void ASword::getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHit) const
 {
 	TArray<FHitResult> hitResults;
-	UStaticMeshComponent* mesh = GetStaticMeshComponent();
-	FVector meshLoc = mesh->GetComponentLocation();
-	FVector meshVel = mesh->GetComponentVelocity();
+
+	FVector meshLoc = MeshComponent->GetComponentLocation();
+	FVector meshVel = MeshComponent->GetComponentVelocity();
 
 	FComponentQueryParams params;
 	params.bTraceComplex = false;
@@ -103,7 +103,7 @@ void ASword::getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHi
 
 	// We only add 10% velocity for the end of the sweep since we need to sweep past the current position for it to work. 
 	// However, if we sweep too far into the future we'll generate hits we don't want this frame.
-	GetWorld()->ComponentSweepMulti(hitResults, mesh, meshLoc - meshVel, meshLoc+ (0.1f * meshVel), mesh->GetComponentRotation(), params);
+	GetWorld()->ComponentSweepMulti(hitResults, MeshComponent, meshLoc - meshVel, meshLoc+ (0.1f * meshVel), MeshComponent->GetComponentRotation(), params);
 	
 	AActor* actorToMatch;
 	auto pred = [&actorToMatch](FHitResult& hit) 
@@ -172,8 +172,7 @@ void ASword::damageAllOverlappingActors()
 
 void ASword::setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn)
 {
-	auto* mesh = GetStaticMeshComponent();
-	mesh->SetMaterial(0, material_Dyn);
+	MeshComponent->SetMaterial(0, material_Dyn);
 }
 
 void ASword::tryLaunchCharacter(ACharacter* character) const

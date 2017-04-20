@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "MlgGrippableStaticMeshActor.h"
+#include "MlgGrippableMeshActor.h"
 #include "ShieldActor.generated.h"
 
 class ABaseProjectile;
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AShieldActor : public AMlgGrippableStaticMeshActor
+class MAJORLEAGUEGLADIATOR_API AShieldActor : public AMlgGrippableMeshActor
 {
 	GENERATED_BODY()
 public:

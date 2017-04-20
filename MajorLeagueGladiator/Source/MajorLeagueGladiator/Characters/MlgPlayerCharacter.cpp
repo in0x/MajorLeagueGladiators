@@ -12,7 +12,7 @@
 #include "DamageReceiverComponent.h"
 #include "AbilitySystemComponent.h"
 #include "Abilities/MlgAbilitySet.h"
-#include "MlgGrippableStaticMeshActor.h"
+#include "MlgGrippableMeshActor.h"
 #include "../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Classes/SteamVRChaperoneComponent.h"
 #include "TriggerZoneComponent.h"
 
@@ -260,7 +260,7 @@ void AMlgPlayerCharacter::SpawnWeapon()
 		spawnParams.Owner = this;
 		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
-		attachedWeapon = GetWorld()->SpawnActor<AMlgGrippableStaticMeshActor>(
+		attachedWeapon = GetWorld()->SpawnActor<AMlgGrippableMeshActor>(
 			startWeaponClass.Get(), GetTransform(), spawnParams);
 
 		OnAttachedWeaponSet();	
@@ -289,7 +289,7 @@ void AMlgPlayerCharacter::OnAttachedWeaponSet()
 		EGripMovementReplicationSettings::LocalOnly_Not_Replicated, 1500000, 2000);
 }
 
-AMlgGrippableStaticMeshActor* AMlgPlayerCharacter::GetAttachedWeapon()
+AMlgGrippableMeshActor* AMlgPlayerCharacter::GetAttachedWeapon()
 {
 	return attachedWeapon;
 }

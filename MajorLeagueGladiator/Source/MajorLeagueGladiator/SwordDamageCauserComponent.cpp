@@ -2,7 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "SwordDamageCauserComponent.h"
-#include "MlgGrippableStaticMeshActor.h"
+#include "MlgGrippableMeshActor.h"
 #include "MlgPlayerController.h"
 #include "MlgGameplayStatics.h"
 
@@ -106,12 +106,11 @@ void USwordDamageCauserComponent::damageAllOverlappingActors()
 
 void USwordDamageCauserComponent::setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn) 
 {
-	AMlgGrippableStaticMeshActor* owner = Cast<AMlgGrippableStaticMeshActor>(GetOwner());
-	
-	if (owner != nullptr)
+	UMeshComponent* ownerMeshComponent = GetOwner()->FindComponentByClass<UMeshComponent>();
+
+	if (ownerMeshComponent)
 	{
-		auto* mesh = owner->GetStaticMeshComponent();
-		mesh->SetMaterial(0, material_Dyn);
+		ownerMeshComponent->SetMaterial(0, material_Dyn);
 	}
 }
 
@@ -126,7 +125,7 @@ void USwordDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor
 
 void USwordDamageCauserComponent::doRumbleRight(AActor* OtherActor)
 {
-	AMlgGrippableStaticMeshActor* owner = Cast<AMlgGrippableStaticMeshActor>(GetOwner());
+	AMlgGrippableMeshActor* owner = Cast<AMlgGrippableMeshActor>(GetOwner());
 	if (owner != nullptr)
 	{
 		AMlgPlayerController* controller = owner->GetMlgPlayerController();

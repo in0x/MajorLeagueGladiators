@@ -14,6 +14,7 @@
 namespace
 {
 	const char* NO_COLLISION_PROFILE_NAME = "NoCollision";
+	const FName PROJECTILE_SPAWN_SOCKET_NAME("ProjectileSpawn");
 }
 
 AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
@@ -34,7 +35,7 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	shotAudioComponent->SetIsReplicated(true);
 
 	laserMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LaserMeshComponent"));
-	laserMesh->SetupAttachment(GetStaticMeshComponent(), FName("ProjectileSpawn"));
+	laserMesh->SetupAttachment(MeshComponent, PROJECTILE_SPAWN_SOCKET_NAME);
 	laserMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
 	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
@@ -63,17 +64,11 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 void AHitScanGunActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	auto mesh = GetStaticMeshComponent()->GetStaticMesh();
-	if (mesh)
+			
+	if (!(MeshComponent->DoesSocketExist(PROJECTILE_SPAWN_SOCKET_NAME)))
 	{
-		shotOriginSocket = mesh->FindSocket(FName("ProjectileSpawn"));
-
-		if (!shotOriginSocket)
-		{
-			UE_LOG(DebugLog, Warning, TEXT("HitscanGun Mesh does not have a 'ProjectileSpawn' socket, shots will originate from incorrect position"));
-		}
-	}
+		UE_LOG(DebugLog, Warning, TEXT("HitscanGun Mesh does not have a 'ProjectileSpawn' socket, shots will originate from incorrect position"));
+	}	
 
 	if (!sceneCapture->TextureTarget)
 	{
@@ -138,8 +133,7 @@ void AHitScanGunActor::OnGrip(UGripMotionControllerComponent* GrippingController
 
 void AHitScanGunActor::shoot() 
 {
-	FTransform actorTransform;
-	shotOriginSocket->GetSocketTransform(actorTransform, GetStaticMeshComponent());
+	FTransform socketTransform = MeshComponent->GetSocketTransform(PROJECTILE_SPAWN_SOCKET_NAME);
 
 	float charge = chargeShot->GetValue();
 
@@ -149,7 +143,7 @@ void AHitScanGunActor::shoot()
 
 	ABaseProjectile* defaultProjectile = projectileClass.GetDefaultObject();
 
-	defaultProjectile->FireProjectile(actorTransform.GetLocation(), actorTransform.GetRotation().GetForwardVector(), this, Instigator->GetController(), params);
+	defaultProjectile->FireProjectile(socketTransform.GetLocation(), socketTransform.GetRotation().GetForwardVector(), this, Instigator->GetController(), params);
 }
 
 void AHitScanGunActor::Tick(float DeltaTime)
