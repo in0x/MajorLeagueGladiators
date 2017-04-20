@@ -16,7 +16,6 @@
 namespace
 {
 	const char* AIM_SOCKET_NAME = "Aim";
-	const float TEMPORARY_COOLDOWN = 3.0f;
 }
 
 UJumpDashAbility::UJumpDashAbility()
@@ -81,6 +80,7 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 
 	PlayJumpParticleEffects();
 	cachedCharacter->OnAbilityActivated.Broadcast(StaticClass());
+	cachedCharacter->OnAbilityUseSuccess.Broadcast(StaticClass(), GetCooldownTimeRemaining());
 }
 
 void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -217,7 +217,6 @@ void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle
 	const FVector velocity = zNormalizedDirection * dashSpeed;
 	
 	cachedCharacter->SetAbilityMoveTargetLocation(targetLocation);
-	cachedCharacter->OnAbilityUseSuccess.Broadcast(StaticClass(), TEMPORARY_COOLDOWN);
 	BeginDashing(velocity);
 }
 
