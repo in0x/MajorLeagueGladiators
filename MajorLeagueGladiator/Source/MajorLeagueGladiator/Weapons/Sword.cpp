@@ -26,6 +26,13 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	MeshComponent->SetCollisionProfileName(MELEE_WEAPON_COLLISION_PROFILE_NAME);
 	PrimaryActorTick.bCanEverTick = true;
 
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SwordStaticMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/MultiTool/sword/sword_blade_3.sword_blade_3'"));
+	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
+	if (SwordStaticMesh.Succeeded() && staticMeshComp)
+	{
+		staticMeshComp->SetStaticMesh(SwordStaticMesh.Object);
+	}
+
 	static ConstructorHelpers::FObjectFinder<UMaterial> SwordMaterialRed(TEXT("Material'/Game/MVRCFPS_Assets/Blade_HeroSword22/M_Blade_HeroSword_Red.M_Blade_HeroSword_Red'"));
 
 	if (SwordMaterialRed.Object != NULL)
