@@ -9,7 +9,7 @@
 
 /*
 Base Class For Grippable actors. It is just a copy of GripableStaticMeshActor,
-but it derives from Actor instead of StaticMeshActor
+but it derives from Actor instead of StaticMeshActor.
 */
 
 UCLASS(Abstract)
