@@ -18,7 +18,7 @@ namespace
 }
 
 AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponent>(Super::MESH_COMPONENT_NAME))
+	: Super(ObjectInitializer)
 	, recoilAnimBackDuration(0.5f)
 	, recoilAnimForwardDuration(0.5f)
 	, elapsedAnimTime(0.f)
@@ -36,15 +36,12 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	
 	MeshComponent->SetSimulatePhysics(false);
 
-	USkeletalMeshComponent* skelletalMeshComp = CastChecked<USkeletalMeshComponent>(MeshComponent);
-	skelletalMeshComp->SetAllBodiesSimulatePhysics(false);
-
-	/*static ConstructorHelpers::FObjectFinder<UStaticMesh> GunStaticMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/FPWeapon/SK_FPGun.SK_FPGun'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> GunStaticMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/MultiTool/gun_mount_static.gun_mount_static'"));
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
 	if (GunStaticMesh.Succeeded() && staticMeshComp)
 	{
 		staticMeshComp->SetStaticMesh(GunStaticMesh.Object);
-	}*/
+	}
 
 	laserMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LaserMeshComponent"));
 	laserMesh->SetupAttachment(MeshComponent, PROJECTILE_SPAWN_SOCKET_NAME);
