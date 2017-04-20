@@ -14,7 +14,6 @@
 namespace
 {
 	const char* SHOT_SOCKET_NAME = "ProjectileSpawn";
-	const float TEMPORARY_COOLDOWN = 3.0f;
 }
 
 UGrenadeAbility::UGrenadeAbility()
@@ -38,12 +37,6 @@ void UGrenadeAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
 	if (!ActorInfo->AvatarActor.IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Invalid Avatar"));
-		return;
-	}
-
-	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Tried to activate ability with insufficient resources"));
 		return;
 	}
 
@@ -129,7 +122,8 @@ void UGrenadeAbility::fireGrenade()
 		grenadeDefaultObject->FireProjectile(targetingTransform.GetLocation(), targetingTransform.GetRotation().GetForwardVector(), weapon, weapon->Instigator->GetController());
 	}
 
-	cachedPlayer->OnAbilityUseSuccess.Broadcast(StaticClass(), 3.0f);
+	CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo);
+	cachedPlayer->OnAbilityUseSuccess.Broadcast(StaticClass(), GetCooldownTimeRemaining());
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
