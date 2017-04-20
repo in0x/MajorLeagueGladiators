@@ -30,6 +30,8 @@ void UDashAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const 
 
 void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	cachedPlayer = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+
 	waitForTargetTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Pick Target Task", EGameplayTargetingConfirmation::Custom, AGameplayAbilityTargetActor_Raycast::StaticClass());
 	waitForTargetTask->ValidData.AddDynamic(this, &UDashAbility::OnTargetPickSuccessful);
 	waitForTargetTask->Cancelled.AddDynamic(this, &UDashAbility::OnTargetPickCanceled);
@@ -42,7 +44,6 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	targetingSpawnedActor = CastChecked<AGameplayAbilityTargetActor_Raycast>(spawnedActor);
 
-	cachedPlayer = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
 	auto gripController = cachedPlayer->GetMotionControllerMesh(EControllerHand::Left);
 	targetingSpawnedActor->StartLocation.SourceComponent = gripController;
 	targetingSpawnedActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
