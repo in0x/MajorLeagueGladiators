@@ -15,7 +15,7 @@ struct FDamageVisual
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, Category="DamageVisual")
-	UParticleSystemComponent* ParticleSystem;
+	TArray<UParticleSystemComponent*> ParticleSystems;
 
 	UPROPERTY(EditAnywhere, Category = "DamageVisual")
 	UMeshComponent* AffectedMesh;
@@ -33,8 +33,7 @@ struct FDamageVisual
 	float CurrentMatVisDuration;
 
 	FDamageVisual()
-		: ParticleSystem(nullptr)
-		, AffectedMesh(nullptr)
+		: AffectedMesh(nullptr)
 		, MatInstance(nullptr)
 		, DamageValParamName(FName("DamageValue"))
 		, MatVisDuration(0.3f)
@@ -54,12 +53,6 @@ class MAJORLEAGUEGLADIATOR_API UDamageVisualizerComponent : public UActorCompone
 public:	
 	UDamageVisualizerComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	/*UFUNCTION()
-	void onDamageReceived(AActor* DamagedActor, const UDamageType* DamageType);
-
-	UFUNCTION()
-	void onPointDamageReceived(AActor* DamagedActor, const FVector& HitLocation, const FVector& OriginDirection, const UDamageType* DamageType);*/
 	
 	UFUNCTION(NetMulticast, reliable)
 	void AddVisual_NetMulticast(UMeshComponent* affectedMesh, bool bSpawnParticles, const FTransform& particleTrafo = FTransform(), const UDamageType* DamageType = nullptr);
@@ -67,9 +60,9 @@ public:
 private:
 	TArray<FDamageVisual> visuals;
 	
-	UPROPERTY(EditAnywhere, Category = "Visualizer")
-	TArray<UParticleSystem*> gunDamageParticleSystems;
+	UPROPERTY(EditAnywhere, Category = "Feedback")
+	TArray<UParticleSystem*> hitscanProjectileDamageParticleSystems;
 
-	UPROPERTY(EditAnywhere, Category = "Visualizer")
+	UPROPERTY(EditAnywhere, Category = "Feedback")
 	TArray<UParticleSystem*> swordDamageParticleSystems;
 };
