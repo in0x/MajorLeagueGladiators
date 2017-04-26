@@ -121,12 +121,11 @@ void ASword::getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHi
 	for (auto& pair : outActorToHit)
 	{
 		actorToMatch = pair.Key;
-		FHitResult* h = hitResults.FindByPredicate(pred); 
+		FHitResult* hitResultMatch = hitResults.FindByPredicate(pred); 
 
-		if (h != nullptr)
+		if (hitResultMatch != nullptr)
 		{
-			pair.Value = *h;
-			DrawDebugSphere(GetWorld(), (*h).ImpactPoint, 3.f, 20, FColor::Cyan, false, 3.0f);
+			pair.Value = *hitResultMatch;
 		}
 	}
 }
