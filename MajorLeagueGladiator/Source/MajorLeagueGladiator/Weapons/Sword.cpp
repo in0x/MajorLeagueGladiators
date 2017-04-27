@@ -6,6 +6,7 @@
 #include "MlgGameplayStatics.h"
 #include "MlgPlayerController.h"
 #include "CollisionStatics.h"
+#include "DamageTypes/SwordDamage.h"
 
 //TODO (Flo): FIX multi hit issue
 
@@ -21,6 +22,8 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	, slashVelocityLearnRate(0.1f)
 	, bIsSwordFastEnough(false)
 	, damageAppliedOnHit(40.f)
+	, damageType(USwordDamage::StaticClass())
+
 {
 	bReplicates = true;
 	MeshComponent->bGenerateOverlapEvents = true;

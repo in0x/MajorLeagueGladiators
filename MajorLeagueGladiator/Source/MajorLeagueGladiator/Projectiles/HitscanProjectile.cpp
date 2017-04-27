@@ -2,7 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "HitscanProjectile.h"
-#include "DamageTypes/PlayerDamage.h"
+#include "DamageTypes/HitscanProjectileDamage.h"
 #include "MlgGameplayStatics.h"
 #include "EffectsManagerActor.h"
 #include "MlgGameState.h"
@@ -46,7 +46,7 @@ ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector Di
 	}
 	else if (UMlgGameplayStatics::CanDealDamageTo(ProjectileInstigator, hitActor))
 	{
-		UGameplayStatics::ApplyPointDamage(hitActor, Damage * OptionalParams.DamageScale, -DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UPlayerDamage::StaticClass());
+		UGameplayStatics::ApplyPointDamage(hitActor, Damage * OptionalParams.DamageScale, -DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UHitscanProjectileDamage::StaticClass());
 	}
 
 	return nullptr;
