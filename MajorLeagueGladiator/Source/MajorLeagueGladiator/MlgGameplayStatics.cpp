@@ -4,7 +4,7 @@
 #include "MlgGameplayStatics.h"
 #include "MlgPlayerState.h"
 #include "MlgGameState.h"
-#include "ParticleSystemManagerActor.h"
+#include "EffectsManagerActor.h"
 
 #include "PredictedEffectsComponent.h"
 

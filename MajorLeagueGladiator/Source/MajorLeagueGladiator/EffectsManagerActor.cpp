@@ -1,5 +1,5 @@
 #include "MajorLeagueGladiator.h"
-#include "ParticleSystemManagerActor.h"
+#include "EffectsManagerActor.h"
 
 
 AEffectsManagerActor::AEffectsManagerActor()

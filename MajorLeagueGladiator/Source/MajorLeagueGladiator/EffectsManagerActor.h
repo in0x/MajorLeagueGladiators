@@ -5,9 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "EmitterSpawnParams.h"
 #include "SoundParams.h"
-#include "ParticleSystemManagerActor.generated.h"
-
-// TODO: Rename, because it manages sound and particle effects
+#include "EffectsManagerActor.generated.h"
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AEffectsManagerActor : public AActor
