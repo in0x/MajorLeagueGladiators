@@ -58,7 +58,7 @@ void UAbilityTask_PullTarget::TickTask(float DeltaTime)
 	{
 		const FVector dirVector = distanceVec / distance;
 
-		moveComp->Velocity = dirVector * pullSpeed;
+		moveComp->SetVelocity(dirVector * pullSpeed);
 		DrawDebugDirectionalArrow(targetActor->GetWorld(), targetLocation, endLocation, 1.0f, FColor::Green);
 	}
 }

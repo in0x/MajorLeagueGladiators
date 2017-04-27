@@ -19,8 +19,9 @@ UPackMovementComponent::UPackMovementComponent(const FObjectInitializer& ObjectI
 {
 	bUpdateOnlyIfRendered = false;
 	bForceSubStepping = false;
+	bIsSimulating = true;
 
-	Velocity = FVector(1.f, 0.f, 0.f);
+	Velocity = FVector::ZeroVector;
 
 	ProjectileGravityScale = 1.f;
 
@@ -349,6 +350,7 @@ float UPackMovementComponent::GetGravityZ() const
 void UPackMovementComponent::StopSimulating(const FHitResult& HitResult)
 {
 	StopMovementImmediately();
+	bIsSimulating = false;
 	OnProjectileStop.Broadcast(HitResult);
 }
 
@@ -514,7 +516,10 @@ float UPackMovementComponent::GetSimulationTimeStep(float RemainingTime, int32 I
 	return FMath::Max(MIN_TICK_TIME, RemainingTime);
 }
 
-
+void UPackMovementComponent::StopSimulating()
+{
+	SetVelocity(FVector::ZeroVector);
+}
 
 void UPackMovementComponent::SetVelocity(FVector NewVelocity)
 {
@@ -525,14 +530,10 @@ void UPackMovementComponent::SetVelocity(FVector NewVelocity)
 	}
 
 	Velocity = NewVelocity;
+	bIsSimulating = NewVelocity != FVector::ZeroVector;
+
 	SyncVelocity();
 }
-
-void UPackMovementComponent::StopSimulating()
-{
-	SetVelocity(FVector::ZeroVector);
-}
-
 
 void UPackMovementComponent::SyncVelocity()
 {
@@ -547,4 +548,5 @@ void UPackMovementComponent::SyncVelocity()
 void UPackMovementComponent::SetVelocity_NetMulticast_Implementation(FVector NewVelocity)
 {
 	Velocity = NewVelocity;
+	bIsSimulating = NewVelocity != FVector::ZeroVector;
 }
