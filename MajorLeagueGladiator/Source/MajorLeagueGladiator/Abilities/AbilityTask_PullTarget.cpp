@@ -35,18 +35,13 @@ void UAbilityTask_PullTarget::TickTask(float DeltaTime)
 	const FVector distanceVec = endLocation - targetLocation;
 	const float distance = distanceVec.Size();
 
+	auto* moveComp = targetActor->FindComponentByClass<UPackMovementComponent>();
+	check(moveComp)
 	if (distance < minDistanceThreshold)
 	{
-		auto* moveComp = targetActor->FindComponentByClass<UPackMovementComponent>();
-		if (moveComp)
-		{
-			moveComp->StopMovementImmediately();
-		}
-		else
-		{
-			targetPrimitve->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
-			targetPrimitve->SetWorldLocation(endLocation);
-		}		
+		moveComp->StopMovementImmediately();
+		targetPrimitve->SetWorldLocation(endLocation);
+
 		if (HasAuthority())
 		{
 			OnSuccess.Broadcast(targetActor);
@@ -62,16 +57,8 @@ void UAbilityTask_PullTarget::TickTask(float DeltaTime)
 	else
 	{
 		const FVector dirVector = distanceVec / distance;
-		auto* moveComp = targetActor->FindComponentByClass<UPackMovementComponent>();
-		if (moveComp)
-		{
-			moveComp->Velocity = dirVector * pullSpeed;
-		}
-		else
-		{
-			targetPrimitve->SetAllPhysicsLinearVelocity(dirVector * pullSpeed);
-		}
 
+		moveComp->Velocity = dirVector * pullSpeed;
 		DrawDebugDirectionalArrow(targetActor->GetWorld(), targetLocation, endLocation, 1.0f, FColor::Green);
 	}
 }
