@@ -51,6 +51,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* landingParticleEffect;
 
+	UPROPERTY(EditAnywhere)
+	USoundBase* jumpSoundEffect;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* landingSoundEffect;
+
 	FTimerHandle timerHandle;
 
 	UPROPERTY(Transient)
@@ -84,7 +90,7 @@ private:
 
 	void StunEnemiesInArea();
 
-	void PlayJumpParticleEffects();
+	void PlayJumpEffects();
 
-	void PlayLandingParticleEffects();
+	void PlayLandingEffects();
 };
