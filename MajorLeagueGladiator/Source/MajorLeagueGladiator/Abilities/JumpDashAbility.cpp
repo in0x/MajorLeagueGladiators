@@ -13,6 +13,8 @@
 
 #include "AI/MlgAICharacter.h"
 
+#include "Weapons/Sword.h"
+
 namespace
 {
 	const FName AIM_SOCKET_NAME("Aim");
@@ -112,6 +114,7 @@ void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 	}
 	PlayLandingEffects();
 	cachedCharacter->InvalidateAbilityMoveTargetLocation();
+	SetSwordAlwaysFastEnough(false);
 }
 
 void UJumpDashAbility::OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
@@ -237,6 +240,7 @@ void UJumpDashAbility::BeginDashing(const FVector& Velocity)
 	cachedMoveComp->StopMovementImmediately();
 	cachedMoveComp->SetMovementMode(MOVE_Flying);
 	cachedMoveComp->AddImpulse(Velocity, true);
+	SetSwordAlwaysFastEnough(true);
 }
 
 void UJumpDashAbility::StunEnemiesInArea()
@@ -339,5 +343,18 @@ void UJumpDashAbility::PlayLandingEffects()
 	else
 	{
 		UE_LOG(DebugLog, Warning, TEXT("Landing Sound Effect not set"));
+	}
+}
+
+void UJumpDashAbility::SetSwordAlwaysFastEnough(bool IsAlwaysFastEnough)
+{
+	if (cachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	if (ASword* sword = Cast<ASword>(cachedCharacter->GetAttachedWeapon()))
+	{
+		sword->SetIsAlwaysFastEnough(IsAlwaysFastEnough);
 	}
 }
