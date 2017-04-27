@@ -69,4 +69,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Feedback")
 	TArray<USoundBase*> sounds;
+
+	//weakpointSounds???
 };

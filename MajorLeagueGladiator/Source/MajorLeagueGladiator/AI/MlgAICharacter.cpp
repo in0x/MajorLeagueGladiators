@@ -57,7 +57,7 @@ float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageE
 	FWeakpoint hitWeakpoint = weakpoints->FindHitWeakpoint(PointDamageEvent.HitInfo);
 
 	UMeshComponent* mesh = FindComponentByClass<UMeshComponent>();
-	UDamageFeedbackComponent* damageFeedback = FindComponentByClass<UDamageFeedbackComponent>(); //concrete damage feedback component is created in respective AI characters
+	UDamageFeedbackComponent* damageFeedback = FindComponentByClass<UDamageFeedbackComponent>(); //concrete damage feedback component is created in respective AI characters BP
 
 	if (damageFeedback)
 	{
