@@ -13,6 +13,8 @@ public:
 	ASword(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void Tick(float DeltaTime) override;
 
+	void SetIsAlwaysFastEnough(bool IsAlwaysFastEnough);
+	bool GetIsAlawaysFastEnough() const;
 protected:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
@@ -28,6 +30,8 @@ private:
 	bool canDealDamageTo(const ACharacter* OtherCharacter) const;
 	void getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHit) const;
 	FVector calcRelativeVelocity() const;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	FVector oldSwingSpeed;
 
@@ -58,4 +62,7 @@ private:
 	float slashVelocityLearnRate;
 
 	bool bIsSwordFastEnough;
+
+	UPROPERTY(replicated)
+	bool bIsAlwaysFastEnough;
 };

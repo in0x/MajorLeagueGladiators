@@ -6,6 +6,8 @@
 #include "GameplayAbilityTargetActor_Raycast.h"
 #include "AbilityTask_MoveTo.h"
 
+#include "Weapons/Sword.h"
+
 namespace
 {
 	const char* AIM_SOCKET_NAME = "Aim";
@@ -37,6 +39,7 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 	waitForTargetTask->Cancelled.AddDynamic(this, &UDashAbility::OnTargetPickCanceled);
 
 	AGameplayAbilityTargetActor* spawnedActor;
+
 	if (!waitForTargetTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Raycast::StaticClass(), spawnedActor))
 	{
 		return;
@@ -69,7 +72,7 @@ void UDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 {
 	waitForTargetTask = nullptr;
 	targetingSpawnedActor = nullptr;
-
+	SetSwordAlwaysFastEnough(false);
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
@@ -77,6 +80,7 @@ void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 {
 	if (cachedPlayer->HasAuthority())
 	{
+		SetSwordAlwaysFastEnough(true);
 		auto capsule = cachedPlayer->GetCapsuleComponent();
 
 		// Add capsule halfheight to Z since our "location" is the capsule 
@@ -112,3 +116,15 @@ void UDashAbility::OnLocationReached()
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
+void UDashAbility::SetSwordAlwaysFastEnough(bool IsAlwaysFastEnough)
+{
+	if (cachedPlayer->HasAuthority())
+	{
+		return;
+	}
+
+	if (ASword* sword = Cast<ASword>(cachedPlayer->GetAttachedWeapon()))
+	{
+		sword->SetIsAlwaysFastEnough(IsAlwaysFastEnough);
+	}
+}
