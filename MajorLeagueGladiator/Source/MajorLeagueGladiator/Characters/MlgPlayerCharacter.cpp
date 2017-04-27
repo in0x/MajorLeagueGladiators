@@ -15,8 +15,8 @@
 #include "MlgGrippableMeshActor.h"
 #include "../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Classes/SteamVRChaperoneComponent.h"
 #include "TriggerZoneComponent.h"
-#include <Runtime/Engine/Classes/Animation/BlendSpace1D.h>
-#include <Runtime/Engine/Classes/Animation/AnimSingleNodeInstance.h>
+#include "Animation/BlendSpace1D.h"
+#include "Animation/AnimSingleNodeInstance.h"
 
 namespace 
 {
@@ -62,7 +62,8 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 		ConstructorHelpers::FObjectFinder<UBlendSpace1D> blendSpace(TEXT("BlendSpace1D'/Game/MVRCFPS_Assets/MultiTool/TriggerPull.TriggerPull'"));
 		if (blendSpace.Succeeded())
 		{
-			leftMesh->PlayAnimation(blendSpace.Object,true);
+			leftMesh->OverrideAnimationData(blendSpace.Object);
+			rightMesh->OverrideAnimationData(blendSpace.Object);
 		}
 	}
 	
@@ -199,6 +200,7 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("LookUp", this, &AMlgPlayerCharacter::AddControllerPitchInput);
 
 	PlayerInputComponent->BindAxis("LeftTriggerAxis", this, &AMlgPlayerCharacter::SetLeftTriggerStatus);
+	PlayerInputComponent->BindAxis("RightTriggerAxis", this, &AMlgPlayerCharacter::SetRightTriggerStatus);
 
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &AMlgPlayerCharacter::OnRightTriggerClicked);
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerReleased);
@@ -488,8 +490,14 @@ void AMlgPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(AMlgPlayerCharacter, attachedWeapon);
 }
 
-void AMlgPlayerCharacter::SetLeftTriggerStatus(float axis)
+void AMlgPlayerCharacter::SetLeftTriggerStatus(float Value)
 {
-	FVector BlendParams(axis, 0.0f, 0.0f);
+	FVector BlendParams(Value, 0.0f, 0.0f);
 	leftMesh->GetSingleNodeInstance()->SetBlendSpaceInput(BlendParams);
+}
+
+void AMlgPlayerCharacter::SetRightTriggerStatus(float Value)
+{
+	FVector BlendParams(Value, 0.0f, 0.0f);
+	rightMesh->GetSingleNodeInstance()->SetBlendSpaceInput(BlendParams);
 }
