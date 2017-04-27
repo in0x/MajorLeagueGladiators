@@ -2,7 +2,7 @@
 #include "ParticleSystemManagerActor.h"
 
 
-AParticleSystemManagerActor::AParticleSystemManagerActor()
+AEffectsManagerActor::AEffectsManagerActor()
 {
 	bReplicates = true;
 	bAlwaysRelevant = true;
@@ -12,22 +12,22 @@ AParticleSystemManagerActor::AParticleSystemManagerActor()
 /*                Particles                                             */
 /************************************************************************/
 
-void AParticleSystemManagerActor::CreateParticleSystemAtLocation(const FEmitterSpawnParams& Params) const
+void AEffectsManagerActor::CreateParticleSystemAtLocation(const FEmitterSpawnParams& Params) const
 {
 	createParticleSystem_Server(Params);
 }
 
-void AParticleSystemManagerActor::createParticleSystem_Server_Implementation(const FEmitterSpawnParams& Params) const
+void AEffectsManagerActor::createParticleSystem_Server_Implementation(const FEmitterSpawnParams& Params) const
 {
 	createParticleSystem_NetMulticast(Params);
 }
 
-bool AParticleSystemManagerActor::createParticleSystem_Server_Validate(const FEmitterSpawnParams& Params)
+bool AEffectsManagerActor::createParticleSystem_Server_Validate(const FEmitterSpawnParams& Params)
 {
 	return true;
 }
 
-void AParticleSystemManagerActor::createParticleSystem_NetMulticast_Implementation(const FEmitterSpawnParams& Params) const
+void AEffectsManagerActor::createParticleSystem_NetMulticast_Implementation(const FEmitterSpawnParams& Params) const
 {
 	UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Params.Template, Params.Transform, Params.bAutoDestroy);
 }
@@ -36,22 +36,22 @@ void AParticleSystemManagerActor::createParticleSystem_NetMulticast_Implementati
 /*                Sound                                                 */
 /************************************************************************/
 
-void AParticleSystemManagerActor::PlaySoundAtLocation(const FSoundParams& Params) const
+void AEffectsManagerActor::PlaySoundAtLocation(const FSoundParams& Params) const
 {
 	playSoundAtLocation_Server(Params);
 }
 
-void AParticleSystemManagerActor::playSoundAtLocation_Server_Implementation(const FSoundParams& Params) const
+void AEffectsManagerActor::playSoundAtLocation_Server_Implementation(const FSoundParams& Params) const
 {
 	playSoundAtLocation_NetMulticast(Params);
 }
 
-bool AParticleSystemManagerActor::playSoundAtLocation_Server_Validate(const FSoundParams& Params)
+bool AEffectsManagerActor::playSoundAtLocation_Server_Validate(const FSoundParams& Params)
 {
 	return true;
 }
 
-void AParticleSystemManagerActor::playSoundAtLocation_NetMulticast_Implementation(const FSoundParams& Params) const
+void AEffectsManagerActor::playSoundAtLocation_NetMulticast_Implementation(const FSoundParams& Params) const
 {
 	UGameplayStatics::PlaySoundAtLocation(
 		GetWorld(),

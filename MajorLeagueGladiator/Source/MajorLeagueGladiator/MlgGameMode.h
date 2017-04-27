@@ -6,7 +6,7 @@
 #include "MlgGameMode.generated.h"
 
 class AMlgPlayerCharacter;
-class AParticleSystemManagerActor;
+class AEffectsManagerActor;
 class UWaveSpawnerManagerComponent;
 
 UCLASS()
@@ -24,7 +24,7 @@ public:
 private:
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AParticleSystemManagerActor> psManagerClass;
+	TSubclassOf<AEffectsManagerActor> fxManagerClass;
 	
 	// The Tank Class. For now this is always assigned to the client.
 	UPROPERTY(EditAnywhere)
