@@ -15,6 +15,8 @@
 #include "MlgGrippableMeshActor.h"
 #include "../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Classes/SteamVRChaperoneComponent.h"
 #include "TriggerZoneComponent.h"
+#include <Runtime/Engine/Classes/Animation/BlendSpace1D.h>
+#include <Runtime/Engine/Classes/Animation/AnimSingleNodeInstance.h>
 
 namespace 
 {
@@ -57,6 +59,11 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	{
 		leftMesh->SetSkeletalMesh(multiMesh.Object);
 		rightMesh->SetSkeletalMesh(multiMesh.Object);
+		ConstructorHelpers::FObjectFinder<UBlendSpace1D> blendSpace(TEXT("BlendSpace1D'/Game/MVRCFPS_Assets/MultiTool/TriggerPull.TriggerPull'"));
+		if (blendSpace.Succeeded())
+		{
+			leftMesh->PlayAnimation(blendSpace.Object,true);
+		}
 	}
 	
 	GetCapsuleComponent()->SetCollisionProfileName(VR_CAPSULE_COLLISION_NAME);
@@ -190,6 +197,8 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 	PlayerInputComponent->BindAxis("Turn", this, &AMlgPlayerCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &AMlgPlayerCharacter::AddControllerPitchInput);
+
+	PlayerInputComponent->BindAxis("LeftTriggerAxis", this, &AMlgPlayerCharacter::SetLeftTriggerStatus);
 
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &AMlgPlayerCharacter::OnRightTriggerClicked);
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerReleased);
@@ -479,3 +488,8 @@ void AMlgPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(AMlgPlayerCharacter, attachedWeapon);
 }
 
+void AMlgPlayerCharacter::SetLeftTriggerStatus(float axis)
+{
+	FVector BlendParams(axis, 0.0f, 0.0f);
+	leftMesh->GetSingleNodeInstance()->SetBlendSpaceInput(BlendParams);
+}
