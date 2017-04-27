@@ -4,6 +4,8 @@
 #include "AmmoPack.h"
 #include "TriggerZoneComponent.h"
 #include "AmmoComponent.h"
+#include "PackMovementComponent.h"
+
 
 namespace
 {
@@ -13,11 +15,15 @@ namespace
 AAmmoPack::AAmmoPack()
 {
 	SetReplicates(true);
+	bReplicateMovement = true;
 
 	MeshComponent->bGenerateOverlapEvents = true;
 	MeshComponent->bMultiBodyOverlap = true;
 	MeshComponent->SetRelativeScale3D({ 0.25,0.25,0.25 });
-	MeshComponent->SetSimulatePhysics(true);
+	MeshComponent->SetCollisionProfileName(PACK_COLLISION_PROFILE_NAME);
+
+	MeshComponent->SetSimulatePhysics(false);
+	movementComponent = CreateDefaultSubobject<UPackMovementComponent>(TEXT("PackMovementComponent"));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ammoPackMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Cube.Shape_Cube'"));
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
@@ -28,8 +34,7 @@ AAmmoPack::AAmmoPack()
 		ConstructorHelpers::FObjectFinder<UMaterialInterface> ammoPackMat(TEXT("Material'/Game/BluePrints/AmmoPackMat.AmmoPackMat'"));
 		staticMeshComp->SetMaterial(0, ammoPackMat.Object);
 	}
-	bReplicateMovement = true;
-	MeshComponent->SetCollisionProfileName(PACK_COLLISION_PROFILE_NAME);
+
 }
 
 void AAmmoPack::Use(AActor* User, TriggerType Type)

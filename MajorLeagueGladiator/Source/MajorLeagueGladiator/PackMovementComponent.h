@@ -5,6 +5,10 @@
 #include "GameFramework/MovementComponent.h"
 #include "PackMovementComponent.generated.h"
 
+/************************************************************************/
+/* Mosty Copied from ProjectileMovementComponent                        */
+/************************************************************************/
+
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UPackMovementComponent : public UMovementComponent
 {
@@ -61,10 +65,6 @@ class MAJORLEAGUEGLADIATOR_API UPackMovementComponent : public UMovementComponen
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
 	float ProjectileGravityScale;
 
-	/** Buoyancy of UpdatedComponent in fluid. 0.0=sinks as fast as in air, 1.0=neutral buoyancy */
-	UPROPERTY()
-	float Buoyancy;
-
 	/**
 	* Percentage of velocity maintained after the bounce in the direction of the normal of impact (coefficient of restitution).
 	* 1.0 = no velocity lost, 0.0 = no bounce. Ignored if bShouldBounce is false.
@@ -116,9 +116,6 @@ class MAJORLEAGUEGLADIATOR_API UPackMovementComponent : public UMovementComponen
 	*/
 	virtual bool CheckStillInWorld();
 
-	/** @return Buoyancy of UpdatedComponent in fluid.  0.0=sinks as fast as in air, 1.0=neutral buoyancy*/
-	float GetBuoyancy() const { return Buoyancy; };
-
 	bool ShouldApplyGravity() const { return ProjectileGravityScale != 0.f; }
 
 	/**
@@ -135,7 +132,7 @@ class MAJORLEAGUEGLADIATOR_API UPackMovementComponent : public UMovementComponen
 	UFUNCTION(BlueprintCallable, Category = "Game|Components|ProjectileMovement")
 		virtual void StopSimulating(const FHitResult& HitResult);
 
-	bool HasStoppedSimulation() { return UpdatedComponent == NULL; }
+	bool HasStoppedSimulation() { return UpdatedComponent == nullptr || Velocity.IsZero(); }
 
 	/**
 	* Compute remaining time step given remaining time and current iterations.
@@ -249,6 +246,15 @@ protected:
 public:
 	/** Compute gravity effect given current physics volume, projectile gravity scale, etc. */
 	virtual float GetGravityZ() const override;
+	
+	void SyncVelocity();
+
+	void StopSimulating();
+	void SetVelocity(FVector NewVelocity);
+
+private:
+	UFUNCTION(NetMulticast, Reliable)
+	void SetVelocity_NetMulticast(FVector NewVelocity);
 
 protected:
 

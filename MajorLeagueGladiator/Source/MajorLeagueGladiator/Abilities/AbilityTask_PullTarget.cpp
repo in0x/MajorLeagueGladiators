@@ -3,6 +3,8 @@
 #include "MajorLeagueGladiator.h"
 #include "AbilityTask_PullTarget.h"
 
+#include "PackMovementComponent.h"
+
 UAbilityTask_PullTarget* UAbilityTask_PullTarget::Create(UGameplayAbility* ThisAbility, FName TaskName, AActor* TargetActor, USceneComponent* EndLocation,
 	float PullSpeed, float MinDistanceThreshold, float MaxDistanceThreshold)
 {
@@ -35,8 +37,16 @@ void UAbilityTask_PullTarget::TickTask(float DeltaTime)
 
 	if (distance < minDistanceThreshold)
 	{
-		targetPrimitve->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
-		targetPrimitve->SetWorldLocation(endLocation);
+		auto* moveComp = targetActor->FindComponentByClass<UPackMovementComponent>();
+		if (moveComp)
+		{
+			moveComp->StopMovementImmediately();
+		}
+		else
+		{
+			targetPrimitve->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
+			targetPrimitve->SetWorldLocation(endLocation);
+		}		
 		if (HasAuthority())
 		{
 			OnSuccess.Broadcast(targetActor);
@@ -52,7 +62,15 @@ void UAbilityTask_PullTarget::TickTask(float DeltaTime)
 	else
 	{
 		const FVector dirVector = distanceVec / distance;
-		targetPrimitve->SetAllPhysicsLinearVelocity(dirVector * pullSpeed);
+		auto* moveComp = targetActor->FindComponentByClass<UPackMovementComponent>();
+		if (moveComp)
+		{
+			moveComp->Velocity = dirVector * pullSpeed;
+		}
+		else
+		{
+			targetPrimitve->SetAllPhysicsLinearVelocity(dirVector * pullSpeed);
+		}
 
 		DrawDebugDirectionalArrow(targetActor->GetWorld(), targetLocation, endLocation, 1.0f, FColor::Green);
 	}
