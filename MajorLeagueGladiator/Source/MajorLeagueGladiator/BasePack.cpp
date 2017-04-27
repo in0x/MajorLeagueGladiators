@@ -23,6 +23,7 @@ ABasePack::ABasePack(const FObjectInitializer& ObjectInitializer)
 
 	MeshComponent->SetSimulatePhysics(false);
 	movementComponent = ObjectInitializer.CreateDefaultSubobject<UPackMovementComponent>(this, TEXT("PackMovementComponent"));
+	movementComponent->bShouldBounce = true;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> packMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Cube.Shape_Cube'"));
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
