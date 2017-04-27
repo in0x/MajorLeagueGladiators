@@ -5,6 +5,7 @@
 #include "AbilityWidgetComponent.h"
 #include "Abilities/DashAbility.h"
 #include "Abilities/JumpDashAbility.h"
+#include "Animation/BlendSpace1D.h"
 
 namespace
 {
@@ -16,11 +17,21 @@ AMeleePlayerCharacter::AMeleePlayerCharacter(const FObjectInitializer& ObjectIni
 {
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> multiMat(TEXT("Material'/Game/Materials/M_MeleeMultiTool.M_MeleeMultiTool'"));
 	multiToolMaterial = multiMat.Object;
-
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> swordMat(TEXT("Material'/Game/Materials/M_Sword.M_Sword'"));
 	swordMaterial = swordMat.Object;
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> bodyMat(TEXT("Material'/Game/Materials/M_Tank.M_Tank'"));
 	bodyMaterial = bodyMat.Object;
+
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> swordHandleMesh(TEXT("SkeletalMesh'/Game/MVRCFPS_Assets/MultiTool/sword/sword_handle.sword_handle'"));
+	if (swordHandleMesh.Succeeded())
+	{
+		rightMesh->SetSkeletalMesh(swordHandleMesh.Object);
+		ConstructorHelpers::FObjectFinder<UBlendSpace1D> blendSpace(TEXT("BlendSpace1D'/Game/MVRCFPS_Assets/MultiTool/sword/SwordTrigger.SwordTrigger'"));
+		if (blendSpace.Succeeded())
+		{
+			rightMesh->OverrideAnimationData(blendSpace.Object);
+		}
+	}
 
 	auto createWidget = [&](TSubclassOf<UGameplayAbility> boundAbilityType, EAbilityWidgetAngle::Type angle, EAbilityWidgetTriggerLocation::Type triggerLocation,
 		const TCHAR* WidgetName, const FName& SocketName) -> UAbilityWidgetComponent*
@@ -45,12 +56,11 @@ void AMeleePlayerCharacter::BeginPlay()
 	auto instance = UMaterialInstanceDynamic::Create(multiToolMaterial, nullptr);
 	auto swordInstance = UMaterialInstanceDynamic::Create(swordMaterial, nullptr);
 	auto bodyInstance = UMaterialInstanceDynamic::Create(bodyMaterial, nullptr);
+	
 	leftMesh->SetMaterial(0, instance);
-
 	rightMesh->SetMaterial(0, swordInstance);
 	headMesh->SetMaterial(0, bodyInstance);
 	bodyMesh2->SetMaterial(0, bodyInstance);
-	rightMesh->SetMaterial(0, instance);
 
 	auto setupBindings = [&](UAbilityWidgetComponent* widget)
 	{
