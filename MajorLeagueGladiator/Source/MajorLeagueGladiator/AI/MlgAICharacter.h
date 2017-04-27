@@ -42,7 +42,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	UDamageReceiverComponent* damageReciever;
 
-	UPROPERTY(EditAnywhere)
-	UDamageVisualizerComponent* damageVisualizer;
+	/*UPROPERTY(EditAnywhere)
+	UDamageVisualizerComponent* damageVisualizer;*/
 };
 	
