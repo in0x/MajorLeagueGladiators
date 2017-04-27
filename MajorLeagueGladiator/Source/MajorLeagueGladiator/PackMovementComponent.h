@@ -6,7 +6,7 @@
 #include "PackMovementComponent.generated.h"
 
 /************************************************************************/
-/* Mosty Copied from ProjectileMovementComponent                        */
+/* Mostly copied from ProjectileMovementComponent                       */
 /************************************************************************/
 
 UCLASS()
