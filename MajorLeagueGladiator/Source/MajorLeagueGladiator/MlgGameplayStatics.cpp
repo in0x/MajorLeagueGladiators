@@ -6,6 +6,8 @@
 #include "MlgGameState.h"
 #include "ParticleSystemManagerActor.h"
 
+#include "PredictedEffectsComponent.h"
+
 bool UMlgGameplayStatics::CanDealDamageTo(const AActor* DamageDealer, const AActor* DamageReceiver)
 {
 	check(DamageDealer);
@@ -208,5 +210,19 @@ void UMlgGameplayStatics::SpawnEmitterNetworked(UWorld* World, const FEmitterSpa
 	check(gameState);
 
 	gameState->GetParticleSystemManager()->CreateParticleSystemAtLocation(Params);
+}
+
+void UMlgGameplayStatics::SpawnEmitterNetworkedPredicted(const APawn* Source, const FEmitterSpawnParams& Params)
+{
+	UPredictedEffectsComponent* predictEffectComp = Source->FindComponentByClass<UPredictedEffectsComponent>();
+	check(predictEffectComp);
+	predictEffectComp->CreateParticleSystemNetworkedPredicted(Params);
+}
+
+void UMlgGameplayStatics::SpawnEmitterLocalOnly(const APawn* Source, const FEmitterSpawnParams & Params)
+{
+	UPredictedEffectsComponent* predictEffectComp = Source->FindComponentByClass<UPredictedEffectsComponent>();
+	check(predictEffectComp);
+	predictEffectComp->CreateParticleSystemLocal(Params);
 }
 

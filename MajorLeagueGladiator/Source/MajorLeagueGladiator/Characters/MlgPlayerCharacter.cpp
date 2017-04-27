@@ -17,6 +17,7 @@
 #include "TriggerZoneComponent.h"
 #include "Animation/BlendSpace1D.h"
 #include "Animation/AnimSingleNodeInstance.h"
+#include "PredictedEffectsComponent.h"
 
 namespace 
 {
@@ -118,6 +119,8 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	abilitySetClass = UMlgAbilitySet::StaticClass();
 
 	GetMovementComponent()->SetIsReplicated(true);
+
+	predictedEffectsComponent = ObjectInitializer.CreateDefaultSubobject<UPredictedEffectsComponent>(this, TEXT("PredictedEffectsComponent"));
 }
 
 void AMlgPlayerCharacter::BeginPlay()
