@@ -55,7 +55,7 @@ public:
 	void StopMovementImmediately_NetMulticast();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
+	void SetLeftTriggerStatus(float axis);
 	USkeletalMeshComponent* GetMotionControllerMesh(EControllerHand Hand);
 	UVRControllerComponent* GetMotionController(EControllerHand Hand);
 	AMlgGrippableMeshActor* GetAttachedWeapon();
