@@ -10,12 +10,12 @@
 // TODO: Rename, because it manages sound and particle effects
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AParticleSystemManagerActor : public AActor
+class MAJORLEAGUEGLADIATOR_API AEffectsManagerActor : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	AParticleSystemManagerActor();
+	AEffectsManagerActor();
 
 	void CreateParticleSystemAtLocation(const FEmitterSpawnParams& Params) const;
 

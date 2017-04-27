@@ -14,7 +14,7 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	//PlayerControllerClass = AMlgPlayerController::StaticClass();
 	PlayerStateClass = AMlgPlayerState::StaticClass();
 	GameStateClass = AMlgGameState::StaticClass();
-	psManagerClass = AParticleSystemManagerActor::StaticClass();
+	fxManagerClass = AEffectsManagerActor::StaticClass();
 	waveSpawnerManger = ObjectInitializer.CreateDefaultSubobject<UWaveSpawnerManagerComponent>(this, TEXT("WaveSpawnerManager"));
 }
 
@@ -52,7 +52,7 @@ void AMlgGameMode::InitGameState()
 {
 	Super::InitGameState();
 
-	AParticleSystemManagerActor* psManager = GetWorld()->SpawnActor<AParticleSystemManagerActor>(psManagerClass.Get(), FVector(0), FRotator::ZeroRotator);
+	AEffectsManagerActor* psManager = GetWorld()->SpawnActor<AEffectsManagerActor>(fxManagerClass.Get(), FVector(0), FRotator::ZeroRotator);
 
 	AMlgGameState* gameState = GetWorld()->GetGameState<AMlgGameState>();
 	gameState->SetGetParticleSystemManager(psManager);

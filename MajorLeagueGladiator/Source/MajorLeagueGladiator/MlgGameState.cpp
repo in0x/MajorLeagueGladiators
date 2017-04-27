@@ -17,12 +17,12 @@ void AMlgGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(AMlgGameState, particleSystemManager);
 }
 
-AParticleSystemManagerActor* AMlgGameState::GetParticleSystemManager()
+AEffectsManagerActor* AMlgGameState::GetParticleSystemManager()
 {
 	return particleSystemManager;
 }
 
-void AMlgGameState::SetGetParticleSystemManager(AParticleSystemManagerActor* psManager)
+void AMlgGameState::SetGetParticleSystemManager(AEffectsManagerActor* psManager)
 {
 	particleSystemManager = psManager;
 }
