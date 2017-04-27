@@ -274,7 +274,10 @@ void UJumpDashAbility::StunEnemiesInArea()
 
 void UJumpDashAbility::PlayJumpParticleEffects()
 {
-	if (!GetOwningActorFromActorInfo()->HasAuthority()) { return; }
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
 
 	if (jumpParticleEffect)
 	{
@@ -283,7 +286,7 @@ void UJumpDashAbility::PlayJumpParticleEffects()
 		emitterParams.Template = jumpParticleEffect;
 		emitterParams.bAutoDestroy = true;
 
-		UMlgGameplayStatics::SpawnEmitterNetworked(cachedCharacter->GetWorld(), emitterParams);
+		UMlgGameplayStatics::SpawnEmitterNetworkedPredicted(cachedCharacter, emitterParams);
 	}
 	else
 	{
@@ -293,7 +296,7 @@ void UJumpDashAbility::PlayJumpParticleEffects()
 
 void UJumpDashAbility::PlayLandingParticleEffects()
 {
-	if (!GetOwningActorFromActorInfo()->HasAuthority()) { return; }
+	if (!IsLocallyControlled()) { return; }
 
 	if (landingParticleEffect)
 	{
@@ -302,7 +305,7 @@ void UJumpDashAbility::PlayLandingParticleEffects()
 		emitterParams.Template = landingParticleEffect;
 		emitterParams.bAutoDestroy = true;
 
-		UMlgGameplayStatics::SpawnEmitterNetworked(cachedCharacter->GetWorld(), emitterParams);
+		UMlgGameplayStatics::SpawnEmitterNetworkedPredicted(cachedCharacter, emitterParams);
 	}
 	else
 	{

@@ -18,6 +18,7 @@ class AMlgGrippableMeshActor;
 class USteamVRChaperoneComponent;
 class UTriggerZoneComponent;
 class UGameplayAbility;
+class UPredictedEffectsComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityMoveTargetLocationSet, FVector, NewLocation);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityActivated, TSubclassOf<UGameplayAbility>, AbilityType);
@@ -130,6 +131,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UAbilitySystemComponent* abilitySystemComponent;
+
+	UPROPERTY(EditAnywhere)
+	UPredictedEffectsComponent* predictedEffectsComponent;
 
 	UPROPERTY(EditAnywhere)
 	TAssetSubclassOf<UMlgAbilitySet> abilitySetClass;
