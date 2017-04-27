@@ -44,6 +44,6 @@ struct FSoundParams
 		, Rotation(FRotator::ZeroRotator)
 		, VolumeMultiplier(1.0f)
 		, PitchMultiplier(1.0f)
-		, StartTime(0)
+		, StartTime(0.0f)
 	{}
 };

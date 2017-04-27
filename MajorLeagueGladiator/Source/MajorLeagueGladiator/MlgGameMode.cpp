@@ -52,8 +52,8 @@ void AMlgGameMode::InitGameState()
 {
 	Super::InitGameState();
 
-	AEffectsManagerActor* psManager = GetWorld()->SpawnActor<AEffectsManagerActor>(fxManagerClass.Get(), FVector(0), FRotator::ZeroRotator);
+	AEffectsManagerActor* fxManager = GetWorld()->SpawnActor<AEffectsManagerActor>(fxManagerClass.Get(), FVector(0), FRotator::ZeroRotator);
 
 	AMlgGameState* gameState = GetWorld()->GetGameState<AMlgGameState>();
-	gameState->SetGetParticleSystemManager(psManager);
+	gameState->SetEffectsManager(fxManager);
 }

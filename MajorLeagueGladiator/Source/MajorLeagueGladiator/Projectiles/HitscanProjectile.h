@@ -6,8 +6,6 @@
 
 #include "HitscanProjectile.generated.h"
 
-class AEffectsManagerActor;
-
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AHitscanProjectile : public ABaseProjectile
 {
