@@ -16,11 +16,11 @@ public:
 	AMlgGameState(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	AEffectsManagerActor* GetParticleSystemManager();
+	AEffectsManagerActor* GetEffectsManager();
 
-	void SetGetParticleSystemManager(AEffectsManagerActor* psManager);
+	void SetEffectsManager(AEffectsManagerActor* fxManager);
 	
 private:
 	UPROPERTY(Replicated, Transient)
-	AEffectsManagerActor* particleSystemManager;
+	AEffectsManagerActor* effectsManager;
 };

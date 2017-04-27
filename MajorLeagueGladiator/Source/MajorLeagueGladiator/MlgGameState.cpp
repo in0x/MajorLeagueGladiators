@@ -14,15 +14,15 @@ AMlgGameState::AMlgGameState(const FObjectInitializer& ObjectInitializer)
 void AMlgGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AMlgGameState, particleSystemManager);
+	DOREPLIFETIME(AMlgGameState, effectsManager);
 }
 
-AEffectsManagerActor* AMlgGameState::GetParticleSystemManager()
+AEffectsManagerActor* AMlgGameState::GetEffectsManager()
 {
-	return particleSystemManager;
+	return effectsManager;
 }
 
-void AMlgGameState::SetGetParticleSystemManager(AEffectsManagerActor* psManager)
+void AMlgGameState::SetEffectsManager(AEffectsManagerActor* fxManager)
 {
-	particleSystemManager = psManager;
+	effectsManager = fxManager;
 }

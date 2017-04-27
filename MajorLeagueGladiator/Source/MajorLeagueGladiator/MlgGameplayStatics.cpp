@@ -5,7 +5,6 @@
 #include "MlgPlayerState.h"
 #include "MlgGameState.h"
 #include "EffectsManagerActor.h"
-
 #include "PredictedEffectsComponent.h"
 
 bool UMlgGameplayStatics::CanDealDamageTo(const AActor* DamageDealer, const AActor* DamageReceiver)
@@ -208,8 +207,7 @@ void UMlgGameplayStatics::SpawnEmitterNetworked(UWorld* World, const FEmitterSpa
 {
 	auto gameState = World->GetGameState<AMlgGameState>();
 	check(gameState);
-
-	gameState->GetParticleSystemManager()->CreateParticleSystemAtLocation(Params);
+	gameState->GetEffectsManager()->CreateParticleSystemAtLocation(Params);
 }
 
 void UMlgGameplayStatics::SpawnEmitterNetworkedPredicted(const APawn* Source, const FEmitterSpawnParams& Params)
@@ -230,8 +228,7 @@ void UMlgGameplayStatics::PlaySoundAtLocationNetworked(UWorld* World, const FSou
 {
 	auto gameState = World->GetGameState<AMlgGameState>();
 	check(gameState);
-
-	gameState->GetParticleSystemManager()->PlaySoundAtLocation(Params);
+	gameState->GetEffectsManager()->PlaySoundAtLocation(Params);
 }
 
 void UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(const APawn* Source, const FSoundParams & Params)
