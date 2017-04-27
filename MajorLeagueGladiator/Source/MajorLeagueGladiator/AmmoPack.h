@@ -2,14 +2,12 @@
 
 #pragma once
 
-#include "UsableItem.h"
+#include "BasePack.h"
 
 #include "AmmoPack.generated.h"
 
-class UPackMovementComponent;
-
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AAmmoPack : public AUsableItem
+class MAJORLEAGUEGLADIATOR_API AAmmoPack : public ABasePack
 {
 	GENERATED_BODY()
 public:
@@ -21,7 +19,4 @@ public:
 private:
 	UPROPERTY(EditAnywhere)
 	uint32 amountToRefill;
-
-	UPROPERTY(EditAnywhere)
-	UPackMovementComponent* movementComponent;
 };

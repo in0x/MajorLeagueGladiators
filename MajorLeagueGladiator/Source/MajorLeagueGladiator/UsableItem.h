@@ -12,7 +12,7 @@ class MAJORLEAGUEGLADIATOR_API AUsableItem : public AMlgGrippableMeshActor, publ
 	GENERATED_BODY()
 	
 public:	
-	AUsableItem();
+	AUsableItem(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UFUNCTION()
 	virtual void Use(AActor* User, TriggerType Type) override;
