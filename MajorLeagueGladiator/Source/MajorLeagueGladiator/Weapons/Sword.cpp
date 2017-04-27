@@ -22,6 +22,7 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	, bIsSwordFastEnough(false)
 	, damageAppliedOnHit(40.f)
 {
+	bReplicates = true;
 	MeshComponent->bGenerateOverlapEvents = true;
 	MeshComponent->SetCollisionProfileName(MELEE_WEAPON_COLLISION_PROFILE_NAME);
 	PrimaryActorTick.bCanEverTick = true;
@@ -63,7 +64,7 @@ void ASword::Tick(float DeltaTime)
 	const FVector relativeSwordVelocity = calcRelativeVelocity();
 	oldSwingSpeed = oldSwingSpeed * (1.0f - slashVelocityLearnRate) + (DeltaTime * relativeSwordVelocity) * slashVelocityLearnRate;
 
-	bool newIsSwordFastEnough = oldSwingSpeed.SizeSquared() > threshholdDoDamageSquared;
+	bool newIsSwordFastEnough = oldSwingSpeed.SizeSquared() > threshholdDoDamageSquared || bIsAlwaysFastEnough;
 
 	if (newIsSwordFastEnough && !bIsSwordFastEnough)
 	{
@@ -75,6 +76,21 @@ void ASword::Tick(float DeltaTime)
 	}
 
 	bIsSwordFastEnough = newIsSwordFastEnough;
+}
+
+void ASword::SetIsAlwaysFastEnough(bool IsAlwaysFastEnough)
+{
+	if (!HasAuthority())
+	{
+		UE_LOG(DebugLog, Warning, TEXT("SetAlwaysFastEnough should only be called on server"));
+	}
+
+	bIsAlwaysFastEnough = IsAlwaysFastEnough;
+}
+
+bool ASword::GetIsAlawaysFastEnough() const
+{
+	return bIsAlwaysFastEnough;
 }
 
 void ASword::onStartSlash()
@@ -229,4 +245,10 @@ FVector ASword::calcRelativeVelocity() const
 	const FVector ownerVelocity = owner ? owner->GetVelocity() : FVector::ZeroVector;
 	const FVector myVelocity = GetVelocity();
 	return myVelocity - ownerVelocity;
+}
+
+void ASword::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ASword, bIsAlwaysFastEnough);
 }

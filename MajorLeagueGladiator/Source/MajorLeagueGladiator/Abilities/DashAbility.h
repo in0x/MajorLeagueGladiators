@@ -37,6 +37,8 @@ private:
 	UFUNCTION()
 	void OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data);
 
+	void SetSwordAlwaysFastEnough(bool IsAlwaysFastEnough);
+
 	UPROPERTY()
 	UAbilityTask_WaitTargetData* waitForTargetTask;
 
