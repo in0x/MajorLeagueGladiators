@@ -4,7 +4,7 @@
 #include "MlgGameMode.h"
 #include "Characters/MlgPlayerCharacter.h"
 #include "MlgPlayerState.h"
-#include "ParticleSystemManagerActor.h"
+#include "EffectsManagerActor.h"
 #include "MlgGameState.h"
 #include "WaveSystem/WaveSpawnerManagerComponent.h"
 

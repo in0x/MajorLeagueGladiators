@@ -2,7 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "MlgGameState.h"
-#include "ParticleSystemManagerActor.h"
+#include "EffectsManagerActor.h"
 #include "WaveSystem/WaveSystemComponent.h"
 
 AMlgGameState::AMlgGameState(const FObjectInitializer& ObjectInitializer)

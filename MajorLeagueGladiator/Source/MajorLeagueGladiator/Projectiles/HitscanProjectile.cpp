@@ -4,7 +4,7 @@
 #include "HitscanProjectile.h"
 #include "DamageTypes/PlayerDamage.h"
 #include "MlgGameplayStatics.h"
-#include "ParticleSystemManagerActor.h"
+#include "EffectsManagerActor.h"
 #include "MlgGameState.h"
 #include "ShieldActor.h"
 #include "CollisionStatics.h"
