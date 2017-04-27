@@ -93,4 +93,6 @@ private:
 	void PlayJumpEffects();
 
 	void PlayLandingEffects();
+
+	void SetSwordAlwaysFastEnough(bool IsAlwaysFastEnough);
 };
