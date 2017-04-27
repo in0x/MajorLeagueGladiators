@@ -38,7 +38,8 @@ class MAJORLEAGUEGLADIATOR_API UPackMovementComponent : public UMovementComponen
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ProjectileSimulation)
 	uint32 bForceSubStepping : 1;
 
-
+	UPROPERTY(VisibleInstanceOnly, Category = ProjectileSimulation)
+	uint32 bIsSimulating : 1;
 	/**
 	* Controls the effects of friction on velocity parallel to the impact surface when bouncing.
 	* If true, friction will be modified based on the angle of impact, making friction higher for perpendicular impacts and lower for glancing impacts.
@@ -132,7 +133,7 @@ class MAJORLEAGUEGLADIATOR_API UPackMovementComponent : public UMovementComponen
 	UFUNCTION(BlueprintCallable, Category = "Game|Components|ProjectileMovement")
 		virtual void StopSimulating(const FHitResult& HitResult);
 
-	bool HasStoppedSimulation() { return UpdatedComponent == nullptr || Velocity.IsZero(); }
+	bool HasStoppedSimulation() { return UpdatedComponent == nullptr || !bIsSimulating; }
 
 	/**
 	* Compute remaining time step given remaining time and current iterations.
