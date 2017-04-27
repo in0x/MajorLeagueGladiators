@@ -4,37 +4,15 @@
 #include "AmmoPack.h"
 #include "TriggerZoneComponent.h"
 #include "AmmoComponent.h"
-#include "PackMovementComponent.h"
-
-
-namespace
-{
-	const char* PACK_COLLISION_PROFILE_NAME = "Pack";
-}
 
 AAmmoPack::AAmmoPack()
 {
-	SetReplicates(true);
-	bReplicateMovement = true;
-
-	MeshComponent->bGenerateOverlapEvents = true;
-	MeshComponent->bMultiBodyOverlap = true;
-	MeshComponent->SetRelativeScale3D({ 0.25,0.25,0.25 });
-	MeshComponent->SetCollisionProfileName(PACK_COLLISION_PROFILE_NAME);
-
-	MeshComponent->SetSimulatePhysics(false);
-	movementComponent = CreateDefaultSubobject<UPackMovementComponent>(TEXT("PackMovementComponent"));
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> ammoPackMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Cube.Shape_Cube'"));
+	ConstructorHelpers::FObjectFinder<UMaterialInterface> ammoPackMat(TEXT("Material'/Game/BluePrints/AmmoPackMat.AmmoPackMat'"));
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
-	if (ammoPackMesh.Succeeded() && staticMeshComp)
-	{
-		staticMeshComp->SetStaticMesh(ammoPackMesh.Object);
-
-		ConstructorHelpers::FObjectFinder<UMaterialInterface> ammoPackMat(TEXT("Material'/Game/BluePrints/AmmoPackMat.AmmoPackMat'"));
+	if (staticMeshComp && ammoPackMat.Succeeded())
+	{		
 		staticMeshComp->SetMaterial(0, ammoPackMat.Object);
 	}
-
 }
 
 void AAmmoPack::Use(AActor* User, TriggerType Type)

@@ -5,32 +5,15 @@
 #include "TriggerZoneComponent.h"
 #include "HealthComponent.h"
 
-namespace
-{
-	const char* PACK_COLLISION_PROFILE_NAME = "Pack";
-}
-
 AHealthPack::AHealthPack()
 {
-	SetReplicates(true);
+	ConstructorHelpers::FObjectFinder<UMaterialInterface> healthPackMat(TEXT("Material'/Game/BluePrints/HealthPackMat.HealthPackMat'"));
 
-	MeshComponent->bGenerateOverlapEvents = true;
-	MeshComponent->bMultiBodyOverlap = true;
-	MeshComponent->SetRelativeScale3D({ 0.25,0.25,0.25 });
-	MeshComponent->SetSimulatePhysics(true);
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> healthPackMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Cube.Shape_Cube'"));
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
-	if (healthPackMesh.Succeeded() && staticMeshComp)
+	if (staticMeshComp && healthPackMat.Succeeded())
 	{
-		staticMeshComp->SetStaticMesh(healthPackMesh.Object);
-		ConstructorHelpers::FObjectFinder<UMaterialInterface> healthPackMat(TEXT("Material'/Game/BluePrints/HealthPackMat.HealthPackMat'"));
 		staticMeshComp->SetMaterial(0, healthPackMat.Object);
-	}
-
-	bReplicateMovement = true;
-	MeshComponent->SetCollisionProfileName(PACK_COLLISION_PROFILE_NAME);
-	
+	}	
 }
 
 void AHealthPack::Use(AActor* User, TriggerType Type)

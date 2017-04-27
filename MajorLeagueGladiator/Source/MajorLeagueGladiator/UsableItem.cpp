@@ -3,7 +3,8 @@
 #include "MajorLeagueGladiator.h"
 #include "UsableItem.h"
 
-AUsableItem::AUsableItem()
+AUsableItem::AUsableItem(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	MeshComponent->bGenerateOverlapEvents = true;

@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "UsableItem.h"
+#include "BasePack.h"
 #include "HealthPack.generated.h"
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AHealthPack : public AUsableItem
+class MAJORLEAGUEGLADIATOR_API AHealthPack : public ABasePack
 {
 	GENERATED_BODY()
 	
