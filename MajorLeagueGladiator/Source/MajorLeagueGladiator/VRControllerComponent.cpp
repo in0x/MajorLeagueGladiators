@@ -6,6 +6,8 @@
 
 #include "CollisionStatics.h"
 
+#include "PackMovementComponent.h"
+
 UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, grabRadius(32)
@@ -190,6 +192,11 @@ void UVRControllerComponent::GrabActorImpl(ActorGrabData GrabData)
 	check(GrabData.pIVRGrip);
 	check(GrippedActors.Num() == 0);
 
+	if (auto* moveComp = GrabData.pActorToGrip->FindComponentByClass<UPackMovementComponent>())
+	{
+		moveComp->StopSimulating();
+	}
+
 	bool foundSlot;
 	FTransform slotTrafo;
 
@@ -229,7 +236,19 @@ bool UVRControllerComponent::LaunchActor(FVector Velocity, bool IgnoreWeight)
 	const float TimeUntilClearMoveIgnore = 0.5f;
 	timer.SetTimer(timerhandle, rootComp, &UPrimitiveComponent::ClearMoveIgnoreActors, TimeUntilClearMoveIgnore, false);
 
-	DropGrip(GrippedActors[0], true);
-	rootComp->AddImpulse(Velocity, NAME_None, IgnoreWeight);
+	auto& grippedActorInfo = GrippedActors[0];
+
+	UPackMovementComponent* moveComp = grippedActorInfo.GetGrippedActor()->FindComponentByClass<UPackMovementComponent>();
+	if (moveComp)
+	{
+		DropGrip(grippedActorInfo, false);
+		moveComp->SetVelocity(Velocity);
+	}
+	else
+	{
+		DropGrip(grippedActorInfo, true);
+		rootComp->AddImpulse(Velocity, NAME_None, IgnoreWeight);
+	}
+	
 	return true;
 }

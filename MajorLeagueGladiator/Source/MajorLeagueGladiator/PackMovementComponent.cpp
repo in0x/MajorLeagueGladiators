@@ -64,6 +64,7 @@ void UPackMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 
 	if (UpdatedComponent->IsSimulatingPhysics())
 	{
+		UE_LOG(DebugLog, Warning, TEXT("The updated component is simulating physics. PackMovementComponent is disabled"));
 		return;
 	}
 
@@ -71,9 +72,7 @@ void UPackMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	uint32 NumBounces = 0;
 	int32 Iterations = 0;
 	FHitResult Hit(1.f);
-	
-	//Altered
-	Velocity = UpdatedComponent->GetComponentVelocity(); 
+	bool bNeedVelocitySync = false;
 
 	while (RemainingTime >= MIN_TICK_TIME && (Iterations < MaxSimulationIterations) && !ActorOwner->IsPendingKill() && !HasStoppedSimulation())
 	{
@@ -122,6 +121,7 @@ void UPackMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		}
 		else
 		{
+			bNeedVelocitySync = true;
 			// Only calculate new velocity if events didn't change it during the movement update.
 			if (Velocity == OldVelocity)
 			{
@@ -162,6 +162,11 @@ void UPackMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 				Iterations--;
 			}
 		}
+	}
+
+	if (bNeedVelocitySync)
+	{
+		SyncVelocity();
 	}
 
 	UpdateComponentVelocity();
@@ -337,15 +342,13 @@ FVector UPackMovementComponent::ComputeAcceleration(const FVector& InVelocity, f
 
 float UPackMovementComponent::GetGravityZ() const
 {
-	// TODO: apply buoyancy if in water
 	return ShouldApplyGravity() ? Super::GetGravityZ() * ProjectileGravityScale : 0.f;
 }
 
 
 void UPackMovementComponent::StopSimulating(const FHitResult& HitResult)
 {
-	//SetUpdatedComponent(NULL);
-	Velocity = FVector::ZeroVector;
+	StopMovementImmediately();
 	OnProjectileStop.Broadcast(HitResult);
 }
 
@@ -509,4 +512,39 @@ float UPackMovementComponent::GetSimulationTimeStep(float RemainingTime, int32 I
 
 	// no less than MIN_TICK_TIME (to avoid potential divide-by-zero during simulation).
 	return FMath::Max(MIN_TICK_TIME, RemainingTime);
+}
+
+
+
+void UPackMovementComponent::SetVelocity(FVector NewVelocity)
+{
+	if (!GetOwner()->HasAuthority())
+	{
+		UE_LOG(DebugLog, Warning, TEXT("Set Velocity can only be called on server"));
+		return;
+	}
+
+	Velocity = NewVelocity;
+	SyncVelocity();
+}
+
+void UPackMovementComponent::StopSimulating()
+{
+	SetVelocity(FVector::ZeroVector);
+}
+
+
+void UPackMovementComponent::SyncVelocity()
+{
+	if (!GetOwner()->HasAuthority())
+	{
+		return;
+	}
+	SetVelocity_NetMulticast(Velocity);
+}
+
+
+void UPackMovementComponent::SetVelocity_NetMulticast_Implementation(FVector NewVelocity)
+{
+	Velocity = NewVelocity;
 }
