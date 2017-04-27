@@ -28,15 +28,15 @@ public:
 
 private:
 
-	UFUNCTION(Server, reliable, WithValidation)
+	UFUNCTION(Server, unreliable, WithValidation)
 	void createParticleSystem_Server(const FEmitterSpawnParams& Params) const;
 
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, unreliable)
 	void createParticleSystem_NetMulticast(const FEmitterSpawnParams& Params) const;
 
-	UFUNCTION(Server, reliable, WithValidation)
+	UFUNCTION(Server, unreliable, WithValidation)
 	void playSoundAtLocation_Server(const FSoundParams& Params) const;
 
-	UFUNCTION(NetMulticast, reliable)
+	UFUNCTION(NetMulticast, unreliable)
 	void playSoundAtLocation_NetMulticast(const FSoundParams& Params) const;
 };

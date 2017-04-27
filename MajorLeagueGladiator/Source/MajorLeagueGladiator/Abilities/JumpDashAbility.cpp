@@ -15,7 +15,7 @@
 
 namespace
 {
-	const char* AIM_SOCKET_NAME = "Aim";
+	const FName AIM_SOCKET_NAME("Aim");
 }
 
 UJumpDashAbility::UJumpDashAbility()
