@@ -33,6 +33,10 @@ UJumpDashAbility::UJumpDashAbility()
 	ConstructorHelpers::FObjectFinder<UParticleSystem> particleSystemRef(TEXT("ParticleSystem'/Game/MobileStarterContent/Particles/P_Explosion.P_Explosion'"));
 	jumpParticleEffect = particleSystemRef.Object;
 	landingParticleEffect = particleSystemRef.Object;
+
+	ConstructorHelpers::FObjectFinder<USoundBase> soundEffectRef(TEXT("SoundWave'/Game/MobileStarterContent/Audio/Explosion01.Explosion01'"));
+	jumpSoundEffect = soundEffectRef.Object;
+	landingSoundEffect = soundEffectRef.Object;
 }
 
 void UJumpDashAbility::InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
@@ -78,7 +82,7 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 	timeManager.SetTimer(timerHandle, this, &UJumpDashAbility::BeginTargeting,
 		targetingDelay, false);
 
-	PlayJumpParticleEffects();
+	PlayJumpEffects();
 	cachedCharacter->OnAbilityActivated.Broadcast(StaticClass());
 	cachedCharacter->OnAbilityUseSuccess.Broadcast(StaticClass(), GetCooldownTimeRemaining());
 }
@@ -106,7 +110,7 @@ void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 		waitTargetDataTask->EndTask();
 		waitTargetDataTask = nullptr;
 	}
-	PlayLandingParticleEffects();
+	PlayLandingEffects();
 	cachedCharacter->InvalidateAbilityMoveTargetLocation();
 }
 
@@ -272,7 +276,7 @@ void UJumpDashAbility::StunEnemiesInArea()
 
 }
 
-void UJumpDashAbility::PlayJumpParticleEffects()
+void UJumpDashAbility::PlayJumpEffects()
 {
 	if (!IsLocallyControlled())
 	{
@@ -292,9 +296,21 @@ void UJumpDashAbility::PlayJumpParticleEffects()
 	{
 		UE_LOG(DebugLog, Warning, TEXT("Jump Particle Effect not set"));
 	}
+
+	if (jumpSoundEffect)
+	{
+		FSoundParams soundParams;
+		soundParams.Sound = jumpSoundEffect;
+		UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(cachedCharacter, soundParams);
+	}
+	else
+	{
+		UE_LOG(DebugLog, Warning, TEXT("Jump Sound Effect not set"));
+	}
+		
 }
 
-void UJumpDashAbility::PlayLandingParticleEffects()
+void UJumpDashAbility::PlayLandingEffects()
 {
 	if (!IsLocallyControlled()) { return; }
 
@@ -310,5 +326,16 @@ void UJumpDashAbility::PlayLandingParticleEffects()
 	else
 	{
 		UE_LOG(DebugLog, Warning, TEXT("Landing Particle Effect not set"));
+	}
+
+	if (jumpSoundEffect)
+	{
+		FSoundParams soundParams;
+		soundParams.Sound = landingSoundEffect;
+		UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(cachedCharacter, soundParams);
+	}
+	else
+	{
+		UE_LOG(DebugLog, Warning, TEXT("Landing Sound Effect not set"));
 	}
 }

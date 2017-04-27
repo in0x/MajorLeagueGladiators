@@ -226,3 +226,17 @@ void UMlgGameplayStatics::SpawnEmitterLocalOnly(const APawn* Source, const FEmit
 	predictEffectComp->CreateParticleSystemLocal(Params);
 }
 
+void UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(const APawn* Source, const FSoundParams & Params)
+{
+	UPredictedEffectsComponent* predictEffectComp = Source->FindComponentByClass<UPredictedEffectsComponent>();
+	check(predictEffectComp);
+	predictEffectComp->PlaySoundAtLocationNetworkedPredicted(Params);
+}
+
+void UMlgGameplayStatics::PlaySoundAtLocationLocalOnly(const APawn* Source, const FSoundParams & Params)
+{
+	UPredictedEffectsComponent* predictEffectComp = Source->FindComponentByClass<UPredictedEffectsComponent>();
+	check(predictEffectComp);
+	predictEffectComp->PlaySoundAtLocationLocal(Params);
+}
+

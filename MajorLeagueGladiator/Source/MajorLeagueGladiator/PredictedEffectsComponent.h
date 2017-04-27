@@ -3,7 +3,9 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
+
 #include "EmitterSpawnParams.h"
+#include "SoundParams.h"
 
 #include "PredictedEffectsComponent.generated.h"
 
@@ -20,6 +22,9 @@ public:
 
 	void CreateParticleSystemNetworkedPredicted(const FEmitterSpawnParams& Params) const;
 	void CreateParticleSystemLocal(const FEmitterSpawnParams& Params) const;
+	
+	void PlaySoundAtLocationNetworkedPredicted(const FSoundParams& Params) const;
+	void PlaySoundAtLocationLocal(const FSoundParams& Params) const;
 
 private:
 
@@ -28,4 +33,10 @@ private:
 
 	UFUNCTION(NetMulticast, reliable)
 	void createParticleSystem_NetMulticast(const FEmitterSpawnParams& Params) const;
+
+	UFUNCTION(Server, reliable, WithValidation)
+	void playSoundAtLocation_Server(const FSoundParams& Params) const;
+
+	UFUNCTION(NetMulticast, reliable)
+	void playSoundAtLocation_NetMulticast(const FSoundParams& Params) const;
 };

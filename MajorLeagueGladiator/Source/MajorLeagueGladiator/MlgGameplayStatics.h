@@ -4,6 +4,7 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "EmitterSpawnParams.h"
+#include "SoundParams.h"
 #include "MlgGameplayStatics.generated.h"
 
 class AMlgPlayerState;
@@ -26,4 +27,7 @@ public:
 
 	static void SpawnEmitterNetworkedPredicted(const APawn* Source, const FEmitterSpawnParams& Params);
 	static void SpawnEmitterLocalOnly(const APawn* Source, const FEmitterSpawnParams& Params);
+
+	static void PlaySoundAtLocationNetworkedPredicted(const APawn* Source, const FSoundParams& Params);
+	static void PlaySoundAtLocationLocalOnly(const APawn* Source, const FSoundParams& Params);
 };
