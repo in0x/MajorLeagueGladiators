@@ -226,6 +226,14 @@ void UMlgGameplayStatics::SpawnEmitterLocalOnly(const APawn* Source, const FEmit
 	predictEffectComp->CreateParticleSystemLocal(Params);
 }
 
+void UMlgGameplayStatics::PlaySoundAtLocationNetworked(UWorld* World, const FSoundParams& Params)
+{
+	auto gameState = World->GetGameState<AMlgGameState>();
+	check(gameState);
+
+	gameState->GetParticleSystemManager()->PlaySoundAtLocation(Params);
+}
+
 void UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(const APawn* Source, const FSoundParams & Params)
 {
 	UPredictedEffectsComponent* predictEffectComp = Source->FindComponentByClass<UPredictedEffectsComponent>();

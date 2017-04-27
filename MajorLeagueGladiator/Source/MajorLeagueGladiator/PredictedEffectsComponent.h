@@ -15,7 +15,6 @@ class MAJORLEAGUEGLADIATOR_API UPredictedEffectsComponent : public UActorCompone
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UPredictedEffectsComponent();
 	
 	bool IsLocallyControlled() const;
