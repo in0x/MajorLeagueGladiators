@@ -77,7 +77,7 @@ void UGravityGunAbility::SearchAndPull()
 	searchActor->StartLocation.SourceComponent = gripControllerMesh;
 	searchActor->StartLocation.SourceSocketName = AIM_SOCKET_NAME;
 
-	searchActor->Distance = PullRange;
+	searchActor->Range = PullRange;
 	searchActor->AutoConfirm = true;
 	searchActor->IsVisualizingCone = true;
 	searchActor->HalfAngleDegrees = HalfAngleDegrees;

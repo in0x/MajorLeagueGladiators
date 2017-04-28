@@ -6,7 +6,7 @@
 
 AGameplayAbilityTargetActor_Cone::AGameplayAbilityTargetActor_Cone(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-	, Distance(200.0f)
+	, Range(200.0f)
 	, HalfAngleDegrees(45.0f)
 	, IsVisualizingCone(false)
 	, AutoConfirm(false)
@@ -16,7 +16,6 @@ AGameplayAbilityTargetActor_Cone::AGameplayAbilityTargetActor_Cone(const FObject
 	RootComponent = coneVisualizer;
 	PrimaryActorTick.bCanEverTick = true;
 }
-
 
 void AGameplayAbilityTargetActor_Cone::Tick(float DeltaSeconds)
 {
@@ -30,7 +29,6 @@ void AGameplayAbilityTargetActor_Cone::Tick(float DeltaSeconds)
 	}
 }
 
-
 void AGameplayAbilityTargetActor_Cone::StartTargeting(UGameplayAbility* Ability)
 {
 	Super::StartTargeting(Ability);
@@ -43,7 +41,6 @@ void AGameplayAbilityTargetActor_Cone::StartTargeting(UGameplayAbility* Ability)
 		coneVisualizer->SetEndScale({ endScale, endScale });
 	}
 }
-
 
 void AGameplayAbilityTargetActor_Cone::ConfirmTargetingAndContinue()
 {
@@ -65,7 +62,7 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 	const FVector targetingLocation = targetingTransform.GetLocation();
 	const FQuat targetingRotation = targetingTransform.GetRotation();
 	const FVector targetingDirecton = targetingRotation.GetForwardVector();
-	const FVector targetingEnd = targetingLocation + targetingDirecton * Distance;
+	const FVector targetingEnd = targetingLocation + targetingDirecton * Range;
 
 	UWorld* world = GetWorld();
 
@@ -76,7 +73,7 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 			targetingLocation,
 			targetingRotation,
 			FCollisionObjectQueryParams(QueryTypes),
-			FCollisionShape::MakeSphere(Distance),
+			FCollisionShape::MakeSphere(Range),
 			CollisionParams
 			);
 	}
@@ -87,7 +84,7 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 			targetingLocation,
 			targetingRotation,
 			CollisionChannel,
-			FCollisionShape::MakeSphere(Distance),
+			FCollisionShape::MakeSphere(Range),
 			CollisionParams
 			);
 	}
@@ -103,7 +100,7 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 	for (auto item : outOverlaps)
 	{
 		auto* actor = item.Actor.Get();
-		if (IsValidFunction && !(IsValidFunction(actor)))
+		if (IsValidTargetFunction && !(IsValidTargetFunction(actor)))
 		{
 			continue;
 		}
@@ -111,14 +108,13 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 		const FVector distance(actor->GetActorLocation() - targetingLocation);
 		const FVector normalizedDistance = distance.GetSafeNormal();
 
-		const float angleRadiens = acosf(FVector::DotProduct(normalizedDistance, targetingDirecton));
-		const float angleDegrees = FMath::RadiansToDegrees(angleRadiens);
+		const float angleRadians = acosf(FVector::DotProduct(normalizedDistance, targetingDirecton));
+		const float angleDegrees = FMath::RadiansToDegrees(angleRadians);
 
 		if (angleDegrees < HalfAngleDegrees)
 		{
 			foundActors.Add(actor);
 		}
-		
 	}
 
 	if (IsVisualizingCone)
@@ -129,15 +125,13 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 	return foundActors;
 }
 
-
 FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_Cone::MakeTargetHandle(const TArray<TWeakObjectPtr<AActor>> Actors) const
 {
 	return StartLocation.MakeTargetDataHandleFromActors(Actors);
 }
 
-
 float AGameplayAbilityTargetActor_Cone::CalcEndConeScale() const
 {
-	return Distance * FMath::Sin(FMath::DegreesToRadians(HalfAngleDegrees)) * 2;
+	return Range * FMath::Sin(FMath::DegreesToRadians(HalfAngleDegrees)) * 2;
 }
 

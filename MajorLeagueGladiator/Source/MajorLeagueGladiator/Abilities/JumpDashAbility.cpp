@@ -144,10 +144,10 @@ void UJumpDashAbility::BeginFindingActorsToLaunch()
 	}
 
 	AGameplayAbilityTargetActor_Cone* targetingConeActor = CastChecked<AGameplayAbilityTargetActor_Cone>(spawnedTargetingActor);
-	targetingConeActor->Distance = effectDistance;
+	targetingConeActor->Range = effectDistance;
 	targetingConeActor->HalfAngleDegrees = halfEffectAngleDegrees;
 	targetingConeActor->StartLocation = MakeTargetLocationInfoFromOwnerActor();
-	targetingConeActor->IsValidFunction = [](AActor* actor) { return Cast<ACharacter>(actor) != nullptr; };
+	targetingConeActor->IsValidTargetFunction = [](AActor* actor) { return Cast<ACharacter>(actor) != nullptr; };
 	targetingConeActor->QueryTypes = TArray<TEnumAsByte<EObjectTypeQuery>>{	UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)};
 
 	findActorsToLaunchTask->FinishSpawningActor(this, spawnedTargetingActor);

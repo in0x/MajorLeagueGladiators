@@ -17,7 +17,7 @@ public:
 	AGameplayAbilityTargetActor_Cone(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	
 	float HalfAngleDegrees;
-	float Distance;
+	float Range;
 	bool IsVisualizingCone;
 	bool AutoConfirm;
 
@@ -26,6 +26,8 @@ public:
 
 	TArray<TEnumAsByte<EObjectTypeQuery>> QueryTypes;
 	ECollisionChannel CollisionChannel;
+
+	FilterFunction* IsValidTargetFunction;
 	
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -33,7 +35,6 @@ public:
 
 	virtual void ConfirmTargetingAndContinue() override;
 
-	FilterFunction* IsValidFunction;
 
 private:
 	UTargetingSplineMeshComponent* coneVisualizer;
@@ -42,7 +43,4 @@ private:
 	FGameplayAbilityTargetDataHandle MakeTargetHandle(const TArray<TWeakObjectPtr<AActor>> Actors) const;
 
 	float CalcEndConeScale() const;
-
-
-
 };
