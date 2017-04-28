@@ -12,11 +12,17 @@ namespace
 	const FName SHIELD_COLLISION_PRESET_NAME("Shield");
 }
 
-AShieldActor::AShieldActor()
+AShieldActor::AShieldActor(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UStaticMeshComponent>(Super::MESH_COMPONENT_NAME))
 {
 	bReplicates = true;
 	MeshComponent->bGenerateOverlapEvents = true;
 	MeshComponent->SetCollisionProfileName(SHIELD_COLLISION_PRESET_NAME);
+
+	UStaticMeshComponent* staticMeshComp = CastChecked<UStaticMeshComponent>(MeshComponent);
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> staticMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/shield09.shield09'"));
+	staticMeshComp->SetStaticMesh(staticMesh.Object);
 }
 
 FTransform AShieldActor::GetReflectSpawnTransform() const
