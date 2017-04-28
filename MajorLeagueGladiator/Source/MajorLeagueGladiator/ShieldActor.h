@@ -12,7 +12,7 @@ class MAJORLEAGUEGLADIATOR_API AShieldActor : public AMlgGrippableMeshActor
 {
 	GENERATED_BODY()
 public:
-	AShieldActor(); 
+	AShieldActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	void OnHitInteractable(const ABaseProjectile* projectile);	
 	FTransform GetReflectSpawnTransform() const;
