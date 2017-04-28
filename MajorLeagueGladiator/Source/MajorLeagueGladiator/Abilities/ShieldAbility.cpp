@@ -10,8 +10,8 @@
 
 namespace
 {
-	const char* AIM_SOCKET_NAME = "Aim";
-	const char* SHIELD_SOCKET_NAME = "Ability";
+	const FName AIM_SOCKET_NAME("Aim");
+	const FName SHIELD_SOCKET_NAME("Shield");
 }
 
 UShieldAbility::UShieldAbility()
@@ -103,11 +103,15 @@ void UShieldAbility::SpawnShield()
 		spawnParams.Owner = ownerPawn;
 		spawnParams.Instigator = ownerPawn;
 
-		shieldActor = GetWorld()->SpawnActor<AShieldActor>(shieldActorClass, GetOwningActorFromActorInfo()->GetTransform(), spawnParams);
-		
-		FTransform gripTransform = gripControllerMesh->GetSocketTransform(AIM_SOCKET_NAME);
+		if (!gripControllerMesh->DoesSocketExist(SHIELD_SOCKET_NAME))
+		{
+			UE_LOG(DebugLog, Warning, TEXT("Shield Socket Missing in MotionController Mesh"));
+		}
+		FTransform shieldSpawnTransform = gripControllerMesh->GetSocketTransform(SHIELD_SOCKET_NAME);
 
-		gripController->GripActor(shieldActor, gripTransform, false, SHIELD_SOCKET_NAME);
+		shieldActor = GetWorld()->SpawnActor<AShieldActor>(shieldActorClass, shieldSpawnTransform, spawnParams);
+
+		gripController->GripActor(shieldActor, shieldSpawnTransform, false);
 	}
 }
 

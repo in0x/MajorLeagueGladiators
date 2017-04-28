@@ -8,8 +8,8 @@
 
 namespace
 {
-	const char* REFLECT_SOCKET_NAME = "Reflect";
-	const char* SHIELD_COLLISION_PRESET_NAME = "Shield";
+	const FName REFLECT_SOCKET_NAME("Reflect");
+	const FName SHIELD_COLLISION_PRESET_NAME("Shield");
 }
 
 AShieldActor::AShieldActor()
