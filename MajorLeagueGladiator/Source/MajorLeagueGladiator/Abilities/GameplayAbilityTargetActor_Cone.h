@@ -7,6 +7,8 @@
 class USceneComponent;
 class UTargetingSplineMeshComponent;
 
+using FilterFunction = bool(AActor*);
+
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AGameplayAbilityTargetActor_Cone : public AGameplayAbilityTargetActor
 {
@@ -23,11 +25,16 @@ public:
 	UPROPERTY(Transient)
 	TArray<TWeakObjectPtr<AActor>> IgnoredActors;
 
+	TArray<TEnumAsByte<EObjectTypeQuery>> QueryTypes;
+	ECollisionChannel CollisionChannel;
+	
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void StartTargeting(UGameplayAbility* Ability) override;
 
 	virtual void ConfirmTargetingAndContinue() override;
+
+	FilterFunction* filterFunction;
 
 private:
 	UTargetingSplineMeshComponent* coneVisualizer;
