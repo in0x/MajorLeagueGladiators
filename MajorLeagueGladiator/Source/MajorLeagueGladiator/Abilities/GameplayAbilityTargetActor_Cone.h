@@ -33,7 +33,7 @@ public:
 
 	virtual void ConfirmTargetingAndContinue() override;
 
-	FilterFunction* filterFunction;
+	FilterFunction* FilterFunctionPtr;
 
 private:
 	UTargetingSplineMeshComponent* coneVisualizer;

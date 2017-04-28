@@ -103,7 +103,7 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 	for (auto item : outOverlaps)
 	{
 		auto* actor = item.Actor.Get();
-		if (filterFunction && !(filterFunction(actor)))
+		if (FilterFunctionPtr && !(FilterFunctionPtr(actor)))
 		{
 			continue;
 		}
