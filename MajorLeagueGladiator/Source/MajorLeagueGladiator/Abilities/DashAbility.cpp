@@ -78,23 +78,36 @@ void UDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 
 void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
-	if (cachedPlayer->HasAuthority())
+	//if (cachedPlayer->HasAuthority())
 	{
 		SetSwordAlwaysFastEnough(true);
 		auto capsule = cachedPlayer->GetCapsuleComponent();
 
 		// Add capsule halfheight to Z since our "location" is the capsule 
 		// center, otherwise we would move our body into the ground.
-		auto location = Data.Data[0]->GetHitResult()->Location;
-		location += capsule->GetUpVector() * capsule->GetScaledCapsuleHalfHeight();
+		FVector targetLocation = Data.Data[0]->GetHitResult()->Location;
+		targetLocation += capsule->GetUpVector() * capsule->GetScaledCapsuleHalfHeight();
 
-		moveToTask = UAbilityTask_MoveTo::Create(this, "MoveTo Task", location, MoveSpeed, cachedPlayer);
+		const FVector playerLocation = cachedPlayer->CalcFeetPosition();
+
+		const FVector distance = targetLocation - playerLocation;
+		float length;
+		FVector direction;
+		distance.ToDirectionAndLength(direction, length);
+
+		float timeNeeded = length / MoveSpeed;
+
+		auto* moveComp = cachedPlayer->GetCharacterMovement();
+		moveComp->SetMovementMode(EMovementMode::MOVE_Flying);
+
+
+		moveToTask = UAbilityTask_MoveTo::Create(this, "MoveTo Task", playerLocation, MoveSpeed, cachedPlayer);
 		moveToTask->Activate();
 		moveToTask->OnLocationReached.AddUObject(this, &UDashAbility::OnLocationReached);
 
 		cachedPlayer->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
 		cachedPlayer->EnableActorCollison_NetMulticast(false);
-		cachedPlayer->SetAbilityMoveTargetLocation(location);
+		cachedPlayer->SetAbilityMoveTargetLocation(playerLocation);
 	}
 
 	CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo);
