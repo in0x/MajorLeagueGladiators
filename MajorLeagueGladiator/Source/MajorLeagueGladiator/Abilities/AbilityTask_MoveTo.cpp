@@ -4,41 +4,60 @@
 #include "AbilityTask_MoveTo.h"
 #include "AbilityTask_MoveToActor.h"
 
-UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, FName TaskName, FVector TargetLocation, float MoveSpeed, AMlgPlayerCharacter* MovingCharacter)
+UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, FName TaskName, FVector TargetLocation, float MoveSpeed, ACharacter* MovingCharacter)
 {
 	UAbilityTask_MoveTo* task = NewAbilityTask<UAbilityTask_MoveTo>(ThisAbility, TaskName);
-	auto world = GEngine->GetWorldFromContextObject(ThisAbility);
-	auto SpawnedActor = world->SpawnActorDeferred<AAbilityTask_MoveToActor>(AAbilityTask_MoveToActor::StaticClass(), FTransform::Identity, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-
-	SpawnedActor->TargetLocation = TargetLocation;
-	SpawnedActor->MoveSpeed = MoveSpeed;
-	SpawnedActor->MovingCharacter = MovingCharacter;
-
-	task->spawnedActor = SpawnedActor;
+	task->MovingCharacter = MovingCharacter;
+	task->TargetLocation = TargetLocation;
+	task->MinDistanceThreshold = 50.f;
+	task->MoveSpeed = MoveSpeed;
+	task->cachedMoveComp = CastChecked<UCharacterMovementComponent>(MovingCharacter->GetMovementComponent());
 
 	return task;
+}
+
+UAbilityTask_MoveTo::UAbilityTask_MoveTo()
+{
+	bTickingTask = true;
+	bSimulatedTask = true;
 }
 
 void UAbilityTask_MoveTo::Activate()
 {
 	Super::Activate();
 
-	spawnedActor->FinishSpawning(FTransform::Identity);	
-	spawnedActor->OnLocationReached.AddUObject(this, &UAbilityTask_MoveTo::OnLocationReachedCallback);
+	cachedMoveComp->SetMovementMode(MOVE_Flying);
 }
 
-void UAbilityTask_MoveTo::OnLocationReachedCallback()
+void UAbilityTask_MoveTo::TickTask(float DeltaTime)
 {
-	EndTask();
-	OnLocationReached.Broadcast();
+	Super::TickTask(DeltaTime);
+
+	if (!MovingCharacter->HasAuthority()) { return; }
+
+	const FVector location = MovingCharacter->GetActorLocation();
+	const float distance = FVector::Distance(TargetLocation, location); // This needs to happen locally
+
+	if (distance < MinDistanceThreshold)
+	{
+		EndTask();
+		OnLocationReached.Broadcast();
+	}
+	else
+	{
+		const FVector Velocity = (TargetLocation - location).GetSafeNormal() * MoveSpeed;
+
+		cachedMoveComp->MoveSmooth(Velocity, DeltaTime);
+
+		DrawDebugDirectionalArrow(MovingCharacter->GetRootComponent()->GetWorld(), location, TargetLocation, 1.0f, FColor::Green);
+	}
 }
+
 
 void UAbilityTask_MoveTo::OnDestroy(bool AbilityEnded)
 {
-	if (spawnedActor)
-	{
-		spawnedActor->Destroy();
-	}
-
 	Super::OnDestroy(AbilityEnded);
+
+	cachedMoveComp->SetMovementMode(MOVE_Falling);
+	cachedMoveComp->StopMovementImmediately();
 }
