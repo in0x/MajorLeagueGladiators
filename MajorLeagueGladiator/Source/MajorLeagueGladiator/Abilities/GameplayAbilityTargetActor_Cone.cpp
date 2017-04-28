@@ -81,7 +81,7 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 			CollisionParams
 			);
 	}
-	else
+	else if (CollisionChannel != ECollisionChannel::ECC_MAX)
 	{
 		world->OverlapMultiByChannel(
 			outOverlaps,
@@ -92,10 +92,13 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 			CollisionParams
 			);
 	}
+	else
+	{ 
+		UE_LOG(DebugLog, Warning, TEXT("Neither QueryTypes nor Collision Channel has been set."
+			"Nothing Will be found"));
+		return{};
+	}
 	
-
-	DrawDebugCone(world, targetingLocation, targetingDirecton, Distance, halfAngleRadians, halfAngleRadians, 10, FColor::Emerald);
-
 	TArray<TWeakObjectPtr<AActor>> foundActors;
 
 	for (auto item : outOverlaps)
