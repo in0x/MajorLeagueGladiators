@@ -145,7 +145,7 @@ void UJumpDashAbility::BeginFindingActorsToLaunch()
 
 	AGameplayAbilityTargetActor_Cone* targetingConeActor = CastChecked<AGameplayAbilityTargetActor_Cone>(spawnedTargetingActor);
 	targetingConeActor->Distance = effectDistance;
-	targetingConeActor->HalfAngleDegrees = halfEffectAngleDegrees;
+	targetingConeActor->SetHalfAngleDegrees(halfEffectAngleDegrees);
 	targetingConeActor->StartLocation = MakeTargetLocationInfoFromOwnerActor();
 
 	findActorsToLaunchTask->FinishSpawningActor(this, spawnedTargetingActor);
