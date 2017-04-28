@@ -147,6 +147,8 @@ void UJumpDashAbility::BeginFindingActorsToLaunch()
 	targetingConeActor->Distance = effectDistance;
 	targetingConeActor->SetHalfAngleDegrees(halfEffectAngleDegrees);
 	targetingConeActor->StartLocation = MakeTargetLocationInfoFromOwnerActor();
+	targetingConeActor->filterFunction = [](AActor* actor) { return Cast<ACharacter>(actor) != nullptr; };
+	targetingConeActor->QueryTypes = TArray<TEnumAsByte<EObjectTypeQuery>>{	UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)};
 
 	findActorsToLaunchTask->FinishSpawningActor(this, spawnedTargetingActor);
 }

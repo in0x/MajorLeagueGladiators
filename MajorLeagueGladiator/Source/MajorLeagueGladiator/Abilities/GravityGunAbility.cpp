@@ -3,13 +3,14 @@
 
 #include "Characters/MlgPlayerCharacter.h"
 #include "VRControllerComponent.h"
-#include "AbilityTask_SearchActor.h"
+#include "GameplayAbilityTargetActor_Cone.h"
 #include "AbilityTask_PullTarget.h"
 #include "AbilityTask_WaitTargetData.h"
+#include "CollisionStatics.h"
 
 namespace
 {
-	const char* AIM_SOCKET_NAME = "Aim";
+	const FName AIM_SOCKET_NAME("Aim");
 }
 
 UGravityGunAbility::UGravityGunAbility(const FObjectInitializer& ObjectInitializer)
@@ -17,6 +18,7 @@ UGravityGunAbility::UGravityGunAbility(const FObjectInitializer& ObjectInitializ
 	, PullSpeed(500)
 	, GrabRange(10)
 	, LaunchVelocity(1000)
+	, HalfAngleDegrees(10.f)
 	, pullTask(nullptr)
 	, searchTask(nullptr)
 	, gripController(nullptr)
@@ -59,24 +61,30 @@ void UGravityGunAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 void UGravityGunAbility::SearchAndPull()
 {
-	searchTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Search Task", EGameplayTargetingConfirmation::Custom, AAbilityTask_SearchActor::StaticClass());
+	searchTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Search Task", EGameplayTargetingConfirmation::Custom, AGameplayAbilityTargetActor_Cone::StaticClass());
 	searchTask->ValidData.AddDynamic(this, &UGravityGunAbility::OnSearchSuccessful);
 	searchTask->Cancelled.AddDynamic(this, &UGravityGunAbility::OnSearchCancelled);
 
 	AGameplayAbilityTargetActor* spawnedActor;
-	if (!searchTask->BeginSpawningActor(this, AAbilityTask_SearchActor::StaticClass(), spawnedActor))
+	if (!searchTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Cone::StaticClass(), spawnedActor))
 	{
 		return;
 	}	
 
-	AAbilityTask_SearchActor* searchActor = CastChecked<AAbilityTask_SearchActor>(spawnedActor);
+	auto* searchActor = CastChecked<AGameplayAbilityTargetActor_Cone>(spawnedActor);
 
 	searchActor->StartLocation.LocationType = EGameplayAbilityTargetingLocationType::SocketTransform;
 	searchActor->StartLocation.SourceComponent = gripControllerMesh;
 	searchActor->StartLocation.SourceSocketName = AIM_SOCKET_NAME;
 
-	searchActor->MaxRange = PullRange;
-	searchActor->IgnoredActors.Add(GetOwningActorFromActorInfo());	
+	searchActor->Distance = PullRange;
+	searchActor->AutoConfirm = true;
+	searchActor->IsVisualizingCone = true;
+	searchActor->SetHalfAngleDegrees(HalfAngleDegrees);
+
+	searchActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
+
+	searchActor->CollisionChannel = CollisionStatics::GetCollsionChannelByName(CollisionStatics::GRIPSCAN_TRACE_CHANNEL_NAME);
 
 	searchTask->FinishSpawningActor(this, spawnedActor);
 }

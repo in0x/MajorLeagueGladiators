@@ -11,8 +11,11 @@ AGameplayAbilityTargetActor_Cone::AGameplayAbilityTargetActor_Cone(const FObject
 	, halfAngleRadians(FMath::DegreesToRadians(45.0f))
 	, IsVisualizingCone(false)
 	, AutoConfirm(false)
+	, CollisionChannel(ECollisionChannel::ECC_MAX)
 {
 	coneVisualizer = ObjectInitializer.CreateDefaultSubobject<UTargetingSplineMeshComponent>(this, TEXT("SplineMesh"));
+	RootComponent = coneVisualizer;
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 
@@ -32,11 +35,12 @@ void AGameplayAbilityTargetActor_Cone::Tick(float DeltaSeconds)
 void AGameplayAbilityTargetActor_Cone::StartTargeting(UGameplayAbility* Ability)
 {
 	Super::StartTargeting(Ability);
-	SetActorHiddenInGame(IsVisualizingCone);
+	SetActorHiddenInGame(!IsVisualizingCone);
 	if (IsVisualizingCone)
 	{
 		const float endScale = CalcEndConeScale();
 	
+		coneVisualizer->SetStartScale({ 10.f, 10.f });
 		coneVisualizer->SetEndScale({ endScale, endScale });
 	}
 }
@@ -53,10 +57,6 @@ void AGameplayAbilityTargetActor_Cone::ConfirmTargetingAndContinue()
 
 TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 {
-	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)
-	};
-
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActors(IgnoredActors);
 
@@ -69,32 +69,54 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 	const FVector targetingEnd = targetingLocation + targetingDirecton * Distance;
 
 	UWorld* world = GetWorld();
-	world->OverlapMultiByObjectType(
-		outOverlaps,
-		targetingLocation,
-		targetingRotation,
-		FCollisionObjectQueryParams(queryTypes),
-		FCollisionShape::MakeSphere(Distance),
-		CollisionParams
-		);
+
+	if (QueryTypes.Num() > 0)
+	{
+		world->OverlapMultiByObjectType(
+			outOverlaps,
+			targetingLocation,
+			targetingRotation,
+			FCollisionObjectQueryParams(QueryTypes),
+			FCollisionShape::MakeSphere(Distance),
+			CollisionParams
+			);
+	}
+	else
+	{
+		world->OverlapMultiByChannel(
+			outOverlaps,
+			targetingLocation,
+			targetingRotation,
+			CollisionChannel,
+			FCollisionShape::MakeSphere(Distance),
+			CollisionParams
+			);
+	}
+	
+
+	DrawDebugCone(world, targetingLocation, targetingDirecton, Distance, halfAngleRadians, halfAngleRadians, 10, FColor::Emerald);
 
 	TArray<TWeakObjectPtr<AActor>> foundActors;
 
 	for (auto item : outOverlaps)
 	{
-		if (ACharacter* character = Cast<ACharacter>(item.Actor.Get()))
+		auto* actor = item.Actor.Get();
+		if (filterFunction && !(filterFunction(actor)))
 		{
-			const FVector distance(character->GetActorLocation() - targetingLocation);
-			const FVector normalizedDistance = distance.GetSafeNormal();
-
-			const float angleRadiens = acosf(FVector::DotProduct(normalizedDistance, targetingDirecton));
-			const float angleDegrees = FMath::RadiansToDegrees(angleRadiens);
-
-			if (angleDegrees < halfAngleDegrees)
-			{
-				foundActors.Add(character);
-			}
+			continue;
 		}
+		
+		const FVector distance(actor->GetActorLocation() - targetingLocation);
+		const FVector normalizedDistance = distance.GetSafeNormal();
+
+		const float angleRadiens = acosf(FVector::DotProduct(normalizedDistance, targetingDirecton));
+		const float angleDegrees = FMath::RadiansToDegrees(angleRadiens);
+
+		if (angleDegrees < halfAngleDegrees)
+		{
+			foundActors.Add(actor);
+		}
+		
 	}
 
 	if (IsVisualizingCone)
@@ -120,6 +142,6 @@ FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_Cone::MakeTargetHan
 
 float AGameplayAbilityTargetActor_Cone::CalcEndConeScale() const
 {
-	return Distance * FMath::Sin(halfAngleRadians);
+	return Distance * FMath::Sin(halfAngleRadians) * 2;
 }
 
