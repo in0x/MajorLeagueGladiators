@@ -348,7 +348,7 @@ void UJumpDashAbility::PlayLandingEffects()
 
 void UJumpDashAbility::SetSwordAlwaysFastEnough(bool IsAlwaysFastEnough)
 {
-	if (cachedCharacter->HasAuthority())
+	if (!cachedCharacter->HasAuthority())
 	{
 		return;
 	}

@@ -118,7 +118,7 @@ void UDashAbility::OnLocationReached()
 
 void UDashAbility::SetSwordAlwaysFastEnough(bool IsAlwaysFastEnough)
 {
-	if (cachedPlayer->HasAuthority())
+	if (!cachedPlayer->HasAuthority())
 	{
 		return;
 	}
