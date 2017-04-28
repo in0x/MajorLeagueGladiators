@@ -7,8 +7,7 @@
 AGameplayAbilityTargetActor_Cone::AGameplayAbilityTargetActor_Cone(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, Distance(200.0f)
-	, halfAngleDegrees(45.0f)
-	, halfAngleRadians(FMath::DegreesToRadians(45.0f))
+	, HalfAngleDegrees(45.0f)
 	, IsVisualizingCone(false)
 	, AutoConfirm(false)
 	, CollisionChannel(ECollisionChannel::ECC_MAX)
@@ -115,7 +114,7 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 		const float angleRadiens = acosf(FVector::DotProduct(normalizedDistance, targetingDirecton));
 		const float angleDegrees = FMath::RadiansToDegrees(angleRadiens);
 
-		if (angleDegrees < halfAngleDegrees)
+		if (angleDegrees < HalfAngleDegrees)
 		{
 			foundActors.Add(actor);
 		}
@@ -130,12 +129,6 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Cone::Trace() const
 	return foundActors;
 }
 
-void AGameplayAbilityTargetActor_Cone::SetHalfAngleDegrees(float NewHalfAngleInDegrees)
-{
-	halfAngleDegrees = NewHalfAngleInDegrees;
-	halfAngleRadians = FMath::DegreesToRadians(NewHalfAngleInDegrees);
-}
-
 
 FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_Cone::MakeTargetHandle(const TArray<TWeakObjectPtr<AActor>> Actors) const
 {
@@ -145,6 +138,6 @@ FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_Cone::MakeTargetHan
 
 float AGameplayAbilityTargetActor_Cone::CalcEndConeScale() const
 {
-	return Distance * FMath::Sin(halfAngleRadians) * 2;
+	return Distance * FMath::Sin(FMath::DegreesToRadians(HalfAngleDegrees)) * 2;
 }
 

@@ -15,12 +15,11 @@ class MAJORLEAGUEGLADIATOR_API AGameplayAbilityTargetActor_Cone : public AGamepl
 	GENERATED_BODY()
 public:
 	AGameplayAbilityTargetActor_Cone(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
+	
+	float HalfAngleDegrees;
 	float Distance;
 	bool IsVisualizingCone;
 	bool AutoConfirm;
-
-	void SetHalfAngleDegrees(float NewHalfAngleInDegrees);
 
 	UPROPERTY(Transient)
 	TArray<TWeakObjectPtr<AActor>> IgnoredActors;
@@ -44,6 +43,6 @@ private:
 
 	float CalcEndConeScale() const;
 
-	float halfAngleDegrees;
-	float halfAngleRadians;
+
+
 };
