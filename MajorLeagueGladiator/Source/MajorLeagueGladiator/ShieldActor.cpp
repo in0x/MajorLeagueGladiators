@@ -23,11 +23,14 @@ AShieldActor::AShieldActor(const FObjectInitializer& ObjectInitializer)
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> staticMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/shield09.shield09'"));
 	staticMeshComp->SetStaticMesh(staticMesh.Object);
+
+	ConstructorHelpers::FObjectFinder<UMaterialInterface> material(TEXT("Material'/Game/Materials/M_Transparent.M_Transparent'"));
+	staticMeshComp->SetMaterial(0, material.Object);
 }
 
 FTransform AShieldActor::GetReflectSpawnTransform() const
 {
-	checkf(MeshComponent->DoesSocketExist(REFLECT_SOCKET_NAME), TEXT("Socket \"AbilityActor\" is missing in the shield actor mesh"));
+	checkf(MeshComponent->DoesSocketExist(REFLECT_SOCKET_NAME), TEXT("Socket \"Reflect\" is missing in the shield actor mesh"));
 	return MeshComponent->GetSocketTransform(REFLECT_SOCKET_NAME);
 }
 
