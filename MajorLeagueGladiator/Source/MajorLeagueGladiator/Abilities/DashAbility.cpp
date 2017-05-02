@@ -54,7 +54,7 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	targetingSpawnedActor->aimDirection = ERaycastTargetDirection::ComponentRotation;
 	targetingSpawnedActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
-	targetingSpawnedActor->MaxRange = MaxRange;
+	targetingSpawnedActor->MaxRange = MaxRange + 100000;
 
 	targetingSpawnedActor->EvalTargetFunc = [](const FHitResult& result)
 	{
@@ -78,37 +78,28 @@ void UDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 
 void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
-	//if (cachedPlayer->HasAuthority())
-	{
-		SetSwordAlwaysFastEnough(true);
-		auto capsule = cachedPlayer->GetCapsuleComponent();
+	SetSwordAlwaysFastEnough(true);
+	auto capsule = cachedPlayer->GetCapsuleComponent();
 
-		// Add capsule halfheight to Z since our "location" is the capsule 
-		// center, otherwise we would move our body into the ground.
-		FVector targetLocation = Data.Data[0]->GetHitResult()->Location;
-		targetLocation += capsule->GetUpVector() * capsule->GetScaledCapsuleHalfHeight();
+	// Add capsule half height to Z since our "location" is the capsule 
+	// center, otherwise we would move our body into the ground.
+	FVector targetLocation = Data.Data[0]->GetHitResult()->Location;
+	targetLocation += capsule->GetUpVector() * capsule->GetScaledCapsuleHalfHeight();
 
-		const FVector playerLocation = cachedPlayer->CalcFeetPosition();
+	const FVector playerLocation = cachedPlayer->CalcFeetPosition();
 
-		const FVector distance = targetLocation - playerLocation;
-		float length;
-		FVector direction;
-		distance.ToDirectionAndLength(direction, length);
+	const FVector distance = targetLocation - playerLocation;
+	float length;
+	FVector direction;
+	distance.ToDirectionAndLength(direction, length);
 
-		float timeNeeded = length / MoveSpeed;
+	float timeNeeded = length / MoveSpeed;
 
-		auto* moveComp = cachedPlayer->GetCharacterMovement();
-		moveComp->SetMovementMode(EMovementMode::MOVE_Flying);
+	auto* moveComp = cachedPlayer->GetCharacterMovement();
 
-
-		moveToTask = UAbilityTask_MoveTo::Create(this, "MoveTo Task", playerLocation, MoveSpeed, cachedPlayer);
-		moveToTask->Activate();
-		moveToTask->OnLocationReached.AddUObject(this, &UDashAbility::OnLocationReached);
-
-		cachedPlayer->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
-		cachedPlayer->EnableActorCollison_NetMulticast(false);
-		cachedPlayer->SetAbilityMoveTargetLocation(playerLocation);
-	}
+	moveToTask = UAbilityTask_MoveTo::Create(this, "MoveTo Task", targetLocation, MoveSpeed, cachedPlayer);
+	moveToTask->OnLocationReached.AddUObject(this, &UDashAbility::OnLocationReached);
+	moveToTask->ReadyForActivation();	
 
 	CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo);
 	cachedPlayer->OnAbilityUseSuccess.Broadcast(StaticClass(), GetCooldownTimeRemaining());

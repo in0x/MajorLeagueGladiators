@@ -11,7 +11,7 @@ UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, 
 	task->TargetLocation = TargetLocation;
 	task->MinDistanceThreshold = 50.f;
 	task->MoveSpeed = MoveSpeed;
-	task->cachedMoveComp = CastChecked<UCharacterMovementComponent>(MovingCharacter->GetMovementComponent());
+	task->cachedMoveComp = CastChecked<UVRBaseCharacterMovementComponent>(MovingCharacter->GetCharacterMovement());
 
 	return task;
 }
@@ -19,7 +19,7 @@ UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, 
 UAbilityTask_MoveTo::UAbilityTask_MoveTo()
 {
 	bTickingTask = true;
-	bSimulatedTask = true;
+	bSimulatedTask = true; // <- makes it so it plays on both client and server
 }
 
 void UAbilityTask_MoveTo::Activate()
@@ -33,23 +33,26 @@ void UAbilityTask_MoveTo::TickTask(float DeltaTime)
 {
 	Super::TickTask(DeltaTime);
 
-	if (!MovingCharacter->HasAuthority()) { return; }
-
 	const FVector location = MovingCharacter->GetActorLocation();
 	const float distance = FVector::Distance(TargetLocation, location); // This needs to happen locally
 
+	DrawDebugLine(MovingCharacter->GetRootComponent()->GetWorld(), location, TargetLocation, FColor::Green, false,-1,0,5);
+
+	// TODO: use right kind of movement
 	if (distance < MinDistanceThreshold)
 	{
+		//cachedMoveComp->Velocity = FVector::ZeroVector;
 		EndTask();
 		OnLocationReached.Broadcast();
 	}
 	else
 	{
 		const FVector Velocity = (TargetLocation - location).GetSafeNormal() * MoveSpeed;
-
+		check(!Velocity.IsZero());
+		//MovingCharacter->SetActorLocation(MovingCharacter->GetActorLocation() + Velocity * DeltaTime);
+		//cachedMoveComp->AddCustomReplicatedMovement(Velocity * 100);
 		cachedMoveComp->MoveSmooth(Velocity, DeltaTime);
-
-		DrawDebugDirectionalArrow(MovingCharacter->GetRootComponent()->GetWorld(), location, TargetLocation, 1.0f, FColor::Green);
+		//MovingCharacter->TeleportTo()
 	}
 }
 
@@ -61,3 +64,15 @@ void UAbilityTask_MoveTo::OnDestroy(bool AbilityEnded)
 	cachedMoveComp->SetMovementMode(MOVE_Falling);
 	cachedMoveComp->StopMovementImmediately();
 }
+
+void UAbilityTask_MoveTo::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UAbilityTask_MoveTo, MovingCharacter);
+	DOREPLIFETIME(UAbilityTask_MoveTo, TargetLocation);
+	DOREPLIFETIME(UAbilityTask_MoveTo, MoveSpeed);
+	DOREPLIFETIME(UAbilityTask_MoveTo, MinDistanceThreshold);
+	DOREPLIFETIME(UAbilityTask_MoveTo, cachedMoveComp);
+}
+

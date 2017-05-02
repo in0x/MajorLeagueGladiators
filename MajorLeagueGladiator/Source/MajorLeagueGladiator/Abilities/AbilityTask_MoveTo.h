@@ -7,6 +7,8 @@
 
 DECLARE_MULTICAST_DELEGATE(FAbilityTaskMoveToLocationReached);
 
+class UVRBaseCharacterMovementComponent;
+
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UAbilityTask_MoveTo : public UAbilityTask
 {
@@ -24,18 +26,22 @@ public:
 
 	FAbilityTaskMoveToLocationReached OnLocationReached;
 
+
+	void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty> & OutLifetimeProps) const override;
+	
 private:
-	UPROPERTY()
+	UPROPERTY(replicated)
 	ACharacter* MovingCharacter;
 
-	UPROPERTY()
+	UPROPERTY(replicated)
 	FVector TargetLocation;
 
-	UPROPERTY()
+	UPROPERTY(replicated)
 	float MoveSpeed;
 
-	UPROPERTY()
+	UPROPERTY(replicated)
 	float MinDistanceThreshold;
 
-	UCharacterMovementComponent* cachedMoveComp;
+	UPROPERTY(replicated)
+	UVRBaseCharacterMovementComponent* cachedMoveComp;
 };
