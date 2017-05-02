@@ -81,7 +81,7 @@ void AHitScanGunActor::BeginPlay()
 
 	if (!sceneCapture->TextureTarget)
 	{
-		sceneCapture->TextureTarget = UCanvasRenderTarget2D::CreateCanvasRenderTarget2D(GetWorld(), UCanvasRenderTarget2D::StaticClass());
+		sceneCapture->TextureTarget = UCanvasRenderTarget2D::CreateCanvasRenderTarget2D(GetWorld(), UCanvasRenderTarget2D::StaticClass(),512,512);
 		auto instance = UMaterialInstanceDynamic::Create(scopeMesh->GetMaterial(0), scopeMesh);
 		instance->SetTextureParameterValue(FName("ScopeTex"), sceneCapture->TextureTarget);
 		scopeMesh->SetMaterial(0, instance);
