@@ -72,6 +72,11 @@ void UShieldAbility::OnBoxTraceFinished(const FGameplayAbilityTargetDataHandle& 
 	const FVector launchVelocity = actorArray->SourceLocation.GetTargetingTransform().GetRotation().Vector() * pushVelocity;
 	for (auto actor : actorArray->GetActors())
 	{
+		if (!actor.IsValid())
+		{
+			continue;
+		}
+
 		ACharacter* character = Cast<ACharacter>(actor.Get());
 		if (character)
 		{
