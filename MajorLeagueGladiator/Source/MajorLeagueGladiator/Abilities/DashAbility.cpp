@@ -92,6 +92,7 @@ void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 
 	CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo);
 	cachedPlayer->OnAbilityUseSuccess.Broadcast(StaticClass(), GetCooldownTimeRemaining());
+	cachedPlayer->SetAbilityMoveTargetLocation(targetLocation);
 }
 
 void UDashAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& Data)

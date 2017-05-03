@@ -6,11 +6,11 @@
 UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, FName TaskName, FVector TargetLocation, float MoveSpeed, ACharacter* MovingCharacter, float MinDistanceThreshold)
 {
 	UAbilityTask_MoveTo* task = NewAbilityTask<UAbilityTask_MoveTo>(ThisAbility, TaskName);
-	task->MovingCharacter = MovingCharacter;
-	task->TargetLocation = TargetLocation;
-	task->MinDistanceThreshold = MinDistanceThreshold;
-	task->MoveSpeed = MoveSpeed;
-	task->cachedMoveComp = CastChecked<UVRBaseCharacterMovementComponent>(MovingCharacter->GetCharacterMovement());
+	task->movingCharacter = MovingCharacter;
+	task->targetLocation = TargetLocation;
+	task->minDistanceThreshold = MinDistanceThreshold;
+	task->moveSpeed = MoveSpeed;
+	task->cachedMoveComp = MovingCharacter->GetCharacterMovement();
 
 	return task;
 }
@@ -24,7 +24,6 @@ UAbilityTask_MoveTo::UAbilityTask_MoveTo()
 void UAbilityTask_MoveTo::Activate()
 {
 	Super::Activate();
-
 	cachedMoveComp->SetMovementMode(MOVE_Flying);
 }
 
@@ -32,19 +31,19 @@ void UAbilityTask_MoveTo::TickTask(float DeltaTime)
 {
 	Super::TickTask(DeltaTime);
 
-	const FVector location = MovingCharacter->GetActorLocation();
-	const float distance = FVector::Distance(TargetLocation, location);
+	const FVector actorLocation = movingCharacter->GetActorLocation();
+	const FVector distanceVec = targetLocation - actorLocation;
+	const float distance = distanceVec.Size();
 
-	DrawDebugLine(MovingCharacter->GetRootComponent()->GetWorld(), location, TargetLocation, FColor::Green, false,-1,0,5);
-
-	if (distance < MinDistanceThreshold)
+	if (distance < minDistanceThreshold)
 	{
 		EndTask();
 		OnLocationReached.Broadcast();
 	}
 	else
 	{
-		const FVector Velocity = (TargetLocation - location).GetSafeNormal() * MoveSpeed;
+		const FVector direction = distanceVec.GetSafeNormal();
+		const FVector Velocity = direction * moveSpeed;
 		cachedMoveComp->MoveSmooth(Velocity, DeltaTime);
 	}
 }
@@ -62,10 +61,10 @@ void UAbilityTask_MoveTo::GetLifetimeReplicatedProps(TArray<class FLifetimePrope
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UAbilityTask_MoveTo, MovingCharacter);
-	DOREPLIFETIME(UAbilityTask_MoveTo, TargetLocation);
-	DOREPLIFETIME(UAbilityTask_MoveTo, MoveSpeed);
-	DOREPLIFETIME(UAbilityTask_MoveTo, MinDistanceThreshold);
+	DOREPLIFETIME(UAbilityTask_MoveTo, movingCharacter);
+	DOREPLIFETIME(UAbilityTask_MoveTo, targetLocation);
+	DOREPLIFETIME(UAbilityTask_MoveTo, moveSpeed);
+	DOREPLIFETIME(UAbilityTask_MoveTo, minDistanceThreshold);
 	DOREPLIFETIME(UAbilityTask_MoveTo, cachedMoveComp);
 }
 
