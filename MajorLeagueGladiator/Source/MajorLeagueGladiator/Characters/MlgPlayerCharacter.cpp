@@ -21,9 +21,10 @@
 
 namespace 
 {
-	const char* PAWN_COLLISION_PROFILE_NAME = "Pawn";
-	const char* NO_COLLISION_PROFILE_NAME = "NoCollision";
-	const char* VR_CAPSULE_COLLISION_NAME = "VrCapsule";
+	const FName PAWN_COLLISION_PROFILE_NAME("Pawn");
+	const FName NO_COLLISION_PROFILE_NAME("NoCollision");
+	const FName VR_CAPSULE_COLLISION_NAME("VrCapsule");
+	const FName VR_GRIP_1_NAME("VRGripP1");
 	const FVector INVALID_TARGET_LOCATION = FVector(0,0, 9'999'999);
 }
 
@@ -296,14 +297,13 @@ void AMlgPlayerCharacter::OnAttachedWeaponSet()
 	// However the values of the object will still be replicated and RPC can be used
 	attachedWeapon->SetReplicateMovement(false);
 
-	FAttachmentTransformRules transRules(EAttachmentRule::SnapToTarget, true);
-	attachedWeapon->AttachToComponent(GetMotionController(EControllerHand::Right), transRules, TEXT("VRGripP1"));
+	UPrimitiveComponent* weaponRootComp = CastChecked<UPrimitiveComponent>(attachedWeapon->GetRootComponent());
+	const FTransform sockTrans = weaponRootComp->GetSocketTransform(VR_GRIP_1_NAME, ERelativeTransformSpace::RTS_Component);
+	const FTransform relativeTransform = sockTrans.Inverse();
+	weaponRootComp->SetRelativeTransform(relativeTransform);
 
-	/*GetMotionController(EControllerHand::Right)->GripActor(
-		attachedWeapon, GetTransform(), true, TEXT("VRGripP1"),
-		EGripCollisionType::InteractiveCollisionWithPhysics,
-		EGripLateUpdateSettings::NotWhenCollidingOrDoubleGripping,
-		EGripMovementReplicationSettings::LocalOnly_Not_Replicated, 1500000, 2000);*/
+	FAttachmentTransformRules transRules(EAttachmentRule::KeepRelative, true);
+	attachedWeapon->AttachToComponent(GetMotionController(EControllerHand::Right), transRules);
 }
 
 AMlgGrippableMeshActor* AMlgPlayerCharacter::GetAttachedWeapon()
@@ -440,15 +440,7 @@ bool AMlgPlayerCharacter::rightHandGrab_Server_Validate()
 
 void AMlgPlayerCharacter::rightHandGrab_Server_Implementation()
 {
-	UVRControllerComponent* rightController = CastChecked<UVRControllerComponent>(RightMotionController);
-	if (rightController->HasGrip())
-	{
-		rightController->UseGrippedActors();
-	}
-	else
-	{
-		rightController->GrabNearestActor();
-	}
+	attachedWeapon->OnUsed();
 }
 
 bool AMlgPlayerCharacter::rightHandRelease_Server_Validate()
@@ -470,9 +462,7 @@ bool AMlgPlayerCharacter::rightHandDrop_Server_Validate()
 
 void AMlgPlayerCharacter::rightHandDrop_Server_Implementation()
 {
-	UVRControllerComponent* rightController = CastChecked<UVRControllerComponent>(RightMotionController);
-	rightController->EndUseGrippedActors();
-	rightController->DropAllGrips();
+	attachedWeapon->OnEndUsed();
 }
 
 void AMlgPlayerCharacter::EnableActorCollison_NetMulticast_Implementation(bool bNewActorEnableCollision)
