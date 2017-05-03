@@ -183,15 +183,12 @@ void AMlgPlayerCharacter::Tick(float DelataTime)
 {
 	Super::Tick(DelataTime);
 
-	FTransform cameraTrans = VRReplicatedCamera->GetComponentTransform();
-
-	FRotator rot(0, cameraTrans.Rotator().Yaw, 0);
-
-	FRotator bodyRotation = bodyMesh2->GetComponentRotation();
+	const FTransform cameraTrans = VRReplicatedCamera->GetComponentTransform();
+	const FRotator rot(0, cameraTrans.Rotator().Yaw, 0);
+	const FRotator bodyRotation = bodyMesh2->GetComponentRotation();
 	
 	bodyMesh2->SetWorldTransform(FTransform(rot, BodyOffsetFromHead + cameraTrans.GetLocation()));
 }
-
 
 void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

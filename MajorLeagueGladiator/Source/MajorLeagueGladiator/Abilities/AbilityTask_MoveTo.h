@@ -26,7 +26,6 @@ public:
 
 	FAbilityTaskMoveToLocationReached OnLocationReached;
 
-
 	void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty> & OutLifetimeProps) const override;
 	
 private:

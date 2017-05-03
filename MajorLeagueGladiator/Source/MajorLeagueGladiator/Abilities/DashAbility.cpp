@@ -86,17 +86,6 @@ void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 	FVector targetLocation = Data.Data[0]->GetHitResult()->Location;
 	targetLocation += capsule->GetUpVector() * capsule->GetScaledCapsuleHalfHeight();
 
-	const FVector playerLocation = cachedPlayer->CalcFeetPosition();
-
-	const FVector distance = targetLocation - playerLocation;
-	float length;
-	FVector direction;
-	distance.ToDirectionAndLength(direction, length);
-
-	float timeNeeded = length / MoveSpeed;
-
-	auto* moveComp = cachedPlayer->GetCharacterMovement();
-
 	moveToTask = UAbilityTask_MoveTo::Create(this, "MoveTo Task", targetLocation, MoveSpeed, cachedPlayer);
 	moveToTask->OnLocationReached.AddUObject(this, &UDashAbility::OnLocationReached);
 	moveToTask->ReadyForActivation();	
