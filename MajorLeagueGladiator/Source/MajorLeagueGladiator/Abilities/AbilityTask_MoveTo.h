@@ -7,13 +7,10 @@
 
 DECLARE_MULTICAST_DELEGATE(FAbilityTaskMoveToLocationReached);
 
-class UVRBaseCharacterMovementComponent;
-
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UAbilityTask_MoveTo : public UAbilityTask
 {
 	GENERATED_BODY()
-
 
 public:
 	static UAbilityTask_MoveTo* Create(
@@ -36,17 +33,17 @@ public:
 	
 private:
 	UPROPERTY(replicated)
-	ACharacter* MovingCharacter;
+	ACharacter* movingCharacter;
 
 	UPROPERTY(replicated)
-	FVector TargetLocation;
+	FVector targetLocation;
 
 	UPROPERTY(replicated)
-	float MoveSpeed;
+	float moveSpeed;
 
 	UPROPERTY(replicated)
-	float MinDistanceThreshold;
+	float minDistanceThreshold;
 
 	UPROPERTY(replicated)
-	UVRBaseCharacterMovementComponent* cachedMoveComp;
+	UCharacterMovementComponent* cachedMoveComp;
 };
