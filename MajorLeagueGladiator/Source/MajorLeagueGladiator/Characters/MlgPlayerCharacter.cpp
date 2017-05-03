@@ -296,11 +296,14 @@ void AMlgPlayerCharacter::OnAttachedWeaponSet()
 	// However the values of the object will still be replicated and RPC can be used
 	attachedWeapon->SetReplicateMovement(false);
 
-	GetMotionController(EControllerHand::Right)->GripActor(
+	FAttachmentTransformRules transRules(EAttachmentRule::SnapToTarget, true);
+	attachedWeapon->AttachToComponent(GetMotionController(EControllerHand::Right), transRules, TEXT("VRGripP1"));
+
+	/*GetMotionController(EControllerHand::Right)->GripActor(
 		attachedWeapon, GetTransform(), true, TEXT("VRGripP1"),
 		EGripCollisionType::InteractiveCollisionWithPhysics,
 		EGripLateUpdateSettings::NotWhenCollidingOrDoubleGripping,
-		EGripMovementReplicationSettings::LocalOnly_Not_Replicated, 1500000, 2000);
+		EGripMovementReplicationSettings::LocalOnly_Not_Replicated, 1500000, 2000);*/
 }
 
 AMlgGrippableMeshActor* AMlgPlayerCharacter::GetAttachedWeapon()
