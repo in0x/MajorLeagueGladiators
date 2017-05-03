@@ -25,12 +25,12 @@ AMeleePlayerCharacter::AMeleePlayerCharacter(const FObjectInitializer& ObjectIni
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> swordHandleMesh(TEXT("SkeletalMesh'/Game/MVRCFPS_Assets/MultiTool/sword/sword_handle.sword_handle'"));
 	if (swordHandleMesh.Succeeded())
 	{
-		rightMesh->SetSkeletalMesh(swordHandleMesh.Object);
 		ConstructorHelpers::FObjectFinder<UBlendSpace1D> blendSpace(TEXT("BlendSpace1D'/Game/MVRCFPS_Assets/MultiTool/sword/SwordTrigger.SwordTrigger'"));
 		if (blendSpace.Succeeded())
 		{
 			rightMesh->OverrideAnimationData(blendSpace.Object);
 		}
+		rightMesh->SetSkeletalMesh(swordHandleMesh.Object);
 	}
 
 	auto createWidget = [&](TSubclassOf<UGameplayAbility> boundAbilityType, EAbilityWidgetAngle::Type angle, EAbilityWidgetTriggerLocation::Type triggerLocation,

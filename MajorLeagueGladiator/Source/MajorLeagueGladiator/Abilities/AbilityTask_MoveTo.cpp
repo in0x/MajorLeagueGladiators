@@ -19,7 +19,7 @@ UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, 
 UAbilityTask_MoveTo::UAbilityTask_MoveTo()
 {
 	bTickingTask = true;
-	bSimulatedTask = true; // <- makes it so it plays on both client and server
+	bSimulatedTask = true;
 }
 
 void UAbilityTask_MoveTo::Activate()
@@ -34,25 +34,19 @@ void UAbilityTask_MoveTo::TickTask(float DeltaTime)
 	Super::TickTask(DeltaTime);
 
 	const FVector location = MovingCharacter->GetActorLocation();
-	const float distance = FVector::Distance(TargetLocation, location); // This needs to happen locally
+	const float distance = FVector::Distance(TargetLocation, location);
 
 	DrawDebugLine(MovingCharacter->GetRootComponent()->GetWorld(), location, TargetLocation, FColor::Green, false,-1,0,5);
 
-	// TODO: use right kind of movement
 	if (distance < MinDistanceThreshold)
 	{
-		//cachedMoveComp->Velocity = FVector::ZeroVector;
 		EndTask();
 		OnLocationReached.Broadcast();
 	}
 	else
 	{
 		const FVector Velocity = (TargetLocation - location).GetSafeNormal() * MoveSpeed;
-		check(!Velocity.IsZero());
-		//MovingCharacter->SetActorLocation(MovingCharacter->GetActorLocation() + Velocity * DeltaTime);
-		//cachedMoveComp->AddCustomReplicatedMovement(Velocity * 100);
 		cachedMoveComp->MoveSmooth(Velocity, DeltaTime);
-		//MovingCharacter->TeleportTo()
 	}
 }
 
