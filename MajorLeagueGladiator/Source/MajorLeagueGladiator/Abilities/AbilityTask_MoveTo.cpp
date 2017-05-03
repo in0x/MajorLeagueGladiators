@@ -2,14 +2,13 @@
 
 #include "MajorLeagueGladiator.h"
 #include "AbilityTask_MoveTo.h"
-#include "AbilityTask_MoveToActor.h"
 
-UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, FName TaskName, FVector TargetLocation, float MoveSpeed, ACharacter* MovingCharacter)
+UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, FName TaskName, FVector TargetLocation, float MoveSpeed, ACharacter* MovingCharacter, float MinDistanceThreshold)
 {
 	UAbilityTask_MoveTo* task = NewAbilityTask<UAbilityTask_MoveTo>(ThisAbility, TaskName);
 	task->MovingCharacter = MovingCharacter;
 	task->TargetLocation = TargetLocation;
-	task->MinDistanceThreshold = 50.f;
+	task->MinDistanceThreshold = MinDistanceThreshold;
 	task->MoveSpeed = MoveSpeed;
 	task->cachedMoveComp = CastChecked<UVRBaseCharacterMovementComponent>(MovingCharacter->GetCharacterMovement());
 

@@ -16,7 +16,13 @@ class MAJORLEAGUEGLADIATOR_API UAbilityTask_MoveTo : public UAbilityTask
 
 
 public:
-	static UAbilityTask_MoveTo* Create(UGameplayAbility* ThisAbility, FName TaskName, FVector TargetLocation, float MoveSpeed, ACharacter* MovingCharacter);
+	static UAbilityTask_MoveTo* Create(
+		UGameplayAbility* ThisAbility,
+		FName TaskName,
+		FVector TargetLocation,
+		float MoveSpeed,
+		ACharacter* MovingCharacter,
+		float MinDistanceThreshold = 10.f);
 
 	UAbilityTask_MoveTo();
 

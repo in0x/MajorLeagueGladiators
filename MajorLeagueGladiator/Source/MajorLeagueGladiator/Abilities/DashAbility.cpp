@@ -54,7 +54,7 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	targetingSpawnedActor->aimDirection = ERaycastTargetDirection::ComponentRotation;
 	targetingSpawnedActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
-	targetingSpawnedActor->MaxRange = MaxRange + 100000;
+	targetingSpawnedActor->MaxRange = MaxRange;
 
 	targetingSpawnedActor->EvalTargetFunc = [](const FHitResult& result)
 	{
