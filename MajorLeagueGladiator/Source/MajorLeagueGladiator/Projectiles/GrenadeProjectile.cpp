@@ -5,6 +5,11 @@
 #include "ShieldActor.h"
 #include "MlgGameplayStatics.h"
 
+namespace
+{
+	const FName PROJECTILE_COLLISION_PROFILE_NAME = "Projectile";
+}
+
 AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializer)
 	: projectileMovementComponent(ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, TEXT("ProjectileMovementComponent")))
 	, ExplosionMaxDamageRadius(20.f)
@@ -25,7 +30,8 @@ AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializ
 
 	UStaticMeshComponent* meshComponent = GetStaticMeshComponent();
 	meshComponent->Mobility = EComponentMobility::Movable;
-	meshComponent->SetCollisionObjectType(ECC_Pawn);
+	/*meshComponent->SetCollisionObjectType(ECC_Pawn);*/
+	meshComponent->SetCollisionProfileName(PROJECTILE_COLLISION_PROFILE_NAME);
 	meshComponent->SetWorldScale3D(FVector(0.1f, 0.1f, 0.1f));
 	meshComponent->SetStaticMesh(mesh.Object);
 	meshComponent->SetMaterial(0, material.Object);
