@@ -2,7 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "MeleeAIDamageFeedbackComponent.h"
-
+#include "MlgGameplayStatics.h"
 #include "DamageTypes/HitscanProjectileDamage.h"
 #include "DamageTypes/SwordDamage.h"
 
@@ -19,6 +19,13 @@ UMeleeAIDamageFeedbackComponent::UMeleeAIDamageFeedbackComponent()
 	swordDamageParticleSystems.Add(swordHit_Melee.Object);
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> swordWeakpointHit_Melee(TEXT("ParticleSystem'/Game/ParticleSystems/PS_SwordWeakpointHit_Melee.PS_SwordWeakpointHit_Melee'"));
 	swordWeakpointDamageParticleSystems.Add(swordWeakpointHit_Melee.Object);
+	//Sounds:
+	static ConstructorHelpers::FObjectFinder<USoundCue> swordAttack01(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Sword_Attack_01_16bit_Cue.Sword_Attack_01_16bit_Cue'"));
+	swordSounds.Add(swordAttack01.Object);
+	static ConstructorHelpers::FObjectFinder<USoundCue> swordAttack02(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Sword_Attack_02_16bit_Cue.Sword_Attack_02_16bit_Cue'"));
+	swordSounds.Add(swordAttack02.Object);
+	static ConstructorHelpers::FObjectFinder<USoundCue> swordAttack03(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Sword_Attack_03_16bit_Cue.Sword_Attack_03_16bit_Cue'"));
+	swordSounds.Add(swordAttack03.Object);
 	//TODO: add minor PS with sparks....
 	
 }
@@ -61,3 +68,12 @@ void UMeleeAIDamageFeedbackComponent::DoWeakpointParticleSystemVisualization_Net
 		}
 	}
 }
+
+void UMeleeAIDamageFeedbackComponent::playSwordHitSound()
+{
+	int32 idx = FMath::RandRange(0, swordSounds.Num() - 1);
+	FSoundParams soundParams;
+	soundParams.Sound = swordSounds[idx];
+	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(CastChecked<APawn>(GetOwner()), soundParams);
+}
+

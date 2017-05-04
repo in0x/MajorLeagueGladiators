@@ -47,5 +47,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Feedback (Melee)")
 	TArray<USoundBase*> swordSounds;
+
+	void playSwordHitSound();
 	
 };
