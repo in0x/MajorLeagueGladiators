@@ -10,7 +10,7 @@ class UWeakpointComponent;
 class UTriggerZoneComponent;
 class UDamageCauserComponent;
 class UDamageReceiverComponent;
-class UDamageVisualizerComponent;
+class UDamageFeedbackComponent;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgAICharacter : public ACharacter
@@ -19,6 +19,8 @@ class MAJORLEAGUEGLADIATOR_API AMlgAICharacter : public ACharacter
 
 public:
 	AMlgAICharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintNativeEvent)
 	void ApplyStagger(float DurationSeconds);
@@ -42,7 +44,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	UDamageReceiverComponent* damageReciever;
 
-	/*UPROPERTY(EditAnywhere)
-	UDamageVisualizerComponent* damageVisualizer;*/
+	UPROPERTY()
+	UDamageFeedbackComponent* damageFeedback;
 };
 	

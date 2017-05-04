@@ -39,15 +39,20 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	damageCauser->DamageType = UEnemyDamage::StaticClass();
 
 	damageReciever = ObjectInitializer.CreateDefaultSubobject<UDamageReceiverComponent>(this, TEXT("DamageReciever"));
-	//damageVisualizer = ObjectInitializer.CreateDefaultSubobject<UDamageVisualizerComponent>(this, TEXT("DamageVisualizer"));
-
+	
 	GetMesh()->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
 	GetMesh()->bGenerateOverlapEvents = true;
 }
 
+void AMlgAICharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	damageFeedback = FindComponentByClass<UDamageFeedbackComponent>(); //concrete damage feedback component is created in respective AI characters BP
+}
+
 void AMlgAICharacter::ApplyStagger_Implementation(float DurationSeconds)
 {
-	//damageVisualizer = ObjectInitializer.CreateDefaultSubobject<UDamageVisualizerComponent>(this, TEXT("DamageVisualizer")); //TODO: Remove
 }
 
 float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageEvent& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -57,22 +62,18 @@ float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageE
 	FWeakpoint hitWeakpoint = weakpoints->FindHitWeakpoint(PointDamageEvent.HitInfo);
 
 	UMeshComponent* mesh = FindComponentByClass<UMeshComponent>();
-	UDamageFeedbackComponent* damageFeedback = FindComponentByClass<UDamageFeedbackComponent>(); //concrete damage feedback component is created in respective AI characters BP
-
+	
 	if (damageFeedback)
 	{
 		damageFeedback->DoMaterialVisualization_NetMulticast(mesh);
 
 		if (hitWeakpoint.LocationSocketName != NAME_None)
 		{
-			//damageVisualizer->AddVisual_NetMulticast(mesh, true, FTransform(PointDamageEvent.HitInfo.ImpactPoint));
 			damageFeedback->DoParticleSystemVisualization_NetMulticast(PointDamageEvent.HitInfo.ImpactPoint, PointDamageEvent.ShotDirection, PointDamageEvent.DamageTypeClass);
 			damageFeedback->DoWeakpointParticleSystemVisualization_NetMulticast(PointDamageEvent.HitInfo.ImpactPoint, PointDamageEvent.ShotDirection, PointDamageEvent.DamageTypeClass);
-			//damageFeedback->PlaySound_NetMulticast()
 		}
 		else
 		{
-			//damageVisualizer->AddVisual_NetMulticast(mesh, false);
 			damageFeedback->DoParticleSystemVisualization_NetMulticast(PointDamageEvent.HitInfo.ImpactPoint, PointDamageEvent.ShotDirection, PointDamageEvent.DamageTypeClass);
 		}
 	}
