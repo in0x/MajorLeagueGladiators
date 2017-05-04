@@ -3,16 +3,16 @@
 #pragma once
 
 #include "DamageFeedbackComponent.h"
-#include "MeleeDamageFeedbackComponent.generated.h"
+#include "MeleeAIDamageFeedbackComponent.generated.h"
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
-class MAJORLEAGUEGLADIATOR_API UMeleeDamageFeedbackComponent : public UDamageFeedbackComponent
+class MAJORLEAGUEGLADIATOR_API UMeleeAIDamageFeedbackComponent : public UDamageFeedbackComponent
 {
 	GENERATED_BODY()
 	
 public:
 
-	UMeleeDamageFeedbackComponent();
+	UMeleeAIDamageFeedbackComponent();
 
 	UFUNCTION(NetMulticast, reliable)
 	virtual void DoParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr) override;

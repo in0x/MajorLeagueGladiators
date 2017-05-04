@@ -7,8 +7,6 @@
 UDamageFeedbackComponent::UDamageFeedbackComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
-
 }
 
 void UDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
