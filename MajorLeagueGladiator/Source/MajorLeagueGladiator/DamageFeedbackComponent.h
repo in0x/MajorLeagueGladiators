@@ -45,6 +45,11 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	/*
+		These functions serve more of an interface to more concrete DamageFeedbackComponent classes. Any effect that should appear in all concrete DamageFeedbackComponent should be defined here.
+		You can override a function in a child class and do not need to call the parent function.
+	*/
+
 	UFUNCTION(NetMulticast, reliable)
 	virtual void DoMaterialVisualization_NetMulticast(UMeshComponent* AffectedMesh);
 
