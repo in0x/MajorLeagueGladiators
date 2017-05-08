@@ -10,7 +10,7 @@
 #include "DamageReceiverComponent.h"
 #include "DamageVisualizerComponent.h"
 #include "MlgGameplayStatics.h"
-#include "DamageFeedback/DamageFeedbackComponent.h"
+#include "DamageFeedback/AIDamageFeedbackComponent.h"
 
 namespace
 {
@@ -48,7 +48,7 @@ void AMlgAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	damageFeedback = FindComponentByClass<UDamageFeedbackComponent>(); //concrete damage feedback component is created in respective AI characters BP
+	damageFeedback = FindComponentByClass<UAIDamageFeedbackComponent>(); //concrete damage feedback component is created in respective AI characters BP
 }
 
 void AMlgAICharacter::ApplyStagger_Implementation(float DurationSeconds)
@@ -66,15 +66,12 @@ float AMlgAICharacter::InternalTakePointDamage(float Damage, const FPointDamageE
 	if (damageFeedback)
 	{
 		damageFeedback->DoMaterialVisualization_NetMulticast(mesh);
+		damageFeedback->DoParticleSystemVisualization_NetMulticast(PointDamageEvent.HitInfo.ImpactPoint, PointDamageEvent.ShotDirection, PointDamageEvent.DamageTypeClass);
+		damageFeedback->PlaySound_NetMulticast(PointDamageEvent.HitInfo.ImpactPoint, PointDamageEvent.ShotDirection, PointDamageEvent.DamageTypeClass);
 
 		if (hitWeakpoint.LocationSocketName != NAME_None)
-		{
-			damageFeedback->DoParticleSystemVisualization_NetMulticast(PointDamageEvent.HitInfo.ImpactPoint, PointDamageEvent.ShotDirection, PointDamageEvent.DamageTypeClass);
+		{	
 			damageFeedback->DoWeakpointParticleSystemVisualization_NetMulticast(PointDamageEvent.HitInfo.ImpactPoint, PointDamageEvent.ShotDirection, PointDamageEvent.DamageTypeClass);
-		}
-		else
-		{
-			damageFeedback->DoParticleSystemVisualization_NetMulticast(PointDamageEvent.HitInfo.ImpactPoint, PointDamageEvent.ShotDirection, PointDamageEvent.DamageTypeClass);
 		}
 	}
 	

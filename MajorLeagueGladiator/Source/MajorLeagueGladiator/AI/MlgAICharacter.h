@@ -10,7 +10,7 @@ class UWeakpointComponent;
 class UTriggerZoneComponent;
 class UDamageCauserComponent;
 class UDamageReceiverComponent;
-class UDamageFeedbackComponent;
+class UAIDamageFeedbackComponent;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgAICharacter : public ACharacter
@@ -45,6 +45,6 @@ private:
 	UDamageReceiverComponent* damageReciever;
 
 	UPROPERTY()
-	UDamageFeedbackComponent* damageFeedback;
+	UAIDamageFeedbackComponent* damageFeedback;
 };
 	

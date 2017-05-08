@@ -2,15 +2,12 @@
 
 #pragma once
 
-#include "DamageFeedback/DamageFeedbackComponent.h"
+#include "DamageFeedbackComponent.h"
 #include "PlayerDamageFeedbackComponent.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class MAJORLEAGUEGLADIATOR_API UPlayerDamageFeedbackComponent : public UDamageFeedbackComponent
 {
 	GENERATED_BODY()
-	
-	
-	
 	
 };

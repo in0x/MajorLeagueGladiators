@@ -14,15 +14,4 @@ public:
 
 	URangedAIDamageFeedbackComponent();
 
-	UFUNCTION(NetMulticast, reliable)
-	virtual void DoParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr) override;
-
-	UFUNCTION(NetMulticast, reliable)
-	virtual void DoWeakpointParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr) override;
-
-private:
-
-	
-	
-	
 };
