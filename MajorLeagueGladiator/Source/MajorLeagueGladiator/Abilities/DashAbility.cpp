@@ -79,12 +79,14 @@ void UDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 void UDashAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
 	SetSwordAlwaysFastEnough(true);
-	auto capsule = cachedPlayer->GetCapsuleComponent();
 
-	// Add capsule half height to Z since our "location" is the capsule 
-	// center, otherwise we would move our body into the ground.
 	FVector targetLocation = Data.Data[0]->GetHitResult()->Location;
-	targetLocation += capsule->GetUpVector() * capsule->GetScaledCapsuleHalfHeight();
+
+	// Add the Z value between our feet and real location so that we don't move into the ground.
+	const float footLocationZ = cachedPlayer->GetCharacterMovement()->GetActorFeetLocation().Z;
+	const float actorLocationZ = cachedPlayer->GetActorLocation().Z;
+	const float targetOffsetZ = actorLocationZ - footLocationZ;
+	targetLocation.Z += targetOffsetZ;
 
 	moveToTask = UAbilityTask_MoveTo::Create(this, "MoveTo Task", targetLocation, MoveSpeed, cachedPlayer);
 	moveToTask->OnLocationReached.AddUObject(this, &UDashAbility::OnLocationReached);
