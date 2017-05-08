@@ -10,7 +10,7 @@
 #include "DamageReceiverComponent.h"
 #include "DamageVisualizerComponent.h"
 #include "MlgGameplayStatics.h"
-#include "DamageFeedbackComponent.h"
+#include "DamageFeedback/DamageFeedbackComponent.h"
 
 namespace
 {
