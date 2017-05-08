@@ -20,6 +20,9 @@ public:
 	UFUNCTION(NetMulticast, reliable)
 	virtual void DoWeakpointParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr) override;
 
+	UFUNCTION(NetMulticast, reliable)
+	virtual void PlaySound_NetMulticast(const FVector& location, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr) override;
+
 private:
 
 	/*
@@ -48,6 +51,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Feedback (Melee)")
 	TArray<USoundBase*> swordSounds;
 
-	void playSwordHitSound();
+	void playSwordHitSound(const FVector& location);
 	
 };

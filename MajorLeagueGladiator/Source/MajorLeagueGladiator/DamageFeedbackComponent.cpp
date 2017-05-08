@@ -69,7 +69,7 @@ void UDamageFeedbackComponent::DoWeakpointParticleSystemVisualization_NetMultica
 	}
 }
 
-void UDamageFeedbackComponent::PlaySound_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, const UDamageType* DamageType)
+void UDamageFeedbackComponent::PlaySound_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
 {
 	for (USoundBase* sound : sounds)
 	{
