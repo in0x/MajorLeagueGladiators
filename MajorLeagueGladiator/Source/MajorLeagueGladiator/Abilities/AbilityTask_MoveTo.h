@@ -18,8 +18,7 @@ public:
 		FName TaskName,
 		FVector TargetLocation,
 		float MoveSpeed,
-		ACharacter* MovingCharacter,
-		float MinDistanceThreshold = 10.f);
+		ACharacter* MovingCharacter);
 
 	UAbilityTask_MoveTo();
 
@@ -40,9 +39,6 @@ private:
 
 	UPROPERTY(replicated)
 	float moveSpeed;
-
-	UPROPERTY(replicated)
-	float minDistanceThreshold;
 
 	UPROPERTY(replicated)
 	UCharacterMovementComponent* cachedMoveComp;

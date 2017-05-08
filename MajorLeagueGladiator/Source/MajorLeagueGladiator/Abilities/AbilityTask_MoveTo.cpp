@@ -3,12 +3,11 @@
 #include "MajorLeagueGladiator.h"
 #include "AbilityTask_MoveTo.h"
 
-UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, FName TaskName, FVector TargetLocation, float MoveSpeed, ACharacter* MovingCharacter, float MinDistanceThreshold)
+UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, FName TaskName, FVector TargetLocation, float MoveSpeed, ACharacter* MovingCharacter)
 {
 	UAbilityTask_MoveTo* task = NewAbilityTask<UAbilityTask_MoveTo>(ThisAbility, TaskName);
 	task->movingCharacter = MovingCharacter;
 	task->targetLocation = TargetLocation;
-	task->minDistanceThreshold = MinDistanceThreshold;
 	task->moveSpeed = MoveSpeed;
 	task->cachedMoveComp = MovingCharacter->GetCharacterMovement();
 
@@ -24,6 +23,7 @@ UAbilityTask_MoveTo::UAbilityTask_MoveTo()
 void UAbilityTask_MoveTo::Activate()
 {
 	Super::Activate();
+	cachedMoveComp->StopMovementImmediately();
 	cachedMoveComp->SetMovementMode(MOVE_Flying);
 }
 
@@ -35,14 +35,18 @@ void UAbilityTask_MoveTo::TickTask(float DeltaTime)
 	const FVector distanceVec = targetLocation - actorLocation;
 	const float distance = distanceVec.Size();
 
-	if (distance < minDistanceThreshold)
+	const float moveDeltaDistance = moveSpeed * DeltaTime;
+
+	// Offset needed, at least in non-vr. Maybe we can get rid of it or make it smaller in VR.
+	if (distance < moveDeltaDistance + 30.f)
 	{
+		movingCharacter->SetActorLocation(targetLocation);
 		EndTask();
 		OnLocationReached.Broadcast();
 	}
 	else
 	{
-		const FVector direction = distanceVec.GetSafeNormal();
+ 		const FVector direction = distanceVec / distance;
 		const FVector Velocity = direction * moveSpeed;
 		cachedMoveComp->MoveSmooth(Velocity, DeltaTime);
 	}
@@ -64,7 +68,6 @@ void UAbilityTask_MoveTo::GetLifetimeReplicatedProps(TArray<class FLifetimePrope
 	DOREPLIFETIME(UAbilityTask_MoveTo, movingCharacter);
 	DOREPLIFETIME(UAbilityTask_MoveTo, targetLocation);
 	DOREPLIFETIME(UAbilityTask_MoveTo, moveSpeed);
-	DOREPLIFETIME(UAbilityTask_MoveTo, minDistanceThreshold);
 	DOREPLIFETIME(UAbilityTask_MoveTo, cachedMoveComp);
 }
 
