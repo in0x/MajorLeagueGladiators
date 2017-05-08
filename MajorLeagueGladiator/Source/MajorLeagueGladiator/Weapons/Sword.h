@@ -37,10 +37,7 @@ private:
 	TArray<USoundBase*> sliceSoundEffects;
 
 	UPROPERTY(EditAnywhere)
-	USoundBase* sliceSoundEffect2;
-
-	UPROPERTY(EditAnywhere)
-	USoundBase* sliceSoundEffect3;
+	float sliceSoundVolumeModifier;
 
 	FVector oldSwingSpeed;
 

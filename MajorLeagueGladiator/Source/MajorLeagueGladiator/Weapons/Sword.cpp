@@ -23,7 +23,7 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	, bIsSwordFastEnough(false)
 	, damageAppliedOnHit(40.f)
 	, damageType(USwordDamage::StaticClass())
-
+	, sliceSoundVolumeModifier(0.3f)
 {
 	bReplicates = true;
 	MeshComponent->bGenerateOverlapEvents = true;
@@ -111,15 +111,18 @@ void ASword::onStartSlash()
 		materialRedObject_Dyn = UMaterialInstanceDynamic::Create(materialRedObject, this);
 	}
 
-	const int x = FMath::RandRange(0,sliceSoundEffects.Num()-1);
-	if (sliceSoundEffects[x])
+	const int soundIndex = FMath::RandRange(0,sliceSoundEffects.Num()-1);
+	if (sliceSoundEffects[soundIndex])
 	{
-		const AActor* playerCharacter = GetOwner();
-		const APawn* playerPawn = CastChecked<APawn>(playerCharacter);
+		const APawn* playerPawn = CastChecked<APawn>(GetOwner());
 		FSoundParams soundParams;
-		soundParams.Sound = sliceSoundEffects[x];
-		soundParams.VolumeMultiplier = 0.3;
+		soundParams.Sound = sliceSoundEffects[soundIndex];
+		soundParams.VolumeMultiplier = sliceSoundVolumeModifier;
 		UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(playerPawn, soundParams);
+	}
+	else 
+	{
+		UE_LOG(DebugLog, Warning, TEXT("Sound Slice with index %d not set"), soundIndex);
 	}
 
 	setMaterialOfOwnerMesh(materialRedObject_Dyn);
