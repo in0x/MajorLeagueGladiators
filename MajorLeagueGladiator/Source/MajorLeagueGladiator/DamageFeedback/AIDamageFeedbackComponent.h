@@ -2,55 +2,43 @@
 
 #pragma once
 
-#include "DamageFeedbackComponent.h"
-#include "MeleeAIDamageFeedbackComponent.generated.h"
+#include "DamageFeedback/DamageFeedbackComponent.h"
+#include "AIDamageFeedbackComponent.generated.h"
 
-UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
-class MAJORLEAGUEGLADIATOR_API UMeleeAIDamageFeedbackComponent : public UDamageFeedbackComponent
+
+UCLASS()
+class MAJORLEAGUEGLADIATOR_API UAIDamageFeedbackComponent : public UDamageFeedbackComponent
 {
 	GENERATED_BODY()
-	
-public:
-
-	UMeleeAIDamageFeedbackComponent();
 
 	UFUNCTION(NetMulticast, reliable)
 	virtual void DoParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr) override;
 
 	UFUNCTION(NetMulticast, reliable)
 	virtual void DoWeakpointParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr) override;
-
+	
 	UFUNCTION(NetMulticast, reliable)
 	virtual void PlaySound_NetMulticast(const FVector& location, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr) override;
+	
+protected:
 
-private:
-
-	/*
-		Reasoning: although these member variables are CURRENTLY the same as in the melee class,
-		the spawn behaviour can be different. Furthermore, some may not be needed. Do not move
-		those in the common parent base class. They E.g. the smoke emitted from a hitscan
-		projectile hit rises up, the sparks emitted from a sword slash jump in the direction of
-		the sword.
-	*/
-
-	UPROPERTY(EditAnywhere, Category = "Feedback (Melee)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
 	TArray<UParticleSystem*> hitscanDamageParticleSystems;
 
-	UPROPERTY(EditAnywhere, Category = "Feedback (Melee)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
 	TArray<UParticleSystem*> swordDamageParticleSystems;
 
-	UPROPERTY(EditAnywhere, Category = "Feedback (Melee)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
 	TArray<UParticleSystem*> hitscanWeakpointDamageParticleSystems;
 
-	UPROPERTY(EditAnywhere, Category = "Feedback (Melee)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
 	TArray<UParticleSystem*> swordWeakpointDamageParticleSystems;
 
-	UPROPERTY(EditAnywhere, Category = "Feedback (Melee)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
 	TArray<USoundBase*> hitscanSounds;
 
-	UPROPERTY(EditAnywhere, Category = "Feedback (Melee)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
 	TArray<USoundBase*> swordSounds;
 
 	void playSwordHitSound(const FVector& location);
-	
 };
