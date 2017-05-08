@@ -72,6 +72,8 @@ void ASword::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	UpdateVelocity(DeltaTime);
+
 	const FVector relativeSwordVelocity = calcRelativeVelocity();
 	oldSwingSpeed = oldSwingSpeed * (1.0f - slashVelocityLearnRate) + (DeltaTime * relativeSwordVelocity) * slashVelocityLearnRate;
 
@@ -170,6 +172,14 @@ void ASword::getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHi
 	}
 }
 
+void ASword::UpdateVelocity(float DeltaTime)
+{
+	const FVector currentLocation = GetActorLocation();
+	const FVector moveDelta = currentLocation - lastLocation;
+	currentVelocity = moveDelta / DeltaTime;
+	lastLocation = currentLocation;
+}
+
 void ASword::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
@@ -200,10 +210,13 @@ void ASword::damageAllOverlappingActors()
 	}
 
 	getOverlappingHits(actorToHit);
-	actorToHit.RemoveAll([](const auto& pair) 
+
+	/*actorToHit.RemoveAll([](const auto& pair) 
 	{
 		return pair.Value.Actor == nullptr;
-	});
+	});*/
+
+	check(actorToHit.GetTypeSize() != 0);
 
 	bool hasDealtdamage = false;
 	AActor* owner = GetOwner();
@@ -267,8 +280,10 @@ FVector ASword::calcRelativeVelocity() const
 {
 	const AActor* owner = GetOwner();
 	const FVector ownerVelocity = owner ? owner->GetVelocity() : FVector::ZeroVector;
-	const FVector myVelocity = GetVelocity();
-	return myVelocity - ownerVelocity;
+	check(ownerVelocity != FVector(-13, 5, 2));
+	check(currentVelocity != FVector(-13, 5, 2));
+
+	return currentVelocity - ownerVelocity;
 }
 
 void ASword::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

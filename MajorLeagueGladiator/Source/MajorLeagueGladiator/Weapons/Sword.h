@@ -29,6 +29,7 @@ private:
 	void tryLaunchCharacter(ACharacter* character) const;
 	bool canDealDamageTo(const ACharacter* OtherCharacter) const;
 	void getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHit) const;
+	void UpdateVelocity(float DeltaTime);
 	FVector calcRelativeVelocity() const;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -62,7 +63,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInstanceDynamic* materialObject_Dyn;
- 
+
 	// Between 0 and 1 defines how fast new sword speed influences overall speedvalue
 	UPROPERTY(EditAnywhere)
 	float slashVelocityLearnRate;
@@ -71,4 +72,7 @@ private:
 
 	UPROPERTY(replicated)
 	bool bIsAlwaysFastEnough;
+
+	FVector	lastLocation;
+	FVector  currentVelocity;
 };
