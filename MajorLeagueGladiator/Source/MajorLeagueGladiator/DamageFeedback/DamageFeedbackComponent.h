@@ -50,17 +50,13 @@ public:
 		You can override a function in a child class and do not need to call the parent function.
 	*/
 
-	UFUNCTION(NetMulticast, reliable)
-	virtual void DoMaterialVisualization_NetMulticast(UMeshComponent* AffectedMesh);
+	virtual void DoMaterialVisualization(UMeshComponent* AffectedMesh);
 
-	UFUNCTION(NetMulticast, reliable)
-	virtual void DoParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr);
+	virtual void DoParticleSystemVisualization(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr);
 
-	UFUNCTION(NetMulticast, reliable)
-	virtual void DoWeakpointParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr);
+	virtual void DoWeakpointParticleSystemVisualization(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr);
 
-	UFUNCTION(NetMulticast, reliable)
-	virtual void PlaySound_NetMulticast(const FVector& location, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr);
+	virtual void PlaySound(const FVector& location, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr);
 		
 protected:
 

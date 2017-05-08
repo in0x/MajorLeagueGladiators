@@ -6,8 +6,6 @@
 
 URangedAIDamageFeedbackComponent::URangedAIDamageFeedbackComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
-
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> hitscan_smoke(TEXT("ParticleSystem'/Game/ParticleSystems/PS_HitscanSmoke.PS_HitscanSmoke'"));
 	hitscanDamageParticleSystems.Add(hitscan_smoke.Object);
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> hitscanBurst_Ranged(TEXT("ParticleSystem'/Game/ParticleSystems/PS_HitscanBurst_Ranged.PS_HitscanBurst_Ranged'"));
