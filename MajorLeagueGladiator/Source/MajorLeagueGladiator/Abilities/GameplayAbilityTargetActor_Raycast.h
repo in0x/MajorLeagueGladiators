@@ -35,6 +35,7 @@ public:
 	TArray<AActor*> IgnoredActors;
 	
 	float MaxRange;
+	bool CanConfirmInvalidTarget;
 	
 	ERaycastTargetDirection::Type aimDirection;
 	

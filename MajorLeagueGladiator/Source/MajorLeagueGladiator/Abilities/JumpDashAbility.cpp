@@ -15,9 +15,12 @@
 
 #include "Weapons/Sword.h"
 
+#include "Abilities/AbilityTask_MoveTo.h"
+
 namespace
 {
 	const FName AIM_SOCKET_NAME("Aim");
+	const FName MOVE_TO_TASK_NAME("MoveToTask");
 }
 
 UJumpDashAbility::UJumpDashAbility()
@@ -43,10 +46,11 @@ UJumpDashAbility::UJumpDashAbility()
 
 void UJumpDashAbility::InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if (waitTargetDataTask)
-	{
+	if (spawnedTargetingActor && spawnedTargetingActor->IsConfirmTargetingAllowed() && waitTargetDataTask)
+	{	
 		waitTargetDataTask->ExternalConfirm(true);
 		waitTargetDataTask = nullptr;
+		spawnedTargetingActor = nullptr;
 	}
 }
 
@@ -75,7 +79,7 @@ void UJumpDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 
 	cachedCharacter->SetAbilityMoveTargetLocation(cachedCharacter->GetActorLocation());
 	cachedCharacter->LaunchCharacter(launchVelocity, true, true);
-	cachedCharacter->OnActorHit.AddDynamic(this, &UJumpDashAbility::OnCollidedWithWorld);
+	cachedCharacter->MovementModeChangedDelegate.AddDynamic(this, &UJumpDashAbility::OnMovementModeChanged);
 	BeginFindingActorsToLaunch();
 
 	const float targetingDelay = minmalJumpHightBeforeDash / launchVelocity.Z;
@@ -98,37 +102,34 @@ void UJumpDashAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 		return;
 	}
 
-	cachedMoveComp->SetMovementMode(MOVE_Falling);
-	cachedMoveComp->StopMovementImmediately();
+	cachedCharacter->MovementModeChangedDelegate.RemoveAll(this);
 
 	FTimerManager& timeManager = cachedCharacter->GetWorldTimerManager();
 	timeManager.ClearTimer(timerHandle);
 	timerHandle.Invalidate();
-
-	cachedCharacter->OnActorHit.RemoveDynamic(this, &UJumpDashAbility::OnCollidedWithWorld);
 	
 	if (waitTargetDataTask)
 	{
+		waitTargetDataTask->ValidData.RemoveAll(this);
+		waitTargetDataTask->Cancelled.RemoveAll(this);
 		waitTargetDataTask->EndTask();
 		waitTargetDataTask = nullptr;
 	}
-	PlayLandingEffects();
-	cachedCharacter->InvalidateAbilityMoveTargetLocation();
-	SetSwordAlwaysFastEnough(false);
-}
-
-void UJumpDashAbility::OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
-{	
-	cachedCharacter->OnActorHit.RemoveDynamic(this, &UJumpDashAbility::OnCollidedWithWorld);
-
-	if (waitTargetDataTask)
+	if (moveToTask)
 	{
-		waitTargetDataTask->EndTask();
-		waitTargetDataTask = nullptr;
+		moveToTask->OnLocationReached.RemoveAll(this);
+		moveToTask->EndTask();
+		moveToTask = nullptr;
 	}
 
 	StunEnemiesInArea();
+	PlayLandingEffects();
+	SetSwordAlwaysFastEnough(false);
+}
 
+void UJumpDashAbility::OnLocationReached()
+{	
+	moveToTask = nullptr;
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
@@ -139,7 +140,7 @@ void UJumpDashAbility::BeginFindingActorsToLaunch()
 
 	findActorsToLaunchTask->ValidData.AddDynamic(this, &UJumpDashAbility::LaunchFoundActorsUpwards);
 
-	AGameplayAbilityTargetActor* spawnedTargetingActor = nullptr;
+	spawnedTargetingActor = nullptr;
 
 	if (!findActorsToLaunchTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Cone::StaticClass(), spawnedTargetingActor))
 	{
@@ -183,9 +184,8 @@ void UJumpDashAbility::BeginTargeting()
 		EGameplayTargetingConfirmation::Custom, AGameplayAbilityTargetActor_Raycast::StaticClass());
 
 	waitTargetDataTask->ValidData.AddDynamic(this, &UJumpDashAbility::OnTargetingSuccess);
-	waitTargetDataTask->Cancelled.AddDynamic(this, &UJumpDashAbility::OnTargetingFailed);
 
-	AGameplayAbilityTargetActor* spawnedTargetingActor = nullptr;
+	spawnedTargetingActor = nullptr;
 
 	if (!waitTargetDataTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Raycast::StaticClass(), spawnedTargetingActor))
 	{
@@ -202,6 +202,7 @@ void UJumpDashAbility::BeginTargeting()
 	targetingRayCastActor->aimDirection = ERaycastTargetDirection::ComponentRotation;
 	targetingRayCastActor->IgnoredActors.Add(cachedCharacter);
 	targetingRayCastActor->MaxRange = maxDashRange;
+	targetingRayCastActor->CanConfirmInvalidTarget = false;
 
 	targetingRayCastActor->EvalTargetFunc = [](const FHitResult& result)
 	{
@@ -215,31 +216,42 @@ void UJumpDashAbility::BeginTargeting()
 
 void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data)
 {
+	waitTargetDataTask = nullptr;
+	spawnedTargetingActor = nullptr;
+
 	const FHitResult* hitresult = Data.Data[0]->GetHitResult();
 	check(hitresult);
 
-	const FVector targetLocation = hitresult->Location;
-	const FVector actorFeetLocation = cachedCharacter->CalcFeetPosition();
-	const FVector feetToTargetVector = targetLocation - actorFeetLocation;
-	const FVector direction = feetToTargetVector.GetUnsafeNormal();
-	const FVector zNormalizedDirection = direction / std::abs(direction.Z);
-	const FVector velocity = zNormalizedDirection * dashSpeed;
+	FVector targetLocation = hitresult->Location;
+
+	const FVector actorLocation = cachedCharacter->GetActorLocation();
+	const FVector distance = targetLocation - actorLocation;
+	const FVector direction = distance.GetUnsafeNormal();
+
+	float zNormaliseValue = std::abs(1 / direction.Z);
+
+	float realDashSpeed = dashSpeed * zNormaliseValue;
 	
-	cachedCharacter->SetAbilityMoveTargetLocation(targetLocation);
-	BeginDashing(velocity);
+	DashTo(targetLocation, realDashSpeed);
 }
 
-void UJumpDashAbility::OnTargetingFailed(const FGameplayAbilityTargetDataHandle& Data)
+void UJumpDashAbility::OnMovementModeChanged(class ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
 {
-	cachedCharacter->OnAbilityUseFail.Broadcast(StaticClass());
-	BeginDashing(FVector(0, 0, -dashSpeed));
+	auto movementMode = cachedMoveComp->MovementMode;
+	if (movementMode == MOVE_Walking)
+	{
+		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+	}
 }
 
-void UJumpDashAbility::BeginDashing(const FVector& Velocity)
+void UJumpDashAbility::DashTo(const FVector& Location, float MoveSpeed)
 {
-	cachedMoveComp->StopMovementImmediately();
-	cachedMoveComp->SetMovementMode(MOVE_Flying);
-	cachedMoveComp->AddImpulse(Velocity, true);
+	cachedCharacter->MovementModeChangedDelegate.RemoveAll(this);
+
+	moveToTask = UAbilityTask_MoveTo::Create(this, MOVE_TO_TASK_NAME, Location, MoveSpeed, cachedCharacter);
+	moveToTask->OnLocationReached.AddUObject(this, &UJumpDashAbility::OnLocationReached);
+	moveToTask->ReadyForActivation();
+
 	SetSwordAlwaysFastEnough(true);
 }
 

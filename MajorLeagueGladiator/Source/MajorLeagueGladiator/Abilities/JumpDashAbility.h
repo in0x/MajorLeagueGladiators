@@ -8,6 +8,7 @@
 class UAbilityTask_WaitTargetData;
 class AGameplayAbilityTargetActor;
 class AMlgPlayerCharacter;
+class UAbilityTask_MoveTo;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UJumpDashAbility : public UGameplayAbility
@@ -63,6 +64,12 @@ private:
 	UAbilityTask_WaitTargetData* waitTargetDataTask;
 
 	UPROPERTY(Transient)
+	AGameplayAbilityTargetActor* spawnedTargetingActor;
+
+	UPROPERTY(Transient)
+	UAbilityTask_MoveTo* moveToTask;
+
+	UPROPERTY(Transient)
 	AMlgPlayerCharacter* cachedCharacter;
 
 	UPROPERTY(Transient)
@@ -74,10 +81,10 @@ private:
 
 	void BeginTargeting();
 
-	void BeginDashing(const FVector& Velocity);
+	void DashTo(const FVector& Location, float MoveSpeed);
 
 	UFUNCTION()
-	void OnCollidedWithWorld(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+	void OnLocationReached();
 
 	UFUNCTION()
 	void LaunchFoundActorsUpwards(const FGameplayAbilityTargetDataHandle& Data);
@@ -86,7 +93,7 @@ private:
 	void OnTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data);
 
 	UFUNCTION()
-	void OnTargetingFailed(const FGameplayAbilityTargetDataHandle& Data);
+	void OnMovementModeChanged(class ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
 
 	void StunEnemiesInArea();
 
