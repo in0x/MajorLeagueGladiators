@@ -46,4 +46,9 @@ struct FSoundParams
 		, PitchMultiplier(1.0f)
 		, StartTime(0.0f)
 	{}
+
+	FSoundParams(USoundBase* sound, const FVector& location = FVector::ZeroVector)
+		: Sound(sound)
+		, Location(location)
+	{}
 };

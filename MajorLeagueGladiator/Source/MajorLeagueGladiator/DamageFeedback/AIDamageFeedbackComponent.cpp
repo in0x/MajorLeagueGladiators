@@ -8,8 +8,6 @@
 
 UAIDamageFeedbackComponent::UAIDamageFeedbackComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
-
 	//Sounds:
 	static ConstructorHelpers::FObjectFinder<USoundCue> swordAttack01(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Sword_Attack_01_16bit_Cue.Sword_Attack_01_16bit_Cue'"));
 	swordSounds.Add(swordAttack01.Object);
@@ -19,30 +17,31 @@ UAIDamageFeedbackComponent::UAIDamageFeedbackComponent()
 	swordSounds.Add(swordAttack03.Object);
 }
 
-void UAIDamageFeedbackComponent::DoParticleSystemVisualization_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
+void UAIDamageFeedbackComponent::DoParticleSystemVisualization(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
 {
-	UDamageFeedbackComponent::DoParticleSystemVisualization_NetMulticast_Implementation(HitLocation, OriginDirection, DamageType);
+	Super::DoParticleSystemVisualization(HitLocation, OriginDirection, DamageType);
 
 	if (DamageType->IsChildOf(UHitscanProjectileDamage::StaticClass()))
 	{
 		for (auto* ps : hitscanDamageParticleSystems)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ps, FTransform(HitLocation));
+
+			UMlgGameplayStatics::SpawnEmitterNetworked(GetWorld(),  FEmitterSpawnParams(ps, FTransform(HitLocation)));
 		}
 	}
 	else if (DamageType->IsChildOf(USwordDamage::StaticClass()))
 	{
 		for (auto* ps : swordDamageParticleSystems)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ps, FTransform(HitLocation));
+			UMlgGameplayStatics::SpawnEmitterNetworked(GetWorld(), FEmitterSpawnParams(ps, FTransform(HitLocation)));
 		}
 	}
 
 }
 
-void UAIDamageFeedbackComponent::DoWeakpointParticleSystemVisualization_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
+void UAIDamageFeedbackComponent::DoWeakpointParticleSystemVisualization(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
 {
-	UDamageFeedbackComponent::DoWeakpointParticleSystemVisualization_NetMulticast_Implementation(HitLocation, OriginDirection, DamageType);
+	Super::DoWeakpointParticleSystemVisualization(HitLocation, OriginDirection, DamageType);
 
 	if (DamageType->IsChildOf(UHitscanProjectileDamage::StaticClass()))
 	{
@@ -53,7 +52,7 @@ void UAIDamageFeedbackComponent::DoWeakpointParticleSystemVisualization_NetMulti
 			//The emitter's pitch has to be rotated by 90 to get the expected look at rotation
 			FRotator emitterRotator = UKismetMathLibrary::FindLookAtRotation(HitLocation, HitLocation + OriginDirection).Add(-90, 0, 0);
 			visualizationOrigin.SetRotation(FQuat(emitterRotator));
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ps, visualizationOrigin);
+			UMlgGameplayStatics::SpawnEmitterNetworked(GetWorld(), FEmitterSpawnParams(ps, visualizationOrigin));
 		}
 	}
 	else if (DamageType->IsChildOf(USwordDamage::StaticClass()))
@@ -65,14 +64,14 @@ void UAIDamageFeedbackComponent::DoWeakpointParticleSystemVisualization_NetMulti
 			//The emitter's pitch has to be rotated by 90 to get the expected look at rotation
 			FRotator emitterRotator = UKismetMathLibrary::FindLookAtRotation(HitLocation, HitLocation + OriginDirection).Add(-90, 0, 0);
 			visualizationOrigin.SetRotation(FQuat(emitterRotator));
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ps, visualizationOrigin);
+			UMlgGameplayStatics::SpawnEmitterNetworked(GetWorld(), FEmitterSpawnParams(ps, visualizationOrigin));
 		}
 	}
 }
 
-void UAIDamageFeedbackComponent::PlaySound_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
+void UAIDamageFeedbackComponent::PlaySound(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
 {
-	UDamageFeedbackComponent::PlaySound_NetMulticast_Implementation(HitLocation, OriginDirection, DamageType);
+	Super::PlaySound(HitLocation, OriginDirection, DamageType);
 
 	if (DamageType->IsChildOf(USwordDamage::StaticClass()))
 	{
@@ -86,6 +85,5 @@ void UAIDamageFeedbackComponent::playSwordHitSound(const FVector& location)
 	FSoundParams soundParams;
 	soundParams.Location = location;
 	soundParams.Sound = swordSounds[idx];
-	checkf(idx >= 0 && GetOwner(), TEXT("Either, index was below zero OR no owner could be found."));
 	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetOwner()->GetWorld(), soundParams);
 }

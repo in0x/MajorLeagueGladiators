@@ -2,6 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "DamageFeedbackComponent.h"
+#include "MlgGameplayStatics.h"
 
 
 UDamageFeedbackComponent::UDamageFeedbackComponent()
@@ -31,7 +32,7 @@ void UDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	});
 }
 
-void UDamageFeedbackComponent::DoMaterialVisualization_NetMulticast_Implementation(UMeshComponent* AffectedMesh)
+void UDamageFeedbackComponent::DoMaterialVisualization(UMeshComponent* AffectedMesh)
 {
 	FDamageFeedbackData feedback;
 	bool hasVisual = feedbackData.ContainsByPredicate([&](const FDamageFeedbackData& d)
@@ -47,15 +48,15 @@ void UDamageFeedbackComponent::DoMaterialVisualization_NetMulticast_Implementati
 	feedbackData.Add(feedback);
 }
 
-void UDamageFeedbackComponent::DoParticleSystemVisualization_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
+void UDamageFeedbackComponent::DoParticleSystemVisualization(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
 {
 	for (UParticleSystem* ps : damageParticleSystems)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ps, FTransform(HitLocation));
+		UMlgGameplayStatics::SpawnEmitterNetworked(GetWorld(), FEmitterSpawnParams(ps, FTransform(HitLocation)));
 	}
 }
 
-void UDamageFeedbackComponent::DoWeakpointParticleSystemVisualization_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
+void UDamageFeedbackComponent::DoWeakpointParticleSystemVisualization(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
 {
 	
 	for (UParticleSystem* ps : weakpointParticleSystems)
@@ -65,14 +66,14 @@ void UDamageFeedbackComponent::DoWeakpointParticleSystemVisualization_NetMultica
 		//The emitter's pitch has to be rotated by 90 to get the expected look at rotation
 		FRotator emitterRotator = UKismetMathLibrary::FindLookAtRotation(HitLocation, HitLocation + OriginDirection).Add(-90, 0, 0);
 		visualizationOrigin.SetRotation(FQuat(emitterRotator));
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ps, visualizationOrigin);
+		UMlgGameplayStatics::SpawnEmitterNetworked(GetWorld(), FEmitterSpawnParams(ps, visualizationOrigin));
 	}
 }
 
-void UDamageFeedbackComponent::PlaySound_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
+void UDamageFeedbackComponent::PlaySound(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
 {
 	for (USoundBase* sound : sounds)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), sound, HitLocation);
+		UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(sound, HitLocation));
 	}
 }
