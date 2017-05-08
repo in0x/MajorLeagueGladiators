@@ -2,14 +2,17 @@
 
 #pragma once
 
-#include "DamageFeedback/DamageFeedbackComponent.h"
+#include "DamageFeedbackComponent.h"
 #include "AIDamageFeedbackComponent.generated.h"
 
 
-UCLASS()
+UCLASS(Blueprintable, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class MAJORLEAGUEGLADIATOR_API UAIDamageFeedbackComponent : public UDamageFeedbackComponent
 {
 	GENERATED_BODY()
+public:
+
+	UAIDamageFeedbackComponent();
 
 	UFUNCTION(NetMulticast, reliable)
 	virtual void DoParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr) override;
@@ -22,22 +25,22 @@ class MAJORLEAGUEGLADIATOR_API UAIDamageFeedbackComponent : public UDamageFeedba
 	
 protected:
 
-	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (AI)")
 	TArray<UParticleSystem*> hitscanDamageParticleSystems;
 
-	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (AI)")
 	TArray<UParticleSystem*> swordDamageParticleSystems;
 
-	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (AI)")
 	TArray<UParticleSystem*> hitscanWeakpointDamageParticleSystems;
 
-	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (AI)")
 	TArray<UParticleSystem*> swordWeakpointDamageParticleSystems;
 
-	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (AI)")
 	TArray<USoundBase*> hitscanSounds;
 
-	UPROPERTY(EditAnywhere, Category = "Feedback (Ranged)")
+	UPROPERTY(EditAnywhere, Category = "Feedback (AI)")
 	TArray<USoundBase*> swordSounds;
 
 	void playSwordHitSound(const FVector& location);
