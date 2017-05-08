@@ -104,7 +104,6 @@ void UDashAbility::OnTargetPickCanceled(const FGameplayAbilityTargetDataHandle& 
 void UDashAbility::OnLocationReached()
 {
 	cachedPlayer->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-	cachedPlayer->EnableActorCollison_NetMulticast(true);
 	cachedPlayer->InvalidateAbilityMoveTargetLocation();
 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
