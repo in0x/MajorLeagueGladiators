@@ -69,10 +69,21 @@ void UMeleeAIDamageFeedbackComponent::DoWeakpointParticleSystemVisualization_Net
 	}
 }
 
-void UMeleeAIDamageFeedbackComponent::playSwordHitSound()
+void UMeleeAIDamageFeedbackComponent::PlaySound_NetMulticast_Implementation(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
+{
+	UDamageFeedbackComponent::PlaySound_NetMulticast_Implementation(HitLocation, OriginDirection, DamageType);
+
+	if (DamageType->IsChildOf(UHitscanProjectileDamage::StaticClass()))
+	{
+		playSwordHitSound(HitLocation);
+	}
+}
+
+void UMeleeAIDamageFeedbackComponent::playSwordHitSound(const FVector& location)
 {
 	int32 idx = FMath::RandRange(0, swordSounds.Num() - 1);
 	FSoundParams soundParams;
+	soundParams.Location = location;
 	soundParams.Sound = swordSounds[idx];
 	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(CastChecked<APawn>(GetOwner()), soundParams);
 }

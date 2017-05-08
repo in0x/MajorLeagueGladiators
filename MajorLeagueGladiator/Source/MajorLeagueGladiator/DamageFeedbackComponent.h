@@ -60,7 +60,7 @@ public:
 	virtual void DoWeakpointParticleSystemVisualization_NetMulticast(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr);
 
 	UFUNCTION(NetMulticast, reliable)
-	virtual void PlaySound_NetMulticast(const FVector& location, const FVector& OriginDirection, const UDamageType* DamageType = nullptr);
+	virtual void PlaySound_NetMulticast(const FVector& location, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType = nullptr);
 		
 protected:
 
