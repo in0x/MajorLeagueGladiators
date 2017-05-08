@@ -2,14 +2,31 @@
 
 #include "MajorLeagueGladiator.h"
 #include "AbilityTask_MoveTo.h"
+#include "Characters/MlgPlayerCharacter.h"
 
-UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(UGameplayAbility* ThisAbility, FName TaskName, FVector TargetLocation, float MoveSpeed, ACharacter* MovingCharacter)
+
+UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(
+	UGameplayAbility* ThisAbility,
+	FName TaskName,
+	FVector TargetLocation,
+	float MoveSpeed,
+	AMlgPlayerCharacter* MovingCharacter,
+	bool ShouldAdjustHight)
 {
 	UAbilityTask_MoveTo* task = NewAbilityTask<UAbilityTask_MoveTo>(ThisAbility, TaskName);
 	task->movingCharacter = MovingCharacter;
 	task->targetLocation = TargetLocation;
 	task->moveSpeed = MoveSpeed;
 	task->cachedMoveComp = MovingCharacter->GetCharacterMovement();
+
+	if (ShouldAdjustHight)
+	{
+		// Add the Z value between our feet and real location so that we don't move into the ground.
+		const float footLocationZ = task->cachedMoveComp->GetActorFeetLocation().Z;
+		const float actorLocationZ = MovingCharacter->GetActorLocation().Z;
+		const float targetOffsetZ = actorLocationZ - footLocationZ;
+		task->targetLocation.Z += targetOffsetZ;
+	}
 
 	return task;
 }
@@ -25,6 +42,7 @@ void UAbilityTask_MoveTo::Activate()
 	Super::Activate();
 	cachedMoveComp->StopMovementImmediately();
 	cachedMoveComp->SetMovementMode(MOVE_Flying);
+	movingCharacter->SetAbilityMoveTargetLocation(targetLocation);
 }
 
 void UAbilityTask_MoveTo::TickTask(float DeltaTime)
@@ -59,6 +77,7 @@ void UAbilityTask_MoveTo::OnDestroy(bool AbilityEnded)
 
 	cachedMoveComp->SetMovementMode(MOVE_Falling);
 	cachedMoveComp->StopMovementImmediately();
+	movingCharacter->InvalidateAbilityMoveTargetLocation();
 }
 
 void UAbilityTask_MoveTo::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

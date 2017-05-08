@@ -5,6 +5,8 @@
 #include "Abilities/Tasks/AbilityTask.h"
 #include "AbilityTask_MoveTo.generated.h"
 
+class AMlgPlayerCharacter;
+
 DECLARE_MULTICAST_DELEGATE(FAbilityTaskMoveToLocationReached);
 
 UCLASS()
@@ -18,7 +20,8 @@ public:
 		FName TaskName,
 		FVector TargetLocation,
 		float MoveSpeed,
-		ACharacter* MovingCharacter);
+		AMlgPlayerCharacter* MovingCharacter,
+		bool ShouldAdjustHight = true);
 
 	UAbilityTask_MoveTo();
 
@@ -32,7 +35,7 @@ public:
 	
 private:
 	UPROPERTY(replicated)
-	ACharacter* movingCharacter;
+	AMlgPlayerCharacter* movingCharacter;
 
 	UPROPERTY(replicated)
 	FVector targetLocation;

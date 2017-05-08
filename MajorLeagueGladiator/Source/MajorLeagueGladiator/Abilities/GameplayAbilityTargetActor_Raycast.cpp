@@ -8,6 +8,7 @@ AGameplayAbilityTargetActor_Raycast::AGameplayAbilityTargetActor_Raycast(const F
 	: Super(ObjectInitializer)
 	, MaxRange(100)
 	, EvalTargetFunc([](const FHitResult&) { return true; })
+	, CanConfirmInvalidTarget(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	splineMesh = ObjectInitializer.CreateDefaultSubobject<UTargetingSplineMeshComponent>(this, TEXT("SplineMesh"));
@@ -71,7 +72,7 @@ void AGameplayAbilityTargetActor_Raycast::Tick(float DeltaSeconds)
 
 bool AGameplayAbilityTargetActor_Raycast::IsConfirmTargetingAllowed()
 {
-	return true;
+	return CanConfirmInvalidTarget || EvalTargetFunc(hitResult);
 }
 
 FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_Raycast::makeDataHandle() 
