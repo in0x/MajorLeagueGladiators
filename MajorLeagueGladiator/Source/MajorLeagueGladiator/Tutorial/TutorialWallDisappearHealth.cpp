@@ -12,6 +12,9 @@ void ATutorialWallDisappearHealth::BeginPlay()
 	
 	cachedPlayerHealthComponent = character->FindComponentByClass<UHealthComponent>();
 	cachedPlayerHealthComponent->HealthChangedDelegate.AddDynamic(this, &ATutorialWallDisappearHealth::OnPlayerHealthChanged);
+
+	float halfHealth = cachedPlayerHealthComponent->GetMaxHealth() / 2.f;
+	cachedPlayerHealthComponent->DecreaseHealth(halfHealth);
 }
 
 void ATutorialWallDisappearHealth::OnPlayerHealthChanged(float NewHealthPercentage, float OldHealthPercentage)
