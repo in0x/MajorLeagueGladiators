@@ -36,6 +36,14 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	{
 		staticMeshComp->SetStaticMesh(SwordStaticMesh.Object);
 	}
+	
+	sliceSoundEffects.SetNum(3);
+	ConstructorHelpers::FObjectFinder<USoundBase> soundEffectRef(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/SwordSwing01.SwordSwing01'"));
+	sliceSoundEffects[0] = soundEffectRef.Object;
+	ConstructorHelpers::FObjectFinder<USoundBase> soundEffectRef2(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/SwordSwing02.SwordSwing02'"));
+	sliceSoundEffects[1] = soundEffectRef2.Object;
+	ConstructorHelpers::FObjectFinder<USoundBase> soundEffectRef3(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/SwordSwing03.SwordSwing03'"));
+	sliceSoundEffects[2] = soundEffectRef3.Object;
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> SwordMaterialRed(TEXT("Material'/Game/MVRCFPS_Assets/Blade_HeroSword22/M_Blade_HeroSword_Red.M_Blade_HeroSword_Red'"));
 
@@ -103,6 +111,17 @@ void ASword::onStartSlash()
 		materialRedObject_Dyn = UMaterialInstanceDynamic::Create(materialRedObject, this);
 	}
 
+	const int x = FMath::RandRange(0,sliceSoundEffects.Num()-1);
+	if (sliceSoundEffects[x])
+	{
+		const AActor* playerCharacter = GetOwner();
+		const APawn* playerPawn = CastChecked<APawn>(playerCharacter);
+		FSoundParams soundParams;
+		soundParams.Sound = sliceSoundEffects[x];
+		soundParams.VolumeMultiplier = 0.3;
+		UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(playerPawn, soundParams);
+	}
+
 	setMaterialOfOwnerMesh(materialRedObject_Dyn);
 }
 
@@ -112,7 +131,6 @@ void ASword::onEndSlash()
 	{
 		materialObject_Dyn = UMaterialInstanceDynamic::Create(materialObject, this);
 	}
-
 	setMaterialOfOwnerMesh(materialObject_Dyn);
 }
 
