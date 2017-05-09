@@ -30,7 +30,6 @@ AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializ
 
 	UStaticMeshComponent* meshComponent = GetStaticMeshComponent();
 	meshComponent->Mobility = EComponentMobility::Movable;
-	/*meshComponent->SetCollisionObjectType(ECC_Pawn);*/
 	meshComponent->SetCollisionProfileName(PROJECTILE_COLLISION_PROFILE_NAME);
 	meshComponent->SetWorldScale3D(FVector(0.1f, 0.1f, 0.1f));
 	meshComponent->SetStaticMesh(mesh.Object);
