@@ -4,6 +4,7 @@
 #include "HealthPack.h"
 #include "TriggerZoneComponent.h"
 #include "HealthComponent.h"
+#include "Characters/RangedPlayerCharacter.h"
 
 AHealthPack::AHealthPack()
 {
@@ -13,7 +14,8 @@ AHealthPack::AHealthPack()
 	if (staticMeshComp && healthPackMat.Succeeded())
 	{
 		staticMeshComp->SetMaterial(0, healthPackMat.Object);
-	}	
+	}
+	chargingPlayerClass = ARangedPlayerCharacter::StaticClass();
 }
 
 void AHealthPack::Use(AActor* User, TriggerType Type)

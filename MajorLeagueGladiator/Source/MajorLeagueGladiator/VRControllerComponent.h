@@ -23,6 +23,7 @@ public:
 	bool TryGrabActor(AActor* Actor);
 	bool LaunchActor(FVector Velocity, bool IgnoreWeight);
 	bool HasGrip() const;
+	AActor* GetGrippedActor() const;
 	AMlgPlayerController* GetMlgPlayerController();
 
 private:

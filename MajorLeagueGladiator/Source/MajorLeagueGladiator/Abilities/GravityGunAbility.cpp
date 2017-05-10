@@ -7,6 +7,7 @@
 #include "AbilityTask_PullTarget.h"
 #include "AbilityTask_WaitTargetData.h"
 #include "CollisionStatics.h"
+#include "BasePack.h"
 
 namespace
 {
@@ -111,9 +112,15 @@ void UGravityGunAbility::OnSearchCancelled(const FGameplayAbilityTargetDataHandl
 void UGravityGunAbility::OnActorPullFinished(AActor* pulledActor)
 {
 	pullTask = nullptr;
-	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
+	AMlgPlayerCharacter* owner = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	if (owner->HasAuthority())
 	{
-		gripController->TryGrabActor(pulledActor);
+		bool gripSuccess = gripController->TryGrabActor(pulledActor);
+		ABasePack* pack = Cast<ABasePack>(pulledActor);
+		if (gripSuccess && pack)
+		{
+			pack->ChargePackIfPossible(owner);
+		}
 	}
 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
@@ -130,6 +137,11 @@ void UGravityGunAbility::LaunchGrippedActor()
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
 	{
 		FVector velocity = gripControllerMesh->GetSocketRotation(AIM_SOCKET_NAME).Vector() * LaunchVelocity;
+		if (ABasePack* pack = Cast<ABasePack>(gripController->GetGrippedActor()))
+		{
+			pack->OnLaunch();
+		}
+
 		gripController->LaunchActor(velocity, true);
 	}
 

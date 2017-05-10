@@ -4,6 +4,7 @@
 #include "AmmoPack.h"
 #include "TriggerZoneComponent.h"
 #include "AmmoComponent.h"
+#include "Characters/MeleePlayerCharacter.h"
 
 AAmmoPack::AAmmoPack()
 {
@@ -13,6 +14,7 @@ AAmmoPack::AAmmoPack()
 	{		
 		staticMeshComp->SetMaterial(0, ammoPackMat.Object);
 	}
+	chargingPlayerClass = AMeleePlayerCharacter::StaticClass();
 }
 
 void AAmmoPack::Use(AActor* User, TriggerType Type)
