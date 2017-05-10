@@ -7,6 +7,8 @@
 #include "CollisionStatics.h"
 
 #include "PackMovementComponent.h"
+#include "Characters/MlgPlayerCharacter.h"
+#include "BasePack.h"
 
 UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -150,6 +152,12 @@ bool UVRControllerComponent::HasGrip() const
 }
 
 
+AActor* UVRControllerComponent::GetGrippedActor() const
+{
+	AActor* grippedActor = CastChecked<AActor>(GrippedActors[0].GrippedObject);
+	return grippedActor;
+}
+
 AMlgPlayerController* UVRControllerComponent::GetMlgPlayerController()
 {
 	AActor* owner = GetOwner();
@@ -223,7 +231,7 @@ bool UVRControllerComponent::LaunchActor(FVector Velocity, bool IgnoreWeight)
 		UE_LOG(DebugLog, Warning, TEXT("Tried to launch Actor but not actor was present"));
 		return false;
 	}
-	AActor* grippedActor = CastChecked<AActor>(GrippedActors[0].GrippedObject);
+	AActor* grippedActor = GetGrippedActor();
 
 	UPrimitiveComponent* rootComp = CastChecked<UPrimitiveComponent>(grippedActor->GetRootComponent());
 
