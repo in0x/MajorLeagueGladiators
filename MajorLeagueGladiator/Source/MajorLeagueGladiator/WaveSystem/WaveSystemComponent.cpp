@@ -173,6 +173,5 @@ void UWaveSystemComponent::playBeginOfWaveEffects()
 void UWaveSystemComponent::playEndOfWaveEffects()
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), endOfWaveSound);
-
 }
 
