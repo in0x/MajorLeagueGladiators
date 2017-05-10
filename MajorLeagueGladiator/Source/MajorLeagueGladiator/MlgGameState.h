@@ -6,6 +6,7 @@
 #include "MlgGameState.generated.h"
 
 class AEffectsManagerActor;
+class UWaveSystemComponent;
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgGameState : public AGameStateBase
@@ -23,4 +24,7 @@ public:
 private:
 	UPROPERTY(Replicated, Transient)
 	AEffectsManagerActor* effectsManager;
+
+	UPROPERTY(EditAnywhere)
+	UWaveSystemComponent* waveSystemComponent;
 };

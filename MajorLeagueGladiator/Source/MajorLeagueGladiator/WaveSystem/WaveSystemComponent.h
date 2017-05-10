@@ -43,7 +43,15 @@ private:
 	UFUNCTION()
 	void onRep_remainingEnemiesForWave(int32 oldRemainingEnemiesForWave);
 
+	UFUNCTION()
+	void onRep_currentWaveNumber(int32 oldWaveNumber);
+
 	void fireRemainingEnemiesForWaveChangedDelegates(int32 oldRemainingEnemiesForWave);
+	void fireWaveNumberChangedDelegates(int32 oldWaveNumber);
+
+	void playFirstWaveEffects();
+	void playBeginOfWaveEffects();
+	void playEndOfWaveEffects();
 
 	UPROPERTY(ReplicatedUsing = onRep_remainingEnemiesForWave, Transient)
 	int32 remainingEnemiesForWave;
@@ -57,7 +65,16 @@ private:
 	UPROPERTY(EditAnywhere)
 	float timeBetweenWavesSeconds;
 
-	UPROPERTY(Replicated, Transient)
+	UPROPERTY(ReplicatedUsing = onRep_currentWaveNumber, Transient)
 	int32 currentWaveNumber;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* firstWaveSound;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* beginOfWaveSound;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* endOfWaveSound;
 };
 

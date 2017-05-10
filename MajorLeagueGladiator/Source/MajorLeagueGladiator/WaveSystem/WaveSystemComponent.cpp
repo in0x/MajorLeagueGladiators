@@ -5,10 +5,19 @@
 UWaveSystemComponent::UWaveSystemComponent()
 	: remainingEnemiesForWave(0)
 	, startWaveNumber(1)
-	, initialTimeBeforeStartSeconds(2.0f)
-	, timeBetweenWavesSeconds(2.0f)
+	, initialTimeBeforeStartSeconds(5.0f)
+	, timeBetweenWavesSeconds(6.0f)
 {
 	SetIsReplicated(true);
+
+	ConstructorHelpers::FObjectFinder<USoundBase> welcome(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/TEMP/Welcome.Welcome'"));
+	firstWaveSound = welcome.Object;
+
+	ConstructorHelpers::FObjectFinder<USoundBase> nextWave(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/TEMP/NextWave.NextWave'"));
+	beginOfWaveSound = nextWave.Object;
+
+	ConstructorHelpers::FObjectFinder<USoundBase> endWave(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/TEMP/EndWave.EndWave'"));
+	endOfWaveSound = endWave.Object;
 }
 
 void UWaveSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -63,7 +72,10 @@ void UWaveSystemComponent::StartWave(int32 WaveNumber)
 		return;
 	}
 
+	int32 oldWaveNumber = currentWaveNumber;
 	currentWaveNumber = WaveNumber;
+	fireWaveNumberChangedDelegates(oldWaveNumber);
+
 	UWaveSpawnerManagerComponent* spawnManager = GetWorld()->GetAuthGameMode()
 		->FindComponentByClass<UWaveSpawnerManagerComponent>();
 
@@ -120,16 +132,47 @@ void UWaveSystemComponent::onRep_remainingEnemiesForWave(int32 oldremainingEnemi
 	fireRemainingEnemiesForWaveChangedDelegates(oldremainingEnemiesForWave);
 }
 
+void UWaveSystemComponent::onRep_currentWaveNumber(int32 oldWaveNumber)
+{
+	fireWaveNumberChangedDelegates(oldWaveNumber);
+}
+
 void UWaveSystemComponent::fireRemainingEnemiesForWaveChangedDelegates(int32 oldremainingEnemiesForWave)
 {
 	OnRemainingEnemiesForWaveChanged.Broadcast(remainingEnemiesForWave, oldremainingEnemiesForWave);
-	if (remainingEnemiesForWave > oldremainingEnemiesForWave)
+	if (remainingEnemiesForWave == 0)
 	{
-		OnWaveStarted.Broadcast(currentWaveNumber);
-	}
-	else if (remainingEnemiesForWave == 0)
-	{
+		playEndOfWaveEffects();
 		OnWaveCleared.Broadcast(currentWaveNumber);
 	}
+}
+
+void UWaveSystemComponent::fireWaveNumberChangedDelegates(int32 oldWaveNumber)
+{
+	if (currentWaveNumber == startWaveNumber)
+	{
+		playFirstWaveEffects();
+	}
+	else
+	{
+		playBeginOfWaveEffects();
+	}
+	OnWaveStarted.Broadcast(currentWaveNumber);
+}
+
+void UWaveSystemComponent::playFirstWaveEffects()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), firstWaveSound);
+}
+
+void UWaveSystemComponent::playBeginOfWaveEffects()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), beginOfWaveSound);
+}
+
+void UWaveSystemComponent::playEndOfWaveEffects()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), endOfWaveSound);
+
 }
 
