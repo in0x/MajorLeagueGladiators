@@ -18,5 +18,8 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	uint32 amountToRefill;
+	uint32 amountToRefillUncharged;
+
+	UPROPERTY(EditAnywhere)
+	uint32 amountToRefillCharged;
 };

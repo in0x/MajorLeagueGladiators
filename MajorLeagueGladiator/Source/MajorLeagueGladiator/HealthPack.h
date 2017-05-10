@@ -18,5 +18,8 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	float amountToRefill;
+	float amountToRefillUncharged;
+
+	UPROPERTY(EditAnywhere)
+	float amountToRefillCharged;
 };

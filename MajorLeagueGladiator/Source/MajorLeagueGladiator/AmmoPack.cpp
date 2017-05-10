@@ -7,6 +7,8 @@
 #include "Characters/MeleePlayerCharacter.h"
 
 AAmmoPack::AAmmoPack()
+	: amountToRefillUncharged(5)
+	, amountToRefillCharged(15)
 {
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> ammoPackMat(TEXT("Material'/Game/BluePrints/AmmoPackMat.AmmoPackMat'"));
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
@@ -43,7 +45,15 @@ void AAmmoPack::Use(AActor* User, TriggerType Type)
 
 	if (ammoComponent->GetAmmoCount() < ammoComponent->GetMaxAmmoCount())
 	{
-		ammoComponent->IncreaseAmmo(amountToRefill);
+		if (IsCharged())
+		{
+			ammoComponent->IncreaseAmmo(amountToRefillCharged);
+		}
+		else
+		{
+			ammoComponent->IncreaseAmmo(amountToRefillUncharged);
+		}
+
 		ReleaseFromGrippedComponent();
 		Destroy();
 	}
