@@ -46,11 +46,11 @@ UJumpDashAbility::UJumpDashAbility()
 
 void UJumpDashAbility::InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if (spawnedTargetingActor && spawnedTargetingActor->IsConfirmTargetingAllowed() && waitTargetDataTask)
+	if (spawnedTargetingActor_dash && spawnedTargetingActor_dash->IsConfirmTargetingAllowed() && waitTargetDataTask)
 	{	
 		waitTargetDataTask->ExternalConfirm(true);
 		waitTargetDataTask = nullptr;
-		spawnedTargetingActor = nullptr;
+		spawnedTargetingActor_dash = nullptr;
 	}
 }
 
@@ -140,21 +140,21 @@ void UJumpDashAbility::BeginFindingActorsToLaunch()
 
 	findActorsToLaunchTask->ValidData.AddDynamic(this, &UJumpDashAbility::LaunchFoundActorsUpwards);
 
-	spawnedTargetingActor = nullptr;
+	AGameplayAbilityTargetActor* spawnedTargetingActor_launch = nullptr;
 
-	if (!findActorsToLaunchTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Cone::StaticClass(), spawnedTargetingActor))
+	if (!findActorsToLaunchTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Cone::StaticClass(), spawnedTargetingActor_launch))
 	{
 		return;
 	}
 
-	AGameplayAbilityTargetActor_Cone* targetingConeActor = CastChecked<AGameplayAbilityTargetActor_Cone>(spawnedTargetingActor);
+	AGameplayAbilityTargetActor_Cone* targetingConeActor = CastChecked<AGameplayAbilityTargetActor_Cone>(spawnedTargetingActor_launch);
 	targetingConeActor->Range = effectDistance;
 	targetingConeActor->HalfAngleDegrees = halfEffectAngleDegrees;
 	targetingConeActor->StartLocation = MakeTargetLocationInfoFromOwnerActor();
 	targetingConeActor->IsValidTargetFunction = [](AActor* actor) { return Cast<ACharacter>(actor) != nullptr; };
 	targetingConeActor->QueryTypes = TArray<TEnumAsByte<EObjectTypeQuery>>{	UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)};
 
-	findActorsToLaunchTask->FinishSpawningActor(this, spawnedTargetingActor);
+	findActorsToLaunchTask->FinishSpawningActor(this, spawnedTargetingActor_launch);
 }
 
 void UJumpDashAbility::LaunchFoundActorsUpwards(const FGameplayAbilityTargetDataHandle& Data)
@@ -185,14 +185,14 @@ void UJumpDashAbility::BeginTargeting()
 
 	waitTargetDataTask->ValidData.AddDynamic(this, &UJumpDashAbility::OnTargetingSuccess);
 
-	spawnedTargetingActor = nullptr;
+	spawnedTargetingActor_dash = nullptr;
 
-	if (!waitTargetDataTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Raycast::StaticClass(), spawnedTargetingActor))
+	if (!waitTargetDataTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Raycast::StaticClass(), spawnedTargetingActor_dash))
 	{
 		return;
 	}
 
-	AGameplayAbilityTargetActor_Raycast* targetingRayCastActor = CastChecked<AGameplayAbilityTargetActor_Raycast>(spawnedTargetingActor);
+	AGameplayAbilityTargetActor_Raycast* targetingRayCastActor = CastChecked<AGameplayAbilityTargetActor_Raycast>(spawnedTargetingActor_dash);
 	
 	auto gripController = cachedCharacter->GetMotionControllerMesh(EControllerHand::Left);
 	targetingRayCastActor->StartLocation.SourceComponent = gripController;
@@ -211,13 +211,13 @@ void UJumpDashAbility::BeginTargeting()
 		return isNotVertical && hitSurface;
 	};
 
-	waitTargetDataTask->FinishSpawningActor(this, spawnedTargetingActor);
+	waitTargetDataTask->FinishSpawningActor(this, spawnedTargetingActor_dash);
 }
 
 void UJumpDashAbility::OnTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data)
 {
 	waitTargetDataTask = nullptr;
-	spawnedTargetingActor = nullptr;
+	spawnedTargetingActor_dash = nullptr;
 
 	const FHitResult* hitresult = Data.Data[0]->GetHitResult();
 	check(hitresult);

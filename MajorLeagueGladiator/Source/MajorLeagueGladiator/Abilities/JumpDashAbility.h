@@ -64,7 +64,7 @@ private:
 	UAbilityTask_WaitTargetData* waitTargetDataTask;
 
 	UPROPERTY(Transient)
-	AGameplayAbilityTargetActor* spawnedTargetingActor;
+	AGameplayAbilityTargetActor* spawnedTargetingActor_dash;
 
 	UPROPERTY(Transient)
 	UAbilityTask_MoveTo* moveToTask;
