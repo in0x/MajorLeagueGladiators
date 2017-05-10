@@ -216,8 +216,6 @@ void ASword::damageAllOverlappingActors()
 		return pair.Value.Actor == nullptr;
 	});
 
-	check(actorToHit.GetTypeSize() != 0);
-
 	bool hasDealtdamage = false;
 	AActor* owner = GetOwner();
 	for (auto& pair : actorToHit)
