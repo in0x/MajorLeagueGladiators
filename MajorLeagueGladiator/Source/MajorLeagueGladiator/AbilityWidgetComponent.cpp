@@ -21,13 +21,19 @@ UAbilityWidgetComponent::UAbilityWidgetComponent()
 	materialInterface = material.Object;
 
 	SetRelativeScale3D(FVector(0.00125, 0.02, 0.01));
+
+	// Note(Phil): Set in Blueprints, this is a backup of the 
+	// values which where painfully found out manually.
+	// Relative Rotation (Pitch=180.000000,Yaw=270.000000,Roll=90.000000)
 }
 
 void UAbilityWidgetComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
 	SetMaterial(0, materialInterface);
 	materialInstance = CreateAndSetMaterialInstanceDynamic(0);
+	materialInstance->SetTextureParameterValue(TEXT("IconTexture"), IconTexture);
 	materialInstance->SetScalarParameterValue(FName(TEXT("GlowStrength")), BaseGlowStrength);
 }
 

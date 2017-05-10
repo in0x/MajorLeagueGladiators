@@ -88,6 +88,9 @@ private:
 	FVector touchInputVector;
 	UMaterialInterface* materialInterface;
 	UMaterialInstanceDynamic* materialInstance;
+	
+	UPROPERTY(EditAnywhere)
+	UTexture* IconTexture;
 
 	float totalCooldown;
 	float remainingCooldown;
