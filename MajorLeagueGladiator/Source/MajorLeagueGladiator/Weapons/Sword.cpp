@@ -143,8 +143,8 @@ void ASword::getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHi
 {
 	TArray<FHitResult> hitResults;
 
-	FVector meshLoc = MeshComponent->GetComponentLocation();
-	FVector meshVel = currentVelocity /*MeshComponent->GetComponentVelocity()*/;
+	FVector actorLoc = GetActorLocation();
+	FVector actorVel = currentVelocity;
 
 	FComponentQueryParams params;
 	params.bTraceComplex = false;
@@ -152,7 +152,7 @@ void ASword::getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHi
 
 	// We only add 10% velocity for the end of the sweep since we need to sweep past the current position for it to work. 
 	// However, if we sweep too far into the future we'll generate hits we don't want this frame.
-	GetWorld()->ComponentSweepMulti(hitResults, MeshComponent, meshLoc - meshVel, meshLoc+ (0.1f * meshVel), MeshComponent->GetComponentRotation(), params);
+	GetWorld()->ComponentSweepMulti(hitResults, MeshComponent, actorLoc - actorVel, actorLoc+ (0.1f * actorVel), MeshComponent->GetComponentRotation(), params);
 	
 	AActor* actorToMatch;
 	auto pred = [&actorToMatch](FHitResult& hit) 
@@ -280,8 +280,6 @@ FVector ASword::calcRelativeVelocity() const
 {
 	const AActor* owner = GetOwner();
 	const FVector ownerVelocity = owner ? owner->GetVelocity() : FVector::ZeroVector;
-	check(ownerVelocity != FVector(-13, 5, 2));
-	check(currentVelocity != FVector(-13, 5, 2));
 
 	return currentVelocity - ownerVelocity;
 }
