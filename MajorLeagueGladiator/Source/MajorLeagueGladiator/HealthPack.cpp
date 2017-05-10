@@ -7,6 +7,8 @@
 #include "Characters/RangedPlayerCharacter.h"
 
 AHealthPack::AHealthPack()
+	: amountToRefillUncharged(10.f)
+	, amountToRefillCharged(50.f)
 {
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> healthPackMat(TEXT("Material'/Game/BluePrints/HealthPackMat.HealthPackMat'"));
 
@@ -44,7 +46,15 @@ void AHealthPack::Use(AActor* User, TriggerType Type)
 
 	if (healthComponent->GetCurrentHealthPercentage() < 1.f)
 	{
-		healthComponent->IncreaseHealth(amountToRefill);
+		if (IsCharged())
+		{
+			healthComponent->IncreaseHealth(amountToRefillCharged);
+		}
+		else
+		{
+			healthComponent->IncreaseHealth(amountToRefillUncharged);
+		}
+
 		ReleaseFromGrippedComponent();
 		Destroy();
 	}
