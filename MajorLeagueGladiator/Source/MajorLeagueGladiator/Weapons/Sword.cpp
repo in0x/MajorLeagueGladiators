@@ -251,8 +251,7 @@ void ASword::doRumbleRight()
 	if (controller != nullptr)
 	{		
 		controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
-	}
-	
+	}	
 }
 
 bool ASword::canDealDamageTo(const ACharacter* OtherCharacter) const
