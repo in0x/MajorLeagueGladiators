@@ -43,6 +43,13 @@ void UAbilityTask_MoveTo::Activate()
 	cachedMoveComp->StopMovementImmediately();
 	cachedMoveComp->SetMovementMode(MOVE_Flying);
 	movingCharacter->SetAbilityMoveTargetLocation(targetLocation);
+
+	const float distanceToTarget = FVector::Distance(movingCharacter->GetActorLocation(), targetLocation);
+	const float timeToReachTargetSeconds = distanceToTarget / moveSpeed;
+	const float toleranceTime = 1.f;
+
+	GetWorld()->GetTimerManager().SetTimer(timeout, this, &UAbilityTask_MoveTo::OnTimeout,
+		timeToReachTargetSeconds + toleranceTime, false);
 }
 
 void UAbilityTask_MoveTo::TickTask(float DeltaTime)
@@ -78,6 +85,8 @@ void UAbilityTask_MoveTo::OnDestroy(bool AbilityEnded)
 	cachedMoveComp->SetMovementMode(MOVE_Falling);
 	cachedMoveComp->StopMovementImmediately();
 	movingCharacter->InvalidateAbilityMoveTargetLocation();
+
+	GetWorld()->GetTimerManager().ClearTimer(timeout);
 }
 
 void UAbilityTask_MoveTo::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -88,5 +97,11 @@ void UAbilityTask_MoveTo::GetLifetimeReplicatedProps(TArray<class FLifetimePrope
 	DOREPLIFETIME(UAbilityTask_MoveTo, targetLocation);
 	DOREPLIFETIME(UAbilityTask_MoveTo, moveSpeed);
 	DOREPLIFETIME(UAbilityTask_MoveTo, cachedMoveComp);
+}
+
+void UAbilityTask_MoveTo::OnTimeout()
+{
+	EndTask();
+	OnLocationReached.Broadcast();
 }
 
