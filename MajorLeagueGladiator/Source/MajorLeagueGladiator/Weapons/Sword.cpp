@@ -144,7 +144,7 @@ void ASword::getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHi
 	TArray<FHitResult> hitResults;
 
 	FVector meshLoc = MeshComponent->GetComponentLocation();
-	FVector meshVel = MeshComponent->GetComponentVelocity();
+	FVector meshVel = currentVelocity /*MeshComponent->GetComponentVelocity()*/;
 
 	FComponentQueryParams params;
 	params.bTraceComplex = false;
@@ -211,10 +211,10 @@ void ASword::damageAllOverlappingActors()
 
 	getOverlappingHits(actorToHit);
 
-	/*actorToHit.RemoveAll([](const auto& pair) 
+	actorToHit.RemoveAll([](const auto& pair) 
 	{
 		return pair.Value.Actor == nullptr;
-	});*/
+	});
 
 	check(actorToHit.GetTypeSize() != 0);
 

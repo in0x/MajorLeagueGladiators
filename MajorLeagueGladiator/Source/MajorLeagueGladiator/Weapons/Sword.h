@@ -74,5 +74,5 @@ private:
 	bool bIsAlwaysFastEnough;
 
 	FVector	lastLocation;
-	FVector  currentVelocity;
+	FVector currentVelocity;
 };
