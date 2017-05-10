@@ -40,7 +40,7 @@ private:
 	void chargePack_NetMulticast();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void onLaunch_NetMulticast();
+	void onLaunchCharged_NetMulticast();
 
 	UPROPERTY(EditAnywhere)
 	UPackMovementComponent* movementComponent;
@@ -50,7 +50,7 @@ private:
 
 	/* How Long the Pack should stay charged */
 	UPROPERTY(EditAnywhere)
-	float maxTimeChargedSeconds;
+	float timeStayChargedSeconds;
 
 	float timeChargeLeftSeconds;
 };

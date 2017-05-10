@@ -46,14 +46,8 @@ void AHealthPack::Use(AActor* User, TriggerType Type)
 
 	if (healthComponent->GetCurrentHealthPercentage() < 1.f)
 	{
-		if (IsCharged())
-		{
-			healthComponent->IncreaseHealth(amountToRefillCharged);
-		}
-		else
-		{
-			healthComponent->IncreaseHealth(amountToRefillUncharged);
-		}
+		const float amoutToRefill = IsCharged() ? amountToRefillCharged : amountToRefillUncharged;
+		healthComponent->IncreaseHealth(amoutToRefill);
 
 		ReleaseFromGrippedComponent();
 		Destroy();
