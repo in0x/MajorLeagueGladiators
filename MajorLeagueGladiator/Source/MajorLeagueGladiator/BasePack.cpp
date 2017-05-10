@@ -16,8 +16,9 @@ namespace
 ABasePack::ABasePack(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, chargingPlayerClass(nullptr)
-	, maxTimeChargedSeconds(10.f)
+	, timeStayChargedSeconds(10.f)
 	, timeChargeLeftSeconds(0.0f)
+	, materialInstance(nullptr)
 {
 	SetReplicates(true);
 	bReplicateMovement = true;
@@ -45,7 +46,7 @@ void ABasePack::BeginPlay()
 {
 	Super::BeginPlay();
 	materialInstance = MeshComponent->CreateAndSetMaterialInstanceDynamic(0);
-	if (materialInstance)
+	if (materialInstance == nullptr)
 	{
 		UE_LOG(DebugLog, Warning, TEXT("ABasePack::BeginPlay: Material Missing"));
 	}
@@ -74,8 +75,6 @@ bool ABasePack::canBeChargedBy(const AMlgPlayerCharacter* PlayerCharacter) const
 	return PlayerCharacter->IsA(chargingPlayerClass);
 }
 
-
-
 bool ABasePack::IsCharged() const
 {
 	return timeChargeLeftSeconds != 0.0f;
@@ -103,7 +102,7 @@ void ABasePack::chargePack()
 
 void ABasePack::chargePack_NetMulticast_Implementation()
 {
-	setTimeChargeLeftSeonds(maxTimeChargedSeconds);
+	setTimeChargeLeftSeonds(timeStayChargedSeconds);
 	check(IsCharged());
 
 	OnActorHit.RemoveDynamic(this, &ABasePack::onCollision);
@@ -120,11 +119,11 @@ void ABasePack::OnLaunch()
 
 	if (IsCharged())
 	{
-		onLaunch_NetMulticast();
+		onLaunchCharged_NetMulticast();
 	}
 }
 
-void ABasePack::onLaunch_NetMulticast_Implementation()
+void ABasePack::onLaunchCharged_NetMulticast_Implementation()
 {
 	OnActorHit.AddDynamic(this, &ABasePack::onCollision);
 }

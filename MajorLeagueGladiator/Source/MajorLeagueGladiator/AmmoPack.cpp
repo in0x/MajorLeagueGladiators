@@ -45,15 +45,9 @@ void AAmmoPack::Use(AActor* User, TriggerType Type)
 
 	if (ammoComponent->GetAmmoCount() < ammoComponent->GetMaxAmmoCount())
 	{
-		if (IsCharged())
-		{
-			ammoComponent->IncreaseAmmo(amountToRefillCharged);
-		}
-		else
-		{
-			ammoComponent->IncreaseAmmo(amountToRefillUncharged);
-		}
-
+		const float amoutToRefill = IsCharged() ? amountToRefillCharged : amountToRefillUncharged;			
+		ammoComponent->IncreaseAmmo(amoutToRefill);
+	
 		ReleaseFromGrippedComponent();
 		Destroy();
 	}

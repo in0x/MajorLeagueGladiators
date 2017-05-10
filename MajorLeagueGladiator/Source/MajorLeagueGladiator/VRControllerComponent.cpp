@@ -154,6 +154,11 @@ bool UVRControllerComponent::HasGrip() const
 
 AActor* UVRControllerComponent::GetGrippedActor() const
 {
+	if (GrippedActors.Num() == 0)
+	{
+		return nullptr;
+	}
+
 	AActor* grippedActor = CastChecked<AActor>(GrippedActors[0].GrippedObject);
 	return grippedActor;
 }
