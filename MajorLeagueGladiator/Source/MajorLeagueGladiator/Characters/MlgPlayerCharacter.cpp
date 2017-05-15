@@ -18,6 +18,7 @@
 #include "Animation/BlendSpace1D.h"
 #include "Animation/AnimSingleNodeInstance.h"
 #include "PredictedEffectsComponent.h"
+#include "PlayerDeathComponent.h"
 
 namespace 
 {
@@ -122,6 +123,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	GetMovementComponent()->SetIsReplicated(true);
 
 	predictedEffectsComponent = ObjectInitializer.CreateDefaultSubobject<UPredictedEffectsComponent>(this, TEXT("PredictedEffectsComponent"));
+	deathComponent = ObjectInitializer.CreateDefaultSubobject<UPlayerDeathComponent>(this, TEXT("PlayerDeathComponent"));
 }
 
 void AMlgPlayerCharacter::BeginPlay()
@@ -149,12 +151,35 @@ void AMlgPlayerCharacter::BeginPlay()
 	auto healthWidget = CastChecked<UPlayerHudWidget>(hudHealth->GetUserWidgetObject());
 	healthComp->HealthChangedDelegate.AddDynamic(healthWidget, &UPlayerHudWidget::SetCurrentPercentage);
 	healthWidget->SetCurrentPercentage(healthComp->GetCurrentHealthPercentage(), 1.0f);
+
+	healthComp->HealthChangedDelegate.AddDynamic(this, &AMlgPlayerCharacter::OnHealthChanged);
 	
 	LandedDelegate.AddDynamic(this, &AMlgPlayerCharacter::OnLand);
 	
 	if (HasAuthority())
 	{
 		SpawnWeapon();
+	}
+}
+
+void AMlgPlayerCharacter::OnHealthChanged(float newHealthPercentage, float oldHealthPercentage)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	if (newHealthPercentage == 0.f)
+	{
+		TArray<AActor*> playerCharacters;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMlgPlayerCharacter::StaticClass(), playerCharacters);
+
+		for (AActor* actor : playerCharacters)
+		{
+			ACharacter* player = CastChecked<AMlgPlayerCharacter>(actor);
+			auto* playerdeathComponent = player->FindComponentByClass<UPlayerDeathComponent>();
+			playerdeathComponent->OnPlayerDied_NetMulticast();
+		}
 	}
 }
 
