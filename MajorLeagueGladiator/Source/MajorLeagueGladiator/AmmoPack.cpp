@@ -7,8 +7,8 @@
 #include "Characters/MeleePlayerCharacter.h"
 
 AAmmoPack::AAmmoPack()
-	: amountToRefillUncharged(5)
-	, amountToRefillCharged(15)
+	: amountToRefillUncharged(10)
+	, amountToRefillCharged(30)
 {
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> ammoPackMat(TEXT("Material'/Game/BluePrints/AmmoPackMat.AmmoPackMat'"));
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);

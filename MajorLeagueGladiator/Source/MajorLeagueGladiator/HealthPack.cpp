@@ -7,8 +7,8 @@
 #include "Characters/RangedPlayerCharacter.h"
 
 AHealthPack::AHealthPack()
-	: amountToRefillUncharged(10.f)
-	, amountToRefillCharged(50.f)
+	: amountToRefillUncharged(30.f)
+	, amountToRefillCharged(100.f)
 {
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> healthPackMat(TEXT("Material'/Game/BluePrints/HealthPackMat.HealthPackMat'"));
 
