@@ -7,6 +7,7 @@
 
 struct FMsgDropGrip;
 class AMlgPlayerController;
+class AMlgGrippableActor;
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
 class MAJORLEAGUEGLADIATOR_API UVRControllerComponent : public UGripMotionControllerComponent
@@ -23,7 +24,7 @@ public:
 	bool TryGrabActor(AActor* Actor);
 	bool LaunchActor(FVector Velocity, bool IgnoreWeight);
 	bool HasGrip() const;
-	AActor* GetGrippedActor() const;
+	AMlgGrippableActor* GetGrippedActor() const;
 	AMlgPlayerController* GetMlgPlayerController();
 
 private:

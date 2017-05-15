@@ -40,6 +40,8 @@ ABasePack::ABasePack(const FObjectInitializer& ObjectInitializer)
 	{
 		staticMeshComp->SetStaticMesh(packMesh.Object);
 	}
+
+	VRGripInterfaceSettings.bSimulateOnDrop = false;
 }
 
 void ABasePack::BeginPlay()
