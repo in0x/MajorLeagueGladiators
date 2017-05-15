@@ -13,6 +13,8 @@
 namespace
 {
 	const char* MELEE_WEAPON_COLLISION_PROFILE_NAME = "MeleeWeapon";
+	const FName SWORD_MATERIAL_GLOW_COLOR_PARAMETER_NAME("Glow Color");
+	const FName SWORD_MATERIAL_GLOW_STRENGTH_PARAMETER_NAME("Glow Strength");
 }
 
 ASword::ASword(const FObjectInitializer& ObjectInitializer)
@@ -24,6 +26,10 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	, damageAppliedOnHit(40.f)
 	, damageType(USwordDamage::StaticClass())
 	, sliceSoundVolumeModifier(0.3f)
+	, materialInstance(nullptr)
+	, glowIntensityMultiplier(50.f)
+	, minimumGlowIntensity(6.f)
+	, maximumGlowIntensity(250.f)
 {
 	bReplicates = true;
 	MeshComponent->bGenerateOverlapEvents = true;
@@ -36,7 +42,11 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	{
 		staticMeshComp->SetStaticMesh(SwordStaticMesh.Object);
 	}
-	
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Static Mesh for Sword not found."));
+	}
+
 	sliceSoundEffects.SetNum(3);
 	ConstructorHelpers::FObjectFinder<USoundBase> soundEffectRef(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/SwordSwing01.SwordSwing01'"));
 	sliceSoundEffects[0] = soundEffectRef.Object;
@@ -45,27 +55,39 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	ConstructorHelpers::FObjectFinder<USoundBase> soundEffectRef3(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/SwordSwing03.SwordSwing03'"));
 	sliceSoundEffects[2] = soundEffectRef3.Object;
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> SwordMaterialRed(TEXT("Material'/Game/MVRCFPS_Assets/Blade_HeroSword22/M_Blade_HeroSword_Red.M_Blade_HeroSword_Red'"));
+	damageSwordColor = FLinearColor(1, 0, 0);
+}
 
-	if (SwordMaterialRed.Object != NULL)
+void ASword::BeginPlay()
+{
+	Super::BeginPlay();
+	materialInstance = MeshComponent->CreateAndSetMaterialInstanceDynamic(0);
+	if (materialInstance == nullptr)
 	{
-		materialRedObject = CastChecked<UMaterial>(SwordMaterialRed.Object);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("M_Blade_HeroSword_Red not found."));
+		UE_LOG(DebugLog, Warning, TEXT("ASword::BeginPlay: Material Missing"));
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> SwordMaterial(TEXT("Material'/Game/MVRCFPS_Assets/Blade_HeroSword22/M_Blade_HeroSword22.M_Blade_HeroSword22'"));
+	materialInstance->GetVectorParameterValue(SWORD_MATERIAL_GLOW_COLOR_PARAMETER_NAME, normalSwordColor);
+}
 
-	if (SwordMaterial.Object != NULL)
+void ASword::updateMaterialIntensity(const float intensity)
+{
+	if (materialInstance == nullptr)
 	{
-		materialObject = CastChecked<UMaterial>(SwordMaterial.Object);
+		UE_LOG(DebugLog, Warning, TEXT("ABasePack::updateMaterial: Material Instance Missing"));
+		return;
 	}
-	else
+	materialInstance->SetScalarParameterValue(SWORD_MATERIAL_GLOW_STRENGTH_PARAMETER_NAME, intensity);
+}
+
+void ASword::updateMaterialColor(const FLinearColor color)
+{
+	if (materialInstance == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("M_Blade_HeroSword22 not found."));
+		UE_LOG(DebugLog, Warning, TEXT("ABasePack::updateMaterial: Material Instance Missing"));
+		return;
 	}
+	materialInstance->SetVectorParameterValue(SWORD_MATERIAL_GLOW_COLOR_PARAMETER_NAME, color);
 }
 
 void ASword::Tick(float DeltaTime)
@@ -76,8 +98,11 @@ void ASword::Tick(float DeltaTime)
 
 	const FVector relativeSwordVelocity = calcRelativeVelocity();
 	oldSwingSpeed = oldSwingSpeed * (1.0f - slashVelocityLearnRate) + (DeltaTime * relativeSwordVelocity) * slashVelocityLearnRate;
-
-	bool newIsSwordFastEnough = oldSwingSpeed.SizeSquared() > threshholdDoDamageSquared || bIsAlwaysFastEnough;
+	const float currentVelocitySquared = oldSwingSpeed.SizeSquared();
+	bool newIsSwordFastEnough = currentVelocitySquared > threshholdDoDamageSquared || bIsAlwaysFastEnough;
+	
+	float glowIntensity = currentVelocitySquared * glowIntensityMultiplier + minimumGlowIntensity;
+	updateMaterialIntensity(glowIntensity > maximumGlowIntensity ? maximumGlowIntensity : glowIntensity);
 
 	if (newIsSwordFastEnough && !bIsSwordFastEnough)
 	{
@@ -108,11 +133,6 @@ bool ASword::GetIsAlawaysFastEnough() const
 
 void ASword::onStartSlash()
 {
-	if (materialRedObject_Dyn == nullptr)
-	{
-		materialRedObject_Dyn = UMaterialInstanceDynamic::Create(materialRedObject, this);
-	}
-
 	const int soundIndex = FMath::RandRange(0,sliceSoundEffects.Num()-1);
 	if (sliceSoundEffects[soundIndex])
 	{
@@ -128,16 +148,12 @@ void ASword::onStartSlash()
 		UE_LOG(DebugLog, Warning, TEXT("Sound Slice with index %d not set"), soundIndex);
 	}
 
-	setMaterialOfOwnerMesh(materialRedObject_Dyn);
+	updateMaterialColor(damageSwordColor);
 }
 
 void ASword::onEndSlash()
 {
-	if (!materialObject_Dyn)
-	{
-		materialObject_Dyn = UMaterialInstanceDynamic::Create(materialObject, this);
-	}
-	setMaterialOfOwnerMesh(materialObject_Dyn);
+	updateMaterialColor(normalSwordColor);
 }
 
 void ASword::getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHit) const
