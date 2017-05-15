@@ -10,6 +10,8 @@
 #include "Characters/MlgPlayerCharacter.h"
 #include "BasePack.h"
 
+#include "MlgGrippableActor.h"
+
 UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, grabRadius(32)
@@ -152,7 +154,7 @@ bool UVRControllerComponent::HasGrip() const
 }
 
 
-AActor* UVRControllerComponent::GetGrippedActor() const
+AMlgGrippableActor* UVRControllerComponent::GetGrippedActor() const
 {
 	if (GrippedActors.Num() == 0)
 	{
@@ -160,7 +162,7 @@ AActor* UVRControllerComponent::GetGrippedActor() const
 	}
 
 	AActor* grippedActor = CastChecked<AActor>(GrippedActors[0].GrippedObject);
-	return grippedActor;
+	return  CastChecked<AMlgGrippableActor>(grippedActor);
 }
 
 AMlgPlayerController* UVRControllerComponent::GetMlgPlayerController()
@@ -236,11 +238,11 @@ bool UVRControllerComponent::LaunchActor(FVector Velocity, bool IgnoreWeight)
 		UE_LOG(DebugLog, Warning, TEXT("Tried to launch Actor but not actor was present"));
 		return false;
 	}
-	AActor* grippedActor = GetGrippedActor();
 
+	AMlgGrippableActor* grippedActor = GetGrippedActor();
 	UPrimitiveComponent* rootComp = CastChecked<UPrimitiveComponent>(grippedActor->GetRootComponent());
 
-	//Temporarly disable Collision with this Actor so I don't shoot against myself
+	//Temporarily disable Collision with this Actor so I don't shoot against myself
 	rootComp->MoveIgnoreActors.Add(GetOwner());
 
 	FTimerManager& timer = GetWorld()->GetTimerManager();
@@ -251,15 +253,14 @@ bool UVRControllerComponent::LaunchActor(FVector Velocity, bool IgnoreWeight)
 
 	auto& grippedActorInfo = GrippedActors[0];
 
-	UPackMovementComponent* moveComp = grippedActorInfo.GetGrippedActor()->FindComponentByClass<UPackMovementComponent>();
+	UPackMovementComponent* moveComp = grippedActor->FindComponentByClass<UPackMovementComponent>();
+	DropGrip(grippedActorInfo, grippedActor->SimulateOnDrop());
 	if (moveComp)
 	{
-		DropGrip(grippedActorInfo, false);
 		moveComp->SetVelocity(Velocity);
 	}
 	else
 	{
-		DropGrip(grippedActorInfo, true);
 		rootComp->AddImpulse(Velocity, NAME_None, IgnoreWeight);
 	}
 	
