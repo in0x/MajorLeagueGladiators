@@ -19,6 +19,7 @@ class USteamVRChaperoneComponent;
 class UTriggerZoneComponent;
 class UGameplayAbility;
 class UPredictedEffectsComponent;
+class UPlayerDeathComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityMoveTargetLocationSet, FVector, NewLocation);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityActivated, TSubclassOf<UGameplayAbility>, AbilityType);
@@ -138,6 +139,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	TAssetSubclassOf<UMlgAbilitySet> abilitySetClass;
 
+	UPROPERTY(EditAnywhere)
+	UPlayerDeathComponent* deathComponent;
+
 	UPROPERTY(Transient)
 	const UMlgAbilitySet* cachedAbilitySet;
 
@@ -162,6 +166,9 @@ private:
 	void rightHandDrop_Server();
 
 	void SpawnWeapon();
+
+	UFUNCTION()
+	void OnHealthChanged(float newHealthPercentage, float oldHealthPercentage);
 
 	UFUNCTION()
 	void OnRep_AttachedWeapon();
