@@ -31,6 +31,7 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	, minGlowStrength(6.f)
 	, maxGlowStrength(250.f)
 	, damageSwordColor(1, 0, 0)
+	, originalSwordColor(0.002732f, 1.f, 0.904661f)
 {
 	bReplicates = true;
 	MeshComponent->bGenerateOverlapEvents = true;
@@ -42,7 +43,6 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	if (SwordStaticMesh.Succeeded() && staticMeshComp)
 	{
 		staticMeshComp->SetStaticMesh(SwordStaticMesh.Object);
-		staticMeshComp->GetMaterial(0)->GetLinearColorParameterValue(SWORD_MATERIAL_GLOW_COLOR_PARAMETER_NAME, originalSwordColor);
 	}
 	else
 	{
@@ -66,6 +66,7 @@ void ASword::BeginPlay()
 	{
 		UE_LOG(DebugLog, Warning, TEXT("ASword::BeginPlay: Material Missing"));
 	}
+	updateMaterialColor(originalSwordColor);
 }
 
 void ASword::updateMaterialIntensity(const float intensity)
