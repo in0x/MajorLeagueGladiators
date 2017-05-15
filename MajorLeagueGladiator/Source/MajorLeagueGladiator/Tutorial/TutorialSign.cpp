@@ -8,7 +8,7 @@ ATutorialSign::ATutorialSign()
 	ConstructorHelpers::FObjectFinder<UStaticMesh> planeMesh(TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"));
 	GetStaticMeshComponent()->SetStaticMesh(planeMesh.Object);
 	
-	ConstructorHelpers::FObjectFinder<UMaterialInterface> material(TEXT("Material'/Game/Tutorial/Images/SignMaterial.SignMaterial'"));
+	ConstructorHelpers::FObjectFinder<UMaterialInterface> material(TEXT("Material'/Game/Materials/SignMaterial.SignMaterial'"));
 	materialInterface = material.Object;
 }
 
