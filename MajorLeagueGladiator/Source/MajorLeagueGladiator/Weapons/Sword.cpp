@@ -116,11 +116,12 @@ void ASword::onStartSlash()
 	const int soundIndex = FMath::RandRange(0,sliceSoundEffects.Num()-1);
 	if (sliceSoundEffects[soundIndex])
 	{
-		const APawn* playerPawn = CastChecked<APawn>(GetOwner());
-		FSoundParams soundParams;
-		soundParams.Sound = sliceSoundEffects[soundIndex];
-		soundParams.VolumeMultiplier = sliceSoundVolumeModifier;
-		UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(playerPawn, soundParams);
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			sliceSoundEffects[soundIndex],
+			GetActorLocation(),
+			sliceSoundVolumeModifier
+		);
 	}
 	else 
 	{
