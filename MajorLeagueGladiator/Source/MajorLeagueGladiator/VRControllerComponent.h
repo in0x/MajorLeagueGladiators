@@ -26,6 +26,7 @@ public:
 	bool HasGrip() const;
 	AMlgGrippableActor* GetGrippedActor() const;
 	AMlgPlayerController* GetMlgPlayerController();
+	FTransform GetChildSocketTransform(FName SocketName) const;
 
 private:
 

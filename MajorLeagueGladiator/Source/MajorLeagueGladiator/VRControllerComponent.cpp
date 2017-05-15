@@ -12,6 +12,11 @@
 
 #include "MlgGrippableActor.h"
 
+namespace
+{
+	const FName PACK_SOCKET_NAME("Pack");
+}
+
 UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, grabRadius(32)
@@ -222,12 +227,20 @@ void UVRControllerComponent::GrabActorImpl(ActorGrabData GrabData)
 	{
 		slotTrafo = UKismetMathLibrary::ConvertTransformToRelative(slotTrafo, actorTransform);
 		slotTrafo.SetScale3D(actorTransform.GetScale3D());
-		GripActor(GrabData.pActorToGrip, slotTrafo, true, FName(), GrabData.pIVRGrip->SlotGripType_Implementation());
+		GripActor(GrabData.pActorToGrip, slotTrafo, true, NAME_None, GrabData.pIVRGrip->SlotGripType_Implementation());
 	}
 	else
 	{
-		actorTransform.SetLocation(GetComponentLocation());
-		GripActor(GrabData.pActorToGrip, actorTransform, false, FName(), GrabData.pIVRGrip->FreeGripType_Implementation());
+		const FVector gripLocation = GrabData.pActorToGrip->IsA(ABasePack::StaticClass())
+			? GetChildSocketTransform(PACK_SOCKET_NAME).GetLocation()
+			: GetComponentLocation();
+
+		const FVector actorLocation = actorTransform.GetLocation();
+		const FVector actorCenter = GrabData.pActorToGrip->GetComponentsBoundingBox(false).GetCenter();
+		FVector locationToCenterOffset = actorCenter - actorLocation;
+
+		actorTransform.SetLocation(gripLocation - locationToCenterOffset);
+		GripActor(GrabData.pActorToGrip, actorTransform, false, NAME_None, GrabData.pIVRGrip->FreeGripType_Implementation());
 	}
 }
 
@@ -265,4 +278,17 @@ bool UVRControllerComponent::LaunchActor(FVector Velocity, bool IgnoreWeight)
 	}
 	
 	return true;
+}
+
+FTransform UVRControllerComponent::GetChildSocketTransform(FName SocketName) const
+{
+	for (const auto& childComp : GetAttachChildren())
+	{
+		if (childComp->DoesSocketExist(SocketName))
+		{
+			return childComp->GetSocketTransform(PACK_SOCKET_NAME);
+		}		
+	}
+	UE_LOG(DebugLog, Warning, TEXT("UVRControllerComponent::GetChildSocketTransform: socket with name \"%s\" not found"), *PACK_SOCKET_NAME.ToString());
+	return GetComponentTransform();
 }
