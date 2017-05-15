@@ -25,8 +25,8 @@ private:
 	void doRumbleRight();
 	void setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn);
 	void dealDamageTo(ACharacter* OtherCharacter, const FHitResult& HitResult);
-	void updateMaterialIntensity(const float intensity);
-	void updateMaterialColor(const FLinearColor color);
+	void updateMaterialIntensity(float intensity);
+	void updateMaterialColor(const FLinearColor& color);
 
 
 	void damageAllOverlappingActors();
@@ -59,19 +59,19 @@ private:
 	UMaterialInstanceDynamic* materialInstance;
 
 	UPROPERTY(EditAnywhere)
-	FLinearColor normalSwordColor;
+	FLinearColor originalSwordColor;
 
 	UPROPERTY(EditAnywhere)
 	FLinearColor damageSwordColor;
 
 	UPROPERTY(EditAnywhere)
-	float glowIntensityMultiplier;
+	float glowStrengthMultiplier;
 
 	UPROPERTY(EditAnywhere)
-	float minimumGlowIntensity;
+	float minGlowStrength;
 
 	UPROPERTY(EditAnywhere)
-	float maximumGlowIntensity;
+	float maxGlowStrength;
 
 	// Between 0 and 1 defines how fast new sword speed influences overall speedvalue
 	UPROPERTY(EditAnywhere)
