@@ -164,21 +164,11 @@ void AMlgPlayerCharacter::BeginPlay()
 
 void AMlgPlayerCharacter::OnHealthChanged(float newHealthPercentage, float oldHealthPercentage)
 {
-	if (!HasAuthority())
+	if (newHealthPercentage == 0.f && HasAuthority())
 	{
-		return;
-	}
-
-	if (newHealthPercentage == 0.f)
-	{
-		TArray<AActor*> playerCharacters;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMlgPlayerCharacter::StaticClass(), playerCharacters);
-
-		for (AActor* actor : playerCharacters)
+		for (TObjectIterator<UPlayerDeathComponent> iter; iter; ++iter)
 		{
-			ACharacter* player = CastChecked<AMlgPlayerCharacter>(actor);
-			auto* playerdeathComponent = player->FindComponentByClass<UPlayerDeathComponent>();
-			playerdeathComponent->OnPlayerDied_NetMulticast();
+			iter->OnPlayerDied_NetMulticast();
 		}
 	}
 }
