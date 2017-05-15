@@ -34,7 +34,7 @@ public:
 	void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty> & OutLifetimeProps) const override;
 	
 private:
-	void OnTimeout();
+	void onTimeout();
 
 	UPROPERTY(replicated)
 	AMlgPlayerCharacter* movingCharacter;
@@ -48,5 +48,5 @@ private:
 	UPROPERTY(replicated)
 	UCharacterMovementComponent* cachedMoveComp;
 
-	FTimerHandle timeout;
+	FTimerHandle timeoutHandle;
 };
