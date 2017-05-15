@@ -12,6 +12,7 @@ class MAJORLEAGUEGLADIATOR_API ASword : public AMlgGrippableMeshActor
 public:
 	ASword(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void Tick(float DeltaTime) override;
+	virtual void BeginPlay() override;
 
 	void SetIsAlwaysFastEnough(bool IsAlwaysFastEnough);
 	bool GetIsAlawaysFastEnough() const;
@@ -24,6 +25,9 @@ private:
 	void doRumbleRight();
 	void setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn);
 	void dealDamageTo(ACharacter* OtherCharacter, const FHitResult& HitResult);
+	void updateMaterialIntensity(const float intensity);
+	void updateMaterialColor(const FLinearColor color);
+
 
 	void damageAllOverlappingActors();
 	void tryLaunchCharacter(ACharacter* character) const;
@@ -51,18 +55,23 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Damage")
 	TSubclassOf<UDamageType> damageType;
 
-	//TODO: change sword color changing. THIS IS ONLY TEMPORARY
-	UPROPERTY(EditAnywhere)
-	UMaterial* materialRedObject;
+	UPROPERTY(Transient)
+	UMaterialInstanceDynamic* materialInstance;
 
 	UPROPERTY(EditAnywhere)
-	UMaterial* materialObject;
+	FLinearColor normalSwordColor;
 
 	UPROPERTY(EditAnywhere)
-	UMaterialInstanceDynamic* materialRedObject_Dyn;
+	FLinearColor damageSwordColor;
 
 	UPROPERTY(EditAnywhere)
-	UMaterialInstanceDynamic* materialObject_Dyn;
+	float glowIntensityMultiplier;
+
+	UPROPERTY(EditAnywhere)
+	float minimumGlowIntensity;
+
+	UPROPERTY(EditAnywhere)
+	float maximumGlowIntensity;
 
 	// Between 0 and 1 defines how fast new sword speed influences overall speedvalue
 	UPROPERTY(EditAnywhere)
