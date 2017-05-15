@@ -6,6 +6,7 @@
 #include "Abilities/DashAbility.h"
 #include "Abilities/JumpDashAbility.h"
 #include "Animation/BlendSpace1D.h"
+#include "PlayerDeathComponent.h"
 
 namespace
 {
@@ -47,6 +48,8 @@ AMeleePlayerCharacter::AMeleePlayerCharacter(const FObjectInitializer& ObjectIni
 
 	topAbilityWidget = createWidget(UDashAbility::StaticClass(), EAbilityWidgetAngle::Half, EAbilityWidgetTriggerLocation::Top, TEXT("TopAbilityWidget"), FName(TEXT("Ability_Widget_Top")));
 	bottomAbilityWidget = createWidget(UJumpDashAbility::StaticClass(), EAbilityWidgetAngle::Half, EAbilityWidgetTriggerLocation::Bottom, TEXT("BottomAbilityWidget"), FName(TEXT("Ability_Widget_Bottom")));
+
+	deathComponent->AfterDeathTeleportPosition = FVector(3706.954346, 131.508514, -1396.709106);
 }
 
 void AMeleePlayerCharacter::BeginPlay()

@@ -100,6 +100,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UMaterialInterface* bodyMaterial;
 
+	UPROPERTY(EditAnywhere)
+	UPlayerDeathComponent* deathComponent;
+
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
 	std::unique_ptr<ChaperoneBounds> pChaperoneBounds;
@@ -138,9 +141,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TAssetSubclassOf<UMlgAbilitySet> abilitySetClass;
-
-	UPROPERTY(EditAnywhere)
-	UPlayerDeathComponent* deathComponent;
 
 	UPROPERTY(Transient)
 	const UMlgAbilitySet* cachedAbilitySet;
