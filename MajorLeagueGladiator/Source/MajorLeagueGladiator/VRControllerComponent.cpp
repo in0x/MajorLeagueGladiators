@@ -266,9 +266,10 @@ bool UVRControllerComponent::LaunchActor(FVector Velocity, bool IgnoreWeight)
 
 	auto& grippedActorInfo = GrippedActors[0];
 
-	UPackMovementComponent* moveComp = grippedActor->FindComponentByClass<UPackMovementComponent>();
 	DropGrip(grippedActorInfo, grippedActor->SimulateOnDrop());
-	if (moveComp)
+	rootComp->SetPhysicsLinearVelocity(FVector::ZeroVector);
+
+	if (UPackMovementComponent* moveComp = grippedActor->FindComponentByClass<UPackMovementComponent>())
 	{
 		moveComp->SetVelocity(Velocity);
 	}
