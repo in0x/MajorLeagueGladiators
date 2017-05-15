@@ -12,7 +12,7 @@
 
 namespace
 {
-	const char* MELEE_WEAPON_COLLISION_PROFILE_NAME = "MeleeWeapon";
+	const FName MELEE_WEAPON_COLLISION_PROFILE_NAME("MeleeWeapon");
 	const FName SWORD_MATERIAL_GLOW_COLOR_PARAMETER_NAME("Glow Color");
 	const FName SWORD_MATERIAL_GLOW_STRENGTH_PARAMETER_NAME("Glow Strength");
 }
@@ -27,9 +27,10 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	, damageType(USwordDamage::StaticClass())
 	, sliceSoundVolumeModifier(0.3f)
 	, materialInstance(nullptr)
-	, glowIntensityMultiplier(50.f)
-	, minimumGlowIntensity(6.f)
-	, maximumGlowIntensity(250.f)
+	, glowStrengthMultiplier(50.f)
+	, minGlowStrength(6.f)
+	, maxGlowStrength(250.f)
+	, damageSwordColor(1, 0, 0)
 {
 	bReplicates = true;
 	MeshComponent->bGenerateOverlapEvents = true;
@@ -41,6 +42,7 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	if (SwordStaticMesh.Succeeded() && staticMeshComp)
 	{
 		staticMeshComp->SetStaticMesh(SwordStaticMesh.Object);
+		staticMeshComp->GetMaterial(0)->GetLinearColorParameterValue(SWORD_MATERIAL_GLOW_COLOR_PARAMETER_NAME, originalSwordColor);
 	}
 	else
 	{
@@ -54,8 +56,6 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	sliceSoundEffects[1] = soundEffectRef2.Object;
 	ConstructorHelpers::FObjectFinder<USoundBase> soundEffectRef3(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/SwordSwing03.SwordSwing03'"));
 	sliceSoundEffects[2] = soundEffectRef3.Object;
-
-	damageSwordColor = FLinearColor(1, 0, 0);
 }
 
 void ASword::BeginPlay()
@@ -66,8 +66,6 @@ void ASword::BeginPlay()
 	{
 		UE_LOG(DebugLog, Warning, TEXT("ASword::BeginPlay: Material Missing"));
 	}
-
-	materialInstance->GetVectorParameterValue(SWORD_MATERIAL_GLOW_COLOR_PARAMETER_NAME, normalSwordColor);
 }
 
 void ASword::updateMaterialIntensity(const float intensity)
@@ -80,7 +78,7 @@ void ASword::updateMaterialIntensity(const float intensity)
 	materialInstance->SetScalarParameterValue(SWORD_MATERIAL_GLOW_STRENGTH_PARAMETER_NAME, intensity);
 }
 
-void ASword::updateMaterialColor(const FLinearColor color)
+void ASword::updateMaterialColor(const FLinearColor& color)
 {
 	if (materialInstance == nullptr)
 	{
@@ -101,8 +99,8 @@ void ASword::Tick(float DeltaTime)
 	const float currentVelocitySquared = oldSwingSpeed.SizeSquared();
 	bool newIsSwordFastEnough = currentVelocitySquared > threshholdDoDamageSquared || bIsAlwaysFastEnough;
 	
-	float glowIntensity = currentVelocitySquared * glowIntensityMultiplier + minimumGlowIntensity;
-	updateMaterialIntensity(glowIntensity > maximumGlowIntensity ? maximumGlowIntensity : glowIntensity);
+	float glowIntensity = currentVelocitySquared * glowStrengthMultiplier;
+	updateMaterialIntensity(FMath::Clamp(glowIntensity, minGlowStrength, maxGlowStrength));
 
 	if (newIsSwordFastEnough && !bIsSwordFastEnough)
 	{
@@ -153,7 +151,7 @@ void ASword::onStartSlash()
 
 void ASword::onEndSlash()
 {
-	updateMaterialColor(normalSwordColor);
+	updateMaterialColor(originalSwordColor);
 }
 
 void ASword::getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHit) const
