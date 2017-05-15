@@ -7,6 +7,7 @@
 #include "Abilities/JumpAbility.h"
 #include "Abilities/DashAbility.h"
 #include "Abilities/GrenadeAbility.h"
+#include "PlayerDeathComponent.h"
 
 namespace 
 {
@@ -37,6 +38,8 @@ ARangedPlayerCharacter::ARangedPlayerCharacter(const FObjectInitializer& ObjectI
 	lefthandTopAbilityWidget = createWidget(leftMesh, UDashAbility::StaticClass(), EAbilityWidgetAngle::Half, EAbilityWidgetTriggerLocation::Top, TEXT("TopAbilityWidget"), FName(TEXT("Ability_Widget_Top")));
 	lefthandBottomAbilityWidget = createWidget(leftMesh, UJumpAbility::StaticClass(), EAbilityWidgetAngle::Half, EAbilityWidgetTriggerLocation::Bottom, TEXT("BottomAbilityWidget"), FName(TEXT("Ability_Widget_Bottom")));
 	rightHandAbilityWidget = createWidget(rightMesh, UGrenadeAbility::StaticClass(), EAbilityWidgetAngle::Full, EAbilityWidgetTriggerLocation::Center, TEXT("RighthandAbilityWidget"), FName(TEXT("Ability_Widget_Center")));
+
+	deathComponent->AfterDeathTeleportPosition = FVector(3426.588379, 131.509048, -1396.709106);
 }
 
 void ARangedPlayerCharacter::BeginPlay()
