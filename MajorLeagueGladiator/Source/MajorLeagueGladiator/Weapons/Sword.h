@@ -39,10 +39,7 @@ private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(EditAnywhere)
-	TArray<USoundBase*> sliceSoundEffects;
-
-	UPROPERTY(EditAnywhere)
-	float sliceSoundVolumeModifier;
+	USoundCue* swordSwingCue;
 
 	FVector oldSwingSpeed;
 

@@ -25,7 +25,6 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	, bIsSwordFastEnough(false)
 	, damageAppliedOnHit(40.f)
 	, damageType(USwordDamage::StaticClass())
-	, sliceSoundVolumeModifier(0.3f)
 	, materialInstance(nullptr)
 	, glowStrengthMultiplier(50.f)
 	, minGlowStrength(6.f)
@@ -49,13 +48,8 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 		UE_LOG(LogTemp, Warning, TEXT("Static Mesh for Sword not found."));
 	}
 
-	sliceSoundEffects.SetNum(3);
-	ConstructorHelpers::FObjectFinder<USoundBase> soundEffectRef(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/SwordSwing01.SwordSwing01'"));
-	sliceSoundEffects[0] = soundEffectRef.Object;
-	ConstructorHelpers::FObjectFinder<USoundBase> soundEffectRef2(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/SwordSwing02.SwordSwing02'"));
-	sliceSoundEffects[1] = soundEffectRef2.Object;
-	ConstructorHelpers::FObjectFinder<USoundBase> soundEffectRef3(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/SwordSwing03.SwordSwing03'"));
-	sliceSoundEffects[2] = soundEffectRef3.Object;
+	ConstructorHelpers::FObjectFinder<USoundCue> swordSwingCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/SwordSwing_Cue.SwordSwing_Cue'"));
+	swordSwingCue = swordSwingCueFinder.Object;
 }
 
 void ASword::BeginPlay()
@@ -132,20 +126,10 @@ bool ASword::GetIsAlawaysFastEnough() const
 
 void ASword::onStartSlash()
 {
-	const int soundIndex = FMath::RandRange(0,sliceSoundEffects.Num()-1);
-	if (sliceSoundEffects[soundIndex])
-	{
-		UGameplayStatics::PlaySoundAtLocation(
-			GetWorld(),
-			sliceSoundEffects[soundIndex],
-			GetActorLocation(),
-			sliceSoundVolumeModifier
-		);
-	}
-	else 
-	{
-		UE_LOG(DebugLog, Warning, TEXT("Sound Slice with index %d not set"), soundIndex);
-	}
+	UGameplayStatics::PlaySoundAtLocation(
+		GetWorld(),
+		swordSwingCue,
+		GetActorLocation());
 
 	updateMaterialColor(damageSwordColor);
 }

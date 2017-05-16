@@ -39,7 +39,7 @@ private:
 	UStaticMeshComponent* scopeMesh;
 
 	UPROPERTY(EditAnywhere)
-	UAudioComponent* shotAudioComponent;
+	USoundCue* shotSoundCue;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* laserMesh;

@@ -38,7 +38,7 @@ protected:
 	TArray<USoundBase*> hitscanSounds;
 
 	UPROPERTY(EditAnywhere, Category = "Feedback (AI)")
-	TArray<USoundBase*> swordSounds;
+	USoundCue* swordSoundCue;
 
 	void playSwordHitSound(const FVector& location);
 };
