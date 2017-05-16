@@ -8,6 +8,8 @@
 
 #include "ShieldActor.h" //Replace with interface when ready
 
+#include "Weapons/Sword.h"
+
 namespace 
 {
 	const char* PROJECTILE_COLLISION_PROFILE_NAME = "Projectile";
@@ -57,13 +59,17 @@ void APhysicsProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 	if (AShieldActor* interactable = Cast<AShieldActor>(OtherActor))
 	{
 		interactable->OnHitInteractable(this);
+		Destroy();
 	}
 	else if (UMlgGameplayStatics::CanDealDamageTo(this, OtherActor))
 	{
 		DealDamage(OtherActor);
-	}	
-	//Destroy even if no damage is applied
-	Destroy();
+		Destroy();
+	}
+	else if (OtherActor->IsA(ASword::StaticClass()))
+	{
+		Destroy();
+	}
 }
 
 void APhysicsProjectile::DealDamage(AActor* OtherActor)
