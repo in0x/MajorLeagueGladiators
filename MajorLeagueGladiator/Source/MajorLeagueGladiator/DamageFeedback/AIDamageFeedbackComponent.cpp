@@ -9,12 +9,8 @@
 UAIDamageFeedbackComponent::UAIDamageFeedbackComponent()
 {
 	//Sounds:
-	static ConstructorHelpers::FObjectFinder<USoundCue> swordAttack01(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Sword_Attack_01_16bit_Cue.Sword_Attack_01_16bit_Cue'"));
-	swordSounds.Add(swordAttack01.Object);
-	static ConstructorHelpers::FObjectFinder<USoundCue> swordAttack02(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Sword_Attack_02_16bit_Cue.Sword_Attack_02_16bit_Cue'"));
-	swordSounds.Add(swordAttack02.Object);
-	static ConstructorHelpers::FObjectFinder<USoundCue> swordAttack03(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Sword_Attack_03_16bit_Cue.Sword_Attack_03_16bit_Cue'"));
-	swordSounds.Add(swordAttack03.Object);
+	static ConstructorHelpers::FObjectFinder<USoundCue> swordSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Sword_Attack_Cue.Sword_Attack_Cue'"));
+	swordSoundCue = swordSoundCueFinder.Object;
 }
 
 void UAIDamageFeedbackComponent::DoParticleSystemVisualization(const FVector& HitLocation, const FVector& OriginDirection, TSubclassOf<UDamageType> DamageType)
@@ -81,9 +77,8 @@ void UAIDamageFeedbackComponent::PlaySound(const FVector& HitLocation, const FVe
 
 void UAIDamageFeedbackComponent::playSwordHitSound(const FVector& location)
 {
-	int32 idx = FMath::RandRange(0, swordSounds.Num() - 1);
 	FSoundParams soundParams;
 	soundParams.Location = location;
-	soundParams.Sound = swordSounds[idx];
+	soundParams.Sound = swordSoundCue;
 	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetOwner()->GetWorld(), soundParams);
 }

@@ -31,8 +31,8 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 
 	SetReplicates(true);
 
-	shotAudioComponent = ObjectInitializer.CreateDefaultSubobject<UAudioComponent>(this, TEXT("ShotAudioComponent"));
-	shotAudioComponent->SetIsReplicated(true);
+	ConstructorHelpers::FObjectFinder<USoundCue> shotSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/hitscan_shot_Cue.hitscan_shot_Cue'"));
+	shotSoundCue = shotSoundCueFinder.Object;
 	
 	MeshComponent->SetSimulatePhysics(false);
 
@@ -128,8 +128,7 @@ void AHitScanGunActor::playShotEffect_NetMulticast_Implementation(float Charge)
 	adjustedRecoilDistance = recoilDistance * Charge;
 	bIsApplyingRecoil = true;
 
-	shotAudioComponent->SetVolumeMultiplier(Charge);
-	shotAudioComponent->Play();
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), shotSoundCue, GetActorLocation(), Charge);
 }
 
 void AHitScanGunActor::OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) 
