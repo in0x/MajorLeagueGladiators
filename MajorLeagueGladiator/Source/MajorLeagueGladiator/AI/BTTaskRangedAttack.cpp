@@ -7,6 +7,7 @@
 
 #include "BehaviorTree/BTFunctionLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "MlgGameplayStatics.h"
 
 
 UBTTaskRangedAttack::UBTTaskRangedAttack()
@@ -15,6 +16,8 @@ UBTTaskRangedAttack::UBTTaskRangedAttack()
 {
 	NodeName = "BTTaskRangedAttack";
 	bCreateNodeInstance = true;
+	ConstructorHelpers::FObjectFinder<USoundCue> rangedAttackSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Ranged_Enemy_Attack_Cue.Ranged_Enemy_Attack_Cue'"));
+	RangedAttackSoundCue = rangedAttackSoundCueFinder.Object;
 }
 
 void UBTTaskRangedAttack::SetOwner(AActor* ActorOwner)
@@ -33,13 +36,15 @@ EBTNodeResult::Type UBTTaskRangedAttack::ExecuteTask(UBehaviorTreeComponent& Own
 	APawn* pawn = controller->GetPawn();
 	USkeletalMeshComponent* meshComponent = pawn->FindComponentByClass<USkeletalMeshComponent>();
 
-	FTransform socketTransform = meshComponent->GetSocketTransform(SocketName);	
+	const FTransform socketTransform = meshComponent->GetSocketTransform(SocketName);	
 
+	FVector shotLocation = socketTransform.GetLocation();
 
-	FVector targetDir = targetActor->GetActorLocation() - socketTransform.GetLocation();
+	FVector targetDir = targetActor->GetActorLocation() - shotLocation;
 	targetDir.Normalize();
 
-	ProjectileClass.GetDefaultObject()->FireProjectile(socketTransform.GetLocation(), targetDir, pawn, controller);
+	ProjectileClass.GetDefaultObject()->FireProjectile(shotLocation, targetDir, pawn, controller);
+	UMlgGameplayStatics::PlaySoundAtLocationNetworked(pawn->GetWorld(), FSoundParams(RangedAttackSoundCue, shotLocation));
 
 	return EBTNodeResult::Succeeded;
 }

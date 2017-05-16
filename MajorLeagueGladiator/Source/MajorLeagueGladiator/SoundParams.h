@@ -37,18 +37,17 @@ struct FSoundParams
 	float StartTime;
 
 	FSoundParams()
-		: Sound(nullptr)
-		, AttenuationSettings(nullptr)
-		, ConcurrencySettings(nullptr)
-		, Location(FVector::ZeroVector)
-		, Rotation(FRotator::ZeroRotator)
-		, VolumeMultiplier(1.0f)
-		, PitchMultiplier(1.0f)
-		, StartTime(0.0f)
+		: FSoundParams(nullptr, FVector::ZeroVector)
 	{}
 
 	FSoundParams(USoundBase* sound, const FVector& location = FVector::ZeroVector)
 		: Sound(sound)
+		, AttenuationSettings(nullptr)
+		, ConcurrencySettings(nullptr)
 		, Location(location)
+		, Rotation(FRotator::ZeroRotator)
+		, VolumeMultiplier(1.0f)
+		, PitchMultiplier(1.0f)
+		, StartTime(0.0f)
 	{}
 };
