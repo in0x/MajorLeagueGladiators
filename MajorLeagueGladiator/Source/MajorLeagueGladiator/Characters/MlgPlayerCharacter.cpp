@@ -173,6 +173,8 @@ void AMlgPlayerCharacter::OnHealthChanged(float newHealthPercentage, float oldHe
 			iter->OnPlayerDied_NetMulticast();
 		}
 	}
+
+	damageFeedback->DoPostProcessVisualization();
 }
 
 void AMlgPlayerCharacter::OnLand(const FHitResult& hit)
