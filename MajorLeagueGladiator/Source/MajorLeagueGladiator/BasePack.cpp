@@ -127,7 +127,10 @@ void ABasePack::OnLaunch()
 
 void ABasePack::onLaunchCharged_NetMulticast_Implementation()
 {
-	OnActorHit.AddDynamic(this, &ABasePack::onCollision);
+	if (!OnActorHit.IsAlreadyBound(this, &ABasePack::onCollision))
+	{
+		OnActorHit.AddDynamic(this, &ABasePack::onCollision);
+	}
 }
 
 void ABasePack::onCollision(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
