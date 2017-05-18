@@ -26,35 +26,14 @@ void AGameplayAbilityTargetActor_Raycast::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	FTransform targetTrans;
+	FVector targetLocation;
 	FVector direction;
+	GetTargetingLocationAndDirection(targetLocation, direction);
 
-	switch (aimDirection)
-	{
-		case ERaycastTargetDirection::ForwardVector:
-		{
-			targetTrans = StartLocation.SourceComponent->GetComponentTransform();
-			direction = StartLocation.SourceComponent->GetForwardVector();
-			break;
-		}
-		case ERaycastTargetDirection::UpVector:
-		{
-			targetTrans = StartLocation.SourceComponent->GetComponentTransform();
-			direction = StartLocation.SourceComponent->GetUpVector();
-			break; 
-		}
-		case ERaycastTargetDirection::ComponentRotation:
-		{
-			targetTrans = StartLocation.GetTargetingTransform();
-			direction = targetTrans.GetRotation().Vector();
-			break; 
-		}
-	}
-	
-	const auto targetBegin = targetTrans.GetLocation();
+	const auto targetBegin = targetLocation;
 	const auto targetEnd = targetBegin + (direction * MaxRange);
 
-	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes {
+	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
 		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic),
 	};
 
@@ -63,7 +42,7 @@ void AGameplayAbilityTargetActor_Raycast::Tick(float DeltaSeconds)
 
 	auto* world = GetWorld();
 	auto didHit = world->LineTraceSingleByObjectType(hitResult, targetBegin, targetEnd, queryTypes, CollisionParams);
-	
+
 	bool isValidTarget = EvalTargetFunc(hitResult);
 
 	FVector drawEnd = isValidTarget ? hitResult.ImpactPoint : targetEnd;
@@ -78,10 +57,38 @@ bool AGameplayAbilityTargetActor_Raycast::IsConfirmTargetingAllowed()
 	return CanConfirmInvalidTarget || EvalTargetFunc(hitResult);
 }
 
-FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_Raycast::makeDataHandle() 
+void AGameplayAbilityTargetActor_Raycast::GetTargetingLocationAndDirection(FVector& OutLocation, FVector& OutDirection) const
+{
+	switch (aimDirection)
+	{
+	case ERaycastTargetDirection::ForwardVector:
+	{
+		const FTransform targetTrans = StartLocation.SourceComponent->GetComponentTransform();
+		OutDirection = StartLocation.SourceComponent->GetForwardVector();
+		OutLocation = targetTrans.GetLocation();
+		break;
+	}
+	case ERaycastTargetDirection::UpVector:
+	{
+		const FTransform targetTrans = StartLocation.SourceComponent->GetComponentTransform();
+		OutDirection = StartLocation.SourceComponent->GetUpVector();
+		OutLocation = targetTrans.GetLocation();
+		break;
+	}
+	case ERaycastTargetDirection::ComponentRotation:
+	{
+		const FTransform targetTrans = StartLocation.GetTargetingTransform();
+		OutDirection = targetTrans.GetRotation().Vector();
+		OutLocation = targetTrans.GetLocation();
+		break;
+	}
+	}
+}
+
+FGameplayAbilityTargetDataHandle AGameplayAbilityTargetActor_Raycast::makeDataHandle()
 {
 	return FGameplayAbilityTargetDataHandle(
-		new FGameplayAbilityTargetData_SingleTargetHit(hitResult) 
+		new FGameplayAbilityTargetData_SingleTargetHit(hitResult)
 		);
 }
 

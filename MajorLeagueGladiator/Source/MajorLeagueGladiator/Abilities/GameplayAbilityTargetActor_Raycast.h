@@ -42,6 +42,8 @@ public:
 	RaycastTargetEvaluationFunc EvalTargetFunc;
 	
 private:
+	void GetTargetingLocationAndDirection(FVector& OutLocation, FVector& OutDirection) const;
+
 	FGameplayAbilityTargetDataHandle makeDataHandle();
 
 	FHitResult hitResult;
