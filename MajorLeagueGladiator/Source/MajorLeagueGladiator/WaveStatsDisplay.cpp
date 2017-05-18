@@ -9,14 +9,7 @@
 // Sets default values
 AWaveStatsDisplay::AWaveStatsDisplay(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-{
-	//widgetComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("WidgetComponent"));
-	//RootComponent = widgetComponent;
-
-	//ConstructorHelpers::FObjectFinder<UMaterialInterface> materialFinder(TEXT("Material'/Engine/EngineMaterials/Widget3DPassThrough.Widget3DPassThrough'"));
-	//widgetComponent->SetMaterial(0, materialFinder.Object);
-
-}
+{}
 
 // Called when the game starts or when spawned
 void AWaveStatsDisplay::BeginPlay()

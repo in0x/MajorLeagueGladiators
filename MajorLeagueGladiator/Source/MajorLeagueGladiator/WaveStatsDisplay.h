@@ -13,16 +13,10 @@ class MAJORLEAGUEGLADIATOR_API AWaveStatsDisplay : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AWaveStatsDisplay(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//	UWidgetComponent* widgetComponent;
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	
+	virtual void BeginPlay() override;	
 
 public:	
 
@@ -33,9 +27,6 @@ public:
 	void UpdateEnemyCount(int NewEnemyCount);
 private:
 
-	
-
 	void OnWaveNumberChanged(int NewWaveCount);
-	void OnEnemyCountChanged(int NewCount, int OldCount);
-	
+	void OnEnemyCountChanged(int NewCount, int OldCount);	
 };
