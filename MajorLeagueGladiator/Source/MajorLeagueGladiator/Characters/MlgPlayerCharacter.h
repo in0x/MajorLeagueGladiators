@@ -20,6 +20,7 @@ class UTriggerZoneComponent;
 class UGameplayAbility;
 class UPredictedEffectsComponent;
 class UPlayerDeathComponent;
+class UPlayerDamageFeedbackComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityMoveTargetLocationSet, FVector, NewLocation);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityActivated, TSubclassOf<UGameplayAbility>, AbilityType);
@@ -102,6 +103,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UPlayerDeathComponent* deathComponent;
+
+	UPROPERTY(EditAnywhere)
+	UPlayerDamageFeedbackComponent* damageFeedback;
 
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;

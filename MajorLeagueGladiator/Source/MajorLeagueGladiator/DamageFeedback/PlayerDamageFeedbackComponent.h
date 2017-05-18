@@ -9,5 +9,10 @@ UCLASS(Blueprintable, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent
 class MAJORLEAGUEGLADIATOR_API UPlayerDamageFeedbackComponent : public UDamageFeedbackComponent
 {
 	GENERATED_BODY()
+
+public:
+	UPlayerDamageFeedbackComponent();
+	
+	virtual void BeginPlay() override;
 	
 };
