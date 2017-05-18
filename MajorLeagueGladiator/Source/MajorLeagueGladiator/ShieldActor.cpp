@@ -54,7 +54,7 @@ void AShieldActor::PlayReflectSound()
 
 void AShieldActor::playSpawnSound()
 {
-	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(spawnSoundCue, GetActorLocation()));
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), spawnSoundCue, GetActorLocation());
 }
 
 void AShieldActor::OnHitInteractable(const ABaseProjectile* projectile)
