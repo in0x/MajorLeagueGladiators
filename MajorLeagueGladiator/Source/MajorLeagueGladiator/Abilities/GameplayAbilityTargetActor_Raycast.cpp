@@ -26,24 +26,27 @@ void AGameplayAbilityTargetActor_Raycast::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	const auto targetTrans = StartLocation.SourceComponent->GetComponentTransform();
+	FTransform targetTrans;
 	FVector direction;
 
 	switch (aimDirection)
 	{
 		case ERaycastTargetDirection::ForwardVector:
 		{
+			targetTrans = StartLocation.SourceComponent->GetComponentTransform();
 			direction = StartLocation.SourceComponent->GetForwardVector();
 			break;
 		}
 		case ERaycastTargetDirection::UpVector:
 		{
+			targetTrans = StartLocation.SourceComponent->GetComponentTransform();
 			direction = StartLocation.SourceComponent->GetUpVector();
 			break; 
 		}
 		case ERaycastTargetDirection::ComponentRotation:
 		{
-			direction = StartLocation.GetTargetingTransform().GetRotation().Vector();
+			targetTrans = StartLocation.GetTargetingTransform();
+			direction = targetTrans.GetRotation().Vector();
 			break; 
 		}
 	}
