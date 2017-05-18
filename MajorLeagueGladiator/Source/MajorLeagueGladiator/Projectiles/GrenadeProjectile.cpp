@@ -63,8 +63,11 @@ void AGrenadeProjectile::onProjectileBounce(const FHitResult& ImpactResult, cons
 {
 	// This event is called by HandleImpact, and checks the velocity after calling it.
 	// So by setting the velocity to below the stop threshold, we can stop the projectile.
-	if (ImpactResult.Actor == nullptr || // This is a workaround while we have bsp brushes in the level.
-		Cast<AShieldActor>(ImpactResult.Actor.Get()))
+	
+	AShieldActor* shield = Cast<AShieldActor>(ImpactResult.Actor.Get());
+	bool bImpactIsStatic = ImpactResult.Actor->GetRootComponent()->Mobility.GetValue() == EComponentMobility::Static;
+
+	if (shield || bImpactIsStatic)
 	{
 		projectileMovementComponent->Velocity = FVector::ZeroVector;
 	}
@@ -110,6 +113,8 @@ void AGrenadeProjectile::refract(AShieldActor* ShieldActor)
 
 		spawnedProjectile->TimedExplode();
 	}
+
+	ShieldActor->PlayReflectSound();
 
 	Destroy();
 }

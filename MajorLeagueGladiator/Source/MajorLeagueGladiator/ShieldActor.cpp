@@ -5,6 +5,7 @@
 
 #include "Projectiles/BaseProjectile.h"
 #include "MlgPlayerController.h"
+#include "MlgGameplayStatics.h"
 
 namespace
 {
@@ -26,6 +27,18 @@ AShieldActor::AShieldActor(const FObjectInitializer& ObjectInitializer)
 
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> material(TEXT("Material'/Game/Materials/M_Transparent.M_Transparent'"));
 	staticMeshComp->SetMaterial(0, material.Object);
+
+	ConstructorHelpers::FObjectFinder<USoundCue> spawnSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/ShieldSpawnSound_Cue.ShieldSpawnSound_Cue'"));
+	spawnSoundCue = spawnSoundCueFinder.Object;
+	
+	ConstructorHelpers::FObjectFinder<USoundCue> reflefctSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/ShieldReflectSound_Cue.ShieldReflectSound_Cue'"));
+	reflectSoundCue = reflefctSoundCueFinder.Object;
+}
+
+void AShieldActor::BeginPlay() 
+{
+	Super::BeginPlay();
+	playSpawnSound();
 }
 
 FTransform AShieldActor::GetReflectSpawnTransform() const
@@ -34,10 +47,21 @@ FTransform AShieldActor::GetReflectSpawnTransform() const
 	return MeshComponent->GetSocketTransform(REFLECT_SOCKET_NAME);
 }
 
+void AShieldActor::PlayReflectSound()
+{
+	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(reflectSoundCue, GetActorLocation()));
+}
+
+void AShieldActor::playSpawnSound()
+{
+	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(spawnSoundCue, GetActorLocation()));
+}
+
 void AShieldActor::OnHitInteractable(const ABaseProjectile* projectile)
 {
 	FTransform socketTransform = GetReflectSpawnTransform();
 	projectile->FireProjectile(socketTransform.GetLocation(), socketTransform.Rotator().Vector(), this, Instigator->GetController());
+	PlayReflectSound();
 
 	if (AMlgPlayerController* playerController = GetMlgPlayerController())
 	{
