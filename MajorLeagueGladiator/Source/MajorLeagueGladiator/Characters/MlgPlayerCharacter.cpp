@@ -19,6 +19,7 @@
 #include "Animation/AnimSingleNodeInstance.h"
 #include "PredictedEffectsComponent.h"
 #include "PlayerDeathComponent.h"
+#include "DamageFeedback/PlayerDamageFeedbackComponent.h"
 
 namespace 
 {
@@ -124,6 +125,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	predictedEffectsComponent = ObjectInitializer.CreateDefaultSubobject<UPredictedEffectsComponent>(this, TEXT("PredictedEffectsComponent"));
 	deathComponent = ObjectInitializer.CreateDefaultSubobject<UPlayerDeathComponent>(this, TEXT("PlayerDeathComponent"));
+	damageFeedback = ObjectInitializer.CreateDefaultSubobject<UPlayerDamageFeedbackComponent>(this, TEXT("PlayerDamageFeedbackComponent"));
 }
 
 void AMlgPlayerCharacter::BeginPlay()
@@ -147,7 +149,7 @@ void AMlgPlayerCharacter::BeginPlay()
 		bUseControllerRotationYaw = true;
 #endif
 	}
-	
+
 	auto healthWidget = CastChecked<UPlayerHudWidget>(hudHealth->GetUserWidgetObject());
 	healthComp->HealthChangedDelegate.AddDynamic(healthWidget, &UPlayerHudWidget::SetCurrentPercentage);
 	healthWidget->SetCurrentPercentage(healthComp->GetCurrentHealthPercentage(), 1.0f);
@@ -155,7 +157,7 @@ void AMlgPlayerCharacter::BeginPlay()
 	healthComp->HealthChangedDelegate.AddDynamic(this, &AMlgPlayerCharacter::OnHealthChanged);
 	
 	LandedDelegate.AddDynamic(this, &AMlgPlayerCharacter::OnLand);
-	
+
 	if (HasAuthority())
 	{
 		SpawnWeapon();
