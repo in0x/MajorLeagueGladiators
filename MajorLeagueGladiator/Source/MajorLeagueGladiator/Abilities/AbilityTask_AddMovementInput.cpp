@@ -19,7 +19,6 @@ UAbilityTask_AddMovementInput* UAbilityTask_AddMovementInput::Create(
 UAbilityTask_AddMovementInput::UAbilityTask_AddMovementInput()
 {
 	bTickingTask = true;
-	bSimulatedTask = true;
 }
 
 void UAbilityTask_AddMovementInput::TickTask(float DeltaTime)

@@ -13,7 +13,7 @@ UWalkingMovementAbility::UWalkingMovementAbility(const FObjectInitializer& Objec
 
 void UWalkingMovementAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	movementTask->ExternalConfirm(true);
+	movementTask->EndTask();
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false, false);
 }
 
