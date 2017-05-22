@@ -7,7 +7,10 @@
 UPlayerDamageFeedbackComponent::UPlayerDamageFeedbackComponent()
 	: hitDuration(0.5f), elapsedHitDuration(0.f)
 {
-
+	PrimaryComponentTick.bCanEverTick = true;
+	
+	static ConstructorHelpers::FObjectFinder<UMaterialInstanceConstant> glitchMaterial(TEXT("MaterialInstanceConstant'/Game/Materials/GlitchEffect/M_Glitch_PostProcess_Inst.M_Glitch_PostProcess_Inst'"));
+	postProcessGlitchMaterial = glitchMaterial.Object;
 }
 
 void UPlayerDamageFeedbackComponent::BeginPlay()
@@ -19,12 +22,14 @@ void UPlayerDamageFeedbackComponent::BeginPlay()
 	}
 
 	//Convert all constant material instances to dynamic ones:
-	for (auto blendable : postProcessComp->Settings.WeightedBlendables.Array)
+	//https://docs.unrealengine.com/latest/INT/API/Runtime/Engine/Engine/FPostProcessSettings/index.html
+	/*for (auto blendable : postProcessComp->Settings.WeightedBlendables.Array)
 	{
 		UMaterialInstanceDynamic* matInstanceDyn = UMaterialInstanceDynamic::Create(CastChecked<UMaterialInterface>(blendable.Object), GetOwner());
 		blendable.Object = matInstanceDyn;
+		dynamicMaterialInstances.Add(matInstanceDyn);
 	}
-
+*/
 }
 
 void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -33,18 +38,18 @@ void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick T
 
 	if (elapsedHitDuration > 0.f)
 	{
+		postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, 1.f);
+		/*
+		UE_LOG(DebugLog, Warning, TEXT("UPlayerDamageFeedbackComponent: Blendables %f"), postProcessComp->Settings.WeightedBlendables.Array.Num());
 		for (auto blendable : postProcessComp->Settings.WeightedBlendables.Array)
 		{
 			blendable.Weight = 1.f;
-		}
-		elapsedHitDuration -= DeltaTime;
-		/*if (elapsedHitDuration <= 0.f)
-		{
-			for (auto blendable : postProcessComp->Settings.WeightedBlendables.Array)
-			{
-				blendable.Weight = 0.f;
-			}
 		}*/
+		elapsedHitDuration -= DeltaTime;
+		if (elapsedHitDuration <= 0.f)
+		{
+			postProcessComp->Settings.RemoveBlendable(postProcessGlitchMaterial);
+		}
 	}
 }
 

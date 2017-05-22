@@ -24,6 +24,12 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UPostProcessComponent* postProcessComp;
 	
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* postProcessGlitchMaterial;
+	
+	UPROPERTY(EditAnywhere)
+	TArray<UMaterialInstanceDynamic*> dynamicMaterialInstances;
+	
 	float hitDuration;
 	float elapsedHitDuration;
 

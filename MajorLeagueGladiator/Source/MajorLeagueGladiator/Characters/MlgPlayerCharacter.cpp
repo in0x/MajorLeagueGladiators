@@ -149,6 +149,12 @@ void AMlgPlayerCharacter::BeginPlay()
 		bUseControllerRotationYaw = true;
 #endif
 	}
+	
+	damageFeedback = FindComponentByClass<UPlayerDamageFeedbackComponent>();
+	if (!damageFeedback)
+	{
+		UE_LOG(DebugLog, Warning, TEXT("AMlgPlayerCharacter::BeginPlay: UPlayerDamageFeedbackComponent not found!"));
+	}
 
 	auto healthWidget = CastChecked<UPlayerHudWidget>(hudHealth->GetUserWidgetObject());
 	healthComp->HealthChangedDelegate.AddDynamic(healthWidget, &UPlayerHudWidget::SetCurrentPercentage);
@@ -174,7 +180,11 @@ void AMlgPlayerCharacter::OnHealthChanged(float newHealthPercentage, float oldHe
 		}
 	}
 
-	damageFeedback->DoPostProcessVisualization();
+	if (newHealthPercentage < oldHealthPercentage)
+	{
+		damageFeedback->DoPostProcessVisualization();
+	}
+	
 }
 
 void AMlgPlayerCharacter::OnLand(const FHitResult& hit)
