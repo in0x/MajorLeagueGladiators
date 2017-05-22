@@ -25,7 +25,7 @@ void UAbilityTask_AddMovementInput::TickTask(float DeltaTime)
 {
 	Super::TickTask(DeltaTime);
 
-	if (movingCharacter->GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Falling)
+	if (movingCharacter->GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Walking)
 	{
 		OnCancelAbility.Broadcast();
 		return;
