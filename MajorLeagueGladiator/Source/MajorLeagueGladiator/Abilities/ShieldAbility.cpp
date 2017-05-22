@@ -22,6 +22,7 @@ UShieldAbility::UShieldAbility()
 	, gripControllerMesh(nullptr)
 	, gripController(nullptr)
 	, shieldActor(nullptr)
+	, maxCurrentActiveTime(0.f)
 {
 	bReplicateInputDirectly = true;
 }
@@ -43,6 +44,12 @@ void UShieldAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const F
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
+
+void UShieldAbility::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UShieldAbility, shieldActor);
+}
 
 void UShieldAbility::PushAwayCloseActors()
 {
@@ -118,8 +125,8 @@ void UShieldAbility::SpawnShield()
 		FTransform shieldSpawnTransform = gripControllerMesh->GetSocketTransform(SHIELD_SOCKET_NAME);
 
 		shieldActor = GetWorld()->SpawnActor<AShieldActor>(shieldActorClass, shieldSpawnTransform, spawnParams);
-
-		gripController->GripActor(shieldActor, shieldSpawnTransform, false);
+		// Notify Myself
+		onRep_shieldActor();
 	}
 }
 
@@ -127,10 +134,20 @@ void UShieldAbility::DespawnShield()
 {
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority && shieldActor)
 	{		
-		gripController->DropActor(shieldActor, false);
 		shieldActor->Destroy();
 		shieldActor = nullptr;
 	}
+}
+
+void UShieldAbility::onRep_shieldActor()
+{
+	if (shieldActor)
+	{
+		FTransform shieldSpawnTransform = gripControllerMesh->GetSocketTransform(SHIELD_SOCKET_NAME);
+		shieldActor->SetActorTransform(shieldSpawnTransform);
+		FAttachmentTransformRules rules(EAttachmentRule::KeepWorld, true);
+		shieldActor->AttachToComponent(gripController, rules);
+	}	
 }
 
 void UShieldAbility::SetGripControllerFromOwner()

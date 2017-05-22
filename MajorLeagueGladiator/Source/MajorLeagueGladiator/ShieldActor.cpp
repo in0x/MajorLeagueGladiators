@@ -14,19 +14,20 @@ namespace
 }
 
 AShieldActor::AShieldActor(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<UStaticMeshComponent>(Super::MESH_COMPONENT_NAME))
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponent>(Super::MESH_COMPONENT_NAME))
+	, maxCurrentActiveTime(0)
+	, currentActiveTime(0)
 {
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 	bReplicates = true;
 	MeshComponent->bGenerateOverlapEvents = true;
 	MeshComponent->SetCollisionProfileName(SHIELD_COLLISION_PRESET_NAME);
 
-	UStaticMeshComponent* staticMeshComp = CastChecked<UStaticMeshComponent>(MeshComponent);
+	USkeletalMeshComponent* skeletalMeshComp = CastChecked<USkeletalMeshComponent>(MeshComponent);
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> staticMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/shield09.shield09'"));
-	staticMeshComp->SetStaticMesh(staticMesh.Object);
-
-	ConstructorHelpers::FObjectFinder<UMaterialInterface> material(TEXT("Material'/Game/Materials/M_Transparent.M_Transparent'"));
-	staticMeshComp->SetMaterial(0, material.Object);
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> skeletalMesh(TEXT("SkeletalMesh'/Game/MVRCFPS_Assets/Shield/shield.shield'"));
+	skeletalMeshComp->SetSkeletalMesh(skeletalMesh.Object);
 
 	ConstructorHelpers::FObjectFinder<USoundCue> spawnSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/ShieldSpawnSound_Cue.ShieldSpawnSound_Cue'"));
 	spawnSoundCue = spawnSoundCueFinder.Object;
@@ -41,6 +42,14 @@ void AShieldActor::BeginPlay()
 	playSpawnSound();
 }
 
+void AShieldActor::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	
+	currentActiveTime += DeltaSeconds;
+}
+
+
 FTransform AShieldActor::GetReflectSpawnTransform() const
 {
 	checkf(MeshComponent->DoesSocketExist(REFLECT_SOCKET_NAME), TEXT("Socket \"Reflect\" is missing in the shield actor mesh"));
@@ -50,6 +59,12 @@ FTransform AShieldActor::GetReflectSpawnTransform() const
 void AShieldActor::PlayReflectSound()
 {
 	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(reflectSoundCue, GetActorLocation()));
+}
+
+void AShieldActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AShieldActor, maxCurrentActiveTime)
 }
 
 void AShieldActor::playSpawnSound()
