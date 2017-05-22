@@ -20,6 +20,12 @@ void UPlayerDamageFeedbackComponent::BeginPlay()
 	{
 		UE_LOG(DebugLog, Warning, TEXT("MlgPlayerCharacter: UPostProcessComponent could not be found!"));
 	}
+	else
+	{
+		postProcessComp->Settings.SceneFringeIntensity = 4.f;
+		postProcessComp->Settings.VignetteIntensity = 0.75f;
+	}
+	
 
 	//Convert all constant material instances to dynamic ones:
 	//https://docs.unrealengine.com/latest/INT/API/Runtime/Engine/Engine/FPostProcessSettings/index.html
@@ -39,6 +45,8 @@ void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick T
 	if (elapsedHitDuration > 0.f)
 	{
 		postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, 1.f);
+		postProcessComp->Settings.bOverride_SceneFringeIntensity = true;
+		postProcessComp->Settings.bOverride_VignetteIntensity = true;
 		/*
 		UE_LOG(DebugLog, Warning, TEXT("UPlayerDamageFeedbackComponent: Blendables %f"), postProcessComp->Settings.WeightedBlendables.Array.Num());
 		for (auto blendable : postProcessComp->Settings.WeightedBlendables.Array)
@@ -49,6 +57,8 @@ void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick T
 		if (elapsedHitDuration <= 0.f)
 		{
 			postProcessComp->Settings.RemoveBlendable(postProcessGlitchMaterial);
+			postProcessComp->Settings.bOverride_SceneFringeIntensity = false;
+			postProcessComp->Settings.bOverride_VignetteIntensity = false;
 		}
 	}
 }
