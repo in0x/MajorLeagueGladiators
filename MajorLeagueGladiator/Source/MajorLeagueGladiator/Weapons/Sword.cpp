@@ -240,7 +240,7 @@ void ASword::tryLaunchCharacter(ACharacter* character) const
 	if (moveMode == MOVE_Falling)
 	{
 		charMoveComp->StopMovementImmediately();
-		character->LaunchCharacter(GetVelocity(), true, true);
+		character->LaunchCharacter(currentVelocity, true, true);
 	}
 }
 
@@ -284,7 +284,7 @@ void ASword::dealDamageTo_Server_Implementation(ACharacter* OtherCharacter, cons
 
 	UGameplayStatics::ApplyPointDamage(OtherCharacter, damageAppliedOnHit, HitResult.TraceEnd - HitResult.TraceStart,
 		HitResult, GetInstigatorController(), this, damageType);
-	tryLaunchCharacter(OtherCharacter);
+	// tryLaunchCharacter(OtherCharacter);
 }
 
 FVector ASword::calcRelativeVelocity() const
