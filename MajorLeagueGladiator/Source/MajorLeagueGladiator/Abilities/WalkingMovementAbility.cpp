@@ -17,12 +17,19 @@ void UWalkingMovementAbility::InputReleased(const FGameplayAbilitySpecHandle Han
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false, false);
 }
 
+void UWalkingMovementAbility::OnMovementTaskCancel()
+{
+	movementTask->EndTask();
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false, false);
+}
+
 void UWalkingMovementAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	AMlgPlayerCharacter* owningChar = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
 
 	movementTask = UAbilityTask_AddMovementInput::Create(this, "AddMovementInputTask", owningChar, owningChar->GetMotionController(targetingHand));
 	movementTask->ReadyForActivation();
+	movementTask->OnCancelAbility.AddDynamic(this, &UWalkingMovementAbility::OnMovementTaskCancel);
 	CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo);
 }
 

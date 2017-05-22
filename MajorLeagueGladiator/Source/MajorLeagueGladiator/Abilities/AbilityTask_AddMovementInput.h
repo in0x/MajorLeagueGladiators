@@ -9,20 +9,23 @@ UCLASS()
 class MAJORLEAGUEGLADIATOR_API UAbilityTask_AddMovementInput : public UAbilityTask
 {
 	GENERATED_BODY()
-	
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAbilityCancelledDelegate);
+
 public:
 	static UAbilityTask_AddMovementInput* Create(
 		UGameplayAbility* ThisAbility,
 		FName TaskName,
-		APawn* MovingCharacter,
+		ACharacter* MovingCharacter,
 		USceneComponent* GetDirectionFromComponent);
 	
 	UAbilityTask_AddMovementInput();
 	virtual void TickTask(float DeltaTime) override;
-	
+	FAbilityCancelledDelegate OnCancelAbility;
+
 private:
 	UPROPERTY()
-	APawn* movingCharacter;
+	ACharacter* movingCharacter;
 
 	UPROPERTY()
 	USceneComponent* getDirectionFromComponent;
