@@ -14,11 +14,15 @@ class MAJORLEAGUEGLADIATOR_API AShieldActor : public AMlgGrippableMeshActor
 public:
 	AShieldActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds);
 	void OnHitInteractable(const ABaseProjectile* projectile);	
 	FTransform GetReflectSpawnTransform() const;
 	void PlayReflectSound();
+	float GetCurrentActiveTime() { return currentActiveTime; }
 
 private:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY(EditAnywhere)
 	USoundCue* spawnSoundCue;
 
@@ -26,4 +30,9 @@ private:
 	USoundCue* reflectSoundCue;
 
 	void playSpawnSound();
+
+	UPROPERTY(Transient, ReplicatedUsing)
+	float maxCurrentActiveTime;
+
+	float currentActiveTime;
 };

@@ -20,6 +20,7 @@ public:
 
 
 private:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const override;
 	void PushAwayCloseActors();
 
 	// we might want to put this into a common base class for abilities that use motion controllers
@@ -30,6 +31,9 @@ private:
 
 	void SpawnShield();
 	void DespawnShield();
+
+	UFUNCTION()
+	void onRep_shieldActor();
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AShieldActor> shieldActorClass;
@@ -49,6 +53,9 @@ private:
 	UPROPERTY(Transient)
 	UVRControllerComponent* gripController;
 
-	UPROPERTY(Transient)
+	UPROPERTY(Transient, ReplicatedUsing = onRep_shieldActor)
 	AActor* shieldActor;
+
+	UPROPERTY(Transient, ReplicatedUsing = onRep_shieldActor)
+	float maxCurrentActiveTime;
 };
