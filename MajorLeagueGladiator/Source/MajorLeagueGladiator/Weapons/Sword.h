@@ -25,6 +25,8 @@ private:
 	void doRumbleRight();
 	void setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn);
 	void dealDamageTo(ACharacter* OtherCharacter, const FHitResult& HitResult);
+	UFUNCTION(Server, WithValidation, Reliable)
+	void dealDamageTo_Server(ACharacter* OtherCharacter, const FHitResult& HitResult);
 	void updateMaterialIntensity(float intensity);
 	void updateMaterialColor(const FLinearColor& color);
 
@@ -35,6 +37,7 @@ private:
 	void getOverlappingHits(TArray<TPair<AActor*, FHitResult>>& outActorToHit) const;
 	void UpdateVelocity(float DeltaTime);
 	FVector calcRelativeVelocity() const;
+	APawn* getOwnerPawn();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
