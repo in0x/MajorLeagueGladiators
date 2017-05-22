@@ -27,11 +27,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* postProcessGlitchMaterial;
 	
-	UPROPERTY(EditAnywhere)
-	TArray<UMaterialInstanceDynamic*> dynamicMaterialInstances;
-	
-	float hitDuration;
-	float elapsedHitDuration;
+	float hitDurationGlitch;
+	float leftHitDurationGlitch;
+	float transitionDurationGlitch;
 
 
 };

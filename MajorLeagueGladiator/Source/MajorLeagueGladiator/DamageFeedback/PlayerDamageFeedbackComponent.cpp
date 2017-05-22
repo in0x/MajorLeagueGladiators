@@ -5,7 +5,7 @@
 
 
 UPlayerDamageFeedbackComponent::UPlayerDamageFeedbackComponent()
-	: hitDuration(0.5f), elapsedHitDuration(0.f)
+	: hitDurationGlitch(1.f), leftHitDurationGlitch(0.f), transitionDurationGlitch(0.2f)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	
@@ -22,39 +22,27 @@ void UPlayerDamageFeedbackComponent::BeginPlay()
 	}
 	else
 	{
+		//https://docs.unrealengine.com/latest/INT/API/Runtime/Engine/Engine/FPostProcessSettings/index.html
 		postProcessComp->Settings.SceneFringeIntensity = 4.f;
 		postProcessComp->Settings.VignetteIntensity = 0.75f;
 	}
-	
-
-	//Convert all constant material instances to dynamic ones:
-	//https://docs.unrealengine.com/latest/INT/API/Runtime/Engine/Engine/FPostProcessSettings/index.html
-	/*for (auto blendable : postProcessComp->Settings.WeightedBlendables.Array)
-	{
-		UMaterialInstanceDynamic* matInstanceDyn = UMaterialInstanceDynamic::Create(CastChecked<UMaterialInterface>(blendable.Object), GetOwner());
-		blendable.Object = matInstanceDyn;
-		dynamicMaterialInstances.Add(matInstanceDyn);
-	}
-*/
 }
 
 void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (elapsedHitDuration > 0.f)
+	if (leftHitDurationGlitch > 0.f)
 	{
-		postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, 1.f);
+		float scaledValue = (transitionDurationGlitch - (1 - leftHitDurationGlitch)) / transitionDurationGlitch;
+		
+		//https://docs.unrealengine.com/latest/INT/API/Runtime/Engine/Engine/FPostProcessSettings/index.html
+		postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, FMath::Clamp(scaledValue, 0.f, 1.f)); //1.f
 		postProcessComp->Settings.bOverride_SceneFringeIntensity = true;
 		postProcessComp->Settings.bOverride_VignetteIntensity = true;
-		/*
-		UE_LOG(DebugLog, Warning, TEXT("UPlayerDamageFeedbackComponent: Blendables %f"), postProcessComp->Settings.WeightedBlendables.Array.Num());
-		for (auto blendable : postProcessComp->Settings.WeightedBlendables.Array)
-		{
-			blendable.Weight = 1.f;
-		}*/
-		elapsedHitDuration -= DeltaTime;
-		if (elapsedHitDuration <= 0.f)
+		
+		leftHitDurationGlitch -= DeltaTime;
+		if (leftHitDurationGlitch <= 0.f)
 		{
 			postProcessComp->Settings.RemoveBlendable(postProcessGlitchMaterial);
 			postProcessComp->Settings.bOverride_SceneFringeIntensity = false;
@@ -65,5 +53,5 @@ void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick T
 
 void UPlayerDamageFeedbackComponent::DoPostProcessVisualization()
 {
-	elapsedHitDuration = hitDuration;
+	leftHitDurationGlitch = hitDurationGlitch;
 }
