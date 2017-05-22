@@ -41,8 +41,7 @@ public:
 	void MoveRight(float Value);
 	void SetLeftTriggerStatus(float Value);
 	void SetRightTriggerStatus(float Value);
-	void OnSideGripAxisRight(float Value);
-
+	
 	void OnLeftTriggerClicked();
 	void OnLeftTriggerReleased();
 	void OnRightTriggerClicked();
@@ -165,9 +164,6 @@ private:
 
 	UFUNCTION(Server, WithValidation, reliable)
 	void rightHandDrop_Server();
-
-	UFUNCTION(Server, WithValidation, reliable)
-	void directionalMove_Server(float Value);
 
 	void SpawnWeapon();
 

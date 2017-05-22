@@ -218,8 +218,6 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("LeftTriggerAxis", this, &AMlgPlayerCharacter::SetLeftTriggerStatus);
 	PlayerInputComponent->BindAxis("RightTriggerAxis", this, &AMlgPlayerCharacter::SetRightTriggerStatus);
 
-	PlayerInputComponent->BindAxis("RightGripAxis", this, &AMlgPlayerCharacter::OnSideGripAxisRight);
-
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &AMlgPlayerCharacter::OnRightTriggerClicked);
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerReleased);
 
@@ -479,23 +477,6 @@ void AMlgPlayerCharacter::rightHandDrop_Server_Implementation()
 	attachedWeapon->OnEndUsed();
 }
 
-bool AMlgPlayerCharacter::directionalMove_Server_Validate(float Value)
-{
-	return true;
-}
-
-void AMlgPlayerCharacter::directionalMove_Server_Implementation(float Value)
-{
-	if (Value > 0.f) 
-	{
-		const FVector forward = RightMotionController->GetForwardVector();
-		FVector direction(forward.X, forward.Y, 0.f);
-		direction.Normalize();
-
-		AddMovementInput(direction, Value);
-	}
-}
-
 void AMlgPlayerCharacter::EnableActorCollison_NetMulticast_Implementation(bool bNewActorEnableCollision)
 {
 	SetActorEnableCollision(bNewActorEnableCollision);
@@ -529,7 +510,3 @@ void AMlgPlayerCharacter::SetRightTriggerStatus(float Value)
 	rightMesh->GetSingleNodeInstance()->SetBlendSpaceInput(BlendParams);
 }
 
-void AMlgPlayerCharacter::OnSideGripAxisRight(float Value)
-{
-	directionalMove_Server(Value);
-}
