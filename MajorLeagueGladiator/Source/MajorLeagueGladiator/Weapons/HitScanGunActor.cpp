@@ -25,6 +25,8 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	, recoilOrigin(0.f)
 	, recoilDistance(-30.f)
 	, projectileClass(AHitscanProjectile::StaticClass())
+	, MaxGlow(100.f)
+	, MinGlow(0.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -98,9 +100,17 @@ void AHitScanGunActor::BeginPlay()
 	chargeWidget = CastChecked<UPlayerHudWidget>(chargeShotHud->GetUserWidgetObject());
 	chargeWidget->SetCurrentPercentage(1.0f, 1.0f);
 
+	laserMeshMaterial = laserMesh->CreateAndSetMaterialInstanceDynamic(0);
+	gunMeshMaterial = MeshComponent->CreateAndSetMaterialInstanceDynamic(0);
+
 	chargeShot->OnChargeValueChangedPercentage.AddLambda([this](float newValue)
 	{
 		chargeWidget->SetCurrentPercentage(newValue, newValue);
+
+		float currentGlow = FMath::Lerp(MinGlow, MaxGlow, newValue);
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("%f"), currentGlow));
+		gunMeshMaterial->SetScalarParameterValue(FName("Glow"), currentGlow);
+		laserMeshMaterial->SetScalarParameterValue(FName("Glow"), currentGlow);
 	});
 }
 

@@ -63,6 +63,16 @@ private:
 
 	UTextWidget* textWidget;
 
+	UMaterialInstanceDynamic* laserMeshMaterial;
+
+	UMaterialInstanceDynamic* gunMeshMaterial;
+
+	UPROPERTY(EditAnywhere)
+	float MaxGlow;
+
+	UPROPERTY(EditAnywhere)
+	float MinGlow;
+
 	UPROPERTY(EditAnywhere)
 	float shotRange;
 
