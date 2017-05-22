@@ -39,15 +39,16 @@ private:
 
 	void SetSwordAlwaysFastEnough(bool IsAlwaysFastEnough);
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	UAbilityTask_WaitTargetData* waitForTargetTask;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	UAbilityTask_MoveTo* moveToTask;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	AGameplayAbilityTargetActor_Raycast* targetingSpawnedActor;
 
+	UPROPERTY(Transient)
 	AMlgPlayerCharacter* cachedPlayer;
 };
 

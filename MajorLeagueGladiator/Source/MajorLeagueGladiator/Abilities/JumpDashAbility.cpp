@@ -32,6 +32,15 @@ UJumpDashAbility::UJumpDashAbility()
 	, halfEffectAngleDegrees(180)
 	, stunRadius(400)
 	, stunTimeSeconds(2.0f)
+	, waitTargetDataTask(nullptr)
+	, spawnedTargetingActor_dash(nullptr)
+	, moveToTask(nullptr)
+	, cachedCharacter(nullptr)
+	, cachedMoveComp(nullptr)
+	, jumpSoundEffect(nullptr)
+	, landingSoundEffect(nullptr)
+	, jumpParticleEffect(nullptr)
+	, landingParticleEffect(nullptr)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;

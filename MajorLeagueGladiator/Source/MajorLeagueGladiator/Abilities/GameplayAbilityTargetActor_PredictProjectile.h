@@ -60,7 +60,10 @@ private:
 	void GetVrControllerFromAbility(AMlgPlayerCharacter* owner);
 	bool PickTarget();
 	
+	UPROPERTY(Transient)
 	UCapsuleComponent* playerCapsule;
+
+	UPROPERTY(Transient)
 	UVRControllerComponent* vrController;
 	
 	FPredictProjectilePathResult predictResult;

@@ -21,10 +21,13 @@ public:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
 private:
+	UPROPERTY(Transient)
 	UAbilityTask_WaitTargetData* waitTargetDataTask;
 	
+	UPROPERTY(Transient)
 	AGrenadeProjectile* grenadeDefaultObject;
 
+	UPROPERTY(Transient)
 	AMlgPlayerCharacter* cachedPlayer;
 
 	void beginTargeting();

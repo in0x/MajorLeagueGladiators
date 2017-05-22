@@ -7,6 +7,9 @@
 UJumpAbility::UJumpAbility()
 	: PredictProjectileSpeed(1000.f)
 	, MaxTimeInFlight(2.f)
+	, waitForTargetTask (nullptr)
+	, targetingSpawnedActor(nullptr)
+	, cachedPlayer(nullptr)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;

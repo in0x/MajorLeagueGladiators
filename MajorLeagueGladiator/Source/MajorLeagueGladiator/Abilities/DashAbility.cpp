@@ -16,6 +16,10 @@ namespace
 UDashAbility::UDashAbility()
 	: MaxRange(1000.f)
 	, MoveSpeed(1500.f)
+	, waitForTargetTask(nullptr)
+	, moveToTask(nullptr)
+	, targetingSpawnedActor(nullptr)
+	, cachedPlayer(nullptr)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;

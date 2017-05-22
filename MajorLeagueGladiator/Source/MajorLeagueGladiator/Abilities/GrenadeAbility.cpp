@@ -17,6 +17,9 @@ namespace
 }
 
 UGrenadeAbility::UGrenadeAbility()
+	: waitTargetDataTask(nullptr)
+	, grenadeDefaultObject(nullptr)
+	, cachedPlayer(nullptr)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;

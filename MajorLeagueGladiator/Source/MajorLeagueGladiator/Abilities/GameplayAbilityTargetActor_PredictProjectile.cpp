@@ -12,6 +12,8 @@ AGameplayAbilityTargetActor_PredictProjectile::AGameplayAbilityTargetActor_Predi
 	, TargetProjectileFlightTime(2.f)
 	, bShowPlayArea(true)
 	, OverrideGravityZ(0.f)
+	, playerCapsule(nullptr)
+	, vrController(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
