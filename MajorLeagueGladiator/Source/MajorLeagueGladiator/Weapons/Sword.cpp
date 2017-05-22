@@ -184,7 +184,7 @@ void ASword::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	if (bIsSwordFastEnough)
+	if (bIsSwordFastEnough && getOwnerPawn()->IsLocallyControlled())
 	{
 		damageAllOverlappingActors();
 	}
@@ -216,7 +216,6 @@ void ASword::damageAllOverlappingActors()
 		return pair.Value.Actor == nullptr;
 	});
 
-	bool hasDealtdamage = false;
 	AActor* owner = GetOwner();
 	for (auto& pair : actorToHit)
 	{
@@ -266,10 +265,25 @@ void ASword::dealDamageTo(ACharacter* OtherCharacter, const FHitResult& HitResul
 {
 	check(OtherCharacter);
 
-	UGameplayStatics::ApplyPointDamage(OtherCharacter, damageAppliedOnHit, HitResult.TraceEnd - HitResult.TraceStart, 
-		HitResult, GetInstigatorController(), this, damageType);
-
+	check(getOwnerPawn()->IsLocallyControlled())
 	doRumbleRight();
+	dealDamageTo_Server(OtherCharacter, HitResult);	
+}
+
+bool ASword::dealDamageTo_Server_Validate(ACharacter* OtherCharacter, const FHitResult& HitResult)
+{
+	return true;
+}
+
+void ASword::dealDamageTo_Server_Implementation(ACharacter* OtherCharacter, const FHitResult& HitResult)
+{
+	if (OtherCharacter == nullptr || OtherCharacter->IsPendingKill())
+	{
+		return;
+	}
+
+	UGameplayStatics::ApplyPointDamage(OtherCharacter, damageAppliedOnHit, HitResult.TraceEnd - HitResult.TraceStart,
+		HitResult, GetInstigatorController(), this, damageType);
 	tryLaunchCharacter(OtherCharacter);
 }
 
@@ -279,6 +293,11 @@ FVector ASword::calcRelativeVelocity() const
 	const FVector ownerVelocity = owner ? owner->GetVelocity() : FVector::ZeroVector;
 
 	return currentVelocity - ownerVelocity;
+}
+
+APawn* ASword::getOwnerPawn()
+{
+	return CastChecked<APawn>(GetOwner());
 }
 
 void ASword::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
