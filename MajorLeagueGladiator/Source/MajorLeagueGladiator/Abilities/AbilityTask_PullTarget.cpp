@@ -21,6 +21,9 @@ UAbilityTask_PullTarget* UAbilityTask_PullTarget::Create(UGameplayAbility* ThisA
 }
 
 UAbilityTask_PullTarget::UAbilityTask_PullTarget()
+	: targetActor(nullptr)
+	, targetPrimitve(nullptr)
+	, endLocationSceneComponent(nullptr)
 {
 	bTickingTask = true;
 	bSimulatedTask = true;

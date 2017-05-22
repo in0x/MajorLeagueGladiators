@@ -19,6 +19,9 @@ UShieldAbility::UShieldAbility()
 	, pushBoxHalfExtent(100, 100, 100)
 	, pushBoxOffsetFromController(100, 0, 0)
 	, pushVelocity(1000)
+	, gripControllerMesh(nullptr)
+	, gripController(nullptr)
+	, shieldActor(nullptr)
 {
 	bReplicateInputDirectly = true;
 }

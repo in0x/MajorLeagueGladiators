@@ -5,6 +5,8 @@
 
 UTeleportAbility::UTeleportAbility ()
 	: PredictProjectileSpeed(750.f)
+	, waitForTargetTask(nullptr)
+	, targetingSpawnedActor(nullptr)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;

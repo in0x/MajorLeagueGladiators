@@ -32,6 +32,8 @@ UAbilityTask_MoveTo* UAbilityTask_MoveTo::Create(
 }
 
 UAbilityTask_MoveTo::UAbilityTask_MoveTo()
+	: movingCharacter(nullptr)
+	, cachedMoveComp(nullptr)
 {
 	bTickingTask = true;
 	bSimulatedTask = true;

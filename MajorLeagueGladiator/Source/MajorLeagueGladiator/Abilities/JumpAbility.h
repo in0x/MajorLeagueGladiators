@@ -44,6 +44,7 @@ private:
 	UPROPERTY(Transient)
 	AGameplayAbilityTargetActor_PredictProjectile* targetingSpawnedActor;
 
+	UPROPERTY(Transient)
 	AMlgPlayerCharacter* cachedPlayer;
 };
 
