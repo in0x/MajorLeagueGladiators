@@ -28,8 +28,8 @@ void UWalkingMovementAbility::ActivateAbility(const FGameplayAbilitySpecHandle H
 	AMlgPlayerCharacter* owningChar = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
 
 	movementTask = UAbilityTask_AddMovementInput::Create(this, "AddMovementInputTask", owningChar, owningChar->GetMotionController(targetingHand));
-	movementTask->ReadyForActivation();
 	movementTask->OnCancelAbility.AddDynamic(this, &UWalkingMovementAbility::OnMovementTaskCancel);
+	movementTask->ReadyForActivation();
 	CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo);
 }
 
