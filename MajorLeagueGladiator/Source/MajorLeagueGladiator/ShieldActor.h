@@ -45,11 +45,5 @@ private:
 	UPROPERTY(EditAnywhere)
 	float maxShieldSeconds;
 
-	UPROPERTY(EditAnywhere)
-	float centerMaxScale;
-
-	UPROPERTY(EditAnywhere)
-	float centerMinScale;
-
 	float currentActiveTime;
 };
