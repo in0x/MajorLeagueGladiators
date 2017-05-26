@@ -6,18 +6,22 @@
 #include "Projectiles/BaseProjectile.h"
 #include "MlgPlayerController.h"
 #include "MlgGameplayStatics.h"
+#include "Components/PoseableMeshComponent.h"
 
 namespace
 {
 	const FName REFLECT_SOCKET_NAME("Reflect");
 	const FName SHIELD_COLLISION_PRESET_NAME("Shield");
+	const FName CENTER_BONE_NAME("middle_JT");
 }
 
 AShieldActor::AShieldActor(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponent>(Super::MESH_COMPONENT_NAME))
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPoseableMeshComponent>(Super::MESH_COMPONENT_NAME))
 	, startActiveTime(0)
 	, currentActiveTime(0)
 	, maxShieldSeconds(3.f)
+	, centerMaxScale(5.f)
+	, centerMinScale(0.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -25,7 +29,7 @@ AShieldActor::AShieldActor(const FObjectInitializer& ObjectInitializer)
 	MeshComponent->bGenerateOverlapEvents = true;
 	MeshComponent->SetCollisionProfileName(SHIELD_COLLISION_PRESET_NAME);
 
-	USkeletalMeshComponent* skeletalMeshComp = CastChecked<USkeletalMeshComponent>(MeshComponent);
+	UPoseableMeshComponent* skeletalMeshComp = CastChecked<UPoseableMeshComponent>(MeshComponent);
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> skeletalMesh(TEXT("SkeletalMesh'/Game/MVRCFPS_Assets/Shield/shield.shield'"));
 	skeletalMeshComp->SetSkeletalMesh(skeletalMesh.Object);
@@ -52,6 +56,10 @@ void AShieldActor::Tick(float DeltaSeconds)
 	if (currentActiveTime >= maxShieldSeconds)
 	{
 		OnTimeRunOut.ExecuteIfBound();
+	}
+	else
+	{
+		updateAnimation(CalcTimeLeft());
 	}
 }
 
@@ -83,6 +91,16 @@ void AShieldActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AShieldActor, startActiveTime)
+}
+
+void AShieldActor::updateAnimation(float timeRemaining)
+{
+	const float percentLeft = timeRemaining / maxShieldSeconds;
+	const float scale = (centerMaxScale - centerMinScale) * percentLeft + centerMinScale;
+
+	const FVector scaleVector(1, scale, scale);
+	UPoseableMeshComponent* shieldMesh = CastChecked<UPoseableMeshComponent>(MeshComponent);
+	shieldMesh->SetBoneScaleByName(CENTER_BONE_NAME, scaleVector, EBoneSpaces::ComponentSpace);
 }
 
 void AShieldActor::playSpawnSound()
