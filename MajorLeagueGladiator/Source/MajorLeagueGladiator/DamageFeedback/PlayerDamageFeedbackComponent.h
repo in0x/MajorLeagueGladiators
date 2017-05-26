@@ -17,7 +17,7 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void DoPostProcessVisualization();
+	void DoGlitchEffect();
 	
 	void DoRumble();
 
@@ -29,9 +29,12 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* postProcessGlitchMaterial;
 	
+	UPROPERTY(EditAnywhere)
 	float hitDurationGlitch;
+	
+	UPROPERTY(EditAnywhere)
 	float leftHitDurationGlitch;
+	
+	UPROPERTY(EditAnywhere)
 	float transitionDurationGlitch;
-
-
 };
