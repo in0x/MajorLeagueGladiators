@@ -9,6 +9,7 @@ UPlayerDamageFeedbackComponent::UPlayerDamageFeedbackComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	
+	//https://docs.unrealengine.com/latest/INT/API/Runtime/Engine/Engine/FPostProcessSettings/index.html
 	static ConstructorHelpers::FObjectFinder<UMaterialInstanceConstant> glitchMaterial(TEXT("MaterialInstanceConstant'/Game/Materials/GlitchEffect/M_Glitch_PostProcess_Inst.M_Glitch_PostProcess_Inst'"));
 	postProcessGlitchMaterial = glitchMaterial.Object;
 }
@@ -22,7 +23,6 @@ void UPlayerDamageFeedbackComponent::BeginPlay()
 	}
 	else
 	{
-		//https://docs.unrealengine.com/latest/INT/API/Runtime/Engine/Engine/FPostProcessSettings/index.html
 		postProcessComp->Settings.SceneFringeIntensity = 4.f;
 		postProcessComp->Settings.VignetteIntensity = 0.75f;
 	}
@@ -35,8 +35,6 @@ void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick T
 	if (leftHitDurationGlitch > 0.f)
 	{
 		float scaledValue = (transitionDurationGlitch - (1 - leftHitDurationGlitch)) / transitionDurationGlitch;
-		
-		//https://docs.unrealengine.com/latest/INT/API/Runtime/Engine/Engine/FPostProcessSettings/index.html
 		postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, FMath::Clamp(scaledValue, 0.f, 1.f)); //1.f
 		postProcessComp->Settings.bOverride_SceneFringeIntensity = true;
 		postProcessComp->Settings.bOverride_VignetteIntensity = true;
@@ -53,5 +51,8 @@ void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick T
 
 void UPlayerDamageFeedbackComponent::DoPostProcessVisualization()
 {
-	leftHitDurationGlitch = hitDurationGlitch;
+	if (leftHitDurationGlitch <= 0.f)
+	{
+		leftHitDurationGlitch = hitDurationGlitch;
+	}
 }
