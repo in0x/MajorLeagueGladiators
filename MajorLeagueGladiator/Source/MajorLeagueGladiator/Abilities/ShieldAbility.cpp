@@ -166,9 +166,9 @@ void UShieldAbility::SpawnShield()
 
 void UShieldAbility::DespawnShield()
 {
-	const float secondsToRecharge = shieldActor->CalcSecondsUntilRecharged();
+	const float secondsUntilRecharge = shieldActor->CalcSecondsUntilRecharged();
 
-	timestampShieldFullyCharged = GetWorld()->GetTimeSeconds() + secondsToRecharge;
+	timestampShieldFullyCharged = GetWorld()->GetTimeSeconds() + secondsUntilRecharge;
 
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority && shieldActor)
 	{		
