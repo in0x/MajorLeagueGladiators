@@ -56,6 +56,9 @@ private:
 
 	bool HasGrippedActor() const;
 
+	UPROPERTY(EditAnywhere)
+	USoundCue* shootSoundCue;
+
 	UPROPERTY(Transient)
 	UAbilityTask_PullTarget* pullTask;
 	

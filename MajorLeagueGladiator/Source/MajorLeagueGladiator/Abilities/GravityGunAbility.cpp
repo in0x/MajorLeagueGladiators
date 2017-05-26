@@ -8,6 +8,7 @@
 #include "AbilityTask_WaitTargetData.h"
 #include "CollisionStatics.h"
 #include "BasePack.h"
+#include "MlgGameplayStatics.h"
 
 namespace
 {
@@ -27,6 +28,9 @@ UGravityGunAbility::UGravityGunAbility(const FObjectInitializer& ObjectInitializ
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;
+
+	ConstructorHelpers::FObjectFinder<USoundCue> shootSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/GravityGunShootSound_Cue.GravityGunShootSound_Cue'"));
+	shootSoundCue = shootSoundCueFinder.Object;
 }
 
 void UGravityGunAbility::InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
@@ -134,7 +138,13 @@ void UGravityGunAbility::OnActorPullFailed()
 
 void UGravityGunAbility::LaunchGrippedActor()
 {
-	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
+	const APawn* playerPawn = CastChecked<APawn>(GetOwningActorFromActorInfo());
+
+	FSoundParams soundParams;
+	soundParams.Sound = shootSoundCue;
+	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(playerPawn, soundParams);
+
+	if (playerPawn->HasAuthority())
 	{
 		FVector velocity = gripControllerMesh->GetSocketRotation(AIM_SOCKET_NAME).Vector() * LaunchVelocity;
 		if (ABasePack* pack = Cast<ABasePack>(gripController->GetGrippedActor()))
