@@ -183,6 +183,7 @@ void AMlgPlayerCharacter::OnHealthChanged(float newHealthPercentage, float oldHe
 	if (newHealthPercentage < oldHealthPercentage && IsLocallyControlled()) //IsLocallyControlled()
 	{
 		damageFeedback->DoPostProcessVisualization();
+		damageFeedback->DoRumble();
 		damageFeedback->PlaySound(GetActorLocation(), FVector::ZeroVector);
 	}
 }
