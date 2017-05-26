@@ -20,6 +20,7 @@ AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializ
 	, TimeToExplode(3.f)
 	, InitialSpeed(5000.f)
 	, RefractCount(4)
+	, ExplodeSoundMultiplier(1.0f)
 {
 	bReplicates = true;
 	bReplicateMovement = true;
@@ -27,6 +28,9 @@ AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializ
 
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> material(TEXT("Material'/Game/Materials/M_Grenade.M_Grenade'"));
 	ConstructorHelpers::FObjectFinder<UStaticMesh> mesh(TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
+
+	ConstructorHelpers::FObjectFinder<USoundCue> explodeSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/GrenadeExplosionCue.GrenadeExplosionCue'"));
+	explodeSoundCue = explodeSoundCueFinder.Object;
 
 	UStaticMeshComponent* meshComponent = GetStaticMeshComponent();
 	meshComponent->Mobility = EComponentMobility::Movable;
@@ -111,12 +115,21 @@ void AGrenadeProjectile::refract(AShieldActor* ShieldActor)
 		auto* spawnedMesh = spawnedProjectile->FindComponentByClass<UStaticMeshComponent>();
 		spawnedMesh->IgnoreActorWhenMoving(ShieldActor, true);
 
+		spawnedProjectile->ExplodeSoundMultiplier = 0.25f;
 		spawnedProjectile->TimedExplode();
 	}
 
 	ShieldActor->PlayReflectSound();
 
 	Destroy();
+}
+
+void AGrenadeProjectile::playExplosionSound()
+{
+	FSoundParams soundParams(explodeSoundCue, GetActorLocation());
+	soundParams.VolumeMultiplier = ExplodeSoundMultiplier;
+
+	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), soundParams);
 }
 
 void AGrenadeProjectile::explode()
@@ -133,7 +146,8 @@ void AGrenadeProjectile::explode()
 		this,
 		Instigator->GetController(),
 		true);
-	
+
+	playExplosionSound();
 	Destroy();
 }
 

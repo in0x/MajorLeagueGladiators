@@ -44,11 +44,17 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 RefractCount;
 
+	UPROPERTY(EditAnywhere)
+	float ExplodeSoundMultiplier;
+
 	void TimedExplode();
 
 private:
 	UPROPERTY(EditAnywhere)
 	UProjectileMovementComponent* projectileMovementComponent;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* explodeSoundCue;
 
 	FTimerHandle explodeTimer;
 	
@@ -58,6 +64,7 @@ private:
 	UFUNCTION()
 	void onProjectileStop(const FHitResult& impactResult);
 
+	void playExplosionSound();
 	void refract(AShieldActor* shieldActor);
 	void explode();
 };
