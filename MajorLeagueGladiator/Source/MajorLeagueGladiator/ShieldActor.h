@@ -5,6 +5,8 @@
 #include "MlgGrippableMeshActor.h"
 #include "ShieldActor.generated.h"
 
+DECLARE_DELEGATE(TimeRunOutDelegate);
+
 class ABaseProjectile;
 
 UCLASS()
@@ -18,8 +20,14 @@ public:
 	void OnHitInteractable(const ABaseProjectile* projectile);	
 	FTransform GetReflectSpawnTransform() const;
 	void PlayReflectSound();
-	float GetCurrentActiveTime() { return currentActiveTime; }
+	float GetCurrentActiveTime() const { return currentActiveTime; }
+	float CalcTimeLeft() const;
+	float CalcSecondsUntilRecharged() const;
+	
+	UPROPERTY(Transient, Replicated)
+	float startActiveTime;
 
+	TimeRunOutDelegate OnTimeRunOut;
 private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -31,8 +39,8 @@ private:
 
 	void playSpawnSound();
 
-	UPROPERTY(Transient, ReplicatedUsing)
-	float maxCurrentActiveTime;
+	UPROPERTY(EditAnywhere)
+	float maxShieldSeconds;
 
 	float currentActiveTime;
 };

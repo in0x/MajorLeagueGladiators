@@ -14,14 +14,16 @@ class MAJORLEAGUEGLADIATOR_API UShieldAbility : public UGameplayAbility
 	GENERATED_BODY()
 public:
 	UShieldAbility();
+	virtual void InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
 	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
-
 private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const override;
 	void PushAwayCloseActors();
+	float CalcShieldChargeTimeNeeded() const;
+	void onShieldTimeRunout();
 
 	// we might want to put this into a common base class for abilities that use motion controllers
 	void SetGripControllerFromOwner();
@@ -54,8 +56,7 @@ private:
 	UVRControllerComponent* gripController;
 
 	UPROPERTY(Transient, ReplicatedUsing = onRep_shieldActor)
-	AActor* shieldActor;
+	AShieldActor* shieldActor;
 
-	UPROPERTY(Transient, ReplicatedUsing = onRep_shieldActor)
-	float maxCurrentActiveTime;
+	float timestampShieldFullyCharged;
 };

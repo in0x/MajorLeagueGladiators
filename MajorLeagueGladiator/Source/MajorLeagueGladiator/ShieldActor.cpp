@@ -15,11 +15,12 @@ namespace
 
 AShieldActor::AShieldActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponent>(Super::MESH_COMPONENT_NAME))
-	, maxCurrentActiveTime(0)
+	, startActiveTime(0)
 	, currentActiveTime(0)
+	, maxShieldSeconds(3.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.bStartWithTickEnabled = true;
 	bReplicates = true;
 	MeshComponent->bGenerateOverlapEvents = true;
 	MeshComponent->SetCollisionProfileName(SHIELD_COLLISION_PRESET_NAME);
@@ -40,13 +41,18 @@ void AShieldActor::BeginPlay()
 {
 	Super::BeginPlay();
 	playSpawnSound();
+	currentActiveTime = startActiveTime;
 }
 
 void AShieldActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	
+
 	currentActiveTime += DeltaSeconds;
+	if (currentActiveTime >= maxShieldSeconds)
+	{
+		OnTimeRunOut.ExecuteIfBound();
+	}
 }
 
 
@@ -61,10 +67,22 @@ void AShieldActor::PlayReflectSound()
 	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(reflectSoundCue, GetActorLocation()));
 }
 
+float AShieldActor::CalcTimeLeft() const
+{
+	const float timeLeft = maxShieldSeconds - currentActiveTime;
+	return FMath::Max(timeLeft, 0.f);
+}
+
+float AShieldActor::CalcSecondsUntilRecharged() const
+{
+	// this means it reacharges as fast as it depletes
+	return currentActiveTime;
+}
+
 void AShieldActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AShieldActor, maxCurrentActiveTime)
+	DOREPLIFETIME(AShieldActor, startActiveTime)
 }
 
 void AShieldActor::playSpawnSound()
