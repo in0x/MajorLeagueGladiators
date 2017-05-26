@@ -37,9 +37,9 @@ UJumpDashAbility::UJumpDashAbility()
 	, moveToTask(nullptr)
 	, cachedCharacter(nullptr)
 	, cachedMoveComp(nullptr)
-	, jumpSoundEffect(nullptr)
 	, landingSoundEffect(nullptr)
 	, jumpParticleEffect(nullptr)
+	, jumpSoundCue(nullptr)
 	, landingParticleEffect(nullptr)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
@@ -49,8 +49,10 @@ UJumpDashAbility::UJumpDashAbility()
 	landingParticleEffect = particleSystemRef.Object;
 
 	ConstructorHelpers::FObjectFinder<USoundBase> soundEffectRef(TEXT("SoundWave'/Game/MobileStarterContent/Audio/Explosion01.Explosion01'"));
-	jumpSoundEffect = soundEffectRef.Object;
 	landingSoundEffect = soundEffectRef.Object;
+
+	ConstructorHelpers::FObjectFinder<USoundCue> jumpSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Jump_Dash_Cue.Jump_Dash_Cue'"));
+	jumpSoundCue = jumpSoundCueFinder.Object;
 }
 
 void UJumpDashAbility::InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
@@ -324,17 +326,9 @@ void UJumpDashAbility::PlayJumpEffects()
 		UE_LOG(DebugLog, Warning, TEXT("Jump Particle Effect not set"));
 	}
 
-	if (jumpSoundEffect)
-	{
-		FSoundParams soundParams;
-		soundParams.Sound = jumpSoundEffect;
-		UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(cachedCharacter, soundParams);
-	}
-	else
-	{
-		UE_LOG(DebugLog, Warning, TEXT("Jump Sound Effect not set"));
-	}
-		
+	FSoundParams soundParams;
+	soundParams.Sound = jumpSoundCue;
+	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(cachedCharacter, soundParams);		
 }
 
 void UJumpDashAbility::PlayLandingEffects()
@@ -355,7 +349,7 @@ void UJumpDashAbility::PlayLandingEffects()
 		UE_LOG(DebugLog, Warning, TEXT("Landing Particle Effect not set"));
 	}
 
-	if (jumpSoundEffect)
+	if (landingSoundEffect)
 	{
 		FSoundParams soundParams;
 		soundParams.Sound = landingSoundEffect;

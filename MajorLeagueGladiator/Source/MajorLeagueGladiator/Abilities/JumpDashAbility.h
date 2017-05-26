@@ -53,10 +53,10 @@ private:
 	UParticleSystem* landingParticleEffect;
 
 	UPROPERTY(EditAnywhere)
-	USoundBase* jumpSoundEffect;
+	USoundBase* landingSoundEffect;
 
 	UPROPERTY(EditAnywhere)
-	USoundBase* landingSoundEffect;
+	USoundCue* jumpSoundCue;
 
 	FTimerHandle timerHandle;
 
