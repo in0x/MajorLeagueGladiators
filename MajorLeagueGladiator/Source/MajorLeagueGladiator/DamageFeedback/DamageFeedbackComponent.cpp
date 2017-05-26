@@ -74,6 +74,7 @@ void UDamageFeedbackComponent::PlaySound(const FVector& HitLocation, const FVect
 {
 	for (USoundBase* sound : sounds)
 	{
-		UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(sound, HitLocation));
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), sound, HitLocation, FRotator::ZeroRotator, 1.f, 1.f, 0.f, nullptr, nullptr);
+		//UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(sound, HitLocation));
 	}
 }
