@@ -17,7 +17,7 @@ UWaveSystemComponent::UWaveSystemComponent()
 	beginOfWaveSound = nextWave.Object;
 
 	ConstructorHelpers::FObjectFinder<USoundCue> endWaveCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/TEMP/EndWave_Cue.EndWave_Cue'"));
-	endWaveCue = endWaveCueFinder.Object;
+	endWaveSound = endWaveCueFinder.Object;
 }
 
 void UWaveSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -172,6 +172,6 @@ void UWaveSystemComponent::playBeginOfWaveEffects()
 
 void UWaveSystemComponent::playEndOfWaveEffects()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), endWaveCue);
+	UGameplayStatics::PlaySound2D(GetWorld(), endWaveSound);
 }
 

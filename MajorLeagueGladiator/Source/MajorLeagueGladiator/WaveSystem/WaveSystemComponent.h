@@ -75,6 +75,6 @@ private:
 	USoundBase* beginOfWaveSound;
 
 	UPROPERTY(EditAnywhere)
-	USoundCue* endWaveCue;
+	USoundBase* endWaveSound;
 };
 
