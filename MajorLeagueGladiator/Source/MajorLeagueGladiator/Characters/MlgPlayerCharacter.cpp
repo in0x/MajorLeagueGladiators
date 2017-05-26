@@ -180,7 +180,7 @@ void AMlgPlayerCharacter::OnHealthChanged(float newHealthPercentage, float oldHe
 		}
 	}
 
-	if (newHealthPercentage < oldHealthPercentage && IsLocallyControlled()) //IsLocallyControlled()
+	if (newHealthPercentage < oldHealthPercentage && IsLocallyControlled())
 	{
 		damageFeedback->DoPostProcessVisualization();
 		damageFeedback->DoRumble();
