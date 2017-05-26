@@ -28,8 +28,11 @@ public:
 	float startActiveTime;
 
 	TimeRunOutDelegate OnTimeRunOut;
+
 private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void updateAnimation(float timeRemaining);
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* spawnSoundCue;
@@ -41,6 +44,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float maxShieldSeconds;
+
+	UPROPERTY(EditAnywhere)
+	float centerMaxScale;
+
+	UPROPERTY(EditAnywhere)
+	float centerMinScale;
 
 	float currentActiveTime;
 };
