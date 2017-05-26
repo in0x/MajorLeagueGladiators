@@ -29,7 +29,12 @@ void UAIDamageFeedbackComponent::DoParticleSystemVisualization(const FVector& Hi
 	{
 		for (auto* ps : swordDamageParticleSystems)
 		{
-			UMlgGameplayStatics::SpawnEmitterNetworked(GetWorld(), FEmitterSpawnParams(ps, FTransform(HitLocation)));
+			FTransform visualizationOrigin;
+			visualizationOrigin.SetLocation(HitLocation);
+			//The emitter's pitch has to be rotated by 90 to get the expected look at rotation
+			FRotator emitterRotator = UKismetMathLibrary::FindLookAtRotation(HitLocation, HitLocation + OriginDirection).Add(-90, 0, 0);
+			visualizationOrigin.SetRotation(FQuat(emitterRotator));
+			UMlgGameplayStatics::SpawnEmitterNetworked(GetWorld(), FEmitterSpawnParams(ps, visualizationOrigin));
 		}
 	}
 
