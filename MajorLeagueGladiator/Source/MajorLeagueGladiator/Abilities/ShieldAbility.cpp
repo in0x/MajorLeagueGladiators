@@ -12,6 +12,7 @@ namespace
 {
 	const FName AIM_SOCKET_NAME("Aim");
 	const FName SHIELD_SOCKET_NAME("Shield");
+	constexpr float INVALID_TIMESTAMP = -1.f;
 }
 
 UShieldAbility::UShieldAbility()
@@ -22,14 +23,23 @@ UShieldAbility::UShieldAbility()
 	, gripControllerMesh(nullptr)
 	, gripController(nullptr)
 	, shieldActor(nullptr)
-	, maxCurrentActiveTime(0.f)
+	, timestampShieldFullyCharged(0)
 {
 	bReplicateInputDirectly = true;
 }
 
+void UShieldAbility::InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
+{	
+	PushAwayCloseActors();
+}
+
 void UShieldAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+	if (shieldActor)
+	{
+		DespawnShield();
+	}
+	//EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
 void UShieldAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -40,7 +50,10 @@ void UShieldAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, co
 
 void UShieldAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	DespawnShield();
+	if (shieldActor)
+	{
+		DespawnShield();
+	}
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
@@ -53,6 +66,7 @@ void UShieldAbility::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 void UShieldAbility::PushAwayCloseActors()
 {
+	check(shieldActor == nullptr);
 	UAbilityTask_WaitTargetData* searchTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Search Task", EGameplayTargetingConfirmation::Instant, AGameplayAbilityTargetActor_Box::StaticClass());
 	searchTask->ValidData.AddDynamic(this, &UShieldAbility::OnBoxTraceFinished);
 
@@ -73,6 +87,18 @@ void UShieldAbility::PushAwayCloseActors()
 	searchActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
 
 	searchTask->FinishSpawningActor(this, spawnedActor);
+}
+
+float UShieldAbility::CalcShieldChargeTimeNeeded() const
+{
+	const float currentTimeStamp = GetWorld()->GetTimeSeconds();
+	const float timeNeeded = timestampShieldFullyCharged - currentTimeStamp;
+	return FMath::Max(timeNeeded, 0.f);
+}
+
+void UShieldAbility::onShieldTimeRunout()
+{
+	DespawnShield();
 }
 
 void UShieldAbility::OnBoxTraceFinished(const FGameplayAbilityTargetDataHandle& Data)
@@ -111,20 +137,26 @@ void UShieldAbility::SpawnShield()
 
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority)
 	{
-		
-		APawn* ownerPawn = CastChecked<APawn>(GetOwningActorFromActorInfo());
+		check(shieldActor == nullptr);
 
-		FActorSpawnParameters spawnParams;
-		spawnParams.Owner = ownerPawn;
-		spawnParams.Instigator = ownerPawn;
+		APawn* ownerPawn = CastChecked<APawn>(GetOwningActorFromActorInfo());
 
 		if (!gripControllerMesh->DoesSocketExist(SHIELD_SOCKET_NAME))
 		{
 			UE_LOG(DebugLog, Warning, TEXT("Shield Socket Missing in MotionController Mesh"));
 		}
 		FTransform shieldSpawnTransform = gripControllerMesh->GetSocketTransform(SHIELD_SOCKET_NAME);
+		UWorld* world = GetWorld();
+		AShieldActor* spawnendShieldDefered = world->SpawnActorDeferred<AShieldActor>(
+			shieldActorClass, shieldSpawnTransform, ownerPawn, ownerPawn);
 
-		shieldActor = GetWorld()->SpawnActor<AShieldActor>(shieldActorClass, shieldSpawnTransform, spawnParams);
+		spawnendShieldDefered->startActiveTime = CalcShieldChargeTimeNeeded();
+		spawnendShieldDefered->OnTimeRunOut.BindUObject(this, &UShieldAbility::onShieldTimeRunout);
+
+		spawnendShieldDefered->FinishSpawning(shieldSpawnTransform);
+
+		shieldActor = spawnendShieldDefered;
+
 		// Notify Myself
 		onRep_shieldActor();
 	}
@@ -132,6 +164,11 @@ void UShieldAbility::SpawnShield()
 
 void UShieldAbility::DespawnShield()
 {
+	const float timeNeededToRecharge = shieldActor->CalcSecondsUntilRecharged();
+
+	// TODO : Consider Float rounding issues!!!
+	timestampShieldFullyCharged = GetWorld()->GetTimeSeconds() + timeNeededToRecharge;
+
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority && shieldActor)
 	{		
 		shieldActor->Destroy();
