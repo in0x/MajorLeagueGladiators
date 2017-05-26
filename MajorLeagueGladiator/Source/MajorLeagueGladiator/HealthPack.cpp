@@ -5,6 +5,7 @@
 #include "TriggerZoneComponent.h"
 #include "HealthComponent.h"
 #include "Characters/RangedPlayerCharacter.h"
+#include "MlgGameplayStatics.h"
 
 AHealthPack::AHealthPack()
 	: amountToRefillUncharged(30.f)
@@ -12,12 +13,30 @@ AHealthPack::AHealthPack()
 {
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> healthPackMat(TEXT("Material'/Game/BluePrints/HealthPackMat.HealthPackMat'"));
 
+	ConstructorHelpers::FObjectFinder<USoundCue> healSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/HealSound_Cue.HealSound_Cue'"));
+	healSoundCue = healSoundCueFinder.Object;
+
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
 	if (staticMeshComp && healthPackMat.Succeeded())
 	{
 		staticMeshComp->SetMaterial(0, healthPackMat.Object);
 	}
 	chargingPlayerClass = ARangedPlayerCharacter::StaticClass();
+}
+
+void AHealthPack::playHealSound(AActor* user)
+{
+	const FSoundParams soundParams(healSoundCue, GetActorLocation());
+	
+	if (user->IsA<APawn>()) // Directly used by enemy.
+	{
+		UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), soundParams);
+	}
+	else // Indirectly used by trigger actor of player.
+	{
+		const APawn* triggerOwner = CastChecked<APawn>(user->GetOwner());
+		UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(triggerOwner, soundParams);
+	}
 }
 
 void AHealthPack::Use(AActor* User, TriggerType Type)
@@ -31,24 +50,18 @@ void AHealthPack::Use(AActor* User, TriggerType Type)
 
 	if (!healthComponent)
 	{
-		auto* owner = User->GetOwner();
-		if (owner)
-		{
-			healthComponent = owner->FindComponentByClass<UHealthComponent>();
-		}
+		const AActor* triggerOwner = User->GetOwner();
+		healthComponent = triggerOwner->FindComponentByClass<UHealthComponent>();
 	}
 		
-	if (!healthComponent)
-	{
-		UE_LOG(DebugLog, Warning, TEXT("Owner of health trigger has no healthcomponent, cannot use healthpack."));
-		return;
-	}
+	checkf(healthComponent, TEXT("Owner of health trigger has no healthcomponent, cannot use healthpack."));
 
 	if (healthComponent->GetCurrentHealthPercentage() < 1.f)
 	{
 		const float amoutToRefill = IsCharged() ? amountToRefillCharged : amountToRefillUncharged;
 		healthComponent->IncreaseHealth(amoutToRefill);
 
+		playHealSound(User);
 		ReleaseFromGrippedComponent();
 		Destroy();
 	}

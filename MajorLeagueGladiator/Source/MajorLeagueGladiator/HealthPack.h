@@ -18,8 +18,13 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
+	USoundCue* healSoundCue;
+
+	UPROPERTY(EditAnywhere)
 	float amountToRefillUncharged;
 
 	UPROPERTY(EditAnywhere)
 	float amountToRefillCharged;
+
+	void playHealSound(AActor* user);
 };
