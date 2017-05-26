@@ -21,9 +21,9 @@ public:
 
 private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const override;
-	void PushAwayCloseActors();
-	float CalcShieldChargeTimeNeeded() const;
-	void onShieldTimeRunout();
+	void pushAwayCloseActors();
+	float calcSecondsToFullCharge() const;
+	void onShieldChargeEmpty();
 
 	// we might want to put this into a common base class for abilities that use motion controllers
 	void SetGripControllerFromOwner();

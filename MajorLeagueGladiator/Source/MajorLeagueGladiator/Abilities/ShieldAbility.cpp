@@ -33,7 +33,7 @@ UShieldAbility::UShieldAbility()
 
 void UShieldAbility::InputPressed(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {	
-	PushAwayCloseActors();
+	pushAwayCloseActors();
 }
 
 void UShieldAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
@@ -47,7 +47,7 @@ void UShieldAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, cons
 void UShieldAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	SetGripControllerFromOwner();
-	PushAwayCloseActors();
+	pushAwayCloseActors();
 }
 
 void UShieldAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -66,7 +66,7 @@ void UShieldAbility::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(UShieldAbility, shieldActor);
 }
 
-void UShieldAbility::PushAwayCloseActors()
+void UShieldAbility::pushAwayCloseActors()
 {
 	check(shieldActor == nullptr);
 	UAbilityTask_WaitTargetData* searchTask = UAbilityTask_WaitTargetData::WaitTargetData(this, "Search Task", EGameplayTargetingConfirmation::Instant, AGameplayAbilityTargetActor_Box::StaticClass());
@@ -91,14 +91,14 @@ void UShieldAbility::PushAwayCloseActors()
 	searchTask->FinishSpawningActor(this, spawnedActor);
 }
 
-float UShieldAbility::CalcShieldChargeTimeNeeded() const
+float UShieldAbility::calcSecondsToFullCharge() const
 {
 	const float currentTimeStamp = GetWorld()->GetTimeSeconds();
 	const float timeNeeded = timestampShieldFullyCharged - currentTimeStamp;
 	return FMath::Max(timeNeeded, 0.f);
 }
 
-void UShieldAbility::onShieldTimeRunout()
+void UShieldAbility::onShieldChargeEmpty()
 {
 	DespawnShield();
 }
@@ -152,8 +152,8 @@ void UShieldAbility::SpawnShield()
 		AShieldActor* spawnendShieldDefered = world->SpawnActorDeferred<AShieldActor>(
 			shieldActorClass, shieldSpawnTransform, ownerPawn, ownerPawn);
 
-		spawnendShieldDefered->StartActiveTime = CalcShieldChargeTimeNeeded();
-		spawnendShieldDefered->OnTimeRunOut.BindUObject(this, &UShieldAbility::onShieldTimeRunout);
+		spawnendShieldDefered->StartActiveTime = calcSecondsToFullCharge();
+		spawnendShieldDefered->OnTimeRunOut.BindUObject(this, &UShieldAbility::onShieldChargeEmpty);
 
 		spawnendShieldDefered->FinishSpawning(shieldSpawnTransform);
 
@@ -166,9 +166,9 @@ void UShieldAbility::SpawnShield()
 
 void UShieldAbility::DespawnShield()
 {
-	const float timeNeededToRecharge = shieldActor->CalcSecondsUntilRecharged();
+	const float secondsToRecharge = shieldActor->CalcSecondsUntilRecharged();
 
-	timestampShieldFullyCharged = GetWorld()->GetTimeSeconds() + timeNeededToRecharge;
+	timestampShieldFullyCharged = GetWorld()->GetTimeSeconds() + secondsToRecharge;
 
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority && shieldActor)
 	{		
