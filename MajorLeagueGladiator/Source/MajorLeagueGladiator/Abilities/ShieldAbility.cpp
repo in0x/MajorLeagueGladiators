@@ -12,8 +12,11 @@ namespace
 {
 	const FName AIM_SOCKET_NAME("Aim");
 	const FName SHIELD_SOCKET_NAME("Shield");
-	constexpr float INVALID_TIMESTAMP = -1.f;
 }
+
+// This ability never ends after being activated
+// When the input is released the shield gets destroyed
+// but the ability continues
 
 UShieldAbility::UShieldAbility()
 	: shieldActorClass(AShieldActor::StaticClass())
@@ -39,7 +42,6 @@ void UShieldAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, cons
 	{
 		DespawnShield();
 	}
-	//EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 
 void UShieldAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -150,7 +152,7 @@ void UShieldAbility::SpawnShield()
 		AShieldActor* spawnendShieldDefered = world->SpawnActorDeferred<AShieldActor>(
 			shieldActorClass, shieldSpawnTransform, ownerPawn, ownerPawn);
 
-		spawnendShieldDefered->startActiveTime = CalcShieldChargeTimeNeeded();
+		spawnendShieldDefered->StartActiveTime = CalcShieldChargeTimeNeeded();
 		spawnendShieldDefered->OnTimeRunOut.BindUObject(this, &UShieldAbility::onShieldTimeRunout);
 
 		spawnendShieldDefered->FinishSpawning(shieldSpawnTransform);
@@ -166,7 +168,6 @@ void UShieldAbility::DespawnShield()
 {
 	const float timeNeededToRecharge = shieldActor->CalcSecondsUntilRecharged();
 
-	// TODO : Consider Float rounding issues!!!
 	timestampShieldFullyCharged = GetWorld()->GetTimeSeconds() + timeNeededToRecharge;
 
 	if (GetOwningActorFromActorInfo()->Role >= ROLE_Authority && shieldActor)
