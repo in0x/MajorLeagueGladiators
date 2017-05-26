@@ -5,11 +5,15 @@
 #include "TriggerZoneComponent.h"
 #include "AmmoComponent.h"
 #include "Characters/MeleePlayerCharacter.h"
+#include "MlgGameplayStatics.h"
 
 AAmmoPack::AAmmoPack()
 	: amountToRefillUncharged(10)
 	, amountToRefillCharged(30)
 {
+	ConstructorHelpers::FObjectFinder<USoundCue> reloadSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Reload_Cue.Reload_Cue'"));
+	reloadSoundCue = reloadSoundCueFinder.Object;
+
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> ammoPackMat(TEXT("Material'/Game/BluePrints/AmmoPackMat.AmmoPackMat'"));
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
 	if (staticMeshComp && ammoPackMat.Succeeded())
@@ -27,27 +31,22 @@ void AAmmoPack::Use(AActor* User, TriggerType Type)
 	}
 
 	UAmmoComponent* ammoComponent = User->FindComponentByClass<UAmmoComponent>();
+	
+	APawn* userOwner = CastChecked<APawn>(User->GetOwner());
 
 	if (!ammoComponent)
 	{
-		auto* owner = User->GetOwner();
-		if (owner) 
-		{
-			ammoComponent = owner->FindComponentByClass<UAmmoComponent>();
-		}
+		ammoComponent = userOwner->FindComponentByClass<UAmmoComponent>();		
 	}
 
-	if (!ammoComponent)
-	{
-		UE_LOG(DebugLog, Warning, TEXT("Owner of ammo trigger has no ammocomponent, cannot use ammopack."));
-		return;
-	}
+	checkf(ammoComponent != nullptr, TEXT("Owner of ammo trigger has no ammocomponent, cannot use ammopack."));
 
 	if (ammoComponent->GetAmmoCount() < ammoComponent->GetMaxAmmoCount())
 	{
 		const float amoutToRefill = IsCharged() ? amountToRefillCharged : amountToRefillUncharged;			
 		ammoComponent->IncreaseAmmo(amoutToRefill);
 	
+		UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(userOwner, FSoundParams(reloadSoundCue, GetActorLocation()));
 		ReleaseFromGrippedComponent();
 		Destroy();
 	}
