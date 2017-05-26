@@ -3,6 +3,7 @@
 #include "AbilityTask_WaitTargetData.h"
 #include "GameplayAbilityTargetActor_PredictProjectile.h"
 #include "Characters/MlgPlayerCharacter.h"
+#include "MlgGameplayStatics.h"
 
 UJumpAbility::UJumpAbility()
 	: PredictProjectileSpeed(1000.f)
@@ -10,9 +11,13 @@ UJumpAbility::UJumpAbility()
 	, waitForTargetTask (nullptr)
 	, targetingSpawnedActor(nullptr)
 	, cachedPlayer(nullptr)
+	, jumpSoundCue(nullptr)
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	bReplicateInputDirectly = true;
+
+	ConstructorHelpers::FObjectFinder<USoundCue> jumpSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Jump_Cue.Jump_Cue'"));
+	jumpSoundCue = jumpSoundCueFinder.Object;
 }
 
 void UJumpAbility::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
@@ -58,6 +63,15 @@ void UJumpAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGa
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
+void UJumpAbility::PlayJumpEffects()
+{
+	FSoundParams soundParams;
+	soundParams.Sound = jumpSoundCue;
+	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(cachedPlayer, soundParams);
+
+	UGameplayStatics::SpawnSoundAttached(jumpSoundCue, cachedPlayer->GetRootComponent(), NAME_None, cachedPlayer->GetActorLocation(), EAttachLocation::KeepRelativeOffset);
+}
+
 void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
 	if (cachedPlayer->HasAuthority())
@@ -65,6 +79,8 @@ void UJumpAbility::OnTargetPickSuccessful(const FGameplayAbilityTargetDataHandle
 		cachedPlayer->LaunchCharacter(AGameplayAbilityTargetActor_PredictProjectile::GetVelocityFromTargetDataHandle(Data), true, true);
 		cachedPlayer->SetAbilityMoveTargetLocation(Data.Data[0]->GetHitResult()->ImpactPoint);
 	}
+
+	PlayJumpEffects();
 
 	CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo);
 
