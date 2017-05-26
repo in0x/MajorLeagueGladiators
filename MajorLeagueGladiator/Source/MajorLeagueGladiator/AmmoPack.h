@@ -18,6 +18,9 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
+	USoundCue* reloadSoundCue;
+	
+	UPROPERTY(EditAnywhere)
 	uint32 amountToRefillUncharged;
 
 	UPROPERTY(EditAnywhere)
