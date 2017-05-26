@@ -108,7 +108,6 @@ void AHitScanGunActor::BeginPlay()
 		chargeWidget->SetCurrentPercentage(newValue, newValue);
 
 		float currentGlow = FMath::Lerp(MinGlow, MaxGlow, newValue);
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("%f"), currentGlow));
 		gunMeshMaterial->SetScalarParameterValue(FName("Glow"), currentGlow);
 		laserMeshMaterial->SetScalarParameterValue(FName("Glow"), currentGlow);
 	});
