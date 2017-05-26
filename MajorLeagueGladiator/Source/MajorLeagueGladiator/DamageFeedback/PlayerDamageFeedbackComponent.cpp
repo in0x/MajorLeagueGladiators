@@ -7,7 +7,9 @@
 
 
 UPlayerDamageFeedbackComponent::UPlayerDamageFeedbackComponent()
-	: hitDurationGlitch(1.f), leftHitDurationGlitch(0.f), transitionDurationGlitch(0.2f)
+	: hitDurationGlitch(1.f)
+	, leftHitDurationGlitch(0.f)
+	, transitionDurationGlitch(0.2f)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	
@@ -28,6 +30,10 @@ void UPlayerDamageFeedbackComponent::BeginPlay()
 	}
 	else
 	{
+		if (postProcessComp->Settings.SceneFringeIntensity != 0.f || postProcessComp->Settings.VignetteIntensity != 0.4f)
+		{
+			UE_LOG(DebugLog, Warning, TEXT("UPlayerDamageFeedbackComponent::BeginPlay: Values of post process component are overridden!"));
+		}
 		postProcessComp->Settings.SceneFringeIntensity = 4.f;
 		postProcessComp->Settings.VignetteIntensity = 0.75f;
 	}
@@ -41,8 +47,6 @@ void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick T
 	{
 		float scaledValue = (transitionDurationGlitch - (1 - leftHitDurationGlitch)) / transitionDurationGlitch;
 		postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, FMath::Clamp(scaledValue, 0.f, 1.f)); //1.f
-		postProcessComp->Settings.bOverride_SceneFringeIntensity = true;
-		postProcessComp->Settings.bOverride_VignetteIntensity = true;
 		
 		leftHitDurationGlitch -= DeltaTime;
 		if (leftHitDurationGlitch <= 0.f)
@@ -54,11 +58,15 @@ void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick T
 	}
 }
 
-void UPlayerDamageFeedbackComponent::DoPostProcessVisualization()
+void UPlayerDamageFeedbackComponent::DoGlitchEffect()
 {
 	if (leftHitDurationGlitch <= 0.f)
 	{
 		leftHitDurationGlitch = hitDurationGlitch;
+		
+		postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, 0.f);
+		postProcessComp->Settings.bOverride_SceneFringeIntensity = true;
+		postProcessComp->Settings.bOverride_VignetteIntensity = true;
 	}
 }
 
