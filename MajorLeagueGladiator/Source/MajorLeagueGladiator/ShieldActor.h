@@ -25,7 +25,7 @@ public:
 	float CalcSecondsUntilRecharged() const;
 	
 	UPROPERTY(Transient, Replicated)
-	float startActiveTime;
+	float StartActiveTime;
 
 	TimeRunOutDelegate OnTimeRunOut;
 

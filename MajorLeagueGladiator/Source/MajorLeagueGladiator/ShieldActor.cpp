@@ -19,7 +19,7 @@ namespace
 
 AShieldActor::AShieldActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponent>(Super::MESH_COMPONENT_NAME))
-	, startActiveTime(0)
+	, StartActiveTime(0)
 	, currentActiveTime(0)
 	, maxShieldSeconds(3.f) 
 {
@@ -47,7 +47,7 @@ void AShieldActor::BeginPlay()
 {
 	Super::BeginPlay();
 	playSpawnSound();
-	currentActiveTime = startActiveTime;
+	currentActiveTime = StartActiveTime;
 }
 
 void AShieldActor::Tick(float DeltaSeconds)
@@ -92,7 +92,7 @@ float AShieldActor::CalcSecondsUntilRecharged() const
 void AShieldActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AShieldActor, startActiveTime)
+	DOREPLIFETIME(AShieldActor, StartActiveTime)
 }
 
 void AShieldActor::updateAnimation(float timeRemaining)
