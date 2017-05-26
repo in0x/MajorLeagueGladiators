@@ -2,6 +2,8 @@
 
 #include "MajorLeagueGladiator.h"
 #include "PlayerDamageFeedbackComponent.h"
+#include "Characters/MlgPlayerCharacter.h"
+#include "MlgPlayerController.h"
 
 
 UPlayerDamageFeedbackComponent::UPlayerDamageFeedbackComponent()
@@ -59,3 +61,18 @@ void UPlayerDamageFeedbackComponent::DoPostProcessVisualization()
 		leftHitDurationGlitch = hitDurationGlitch;
 	}
 }
+
+void UPlayerDamageFeedbackComponent::DoRumble()
+{
+	AMlgPlayerController* controller = Cast<AMlgPlayerController>(Cast<APawn>(GetOwner())->GetController());//owner->GetMlgPlayerController();
+	if (controller != nullptr)
+	{
+		controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
+		controller->ClientPlayForceFeedback(controller->GetRumbleShortLeft(), false, FName("rumbleLeft"));
+	}
+	else
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UPlayerDamageFeedbackComponent::DoRumble: Could not cast controller to AMlgPlayerController!"));
+	}
+}
+
