@@ -5,9 +5,8 @@
 
 namespace
 {
-	const FString PRE_BEGIN_MAP("/Game/DoubleCircle?game=Class'/Script/RailGunner.RailGunnerGameMode'?listen");
+	const FString PRE_BEGIN_MAP("/Game/ScaleRef?game=/Game/BluePrints/MlgGameModeBP?listen");
 }
-
 
 UMlgGameInstance::UMlgGameInstance(const FObjectInitializer & ObjectInitializer)
 {
