@@ -31,9 +31,9 @@ void UAbilityTask_AddMovementInput::TickTask(float DeltaTime)
 		return;
 	}
 
-	const FVector forward = getDirectionFromComponent->GetForwardVector();
+	FVector forward = getDirectionFromComponent->GetForwardVector();
+	forward.Normalize();
 	FVector direction(forward.X, forward.Y, 0.f);
-	direction.Normalize();
 
 	movingCharacter->AddMovementInput(direction, 1.f);
 }
