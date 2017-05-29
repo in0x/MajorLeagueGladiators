@@ -5,9 +5,8 @@
 #include "VRExpansion/VRSimpleCharacter.h"
 #include "MenuCharacter.generated.h"
 
-/**
- * 
- */
+DECLARE_MULTICAST_DELEGATE_OneParam(ButtonPressedDelegate, int);
+
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMenuCharacter : public AVRSimpleCharacter
 {
@@ -16,6 +15,7 @@ public:
 	AMenuCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	ButtonPressedDelegate OnButtonPressed;
 private:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* leftMesh;
@@ -23,8 +23,11 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* rightMesh;
 
-	void OnLeftTriggerClicked();
-	void OnRightTriggerClicked();
-	
-	
+	void buttonPress(int number);
+
+	template<int NUMBER>
+	void buttonPress()
+	{
+		buttonPress(NUMBER);
+	}
 };

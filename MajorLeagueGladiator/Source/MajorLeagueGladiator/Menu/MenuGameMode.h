@@ -17,8 +17,10 @@ class MAJORLEAGUEGLADIATOR_API AMenuGameMode : public AGameMode
 	GENERATED_BODY()
 public:
 	AMenuGameMode();
+	virtual void BeginPlay() override;
 
 public:
+	void onMenuCharacterButtonPress(int number);
 	void startRangedTutorial();
 	void startMeleeTutorial();
 	void hostGame();
