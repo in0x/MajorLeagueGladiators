@@ -21,6 +21,8 @@
 #include "PlayerDeathComponent.h"
 #include "DamageFeedback/PlayerDamageFeedbackComponent.h"
 
+#include "MlgGameInstance.h"
+
 namespace 
 {
 	const FName PAWN_COLLISION_PROFILE_NAME("Pawn");
@@ -251,6 +253,13 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	else
 	{
 		abilitySet->BindAbilitiesToInput(PlayerInputComponent, abilitySystemComponent);
+	}
+
+	// REFACTOR: For Quick Testing
+	if (HasAuthority())
+	{
+		UMlgGameInstance* instance = CastChecked<UMlgGameInstance>(GetGameInstance());
+		PlayerInputComponent->BindAction("Menu", EInputEvent::IE_Pressed, instance, &UMlgGameInstance::TravelToMainMenu);
 	}
 	
 }

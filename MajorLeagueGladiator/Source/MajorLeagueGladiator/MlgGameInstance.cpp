@@ -6,7 +6,7 @@
 namespace
 {
 	const FString PRE_BEGIN_MAP("/Game/ScaleRef?game=/Game/BluePrints/MlgGameModeBP?listen");
-	const FString MAIN_MENU_MAP("/Game/Tank_Tutorial?game=/Game/Tutorial/TankTutorialGamemode");
+	const FString MAIN_MENU_MAP("/Game/MainMenu?game=Class'/Script/MajorLeagueGladiator.MenuGameMode'");
 
 	IOnlineSessionPtr findOnlineSession()
 	{

@@ -5,6 +5,7 @@
 
 #include "Menu/MenuCharacter.h"
 #include "MlgGameInstance.h"
+#include "Menu/MenuCharacter.h"
 
 namespace
 {
@@ -19,6 +20,40 @@ AMenuGameMode::AMenuGameMode()
 	//PlayerStateClass = AMlgPlayerState::StaticClass();
 	//GameStateClass = AMlgGameState::StaticClass();
 	//fxManagerClass = AEffectsManagerActor::StaticClass();
+}
+
+void AMenuGameMode::BeginPlay()
+{
+
+	for (TActorIterator<AMenuCharacter> iter(GetWorld(), AMenuCharacter::StaticClass()); iter; ++iter)
+	{
+		iter->OnButtonPressed.AddUObject(this, &AMenuGameMode::onMenuCharacterButtonPress);
+	}
+
+}
+
+void AMenuGameMode::onMenuCharacterButtonPress(int number)
+{
+	// REFACTOR: Had no better idea for quick testing
+	switch (number)
+	{
+	case 1:
+		findGame();
+		break;
+	case 2:
+		hostGame();
+		break;
+	case 3:
+		startRangedTutorial();
+		break;
+	case 4:
+		startMeleeTutorial();
+		break;
+	case 5:
+		break;
+	default:
+		break;
+	}
 }
 
 void AMenuGameMode::startRangedTutorial()
@@ -55,6 +90,8 @@ void AMenuGameMode::onGamesFound(const TArray <FOnlineSessionSearchResult>& foun
 	UMlgGameInstance* gameInstance = getMlgGameInstance();
 
 	gameInstance->OnFindSessionFinished.RemoveAll(this);
+	// For now we just immediately join the first found session
+	// later we can add a menu, where this can be selected
 	if (foundGames.Num() > 0)
 	{
 		joinGame(foundGames[0]);
