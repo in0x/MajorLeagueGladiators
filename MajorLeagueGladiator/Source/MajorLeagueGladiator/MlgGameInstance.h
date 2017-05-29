@@ -24,6 +24,8 @@ public:
 	void FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence, int32 MaxSearchResults = 20, int32 PingBucketSize = 50);
 	virtual bool JoinSession(ULocalPlayer* localPlayer, const FOnlineSessionSearchResult& SearchResult) override;
 
+	void TravelToMainMenu();
+
 	SearchFinishedDelegate OnFindSessionFinished;
 private:
 
@@ -33,18 +35,18 @@ private:
 	void onJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 	virtual void onDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 
-	FOnCreateSessionCompleteDelegate  m_onCreateSessionCompleteDelegate;
-	FOnStartSessionCompleteDelegate  m_onStartSessionCompleteDelegate;
-	FOnFindSessionsCompleteDelegate m_onFindSessionsCompleteDelegate;
-	FOnJoinSessionCompleteDelegate m_onJoinSessionCompleteDelegate;
-	FOnDestroySessionCompleteDelegate m_onDestroySessionCompleteDelegate;
+	FOnCreateSessionCompleteDelegate  onCreateSessionCompleteDelegate;
+	FOnStartSessionCompleteDelegate  onStartSessionCompleteDelegate;
+	FOnFindSessionsCompleteDelegate onFindSessionsCompleteDelegate;
+	FOnJoinSessionCompleteDelegate onJoinSessionCompleteDelegate;
+	FOnDestroySessionCompleteDelegate onDestroySessionCompleteDelegate;
 
-	FDelegateHandle m_onCreateSessionCompleteDelegateHandle;
-	FDelegateHandle m_onStartSessionCompleteDelegateHandle;
-	FDelegateHandle m_onFindSessionsCompleteDelegateHandle;
-	FDelegateHandle m_onJoinSessionCompleteDelegateHandle;
-	FDelegateHandle m_onDestroySessionCompleteDelegateHandle;
+	FDelegateHandle onCreateSessionCompleteDelegateHandle;
+	FDelegateHandle onStartSessionCompleteDelegateHandle;
+	FDelegateHandle onFindSessionsCompleteDelegateHandle;
+	FDelegateHandle onJoinSessionCompleteDelegateHandle;
+	FDelegateHandle onDestroySessionCompleteDelegateHandle;
 	
-	TSharedPtr<class FOnlineSessionSettings> m_sessionSettings;
-	TSharedPtr<class FOnlineSessionSearch> m_sessionSearch;
+	TSharedPtr<class FOnlineSessionSettings> sessionSettings;
+	TSharedPtr<class FOnlineSessionSearch> sessionSearch;
 };
