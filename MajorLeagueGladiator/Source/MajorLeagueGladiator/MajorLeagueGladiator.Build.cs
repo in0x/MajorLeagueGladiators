@@ -16,9 +16,11 @@ public class MajorLeagueGladiator : ModuleRules
                 "Runtime/Engine/Classes/Kismet",
                 "Runtime/Engine/Private/PhysicsEngine",
                 "Runtime/GameplayAbilities",
-                "Runtime/GameplayTasks"
+                "Runtime/GameplayTasks",
             }
 		);
+
+        DynamicallyLoadedModuleNames.Add("OnlineSubsystemNull");
 
         PublicDependencyModuleNames.AddRange(
             new string[] 
@@ -37,7 +39,9 @@ public class MajorLeagueGladiator : ModuleRules
                 "ProceduralMeshComponent",
                 "GameplayAbilities",
                 "GameplayTasks",
-                "GameplayTags"
+                "GameplayTags",
+                "OnlineSubsystem",
+                "OnlineSubsystemUtils"
             });
 
         PrivateDependencyModuleNames.AddRange(
