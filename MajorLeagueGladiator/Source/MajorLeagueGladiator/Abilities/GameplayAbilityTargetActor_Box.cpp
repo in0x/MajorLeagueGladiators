@@ -47,7 +47,7 @@ TArray<TWeakObjectPtr<AActor>> AGameplayAbilityTargetActor_Box::Trace() const
 		CollisionParams
 		);
 
-	DrawDebugBox(world, CalcCenterBox(), boxCollsionShape.GetExtent(), StartLocation.GetTargetingTransform().GetRotation(), FColor::Green, false, 2.0f);
+	//DrawDebugBox(world, CalcCenterBox(), boxCollsionShape.GetExtent(), StartLocation.GetTargetingTransform().GetRotation(), FColor::Green, false, 2.0f);
 
 	TArray<TWeakObjectPtr<AActor>> result;
 	for (auto item : outOverlaps)
