@@ -40,7 +40,7 @@ void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMenuCharacter::buttonPress<2>);
 	PlayerInputComponent->BindAction("Ability1", EInputEvent::IE_Pressed, this, &AMenuCharacter::buttonPress<3>);
 	PlayerInputComponent->BindAction("Ability3", EInputEvent::IE_Pressed, this, &AMenuCharacter::buttonPress<4>);
-	PlayerInputComponent->BindAction("MenuRight", EInputEvent::IE_Pressed, this, &AMenuCharacter::buttonPress<5>);
+	PlayerInputComponent->BindAction("Menu", EInputEvent::IE_Pressed, this, &AMenuCharacter::buttonPress<5>);
 }
 
 void AMenuCharacter::buttonPress(int number)
