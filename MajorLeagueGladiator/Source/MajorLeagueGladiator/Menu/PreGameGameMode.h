@@ -21,6 +21,7 @@ public:
 
 	void StartGame();
 
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 private:
 	// The Tank Class. For now this is always assigned to the client.
 	UPROPERTY(EditAnywhere)
