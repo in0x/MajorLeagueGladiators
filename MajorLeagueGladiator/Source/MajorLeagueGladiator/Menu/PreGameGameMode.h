@@ -29,4 +29,6 @@ private:
 	// The DPS Class. For now this is always assigned to the server.
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AMlgPlayerCharacter> dpsClass;
+
+	FTimerHandle timerHandle;
 };
