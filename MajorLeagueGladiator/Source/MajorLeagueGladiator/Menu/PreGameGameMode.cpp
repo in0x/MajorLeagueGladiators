@@ -16,7 +16,7 @@ APreGameGameMode::APreGameGameMode(const FObjectInitializer& ObjectInitializer)
 {
 	bUseSeamlessTravel = true;
 
-	GameStateClass = AMlgGameState::StaticClass();
+	PlayerStateClass = AMlgPlayerState::StaticClass();
 
 	ConstructorHelpers::FClassFinder<AMlgPlayerCharacter> ranged(TEXT("/Game/BluePrints/Characters/RangedPlayerCharacterBP"));
 	dpsClass = ranged.Class;
