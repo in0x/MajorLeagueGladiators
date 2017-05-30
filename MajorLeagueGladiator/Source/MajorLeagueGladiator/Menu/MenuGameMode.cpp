@@ -37,7 +37,7 @@ void AMenuGameMode::onMenuCharacterButtonPress(int number)
 	// REFACTOR: Had no better idea for quick testing
 	switch (number)
 	{
-	case 1:
+	/*case 1:
 		findGame();
 		break;
 	case 2:
@@ -52,7 +52,20 @@ void AMenuGameMode::onMenuCharacterButtonPress(int number)
 	case 5:
 		break;
 	default:
-		break;
+		break;*/
+
+		case 1:
+		case 2:
+		{
+			findGame();
+			break;
+		}
+		case 3:
+		case 4:
+		{
+			hostGame();
+			break;
+		}
 	}
 }
 
