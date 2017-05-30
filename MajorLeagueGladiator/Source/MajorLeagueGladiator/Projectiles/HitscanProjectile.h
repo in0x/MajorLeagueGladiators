@@ -18,7 +18,7 @@ public:
 	virtual ABaseProjectile* FireProjectile(FVector Location, FVector DirectionVector, AActor* ProjectileOwner, AController* ProjectileInstigator,
 											const FProjectileSpawnParams& OptionalParams = FProjectileSpawnParams()) const override;
 
-	FHitResult Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const;
+	FHitResult Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors) const;
 
 private:
 	UPROPERTY(EditAnywhere)

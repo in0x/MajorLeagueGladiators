@@ -52,14 +52,14 @@ ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector Di
 	return nullptr;
 }
 
-FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IngnoredActors) const
+FHitResult AHitscanProjectile::Trace(UWorld* world, FVector Location, FVector DirectionVector, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors) const
 {
 	FVector end = Location + DirectionVector * range;
 
 	FHitResult result;
 
 	FCollisionQueryParams CollisionParams("HitscanShot", true, Instigator);
-	CollisionParams.AddIgnoredActors(IngnoredActors);
+	CollisionParams.AddIgnoredActors(IgnoredActors);
 
 	ECollisionChannel hitScanChannel = CollisionStatics::GetCollsionChannelByName(CollisionStatics::HITSCAN_TRACE_CHANNEL_NAME);
 

@@ -5,29 +5,24 @@
 #include "VRExpansion/VRSimpleCharacter.h"
 #include "MenuCharacter.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(ButtonPressedDelegate, int);
-
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMenuCharacter : public AVRSimpleCharacter
 {
 	GENERATED_BODY()
 public:
 	AMenuCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	ButtonPressedDelegate OnButtonPressed;
+	virtual void Tick(float DeltaTimeSeconds) override;
+
 private:
+	void OnRightTriggerClicked();
+
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* leftMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* rightMesh;
-
-	void buttonPress(int number);
-
-	template<int NUMBER>
-	void buttonPress()
-	{
-		buttonPress(NUMBER);
-	}
+	
+	UPROPERTY(EditAnywhere)
+	float MenuSelectionRayCastRange;
 };
