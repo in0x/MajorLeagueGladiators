@@ -8,6 +8,7 @@
 #include "MlgGameState.h"
 #include "WaveSystem/WaveSpawnerManagerComponent.h"
 #include "Ai/MlgAICharacter.h"
+#include "MlgPlayerController.h"
 
 namespace
 {
@@ -80,7 +81,7 @@ void AMlgGameMode::DestroyAllAi()
 
 void AMlgGameMode::GetSeamlessTravelActorList(bool bToTransition, TArray<AActor*>& ActorList)
 {
-	Super::GetSeamlessTravelActorList(bToTransition, ActorList);
+	/*Super::GetSeamlessTravelActorList(bToTransition, ActorList);
 	ActorList.RemoveAllSwap([](AActor* actor)
 	{
 		if (APlayerState* ps = Cast<APlayerState>(actor))
@@ -88,5 +89,25 @@ void AMlgGameMode::GetSeamlessTravelActorList(bool bToTransition, TArray<AActor*
 			return ps->bIsABot != 0;
 		}
 		return false;
-	});
+	});*/
+	// Get allocations for the elements we're going to add handled in one go
+	const int32 ActorsToAddCount = 2 + (bToTransition ? 3 : 0);
+	ActorList.Reserve(ActorsToAddCount);
+
+	for (TActorIterator<AMlgPlayerController> iter(GetWorld(), AMlgPlayerController::StaticClass()); iter; ++iter)
+	{
+		ActorList.Add(iter->PlayerState);
+	}
+
+	if (bToTransition)
+	{
+		// Keep ourselves until we transition to the final destination
+		ActorList.Add(this);
+		// Keep general game state until we transition to the final destination
+		ActorList.Add(GameState);
+		// Keep the game session state until we transition to the final destination
+		ActorList.Add(GameSession);
+
+		// If adding in this section best to increase the literal above for the ActorsToAddCount
+	}
 }
