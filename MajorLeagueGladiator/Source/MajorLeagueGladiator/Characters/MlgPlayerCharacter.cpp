@@ -182,6 +182,7 @@ void AMlgPlayerCharacter::OnHealthChanged(float newHealthPercentage, float oldHe
 		{
 			iter->OnPlayerDied_NetMulticast();
 		}
+		GetWorld()->GetAuthGameMode<AMlgGameMode>()->DestroyAllAi();
 		FTimerHandle timerHandle;
 		GetWorldTimerManager().SetTimer(timerHandle, GetWorld()->GetAuthGameMode<AMlgGameMode>(), &AMlgGameMode::TravelToPreGameMap, 5.f);
 	}
