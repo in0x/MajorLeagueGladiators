@@ -54,7 +54,6 @@ bool UMlgGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 
 	onCreateSessionCompleteDelegateHandle = Sessions->AddOnCreateSessionCompleteDelegate_Handle(onCreateSessionCompleteDelegate);
 
-	// Our delegate should get called when this is complete (doesn't need to be successful!)
 	return Sessions->CreateSession(*UserId, GameSessionName, *sessionSettings);
 }
 
@@ -80,13 +79,17 @@ void UMlgGameInstance::onStartSessionComplete(FName SessionName, bool bWasSucces
 	Sessions->ClearOnStartSessionCompleteDelegate_Handle(onStartSessionCompleteDelegateHandle);
 	if (bWasSuccessful)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("change to double Circle map"));
 		GetWorld()->ServerTravel(PRE_BEGIN_MAP);
 	}
 }
 
 void UMlgGameInstance::FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence, int32 MaxSearchResults, int32 PingBucketSize)
 {
+	if (onFindSessionsCompleteDelegateHandle.IsValid())
+	{
+		UE_LOG(DebugLog, Warning, TEXT(" UMlgGameInstance::FindSessions: Already Looking for Session"));
+		return;
+	}
 	check(UserId->IsValid());
 
 	IOnlineSessionPtr Sessions = findOnlineSession();
@@ -155,6 +158,19 @@ void UMlgGameInstance::onJoinSessionComplete(FName SessionName, EOnJoinSessionCo
 	}
 }
 
+
+void UMlgGameInstance::TravelToMainMenu()
+{
+	IOnlineSessionPtr Sessions = findOnlineSession();
+
+	if (Sessions.IsValid())
+	{
+		Sessions->AddOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteDelegate);
+			
+		Sessions->DestroySession(GameSessionName);
+	}
+}
+
 void UMlgGameInstance::onDestroySessionComplete(FName SessionName, bool bWasSuccessful)
 {
 	IOnlineSessionPtr Sessions = findOnlineSession();
@@ -163,12 +179,12 @@ void UMlgGameInstance::onDestroySessionComplete(FName SessionName, bool bWasSucc
 
 	if (bWasSuccessful)
 	{
-		TravelToMainMenu();
+		GetWorld()->ServerTravel(MAIN_MENU_MAP);
 	}
 }
 
-void UMlgGameInstance::TravelToMainMenu()
+EOnlineSessionState::Type UMlgGameInstance::GetGameSessionState() const
 {
-	GetWorld()->ServerTravel(MAIN_MENU_MAP);
+	IOnlineSessionPtr Sessions = findOnlineSession();
+	return Sessions->GetSessionState(GameSessionName);
 }
-
