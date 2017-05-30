@@ -67,7 +67,6 @@ void AMlgGameMode::InitGameState()
 
 void AMlgGameMode::TravelToPreGameMap()
 {
-	DestroyAllAi();
 	GetWorld()->ServerTravel(PRE_GAME_MAP, true);
 }
 
