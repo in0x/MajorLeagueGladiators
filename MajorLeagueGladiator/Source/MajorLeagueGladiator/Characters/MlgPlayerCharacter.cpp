@@ -21,6 +21,8 @@
 #include "PlayerDeathComponent.h"
 #include "DamageFeedback/PlayerDamageFeedbackComponent.h"
 
+#include "MlgGameMode.h"
+
 #include "MlgGameInstance.h"
 
 namespace 
@@ -180,6 +182,8 @@ void AMlgPlayerCharacter::OnHealthChanged(float newHealthPercentage, float oldHe
 		{
 			iter->OnPlayerDied_NetMulticast();
 		}
+		FTimerHandle timerHandle;
+		GetWorldTimerManager().SetTimer(timerHandle, GetWorld()->GetAuthGameMode<AMlgGameMode>(), &AMlgGameMode::TravelToPreGameMap, 5.f);
 	}
 
 	if (newHealthPercentage < oldHealthPercentage && IsLocallyControlled())
