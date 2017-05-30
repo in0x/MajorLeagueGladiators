@@ -7,6 +7,7 @@
 #include "EffectsManagerActor.h"
 #include "MlgGameState.h"
 #include "WaveSystem/WaveSpawnerManagerComponent.h"
+#include "Ai/MlgAICharacter.h"
 
 namespace
 {
@@ -66,5 +67,14 @@ void AMlgGameMode::InitGameState()
 
 void AMlgGameMode::TravelToPreGameMap()
 {
+	DestroyAllAi();
 	GetWorld()->ServerTravel(PRE_GAME_MAP, true);
+}
+
+void AMlgGameMode::DestroyAllAi()
+{
+	for (TActorIterator<AMlgAICharacter> iter(GetWorld(), AMlgAICharacter::StaticClass()); iter; ++iter)
+	{
+		iter->Destroy();
+	}
 }

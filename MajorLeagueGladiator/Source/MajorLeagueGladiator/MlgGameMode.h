@@ -22,6 +22,8 @@ public:
 	virtual void InitGameState() override;
 	
 	void TravelToPreGameMap();
+
+	void DestroyAllAi();
 private:
 
 	UPROPERTY(EditAnywhere)
