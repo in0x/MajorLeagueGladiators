@@ -26,6 +26,8 @@ public:
 	void DestroyAllAi();
 private:
 
+	virtual void GetSeamlessTravelActorList(bool bToTransition, TArray<AActor*>& ActorList) override;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AEffectsManagerActor> fxManagerClass;
 	
