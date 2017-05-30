@@ -77,3 +77,16 @@ void AMlgGameMode::DestroyAllAi()
 		iter->Destroy();
 	}
 }
+
+void AMlgGameMode::GetSeamlessTravelActorList(bool bToTransition, TArray<AActor*>& ActorList)
+{
+	Super::GetSeamlessTravelActorList(bToTransition, ActorList);
+	ActorList.RemoveAllSwap([](AActor* actor)
+	{
+		if (APlayerState* ps = Cast<APlayerState>(actor))
+		{
+			return ps->bIsABot != 0;
+		}
+		return false;
+	});
+}
