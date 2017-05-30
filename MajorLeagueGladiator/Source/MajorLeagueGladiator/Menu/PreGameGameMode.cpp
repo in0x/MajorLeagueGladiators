@@ -4,6 +4,8 @@
 #include "PreGameGameMode.h"
 
 #include "Characters/MlgPlayerCharacter.h"
+#include "MlgPlayerState.h"
+
 namespace 
 {
 	const FString GAME_MAP("/Game/ScaleRef?game=/Game/BluePrints/MlgGameModeBP");
@@ -13,6 +15,8 @@ APreGameGameMode::APreGameGameMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	bUseSeamlessTravel = true;
+
+	GameStateClass = AMlgGameState::StaticClass();
 
 	ConstructorHelpers::FClassFinder<AMlgPlayerCharacter> ranged(TEXT("/Game/BluePrints/Characters/RangedPlayerCharacterBP"));
 	dpsClass = ranged.Class;
