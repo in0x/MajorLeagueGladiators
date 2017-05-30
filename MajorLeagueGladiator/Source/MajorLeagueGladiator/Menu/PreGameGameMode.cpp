@@ -53,7 +53,7 @@ UClass* APreGameGameMode::GetDefaultPawnClassForController_Implementation(AContr
 
 void APreGameGameMode::BeginPlay()
 {
-	//GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &APreGameGameMode::StartGame, 2.f, true);
+	GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &APreGameGameMode::StartGame, 5.f);
 }
 
 void APreGameGameMode::StartGame()
