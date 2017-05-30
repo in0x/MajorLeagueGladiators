@@ -8,6 +8,11 @@
 #include "MlgGameState.h"
 #include "WaveSystem/WaveSpawnerManagerComponent.h"
 
+namespace
+{
+	const FString PRE_GAME_MAP("/Game/PreGame?game=/Script/MajorLeagueGladiator.PreGameGameMode");
+}
+
 AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 {
 	//DefaultPawnClass = AMlgPlayerCharacter::StaticClass();
@@ -16,6 +21,7 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	GameStateClass = AMlgGameState::StaticClass();
 	fxManagerClass = AEffectsManagerActor::StaticClass();
 	waveSpawnerManger = ObjectInitializer.CreateDefaultSubobject<UWaveSpawnerManagerComponent>(this, TEXT("WaveSpawnerManager"));
+	bUseSeamlessTravel = true;
 }
 
 UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
@@ -56,4 +62,9 @@ void AMlgGameMode::InitGameState()
 
 	AMlgGameState* gameState = GetWorld()->GetGameState<AMlgGameState>();
 	gameState->SetEffectsManager(fxManager);
+}
+
+void AMlgGameMode::TravelToPreGameMap()
+{
+	GetWorld()->ServerTravel(PRE_GAME_MAP, true);
 }
