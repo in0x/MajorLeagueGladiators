@@ -17,7 +17,6 @@ class MAJORLEAGUEGLADIATOR_API UMlgGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
-
 	UMlgGameInstance(const FObjectInitializer& ObjectInitializer);
 
 	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, bool bIsLan, bool bIsPresence, int32 MaxNumPlayers);
@@ -27,6 +26,8 @@ public:
 	void TravelToMainMenu();
 
 	SearchFinishedDelegate OnFindSessionFinished;
+
+	EOnlineSessionState::Type GetGameSessionState() const;
 private:
 
 	virtual void onCreateSessionComplete(FName SessionName, bool bWasSuccessful);
