@@ -68,6 +68,11 @@ void AMlgGameMode::InitGameState()
 
 void AMlgGameMode::TravelToPreGameMap()
 {
+	GameState->PlayerArray.RemoveAllSwap([](APlayerState* playerState)
+	{
+		return  playerState == nullptr || playerState->bIsABot != 0;
+	});
+
 	GetWorld()->ServerTravel(PRE_GAME_MAP, true);
 }
 
