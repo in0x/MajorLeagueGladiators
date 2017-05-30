@@ -6,6 +6,7 @@
 #include "Menu/MenuCharacter.h"
 #include "MlgGameInstance.h"
 #include "Menu/MenuCharacter.h"
+#include "MenuActionComponent.h"
 
 namespace
 {
@@ -16,54 +17,38 @@ namespace
 AMenuGameMode::AMenuGameMode()
 {
 	DefaultPawnClass = AMenuCharacter::StaticClass();
-	//PlayerControllerClass = AMlgPlayerController::StaticClass();
-	//PlayerStateClass = AMlgPlayerState::StaticClass();
-	//GameStateClass = AMlgGameState::StaticClass();
-	//fxManagerClass = AEffectsManagerActor::StaticClass();
 }
 
 void AMenuGameMode::BeginPlay()
 {
-
-	for (TActorIterator<AMenuCharacter> iter(GetWorld(), AMenuCharacter::StaticClass()); iter; ++iter)
+	for (TObjectIterator<UMenuActionComponent> iter; iter; ++iter)
 	{
-		iter->OnButtonPressed.AddUObject(this, &AMenuGameMode::onMenuCharacterButtonPress);
+		iter->OnMenuActionTriggered.AddUObject(this, &AMenuGameMode::onMenuAction);
 	}
-
 }
 
-void AMenuGameMode::onMenuCharacterButtonPress(int number)
+void AMenuGameMode::onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction)
 {
-	// REFACTOR: Had no better idea for quick testing
-	switch (number)
+	switch (menuAction)
 	{
-	/*case 1:
-		findGame();
-		break;
-	case 2:
-		hostGame();
-		break;
-	case 3:
-		startRangedTutorial();
-		break;
-	case 4:
-		startMeleeTutorial();
-		break;
-	case 5:
-		break;
-	default:
-		break;*/
-
-		case 1:
-		case 2:
+		case EMenuAction::Type::HostGame:
+		{
+			hostGame();
+			break;
+		}
+		case EMenuAction::Type::JoinGame:
 		{
 			findGame();
 			break;
 		}
-		case 3:
-		case 4:
+		case EMenuAction::Type::StartMeleeTutorial:
 		{
-			hostGame();
+			startMeleeTutorial();
+			break;
+		}
+		case EMenuAction::Type::StartRangedTutorial:
+		{
+			startRangedTutorial();
 			break;
 		}
 	}

@@ -8,7 +8,7 @@
 
 #include "MenuGameMode.generated.h"
 
-
+namespace EMenuAction { enum Type; }
 class UMlgGameInstance;
 
 UCLASS()
@@ -19,15 +19,14 @@ public:
 	AMenuGameMode();
 	virtual void BeginPlay() override;
 
-public:
-	void onMenuCharacterButtonPress(int number);
+private:
 	void startRangedTutorial();
 	void startMeleeTutorial();
 	void hostGame();
 	void findGame();
 	void joinGame(const FOnlineSessionSearchResult& searchResultToJoin);
-private:
 	void onGamesFound(const TArray <FOnlineSessionSearchResult>& foundGames);
+	void onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction);
 
 	UMlgGameInstance* getMlgGameInstance() const;
 	TSharedPtr<const FUniqueNetId> getUniqueNetID() const;
