@@ -54,10 +54,14 @@ UClass* APreGameGameMode::GetDefaultPawnClassForController_Implementation(AContr
 void APreGameGameMode::BeginPlay()
 {
 	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, this, &APreGameGameMode::StartGame, 5.f, false);
+	GetWorld()->GetTimerManager().SetTimer(handle, this, &APreGameGameMode::StartGame, 2.f, true);
 }
 
 void APreGameGameMode::StartGame()
 {
-	GetWorld()->ServerTravel(GAME_MAP, true);
+	if (NumPlayers >= 2)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(timerHandle);
+		GetWorld()->ServerTravel(GAME_MAP, true);
+	}
 }
