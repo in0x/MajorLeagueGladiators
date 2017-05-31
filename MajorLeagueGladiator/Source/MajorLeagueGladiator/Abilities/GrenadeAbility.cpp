@@ -104,6 +104,7 @@ void UGrenadeAbility::beginTargeting()
 
 void UGrenadeAbility::onTargetingSuccess(const FGameplayAbilityTargetDataHandle& Data)
 {
+	cachedPlayer->PlayRumbleRight();
 	fireGrenade();
 }
 
