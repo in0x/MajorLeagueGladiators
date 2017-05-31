@@ -72,9 +72,15 @@ FTransform AShieldActor::GetReflectSpawnTransform() const
 	return MeshComponent->GetSocketTransform(REFLECT_SOCKET_NAME);
 }
 
-void AShieldActor::PlayReflectSound()
+void AShieldActor::PlayReflectEffect()
 {
 	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(reflectSoundCue, GetActorLocation()));
+
+	AMlgPlayerController* controller = CastChecked<AMlgPlayerController>(CastChecked<APawn>(GetOwner())->GetController());
+	if (controller)
+	{
+		controller->ClientPlayForceFeedback(controller->GetRumbleShortLeft(), false, FName("rumbleLeft"));
+	}
 }
 
 float AShieldActor::CalcTimeLeft() const
@@ -114,10 +120,6 @@ void AShieldActor::OnHitInteractable(const ABaseProjectile* projectile)
 {
 	FTransform socketTransform = GetReflectSpawnTransform();
 	projectile->FireProjectile(socketTransform.GetLocation(), socketTransform.GetRotation().GetForwardVector(), this, Instigator->GetController());
-	PlayReflectSound();
-
-	if (AMlgPlayerController* playerController = GetMlgPlayerController())
-	{
-		playerController->ClientPlayForceFeedback(playerController->GetRumbleShortLeft(), false, FName("rumbleLeft"));
-	}
+	
+	PlayReflectEffect();
 }
