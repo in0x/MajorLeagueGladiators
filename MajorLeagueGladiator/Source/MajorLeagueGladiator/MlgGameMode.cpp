@@ -6,12 +6,15 @@
 #include "MlgPlayerState.h"
 #include "MlgGameState.h"
 #include "WaveSystem/WaveSpawnerManagerComponent.h"
+#include "WaveSystem/WaveSystemComponent.h"
 #include "Ai/MlgAICharacter.h"
 #include "MlgPlayerController.h"
+#include "MlgGameInstance.h"
 
 namespace
 {
-	const FString PRE_GAME_MAP("/Game/PreGame?game=/Script/MajorLeagueGladiator.PreGameGameMode");
+	const FString PRE_GAME_MAP("/Game/PreGame");
+	const FString GAME_MAP("/Game/ScaleRef");
 }
 
 AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
@@ -21,7 +24,24 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	PlayerStateClass = AMlgPlayerState::StaticClass();
 	GameStateClass = AMlgGameState::StaticClass();
 	waveSpawnerManger = ObjectInitializer.CreateDefaultSubobject<UWaveSpawnerManagerComponent>(this, TEXT("WaveSpawnerManager"));
-	bUseSeamlessTravel = true;
+//	bUseSeamlessTravel = true;
+}
+
+void AMlgGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+	SavedState& savedState = CastChecked<UMlgGameInstance>(GetGameInstance())->savedState;
+	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
+	waveSystemComponent->SetFromSavedState(savedState);
+
+	if (savedState.isTravelingToGameMap)
+	{
+		postEnterGameMap();
+	}
+	else
+	{
+		postEnterRoomOfShame();
+	}
 }
 
 UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
@@ -39,7 +59,6 @@ UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AControlle
 			UE_LOG(DebugLog, Warning, TEXT("DPS Class not set. Using Default Pawn Class"));
 			return Super::GetDefaultPawnClassForController_Implementation(InController);
 		}
-
 		return dpsClass.Get();
 	}
 	else
@@ -54,11 +73,46 @@ UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AControlle
 	}
 }
 
-
-void AMlgGameMode::TravelToPreGameMap()
+void AMlgGameMode::BeginMatchDefault()
 {
+	BeginMatch(1);
+}
+
+void AMlgGameMode::BeginMatch(int32 StartWave)
+{
+	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
+	waveSystemComponent->SetStartWave(StartWave);
+	TravelToGameMap();
+}
+
+void AMlgGameMode::MatchLost()
+{
+	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
+	waveSystemComponent->Stop();
+	TravelToRoomOfShame();
+}
+
+void AMlgGameMode::TravelToRoomOfShame()
+{
+	SavedState& savedState = CastChecked<UMlgGameInstance>(GetGameInstance())->savedState;
+	savedState.isTravelingToGameMap = false;
+
+	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
+	waveSystemComponent->WriteIntoSavedState(savedState);
+
 	filterOutAiPlayerStates();
 	GetWorld()->ServerTravel(PRE_GAME_MAP, true);
+}
+
+void AMlgGameMode::TravelToGameMap()
+{
+	SavedState& savedState = CastChecked<UMlgGameInstance>(GetGameInstance())->savedState;
+	savedState.isTravelingToGameMap = true;
+
+	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
+	waveSystemComponent->WriteIntoSavedState(savedState);
+
+	GetWorld()->ServerTravel(GAME_MAP, true);
 }
 
 void AMlgGameMode::filterOutAiPlayerStates()
@@ -67,6 +121,18 @@ void AMlgGameMode::filterOutAiPlayerStates()
 	{
 		return  playerState == nullptr || playerState->bIsABot != 0;
 	});
+}
+
+void AMlgGameMode::postEnterGameMap()
+{
+	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
+	waveSystemComponent->StartWave();
+}
+
+void AMlgGameMode::postEnterRoomOfShame()
+{
+	FTimerHandle timerHandle;
+	GetWorldTimerManager().SetTimer(timerHandle, this, &AMlgGameMode::BeginMatchDefault, 5.f);
 }
 
 void AMlgGameMode::DestroyAllAi()

@@ -5,7 +5,7 @@
 
 namespace
 {
-	const FString PRE_BEGIN_MAP("/Game/PreGame?game=/Script/MajorLeagueGladiator.PreGameGameMode?listen");
+	const FString PRE_BEGIN_MAP("/Game/PreGame?listen");
 	const FString MAIN_MENU_MAP("/Game/MainMenu?game=Class'/Script/MajorLeagueGladiator.MenuGameMode'");
 
 

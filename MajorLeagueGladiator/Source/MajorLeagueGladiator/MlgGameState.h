@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include "GameFramework/GameStateBase.h"
+#include "GameFramework/GameState.h"
 #include "MlgGameState.generated.h"
 
 class UReplicatedEffectsComponent;
 class UWaveSystemComponent;
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AMlgGameState : public AGameStateBase
+class MAJORLEAGUEGLADIATOR_API AMlgGameState : public AGameState
 {
 	GENERATED_BODY()
 		

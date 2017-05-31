@@ -1,12 +1,15 @@
 #include "MajorLeagueGladiator.h"
 #include "WaveSystemComponent.h"
 #include "WaveSystem/WaveSpawnerManagerComponent.h"
+#include "MlgGameMode.h"
+#include "MlgGameInstance.h"
 
 UWaveSystemComponent::UWaveSystemComponent()
 	: remainingEnemiesForWave(0)
 	, startWaveNumber(1)
 	, initialTimeBeforeStartSeconds(5.0f)
 	, timeBetweenWavesSeconds(6.0f)
+	, waveState(EWaveState::NotStarted)
 {
 	SetIsReplicated(true);
 
@@ -20,61 +23,53 @@ UWaveSystemComponent::UWaveSystemComponent()
 	endWaveSound = endWaveCueFinder.Object;
 }
 
-void UWaveSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void UWaveSystemComponent::SetFromSavedState(const SavedState& savedState)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UWaveSystemComponent, remainingEnemiesForWave);
-	DOREPLIFETIME(UWaveSystemComponent, currentWaveNumber);
-}
-
-void UWaveSystemComponent::BeginPlay()
-{
-	Super::BeginPlay();
-	if (GetOwner()->HasAuthority())
-	{
-		FTimerHandle handle;
-		GetWorld()->GetTimerManager().SetTimer(handle, this, &UWaveSystemComponent::Start, initialTimeBeforeStartSeconds);
+	if (savedState.isTravelingToGameMap)
+	{		
+		remainingEnemiesForWave = 0;
 	}
-}
-
-void UWaveSystemComponent::Start()
-{
-	if (!GetOwner()->HasAuthority())
+	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave on client"));
-		return;
+		remainingEnemiesForWave = savedState.remainingEnemies;
 	}
-	StartWave(startWaveNumber);
+	waveState = EWaveState::NotStarted;
+	startWaveNumber = savedState.startWaveNumber;
+	currentWaveNumber = savedState.currentWaveNumber;
+	onRep_remainingEnemiesForWave(remainingEnemiesForWave);
+	onRep_currentWaveNumber(currentWaveNumber);	
+}
+void UWaveSystemComponent::WriteIntoSavedState(SavedState& savedState) const
+{
+	savedState.startWaveNumber = startWaveNumber;
+	savedState.currentWaveNumber = currentWaveNumber;
+	savedState.remainingEnemies = remainingEnemiesForWave;
 }
 
-void UWaveSystemComponent::OnEnemyKilled(ACharacter* KilledCharacter)
+void UWaveSystemComponent::SetStartWave(int32 WaveNumber)
 {
-	ChangeRemainingEnemiesForWave(-1);
+	startWaveNumber = WaveNumber;
 }
 
-void UWaveSystemComponent::StartNextWave()
+void UWaveSystemComponent::StartWave()
 {
-	StartWave(currentWaveNumber + 1);
+	check(waveState == EWaveState::NotStarted);
+	check(GetOwner()->HasAuthority());
+
+	startWaveImpl(startWaveNumber);
 }
 
-void UWaveSystemComponent::StartWave(int32 WaveNumber)
+void UWaveSystemComponent::startNextWave()
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Beginn Spawning Wave %d"), WaveNumber));
-	if (!GetOwner()->HasAuthority())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave on client"));
-		return;
-	}
+	check(waveState == EWaveState::BetweemWave);
+	startWaveImpl(currentWaveNumber + 1);
+}
 
-	if (GetRemainingEnemiesForWave() > 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Can not spawn wave while wave is still in progress"));
-		return;
-	}
-
-	int32 oldWaveNumber = currentWaveNumber;
-	currentWaveNumber = WaveNumber;
-	fireWaveNumberChangedDelegates(oldWaveNumber);
+void UWaveSystemComponent::startWaveImpl(int32 WaveNumber)
+{
+	waveState = EWaveState::DuringWave;
+	
+	setWaveNumber(WaveNumber);
 
 	UWaveSpawnerManagerComponent* spawnManager = GetWorld()->GetAuthGameMode()
 		->FindComponentByClass<UWaveSpawnerManagerComponent>();
@@ -93,33 +88,61 @@ void UWaveSystemComponent::StartWave(int32 WaveNumber)
 		return;
 	}
 
-	ChangeRemainingEnemiesForWave(waveEnemyCount);
+	changeRemainingEnemiesForWave(waveEnemyCount);
 }
 
-void UWaveSystemComponent::ChangeRemainingEnemiesForWave(int32 ChangeInValue)
+void UWaveSystemComponent::OnEnemyKilled(ACharacter* KilledCharacter)
 {
-	SetRemainingEnemiesForWave(GetRemainingEnemiesForWave() + ChangeInValue);
-}
-
-void UWaveSystemComponent::SetRemainingEnemiesForWave(int32 NewRemainingEnemiesForWave)
-{
-	if (!GetOwner()->HasAuthority())
+	if (waveState == EWaveState::DuringWave)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Can not change remainingEnemiesForWave on client"));
-		return;
+		changeRemainingEnemiesForWave(-1);
 	}
+}
+
+void UWaveSystemComponent::Stop()
+{
+	check(GetOwner()->HasAuthority());
+
+	waveState = EWaveState::NotStarted;
+	GetWorld()->GetAuthGameMode<AMlgGameMode>()->DestroyAllAi();
+
+	if (nextActionTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(nextActionTimerHandle);
+	}
+}
+
+bool UWaveSystemComponent::IsRunning() const
+{
+	return nextActionTimerHandle.IsValid() || remainingEnemiesForWave > 0;
+}
+
+void UWaveSystemComponent::changeRemainingEnemiesForWave(int32 ChangeInValue)
+{
+	setRemainingEnemiesForWave(GetRemainingEnemiesForWave() + ChangeInValue);
+}
+
+void UWaveSystemComponent::setRemainingEnemiesForWave(int32 NewRemainingEnemiesForWave)
+{
+	check(GetOwner()->HasAuthority());	
 	check(NewRemainingEnemiesForWave >= 0);
-	
-	if (NewRemainingEnemiesForWave == 0)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT("Wave %d has been defeated"), currentWaveNumber));
-		FTimerHandle handle;
-		GetWorld()->GetTimerManager().SetTimer(handle, this, &UWaveSystemComponent::StartNextWave, timeBetweenWavesSeconds);	
-	}
 
 	int32 oldRemainingEnemiesForWave = remainingEnemiesForWave;
 	remainingEnemiesForWave = NewRemainingEnemiesForWave;
 	fireRemainingEnemiesForWaveChangedDelegates(oldRemainingEnemiesForWave);
+
+	if (NewRemainingEnemiesForWave == 0 && waveState == EWaveState::DuringWave)
+	{
+		GetWorld()->GetTimerManager().SetTimer(nextActionTimerHandle, this, &UWaveSystemComponent::startNextWave, timeBetweenWavesSeconds);
+		waveState = EWaveState::BetweemWave;
+	}
+}
+
+void UWaveSystemComponent::setWaveNumber(int32 NewWaveNumber)
+{
+	int32 oldWaveNumber = currentWaveNumber;
+	currentWaveNumber = NewWaveNumber;
+	onRep_currentWaveNumber(oldWaveNumber);
 }
 
 int32 UWaveSystemComponent::GetRemainingEnemiesForWave() const
@@ -175,3 +198,10 @@ void UWaveSystemComponent::playEndOfWaveEffects()
 	UGameplayStatics::PlaySound2D(GetWorld(), endWaveSound);
 }
 
+void UWaveSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UWaveSystemComponent, remainingEnemiesForWave);
+	DOREPLIFETIME(UWaveSystemComponent, currentWaveNumber);
+	DOREPLIFETIME(UWaveSystemComponent, waveState);
+}
