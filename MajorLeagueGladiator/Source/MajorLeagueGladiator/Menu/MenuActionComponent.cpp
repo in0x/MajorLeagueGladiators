@@ -5,7 +5,6 @@
 
 UMenuActionComponent::UMenuActionComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UMenuActionComponent::TriggerMenuAction() const

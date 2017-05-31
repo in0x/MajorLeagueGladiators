@@ -31,8 +31,6 @@ UMlgGameInstance::UMlgGameInstance(const FObjectInitializer & ObjectInitializer)
 
 bool UMlgGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, bool bIsLan, bool bIsPresence, int32 MaxNumPlayers)
 {
-	IOnlineSessionPtr Sessions = findOnlineSession();
-
 	sessionSettings = MakeShareable(new FOnlineSessionSettings());
 	check(sessionSettings.IsValid())
 
@@ -53,6 +51,7 @@ bool UMlgGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 	*/
 	//sessionSettings->Set(SETTING_MAPNAME, FString("NewMap"), EOnlineDataAdvertisementType::ViaOnlineService);
 
+	IOnlineSessionPtr Sessions = findOnlineSession();
 	onCreateSessionCompleteDelegateHandle = Sessions->AddOnCreateSessionCompleteDelegate_Handle(onCreateSessionCompleteDelegate);
 
 	return Sessions->CreateSession(*UserId, GameSessionName, *sessionSettings);
@@ -82,6 +81,11 @@ void UMlgGameInstance::onStartSessionComplete(FName SessionName, bool bWasSucces
 	{
 		GetWorld()->ServerTravel(PRE_BEGIN_MAP);
 	}
+	else
+	{
+		UE_LOG(DebugLog, Error, TEXT("UMlgGameInstance::onStartSessionComplete: StartSession failed"));
+		return;
+	}
 }
 
 void UMlgGameInstance::FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence, int32 MaxSearchResults, int32 PingBucketSize)
@@ -93,7 +97,6 @@ void UMlgGameInstance::FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool 
 	}
 	check(UserId->IsValid());
 
-	IOnlineSessionPtr Sessions = findOnlineSession();
 	/*
 	Fill in all the SearchSettings, like if we are searching for a LAN game and how many results we want to have!
 	*/
@@ -111,28 +114,31 @@ void UMlgGameInstance::FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool 
 
 	TSharedRef<FOnlineSessionSearch> SearchSettingsRef = sessionSearch.ToSharedRef();
 
-	// Set the Delegate to the Delegate Handle of the FindSession function
+	IOnlineSessionPtr Sessions = findOnlineSession();
 	onFindSessionsCompleteDelegateHandle = Sessions->AddOnFindSessionsCompleteDelegate_Handle(onFindSessionsCompleteDelegate);
 
-	// Finally call the SessionInterface function. The Delegate gets called once this is finished
 	Sessions->FindSessions(*UserId, SearchSettingsRef);
 }
 
 void UMlgGameInstance::onFindSessionsComplete(bool bWasSuccessful)
 {
 	IOnlineSessionPtr Sessions = findOnlineSession();
-
 	Sessions->ClearOnFindSessionsCompleteDelegate_Handle(onFindSessionsCompleteDelegateHandle);
+
+	if (!bWasSuccessful)
+	{
+		UE_LOG(DebugLog, Error, TEXT("UMlgGameInstance::onFindSessionsComplete: findSession failed"));
+		return;
+	}
 
 	OnFindSessionFinished.Broadcast(sessionSearch->SearchResults);
 }
 
 bool UMlgGameInstance::JoinSession(ULocalPlayer* localPlayer, const FOnlineSessionSearchResult& SearchResult)
 {
-	check(localPlayer->IsValidLowLevel());
+	check(localPlayer && localPlayer->IsValidLowLevel());
 
 	IOnlineSessionPtr Sessions = findOnlineSession();
-
 	onJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(onJoinSessionCompleteDelegate);
 
 	return Sessions->JoinSession(*localPlayer->GetPreferredUniqueNetId(), GameSessionName, SearchResult);
@@ -143,6 +149,11 @@ void UMlgGameInstance::onJoinSessionComplete(FName SessionName, EOnJoinSessionCo
 	IOnlineSessionPtr Sessions = findOnlineSession();
 
 	Sessions->ClearOnJoinSessionCompleteDelegate_Handle(onJoinSessionCompleteDelegateHandle);
+
+	if (Result != EOnJoinSessionCompleteResult::Success)
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::onJoinSessionComplete: Session join failed"));
+	}
 
 	// Get the first local PlayerController, so we can call "ClientTravel" to get to the Server Map
 	// This is something the Blueprint Node "Join Session" does automatically!
@@ -162,6 +173,12 @@ void UMlgGameInstance::onJoinSessionComplete(FName SessionName, EOnJoinSessionCo
 
 void UMlgGameInstance::TravelToMainMenu()
 {
+	if (GetGameSessionState() == EOnlineSessionState::NoSession)
+	{
+		GetWorld()->ServerTravel(MAIN_MENU_MAP);
+		return;
+	}
+
 	IOnlineSessionPtr Sessions = findOnlineSession();
 
 	if (Sessions.IsValid())
@@ -181,6 +198,10 @@ void UMlgGameInstance::onDestroySessionComplete(FName SessionName, bool bWasSucc
 	if (bWasSuccessful)
 	{
 		GetWorld()->ServerTravel(MAIN_MENU_MAP);
+	}
+	else
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::onDestroySessionComplete: Session destroy failed"));
 	}
 }
 

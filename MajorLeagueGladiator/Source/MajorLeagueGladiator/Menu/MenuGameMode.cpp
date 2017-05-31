@@ -77,12 +77,6 @@ void AMenuGameMode::findGame()
 	gameInstance->FindSessions(getUniqueNetID(), true, true);
 }
 
-void AMenuGameMode::joinGame(const FOnlineSessionSearchResult& searchResultToJoin)
-{
-	ULocalPlayer* localplayer = GetWorld()->GetFirstLocalPlayerFromController();
-	getMlgGameInstance()->JoinSession(localplayer, searchResultToJoin);
-}
-
 void AMenuGameMode::onGamesFound(const TArray <FOnlineSessionSearchResult>& foundGames)
 {
 	UMlgGameInstance* gameInstance = getMlgGameInstance();
@@ -94,6 +88,16 @@ void AMenuGameMode::onGamesFound(const TArray <FOnlineSessionSearchResult>& foun
 	{
 		joinGame(foundGames[0]);
 	}
+	else
+	{
+		UE_LOG(DebugLog, Warning, TEXT("AMenuGameMode::onGamesFound: No game found"));
+	}
+}
+
+void AMenuGameMode::joinGame(const FOnlineSessionSearchResult& searchResultToJoin)
+{
+	ULocalPlayer* localplayer = GetWorld()->GetFirstLocalPlayerFromController();
+	getMlgGameInstance()->JoinSession(localplayer, searchResultToJoin);
 }
 
 UMlgGameInstance* AMenuGameMode::getMlgGameInstance() const

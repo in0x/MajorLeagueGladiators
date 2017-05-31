@@ -16,7 +16,7 @@ public class MajorLeagueGladiator : ModuleRules
                 "Runtime/Engine/Classes/Kismet",
                 "Runtime/Engine/Private/PhysicsEngine",
                 "Runtime/GameplayAbilities",
-                "Runtime/GameplayTasks",
+                "Runtime/GameplayTasks"
             }
 		);
 
