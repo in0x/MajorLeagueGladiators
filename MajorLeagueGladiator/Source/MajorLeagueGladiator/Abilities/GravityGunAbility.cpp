@@ -138,13 +138,15 @@ void UGravityGunAbility::OnActorPullFailed()
 
 void UGravityGunAbility::LaunchGrippedActor()
 {
-	const APawn* playerPawn = CastChecked<APawn>(GetOwningActorFromActorInfo());
+	const AMlgPlayerCharacter* player = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
 
 	FSoundParams soundParams;
 	soundParams.Sound = shootSoundCue;
-	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(playerPawn, soundParams);
+	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(player, soundParams);
 
-	if (playerPawn->HasAuthority())
+	player->PlayRumbleLeft();
+
+	if (player->HasAuthority())
 	{
 		FVector velocity = gripControllerMesh->GetSocketRotation(AIM_SOCKET_NAME).Vector() * LaunchVelocity;
 		if (ABasePack* pack = Cast<ABasePack>(gripController->GetGrippedActor()))

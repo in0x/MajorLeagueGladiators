@@ -4,7 +4,7 @@
 #include "Sword.h"
 
 #include "MlgGameplayStatics.h"
-#include "MlgPlayerController.h"
+#include "Characters/MlgPlayerCharacter.h"
 #include "CollisionStatics.h"
 #include "DamageTypes/SwordDamage.h"
 
@@ -246,11 +246,8 @@ void ASword::tryLaunchCharacter(ACharacter* character) const
 
 void ASword::doRumbleRight()
 {	
-	AMlgPlayerController* controller = CastChecked<AMlgPlayerController>(CastChecked<APawn>(GetOwner())->GetController());
-	if (controller != nullptr)
-	{		
-		controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
-	}	
+	AMlgPlayerCharacter* player = CastChecked<AMlgPlayerCharacter>(GetOwner());
+	player->PlayRumbleRight();
 }
 
 bool ASword::canDealDamageTo(const ACharacter* OtherCharacter) const

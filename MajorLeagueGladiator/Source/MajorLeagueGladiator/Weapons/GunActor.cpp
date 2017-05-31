@@ -6,7 +6,7 @@
 #include "Projectiles/PhysicsProjectile.h"
 #include "TextWidget.h"
 #include "WidgetComponent.h"
-#include "MlgPlayerController.h"
+#include "Characters/MlgPlayerCharacter.h"
 
 namespace
 {
@@ -65,12 +65,8 @@ void AGunActor::Tick(float DeltaTime)
 		ammoComponent->GetProjectileType().GetDefaultObject()->FireProjectile(
 			trafo.GetLocation(), trafo.Rotator().Vector() , this, Instigator->GetController());
 
-
-		auto* controller = this->GetMlgPlayerController();
-		if (controller != nullptr) 
-		{
-			controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
-		}
+		AMlgPlayerCharacter* player = CastChecked<AMlgPlayerCharacter>(GetOwner());
+		player->PlayRumbleRight();
 	}
 }
 
