@@ -42,6 +42,8 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	
 	GetMesh()->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
 	GetMesh()->bGenerateOverlapEvents = true;
+
+	audioComponent = ObjectInitializer.CreateDefaultSubobject<UAudioComponent>(this, TEXT("AudioComponent"));
 }
 
 void AMlgAICharacter::BeginPlay()

@@ -27,7 +27,10 @@ public:
 	
 protected:
 	virtual float InternalTakePointDamage(float Damage, const FPointDamageEvent& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAudioComponent* audioComponent;
+
 private:
 	UPROPERTY(EditAnywhere)
 	UHealthComponent* health;

@@ -16,8 +16,6 @@ UBTTaskRangedAttack::UBTTaskRangedAttack()
 {
 	NodeName = "BTTaskRangedAttack";
 	bCreateNodeInstance = true;
-	ConstructorHelpers::FObjectFinder<USoundCue> rangedAttackSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Ranged_Enemy_Attack_Cue.Ranged_Enemy_Attack_Cue'"));
-	RangedAttackSoundCue = rangedAttackSoundCueFinder.Object;
 }
 
 void UBTTaskRangedAttack::SetOwner(AActor* ActorOwner)
@@ -44,7 +42,6 @@ EBTNodeResult::Type UBTTaskRangedAttack::ExecuteTask(UBehaviorTreeComponent& Own
 	targetDir.Normalize();
 
 	ProjectileClass.GetDefaultObject()->FireProjectile(shotLocation, targetDir, pawn, controller);
-	UMlgGameplayStatics::PlaySoundAtLocationNetworked(pawn->GetWorld(), FSoundParams(RangedAttackSoundCue, shotLocation));
 
 	return EBTNodeResult::Succeeded;
 }
