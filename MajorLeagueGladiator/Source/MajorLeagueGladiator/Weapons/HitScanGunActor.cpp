@@ -6,11 +6,11 @@
 #include "AmmoComponent.h"
 #include "WidgetComponent.h"
 #include "TextWidget.h"
-#include "MlgPlayerController.h"
 #include "Projectiles/HitscanProjectile.h"
 #include "ChargeShotComponent.h"
 #include "PlayerHudWidget.h"
 #include "MlgGameplayStatics.h"
+#include "Characters/MlgPlayerCharacter.h"
 
 namespace
 {
@@ -134,11 +134,8 @@ void AHitScanGunActor::OnUsed()
 	playShotEffect_NetMulticast(chargeShot->GetValuePercentage());
 	chargeShot->Reset();
 
-	AMlgPlayerController* controller = CastChecked<AMlgPlayerController>(CastChecked<APawn>(GetOwner())->GetController());
-	if (controller)
-	{
-		controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
-	}
+	AMlgPlayerCharacter* player = CastChecked<AMlgPlayerCharacter>(GetOwner());
+	player->PlayRumbleRight();
 }
 
 void AHitScanGunActor::playEmptyEffect()

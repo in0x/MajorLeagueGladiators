@@ -49,6 +49,4 @@ private:
 	void setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn);
 
 	bool canDealDamage;
-
-	void doRumbleRight(AActor* OtherActor);
 };
