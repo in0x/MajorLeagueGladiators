@@ -4,12 +4,12 @@
 #include "ShieldActor.h"
 
 #include "Projectiles/BaseProjectile.h"
-#include "MlgPlayerController.h"
 #include "MlgGameplayStatics.h"
 #include "Components/PoseableMeshComponent.h"
 #include "Animation/BlendSpace1D.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimSingleNodeInstance.h"
+#include "Characters/MlgPlayerCharacter.h"
 
 namespace
 {
@@ -76,11 +76,8 @@ void AShieldActor::PlayReflectEffect()
 {
 	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(reflectSoundCue, GetActorLocation()));
 
-	AMlgPlayerController* controller = CastChecked<AMlgPlayerController>(CastChecked<APawn>(GetOwner())->GetController());
-	if (controller)
-	{
-		controller->ClientPlayForceFeedback(controller->GetRumbleShortLeft(), false, FName("rumbleLeft"));
-	}
+	AMlgPlayerCharacter* player = Cast<AMlgPlayerCharacter>(GetOwner());
+	player->PlayRumbleLeft();
 }
 
 float AShieldActor::CalcTimeLeft() const

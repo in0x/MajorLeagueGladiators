@@ -6,6 +6,8 @@
 #include "MlgPlayerController.h"
 #include "MlgGameplayStatics.h"
 
+// NOT USED
+
 USwordDamageCauserComponent::USwordDamageCauserComponent()
 	: oldSwingSpeed(FVector::ZeroVector)
 	, threshholdDoDamageSquared(16)
@@ -97,11 +99,6 @@ void USwordDamageCauserComponent::damageAllOverlappingActors()
 			hasDealtdamage = true;
 		}
 	}
-
-	if (hasDealtdamage)
-	{
-		doRumbleRight(GetOwner());
-	}
 }
 
 void USwordDamageCauserComponent::setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn) 
@@ -119,28 +116,5 @@ void USwordDamageCauserComponent::OnBeginOverlap(AActor* OverlappedActor, AActor
 	if (canDealDamage && UMlgGameplayStatics::CanDealDamageTo(OverlappedActor, OtherActor))
 	{
 		UGameplayStatics::ApplyDamage(OtherActor, damageAppliedOnHit, OverlappedActor->GetInstigatorController(), OverlappedActor, DamageType);
-		doRumbleRight(OtherActor);
-	}
-}
-
-void USwordDamageCauserComponent::doRumbleRight(AActor* OtherActor)
-{
-	AMlgGrippableMeshActor* owner = Cast<AMlgGrippableMeshActor>(GetOwner());
-	if (owner != nullptr)
-	{
-		AMlgPlayerController* controller = owner->GetMlgPlayerController();
-		if (controller != nullptr)
-		{
-			//check if hit object is part of myself, then we do not rumble
-			APawn* otherPlayer = Cast<APawn>(OtherActor);
-			if (otherPlayer != nullptr)
-			{
-				if (otherPlayer->Controller == controller)
-				{
-					return;
-				}
-			}
-			controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
-		}
 	}
 }
