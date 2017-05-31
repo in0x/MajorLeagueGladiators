@@ -240,13 +240,13 @@ void ASword::tryLaunchCharacter(ACharacter* character) const
 	if (moveMode == MOVE_Falling)
 	{
 		charMoveComp->StopMovementImmediately();
-		character->LaunchCharacter(currentVelocity, true, true);
+		character->LaunchCharacter(currentVelocity, true, true);	
 	}
 }
 
 void ASword::doRumbleRight()
 {	
-	AMlgPlayerController* controller = GetMlgPlayerController();
+	AMlgPlayerController* controller = CastChecked<AMlgPlayerController>(CastChecked<APawn>(GetOwner())->GetController());
 	if (controller != nullptr)
 	{		
 		controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
