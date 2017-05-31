@@ -20,7 +20,7 @@
 #include "PredictedEffectsComponent.h"
 #include "PlayerDeathComponent.h"
 #include "DamageFeedback/PlayerDamageFeedbackComponent.h"
-
+#include "MlgPlayerController.h"
 #include "MlgGameMode.h"
 
 #include "MlgGameInstance.h"
@@ -130,6 +130,12 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	predictedEffectsComponent = ObjectInitializer.CreateDefaultSubobject<UPredictedEffectsComponent>(this, TEXT("PredictedEffectsComponent"));
 	deathComponent = ObjectInitializer.CreateDefaultSubobject<UPlayerDeathComponent>(this, TEXT("PlayerDeathComponent"));
 	damageFeedback = ObjectInitializer.CreateDefaultSubobject<UPlayerDamageFeedbackComponent>(this, TEXT("PlayerDamageFeedbackComponent"));
+
+	const static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> helperLeft(TEXT("/Game/RumbleFiles/RumbleShortLeft"));
+	const static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> helperRight(TEXT("/Game/RumbleFiles/RumbleShortRight"));
+
+	rumbleLeft = helperLeft.Object;
+	rumbleRight = helperRight.Object;
 }
 
 void AMlgPlayerCharacter::BeginPlay()
@@ -225,6 +231,18 @@ void AMlgPlayerCharacter::Tick(float DelataTime)
 	const FRotator bodyRotation = bodyMesh2->GetComponentRotation();
 	
 	bodyMesh2->SetWorldTransform(FTransform(rot, BodyOffsetFromHead + cameraTrans.GetLocation()));
+}
+
+void AMlgPlayerCharacter::PlayRumbleLeft()
+{
+	APlayerController* playerController = CastChecked<APlayerController>(GetController());
+	playerController->ClientPlayForceFeedback(rumbleLeft, false, FName("rumbleLeft"));
+}
+
+void AMlgPlayerCharacter::PlayRumbleRight()
+{
+	APlayerController* playerController = CastChecked<APlayerController>(GetController());
+	playerController->ClientPlayForceFeedback(rumbleRight, false, FName("rumbleRight"));
 }
 
 void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -331,6 +349,7 @@ void AMlgPlayerCharacter::OnRep_AttachedWeapon()
 {
 	OnAttachedWeaponSet();
 }
+
 void AMlgPlayerCharacter::OnAttachedWeaponSet()
 {
 	// We don't replicate the movement, as it is set by the motion controllers.

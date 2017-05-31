@@ -82,6 +82,9 @@ public:
 	FAbilityUseFail OnAbilityUseFail;
 	FAbilityUseSuccess OnAbilityUseSuccess;
 
+	void PlayRumbleLeft();
+	void PlayRumbleRight();
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	USkeletalMeshComponent* leftMesh;
@@ -145,6 +148,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TAssetSubclassOf<UMlgAbilitySet> abilitySetClass;
+
+	UPROPERTY(EditAnywhere)
+	UForceFeedbackEffect* rumbleLeft;
+
+	UPROPERTY(EditAnywhere)
+	UForceFeedbackEffect* rumbleRight;
 
 	UPROPERTY(Transient)
 	const UMlgAbilitySet* cachedAbilitySet;
