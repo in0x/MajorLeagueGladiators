@@ -5,7 +5,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "MlgGameState.generated.h"
 
-class AEffectsManagerActor;
+class UReplicatedEffectsComponent;
 class UWaveSystemComponent;
 
 UCLASS()
@@ -15,15 +15,10 @@ class MAJORLEAGUEGLADIATOR_API AMlgGameState : public AGameStateBase
 		
 public:
 	AMlgGameState(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	AEffectsManagerActor* GetEffectsManager();
-
-	void SetEffectsManager(AEffectsManagerActor* fxManager);
 	
 private:
-	UPROPERTY(Replicated, Transient)
-	AEffectsManagerActor* effectsManager;
+	UPROPERTY()
+	UReplicatedEffectsComponent* effectsManager;
 
 	UPROPERTY(EditAnywhere)
 	UWaveSystemComponent* waveSystemComponent;

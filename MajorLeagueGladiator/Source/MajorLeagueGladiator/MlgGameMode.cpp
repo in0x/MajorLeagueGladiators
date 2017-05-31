@@ -4,7 +4,6 @@
 #include "MlgGameMode.h"
 #include "Characters/MlgPlayerCharacter.h"
 #include "MlgPlayerState.h"
-#include "EffectsManagerActor.h"
 #include "MlgGameState.h"
 #include "WaveSystem/WaveSpawnerManagerComponent.h"
 #include "Ai/MlgAICharacter.h"
@@ -21,7 +20,6 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	//PlayerControllerClass = AMlgPlayerController::StaticClass();
 	PlayerStateClass = AMlgPlayerState::StaticClass();
 	GameStateClass = AMlgGameState::StaticClass();
-	fxManagerClass = AEffectsManagerActor::StaticClass();
 	waveSpawnerManger = ObjectInitializer.CreateDefaultSubobject<UWaveSpawnerManagerComponent>(this, TEXT("WaveSpawnerManager"));
 	bUseSeamlessTravel = true;
 }
@@ -56,15 +54,6 @@ UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AControlle
 	}
 }
 
-void AMlgGameMode::InitGameState()
-{
-	Super::InitGameState();
-
-	AEffectsManagerActor* fxManager = GetWorld()->SpawnActor<AEffectsManagerActor>(fxManagerClass.Get(), FVector(0), FRotator::ZeroRotator);
-
-	AMlgGameState* gameState = GetWorld()->GetGameState<AMlgGameState>();
-	gameState->SetEffectsManager(fxManager);
-}
 
 void AMlgGameMode::TravelToPreGameMap()
 {

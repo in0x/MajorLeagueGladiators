@@ -4,8 +4,28 @@
 #include "MlgGameplayStatics.h"
 #include "MlgPlayerState.h"
 #include "MlgGameState.h"
-#include "EffectsManagerActor.h"
+#include "ReplicatedEffectsComponent.h"
 #include "PredictedEffectsComponent.h"
+
+namespace
+{
+	UReplicatedEffectsComponent* getReplicatedEffectsComponent(UWorld* World)
+	{
+		AGameStateBase* gameState = World->GetGameState();
+		check(gameState);
+		UReplicatedEffectsComponent* repFxComp = gameState->FindComponentByClass<UReplicatedEffectsComponent>();
+		check(repFxComp);
+		return repFxComp;
+	}
+
+	UPredictedEffectsComponent* getPredictedEffectsComponent(const APawn* Source)
+	{
+		UPredictedEffectsComponent* predictEffectComp = Source->FindComponentByClass<UPredictedEffectsComponent>();
+		check(predictEffectComp);
+		return predictEffectComp;
+	}
+}
+
 
 bool UMlgGameplayStatics::CanDealDamageTo(const AActor* DamageDealer, const AActor* DamageReceiver)
 {
@@ -205,43 +225,31 @@ bool UMlgGameplayStatics::ApplyRadialDamageWithFalloff(const UObject* WorldConte
 
 void UMlgGameplayStatics::SpawnEmitterNetworked(UWorld* World, const FEmitterSpawnParams& Params)
 {
-	auto gameState = World->GetGameState<AMlgGameState>();
-	check(gameState);
-	gameState->GetEffectsManager()->CreateParticleSystemAtLocation(Params);
+	getReplicatedEffectsComponent(World)->CreateParticleSystemAtLocation(Params);
 }
 
 void UMlgGameplayStatics::SpawnEmitterNetworkedPredicted(const APawn* Source, const FEmitterSpawnParams& Params)
 {
-	UPredictedEffectsComponent* predictEffectComp = Source->FindComponentByClass<UPredictedEffectsComponent>();
-	check(predictEffectComp);
-	predictEffectComp->CreateParticleSystemNetworkedPredicted(Params);
+	getPredictedEffectsComponent(Source)->CreateParticleSystemNetworkedPredicted(Params);
 }
 
-void UMlgGameplayStatics::SpawnEmitterLocalOnly(const APawn* Source, const FEmitterSpawnParams & Params)
+void UMlgGameplayStatics::SpawnEmitterLocalOnly(const APawn* Source, const FEmitterSpawnParams& Params)
 {
-	UPredictedEffectsComponent* predictEffectComp = Source->FindComponentByClass<UPredictedEffectsComponent>();
-	check(predictEffectComp);
-	predictEffectComp->CreateParticleSystemLocal(Params);
+	getPredictedEffectsComponent(Source)->CreateParticleSystemLocal(Params);
 }
 
 void UMlgGameplayStatics::PlaySoundAtLocationNetworked(UWorld* World, const FSoundParams& Params)
 {
-	auto gameState = World->GetGameState<AMlgGameState>();
-	check(gameState);
-	gameState->GetEffectsManager()->PlaySoundAtLocation(Params);
+	getReplicatedEffectsComponent(World)->PlaySoundAtLocation(Params);
 }
 
-void UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(const APawn* Source, const FSoundParams & Params)
+void UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(const APawn* Source, const FSoundParams& Params)
 {
-	UPredictedEffectsComponent* predictEffectComp = Source->FindComponentByClass<UPredictedEffectsComponent>();
-	check(predictEffectComp);
-	predictEffectComp->PlaySoundAtLocationNetworkedPredicted(Params);
+	getPredictedEffectsComponent(Source)->PlaySoundAtLocationNetworkedPredicted(Params);
 }
 
-void UMlgGameplayStatics::PlaySoundAtLocationLocalOnly(const APawn* Source, const FSoundParams & Params)
+void UMlgGameplayStatics::PlaySoundAtLocationLocalOnly(const APawn* Source, const FSoundParams& Params)
 {
-	UPredictedEffectsComponent* predictEffectComp = Source->FindComponentByClass<UPredictedEffectsComponent>();
-	check(predictEffectComp);
-	predictEffectComp->PlaySoundAtLocationLocal(Params);
+	getPredictedEffectsComponent(Source)->PlaySoundAtLocationLocal(Params);
 }
 

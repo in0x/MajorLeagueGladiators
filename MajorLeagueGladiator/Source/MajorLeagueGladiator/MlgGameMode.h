@@ -6,7 +6,7 @@
 #include "MlgGameMode.generated.h"
 
 class AMlgPlayerCharacter;
-class AEffectsManagerActor;
+class UReplicatedEffectsComponent;
 class UWaveSpawnerManagerComponent;
 
 UCLASS()
@@ -19,16 +19,11 @@ public:
 
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
-	virtual void InitGameState() override;
-	
 	void TravelToPreGameMap();
 
 	void DestroyAllAi();
 private:
 	void filterOutAiPlayerStates();
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AEffectsManagerActor> fxManagerClass;
 	
 	// The Tank Class. For now this is always assigned to the client.
 	UPROPERTY(EditAnywhere)
