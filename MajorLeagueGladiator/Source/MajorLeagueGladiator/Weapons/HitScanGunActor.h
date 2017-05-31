@@ -32,6 +32,8 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void playShotEffect_NetMulticast(float Charge);
 
+	void playEmptyEffect();
+
 	UPROPERTY(EditAnywhere)
 	USceneCaptureComponent2D* sceneCapture;
 
@@ -40,6 +42,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* shotSoundCue;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* shootEmptyCue;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* laserMesh;

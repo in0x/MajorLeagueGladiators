@@ -10,6 +10,7 @@
 #include "Projectiles/HitscanProjectile.h"
 #include "ChargeShotComponent.h"
 #include "PlayerHudWidget.h"
+#include "MlgGameplayStatics.h"
 
 namespace
 {
@@ -35,7 +36,10 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 
 	ConstructorHelpers::FObjectFinder<USoundCue> shotSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/hitscan_shot_Cue.hitscan_shot_Cue'"));
 	shotSoundCue = shotSoundCueFinder.Object;
-	
+
+	ConstructorHelpers::FObjectFinder<USoundCue> shootEmptyCueFinder (TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/hitscan_shot_empty_cue.hitscan_shot_empty_cue'"));
+	shootEmptyCue = shootEmptyCueFinder.Object;
+
 	MeshComponent->SetSimulatePhysics(false);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> GunStaticMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/MultiTool/gun_mount_static.gun_mount_static'"));
@@ -115,9 +119,15 @@ void AHitScanGunActor::BeginPlay()
 
 void AHitScanGunActor::OnUsed()
 {
-	if (bIsApplyingRecoil || ammoComponent->GetAmmoCount() <= 0) // Gun hasn't reset yet.
+	if (bIsApplyingRecoil) // Gun hasn't reset yet.
 		return;
 
+	if (ammoComponent->GetAmmoCount() <= 0)
+	{
+		playEmptyEffect();
+		return;
+	}
+	
 	ammoComponent->ConsumeAmmo();
 	shoot();
 
@@ -131,13 +141,20 @@ void AHitScanGunActor::OnUsed()
 	}
 }
 
+void AHitScanGunActor::playEmptyEffect()
+{
+	FSoundParams soundParams(shootEmptyCue, GetActorLocation());
+	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(Cast<APawn>(GetOwner()), soundParams);
+}
+
 void AHitScanGunActor::playShotEffect_NetMulticast_Implementation(float Charge)
 {
 	currentAnimDuration = recoilAnimBackDuration;
 	adjustedRecoilDistance = recoilDistance * Charge;
 	bIsApplyingRecoil = true;
 
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), shotSoundCue, GetActorLocation(), Charge);
+	FSoundParams soundParams(shotSoundCue, GetActorLocation());
+	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(Cast<APawn>(GetOwner()), soundParams);
 }
 
 void AHitScanGunActor::OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) 
