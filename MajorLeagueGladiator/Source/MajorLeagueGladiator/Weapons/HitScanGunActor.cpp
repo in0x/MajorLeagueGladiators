@@ -134,8 +134,8 @@ void AHitScanGunActor::OnUsed()
 	playShotEffect_NetMulticast(chargeShot->GetValuePercentage());
 	chargeShot->Reset();
 
-	auto* controller = this->GetMlgPlayerController();
-	if (controller != nullptr)
+	AMlgPlayerController* controller = CastChecked<AMlgPlayerController>(CastChecked<APawn>(GetOwner())->GetController());
+	if (controller)
 	{
 		controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
 	}

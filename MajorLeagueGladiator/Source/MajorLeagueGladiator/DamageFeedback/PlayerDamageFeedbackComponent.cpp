@@ -72,7 +72,7 @@ void UPlayerDamageFeedbackComponent::DoGlitchEffect()
 
 void UPlayerDamageFeedbackComponent::DoRumble()
 {
-	AMlgPlayerController* controller = Cast<AMlgPlayerController>(Cast<APawn>(GetOwner())->GetController());//owner->GetMlgPlayerController();
+	AMlgPlayerController* controller = Cast<AMlgPlayerController>(Cast<APawn>(GetOwner())->GetController());
 	if (controller != nullptr)
 	{
 		controller->ClientPlayForceFeedback(controller->GetRumbleShortRight(), false, FName("rumbleRight"));
