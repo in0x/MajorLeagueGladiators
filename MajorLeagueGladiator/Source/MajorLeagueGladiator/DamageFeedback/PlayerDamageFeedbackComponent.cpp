@@ -14,7 +14,7 @@ UPlayerDamageFeedbackComponent::UPlayerDamageFeedbackComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	
 	//Sound
-	static ConstructorHelpers::FObjectFinder<USoundCue> playerDamageSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Sword_Attack_Cue.Sword_Attack_Cue'"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> playerDamageSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/Damage_Taken_16bit_Cue.Damage_Taken_16bit_Cue'"));
 	sounds.Add(playerDamageSoundCueFinder.Object);
 	//https://docs.unrealengine.com/latest/INT/API/Runtime/Engine/Engine/FPostProcessSettings/index.html
 	static ConstructorHelpers::FObjectFinder<UMaterialInstanceConstant> glitchMaterial(TEXT("MaterialInstanceConstant'/Game/Materials/GlitchEffect/M_Glitch_PostProcess_Inst.M_Glitch_PostProcess_Inst'"));
