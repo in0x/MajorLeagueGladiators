@@ -8,12 +8,14 @@
 namespace
 {
 	const FName PROJECTILE_COLLISION_PROFILE_NAME = "Projectile";
+	const float NORMAL_EXPLOSION_RADIUS = 300.f;
+	const float SMALL_EXPLOSION_RADIUS = 150.f;
 }
 
 AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializer)
 	: projectileMovementComponent(ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, TEXT("ProjectileMovementComponent")))
 	, ExplosionMaxDamageRadius(20.f)
-	, ExplosionRadius(200.f)
+	, ExplosionRadius(NORMAL_EXPLOSION_RADIUS)
 	, MaxDamage(50.f)
 	, MinDamage(10.f)
 	, DamageFalloff(0.5f)
@@ -31,6 +33,12 @@ AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializ
 
 	ConstructorHelpers::FObjectFinder<USoundCue> explodeSoundCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/GrenadeExplosionCue.GrenadeExplosionCue'"));
 	explodeSoundCue = explodeSoundCueFinder.Object;
+
+	ConstructorHelpers::FObjectFinder<UParticleSystem> explosionFinder(TEXT("ParticleSystem'/Game/ParticleSystems/GrenadeBlast/GrenadeBlast.GrenadeBlast'"));
+	explosionParticles = explosionFinder.Object;
+
+	ConstructorHelpers::FObjectFinder<UParticleSystem> smallExplosionFinder(TEXT("ParticleSystem'/Game/ParticleSystems/GrenadeBlast/GrenadeBlast_small.GrenadeBlast_small'"));
+	smallExplosionParticles = smallExplosionFinder.Object;
 
 	UStaticMeshComponent* meshComponent = GetStaticMeshComponent();
 	meshComponent->Mobility = EComponentMobility::Movable;
@@ -90,6 +98,8 @@ void AGrenadeProjectile::onProjectileStop(const FHitResult& ImpactResult)
 	{
 		TimedExplode();
 	}
+
+	playParticleEffect();
 }
 
 void AGrenadeProjectile::refract(AShieldActor* ShieldActor)  
@@ -105,7 +115,7 @@ void AGrenadeProjectile::refract(AShieldActor* ShieldActor)
 
 		auto* spawnedProjectile = CastChecked<AGrenadeProjectile>(FireProjectile(sourceLocation + sourceDirection * 10, launchDirection, GetOwner(), Instigator->GetController()));
 		spawnedProjectile->TimeToExplode = 1.f;
-		spawnedProjectile->ExplosionRadius = ExplosionRadius * 0.5f;
+		spawnedProjectile->ExplosionRadius = SMALL_EXPLOSION_RADIUS;
 		spawnedProjectile->ExplosionMaxDamageRadius = spawnedProjectile->ExplosionRadius;
 
 		auto* spawnedMovement = spawnedProjectile->FindComponentByClass<UProjectileMovementComponent>();
@@ -132,6 +142,17 @@ void AGrenadeProjectile::playExplosionSound()
 	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), soundParams);
 }
 
+
+void AGrenadeProjectile::playParticleEffect()
+{
+	FEmitterSpawnParams emitterParams;
+	emitterParams.Transform.SetTranslation(GetActorLocation());
+	emitterParams.Template = ExplosionRadius == NORMAL_EXPLOSION_RADIUS ? explosionParticles : smallExplosionParticles;
+	emitterParams.bAutoDestroy = true;
+
+	UMlgGameplayStatics::SpawnEmitterNetworked(GetWorld(), emitterParams);
+}
+
 void AGrenadeProjectile::explode()
 {
 	UMlgGameplayStatics::ApplyRadialDamageWithFalloff(
@@ -145,7 +166,7 @@ void AGrenadeProjectile::explode()
 		DamageType,
 		this,
 		Instigator->GetController(),
-		true);
+		false);
 
 	playExplosionSound();
 	Destroy();

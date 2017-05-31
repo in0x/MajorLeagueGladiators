@@ -24,12 +24,10 @@ public:
 	static bool ApplyRadialDamageWithFalloff(const UObject* WorldContextObject, float BaseDamage, float MinimumDamage, const FVector& Origin, float DamageInnerRadius, float DamageOuterRadius, float DamageFalloff, TSubclassOf<class UDamageType> DamageTypeClass, AActor* DamageCauser, AController* InstigatedByController, bool bDrawDebug = false, const TArray<AActor*>& IgnoreActors = TArray<AActor*>(), ECollisionChannel DamagePreventionChannel = ECC_Visibility);
 
 	static void SpawnEmitterNetworked(UWorld* World, const FEmitterSpawnParams& Params);
-
 	static void SpawnEmitterNetworkedPredicted(const APawn* Source, const FEmitterSpawnParams& Params);
 	static void SpawnEmitterLocalOnly(const APawn* Source, const FEmitterSpawnParams& Params);
 
 	static void PlaySoundAtLocationNetworked(UWorld* World, const FSoundParams& Params);
-
 	static void PlaySoundAtLocationNetworkedPredicted(const APawn* Source, const FSoundParams& Params);
 	static void PlaySoundAtLocationLocalOnly(const APawn* Source, const FSoundParams& Params);
 };
