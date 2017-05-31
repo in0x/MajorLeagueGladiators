@@ -335,6 +335,9 @@ void UJumpDashAbility::PlayLandingEffects()
 {
 	if (!IsLocallyControlled()) { return; }
 
+	cachedCharacter->PlayRumbleLeft();
+	cachedCharacter->PlayRumbleRight();
+
 	if (landingParticleEffect)
 	{
 		FEmitterSpawnParams emitterParams;
