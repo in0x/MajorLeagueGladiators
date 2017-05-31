@@ -56,6 +56,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	USoundCue* explodeSoundCue;
 
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* explosionParticles;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* smallExplosionParticles;
+
 	FTimerHandle explodeTimer;
 	
 	UFUNCTION()
@@ -65,6 +71,7 @@ private:
 	void onProjectileStop(const FHitResult& impactResult);
 
 	void playExplosionSound();
+	void playParticleEffect();
 	void refract(AShieldActor* shieldActor);
 	void explode();
 };
