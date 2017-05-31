@@ -3,7 +3,6 @@
 #include "MajorLeagueGladiator.h"
 #include "MlgGameplayStatics.h"
 #include "MlgPlayerState.h"
-#include "MlgGameState.h"
 #include "ReplicatedEffectsComponent.h"
 #include "PredictedEffectsComponent.h"
 
