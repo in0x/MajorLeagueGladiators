@@ -2,18 +2,18 @@
 
 #pragma once
 
-#include "GameFramework/Actor.h"
+#include "Components/ActorComponent.h"
 #include "EmitterSpawnParams.h"
 #include "SoundParams.h"
-#include "EffectsManagerActor.generated.h"
+#include "ReplicatedEffectsComponent.generated.h"
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AEffectsManagerActor : public AActor
+class MAJORLEAGUEGLADIATOR_API UReplicatedEffectsComponent : public UActorComponent
 {
 	GENERATED_BODY()
 	
 public:	
-	AEffectsManagerActor();
+	UReplicatedEffectsComponent();
 
 	void CreateParticleSystemAtLocation(const FEmitterSpawnParams& Params) const;
 
