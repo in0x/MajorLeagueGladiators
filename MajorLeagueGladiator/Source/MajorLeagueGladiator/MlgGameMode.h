@@ -2,27 +2,35 @@
 
 #pragma once
 
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
 #include "MlgGameMode.generated.h"
 
 class AMlgPlayerCharacter;
 class UWaveSpawnerManagerComponent;
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AMlgGameMode : public AGameModeBase
+class MAJORLEAGUEGLADIATOR_API AMlgGameMode : public AGameMode
 {
 	GENERATED_BODY()
 	
 public:
 	AMlgGameMode(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	virtual void BeginPlay() override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
-	void TravelToPreGameMap();
+	void BeginMatchDefault();
+	void BeginMatch(int32 StartWave);
+	void MatchLost();
 
+	void TravelToRoomOfShame();
+	void TravelToGameMap();
 	void DestroyAllAi();
 private:
 	void filterOutAiPlayerStates();
+
+	void postEnterGameMap();
+	void postEnterRoomOfShame();
 	
 	// The Tank Class. For now this is always assigned to the client.
 	UPROPERTY(EditAnywhere)

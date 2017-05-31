@@ -8,6 +8,18 @@
 DECLARE_MULTICAST_DELEGATE_TwoParams(RemainingEnemiesForWaveChangedDelegate, int32, int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(WaveDelegate, int32)
 
+UENUM(BlueprintType)
+namespace EWaveState
+{
+	enum Type
+	{
+		NotStarted,
+		DuringWave,
+		BetweemWave,
+	};
+}
+
+struct SavedState;
 
 /*
 Manages the Enemy wave timings, such as when to start a new Wave, what wave number it should be and
@@ -23,21 +35,29 @@ class MAJORLEAGUEGLADIATOR_API UWaveSystemComponent : public UActorComponent
 public:
 	UWaveSystemComponent();
 
-	virtual void BeginPlay() override;
 	void OnEnemyKilled(ACharacter* KilledCharacter);
 
-	void Start();
-	void StartNextWave();
-	void StartWave(int32 WaveNumber);
+	void SetStartWave(int32 WaveNumber);
+	void StartWave();
+	void Stop();
 
-	void ChangeRemainingEnemiesForWave(int32 ChangeInValue);
-	void SetRemainingEnemiesForWave(int32 NewRemainingEnemiesForWave);
+	bool IsRunning() const;
 	int32 GetRemainingEnemiesForWave() const;
+
+	void SetFromSavedState(const SavedState& savedState);
+	void WriteIntoSavedState(SavedState& savedState) const;
 
 	RemainingEnemiesForWaveChangedDelegate OnRemainingEnemiesForWaveChanged;
 	WaveDelegate OnWaveStarted;
 	WaveDelegate OnWaveCleared;
+
 private:
+	void startNextWave();
+	void startWaveImpl(int32 WaveNumber);
+	void changeRemainingEnemiesForWave(int32 ChangeInValue);
+	void setRemainingEnemiesForWave(int32 NewRemainingEnemiesForWave);
+	void setWaveNumber(int32 NewWaveNumber);
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION()
@@ -55,6 +75,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing = onRep_remainingEnemiesForWave, Transient)
 	int32 remainingEnemiesForWave;
+
+	UPROPERTY(Replicated)
+	TEnumAsByte<EWaveState::Type> waveState;
 
 	UPROPERTY(EditAnywhere)
 	int32 startWaveNumber;
@@ -76,5 +99,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USoundBase* endWaveSound;
+
+	FTimerHandle nextActionTimerHandle;
 };
 

@@ -184,13 +184,7 @@ void AMlgPlayerCharacter::OnHealthChanged(float newHealthPercentage, float oldHe
 {
 	if (newHealthPercentage == 0.f && HasAuthority())
 	{
-		/*for (TObjectIterator<UPlayerDeathComponent> iter; iter; ++iter)
-		{
-			iter->OnPlayerDied_NetMulticast();
-		}*/
-		/*FTimerHandle timerHandle;
-		GetWorldTimerManager().SetTimer(timerHandle, GetWorld()->GetAuthGameMode<AMlgGameMode>(), &AMlgGameMode::TravelToPreGameMap, 5.f);*/
-		GetWorld()->GetAuthGameMode<AMlgGameMode>()->TravelToPreGameMap();
+		GetWorld()->GetAuthGameMode<AMlgGameMode>()->MatchLost();
 	}
 
 	if (newHealthPercentage < oldHealthPercentage && IsLocallyControlled())

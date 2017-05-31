@@ -9,7 +9,16 @@
 
 //Used Tutorial : https://wiki.unrealengine.com/How_To_Use_Sessions_In_C%2B%2B
 
+
 DECLARE_MULTICAST_DELEGATE_OneParam(SearchFinishedDelegate, const TArray <FOnlineSessionSearchResult>&);
+
+struct SavedState
+{
+	int32 currentWaveNumber;
+	int32 startWaveNumber;
+	int32 remainingEnemies;
+	bool isTravelingToGameMap;
+};
 
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API UMlgGameInstance : public UGameInstance
@@ -28,6 +37,9 @@ public:
 	SearchFinishedDelegate OnFindSessionFinished;
 
 	EOnlineSessionState::Type GetGameSessionState() const;
+
+	SavedState savedState;
+
 private:
 
 	virtual void onCreateSessionComplete(FName SessionName, bool bWasSuccessful);
