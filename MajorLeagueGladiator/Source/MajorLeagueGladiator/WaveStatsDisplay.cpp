@@ -19,6 +19,9 @@ void AWaveStatsDisplay::BeginPlay()
 	UWaveSystemComponent* waveSystemComponent = gamestate->FindComponentByClass<UWaveSystemComponent>();
 	waveSystemComponent->OnRemainingEnemiesForWaveChanged.AddUObject(this, &AWaveStatsDisplay::OnEnemyCountChanged);
 	waveSystemComponent->OnWaveStarted.AddUObject(this, &AWaveStatsDisplay::OnWaveNumberChanged);
+
+	OnEnemyCountChanged(waveSystemComponent->GetRemainingEnemiesForWave());
+	//TODO other one
 }
 
 void AWaveStatsDisplay::OnWaveNumberChanged(int NewWaveCount)
