@@ -19,7 +19,7 @@ public:
 	virtual void Tick(float DeltaSeconds);
 	void OnHitInteractable(const ABaseProjectile* projectile);	
 	FTransform GetReflectSpawnTransform() const;
-	void PlayReflectSound();
+	void PlayReflectEffect();
 	float GetCurrentActiveTime() const { return currentActiveTime; }
 	float CalcTimeLeft() const;
 	float CalcSecondsUntilRecharged() const;
@@ -31,7 +31,6 @@ public:
 
 private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
 	void updateAnimation(float timeRemaining);
 
 	UPROPERTY(EditAnywhere)

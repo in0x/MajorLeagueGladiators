@@ -119,7 +119,7 @@ void AGrenadeProjectile::refract(AShieldActor* ShieldActor)
 		spawnedProjectile->TimedExplode();
 	}
 
-	ShieldActor->PlayReflectSound();
+	ShieldActor->PlayReflectEffect();
 
 	Destroy();
 }
