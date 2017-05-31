@@ -82,8 +82,8 @@ public:
 	FAbilityUseFail OnAbilityUseFail;
 	FAbilityUseSuccess OnAbilityUseSuccess;
 
-	void PlayRumbleLeft();
-	void PlayRumbleRight();
+	void PlayRumbleLeft() const;
+	void PlayRumbleRight() const;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
