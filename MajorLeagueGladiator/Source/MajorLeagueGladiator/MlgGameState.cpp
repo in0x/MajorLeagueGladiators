@@ -9,5 +9,5 @@ AMlgGameState::AMlgGameState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	waveSystemComponent = ObjectInitializer.CreateDefaultSubobject<UWaveSystemComponent>(this, TEXT("WaveSystemComponent"));
-	effectsManager = ObjectInitializer.CreateDefaultSubobject<UReplicatedEffectsComponent>(this, TEXT("ReplicatedEffectsComponent"));
+	replicatedEffectsComponent = ObjectInitializer.CreateDefaultSubobject<UReplicatedEffectsComponent>(this, TEXT("ReplicatedEffectsComponent"));
 }

@@ -18,7 +18,7 @@ public:
 	
 private:
 	UPROPERTY()
-	UReplicatedEffectsComponent* effectsManager;
+	UReplicatedEffectsComponent* replicatedEffectsComponent;
 
 	UPROPERTY(EditAnywhere)
 	UWaveSystemComponent* waveSystemComponent;

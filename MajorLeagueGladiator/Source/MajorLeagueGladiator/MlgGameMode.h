@@ -6,7 +6,6 @@
 #include "MlgGameMode.generated.h"
 
 class AMlgPlayerCharacter;
-class UReplicatedEffectsComponent;
 class UWaveSpawnerManagerComponent;
 
 UCLASS()
