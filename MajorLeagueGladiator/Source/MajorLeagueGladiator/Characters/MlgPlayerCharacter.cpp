@@ -233,13 +233,13 @@ void AMlgPlayerCharacter::Tick(float DelataTime)
 	bodyMesh2->SetWorldTransform(FTransform(rot, BodyOffsetFromHead + cameraTrans.GetLocation()));
 }
 
-void AMlgPlayerCharacter::PlayRumbleLeft()
+void AMlgPlayerCharacter::PlayRumbleLeft() const
 {
 	APlayerController* playerController = CastChecked<APlayerController>(GetController());
 	playerController->ClientPlayForceFeedback(rumbleLeft, false, FName("rumbleLeft"));
 }
 
-void AMlgPlayerCharacter::PlayRumbleRight()
+void AMlgPlayerCharacter::PlayRumbleRight() const
 {
 	APlayerController* playerController = CastChecked<APlayerController>(GetController());
 	playerController->ClientPlayForceFeedback(rumbleRight, false, FName("rumbleRight"));
