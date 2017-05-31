@@ -39,6 +39,12 @@ AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
 	RightMotionController->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	leftMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	rightMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+
+#if 1 //If this is on you can move with the mouse, however it also causes the sliding bug
+	bUseControllerRotationPitch = true;
+	bUseControllerRotationRoll = true;
+	bUseControllerRotationYaw = true;
+#endif
 }
 
 void AMenuCharacter::Tick(float DeltaTimeSeconds)
@@ -56,6 +62,8 @@ void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnRightTriggerClicked);
+	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 }
 
 void AMenuCharacter::OnRightTriggerClicked()
