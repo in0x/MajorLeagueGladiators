@@ -30,9 +30,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FBlackboardKeySelector Target;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USoundCue* RangedAttackSoundCue;
-
 protected:
 	UPROPERTY(Transient)
 	AAIController* controller;
