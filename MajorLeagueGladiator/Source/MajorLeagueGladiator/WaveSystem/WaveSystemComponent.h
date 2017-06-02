@@ -46,7 +46,7 @@ public:
 	int32 GetCurrentWaveNumber() const;
 
 	virtual void InitializeComponent() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void UninitializeComponent() override;
 
 	RemainingEnemiesForWaveChangedDelegate OnRemainingEnemiesForWaveChanged;
 	WaveDelegate OnWaveStarted;
@@ -72,10 +72,6 @@ private:
 
 	void fireRemainingEnemiesForWaveChangedDelegates(int32 oldRemainingEnemiesForWave);
 	void fireWaveNumberChangedDelegates(int32 oldWaveNumber);
-
-	void playFirstWaveEffects();
-	void playBeginOfWaveEffects();
-	void playEndOfWaveEffects();
 
 	UPROPERTY(ReplicatedUsing = onRep_remainingEnemiesForWave, Transient)
 	int32 remainingEnemiesForWave;

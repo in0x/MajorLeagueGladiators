@@ -5,6 +5,8 @@
 #include "GameFramework/GameMode.h"
 #include "MlgGameMode.generated.h"
 
+namespace EMenuAction { enum Type; }
+
 class AMlgPlayerCharacter;
 class UWaveSpawnerManagerComponent;
 
@@ -19,14 +21,16 @@ public:
 	virtual void BeginPlay() override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
-	void BeginMatchDefault();
 	void BeginMatch(int32 StartWave);
+
 	void MatchLost();
 
 	void TravelToRoomOfShame();
 	void TravelToGameMap();
 	void DestroyAllAi();
 private:
+	void onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction);
+
 	void filterOutAiPlayerStates();
 
 	void enterGameMap();
@@ -42,4 +46,13 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UWaveSpawnerManagerComponent* waveSpawnerManger;
+
+	UPROPERTY(EditAnywhere)
+	int32 easyStartWave;
+
+	UPROPERTY(EditAnywhere)
+	int32 mediumStartWave;
+
+	UPROPERTY(EditAnywhere)
+	int32 hardStartWave;
 };

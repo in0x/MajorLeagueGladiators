@@ -52,15 +52,30 @@ bool UReplicatedEffectsComponent::playSoundAtLocation_Server_Validate(const FSou
 
 void UReplicatedEffectsComponent::playSoundAtLocation_NetMulticast_Implementation(const FSoundParams& Params) const
 {
-	UGameplayStatics::PlaySoundAtLocation(
-		GetWorld(),
-		Params.Sound,
-		Params.Location,
-		Params.Rotation,
-		Params.VolumeMultiplier,
-		Params.PitchMultiplier,
-		Params.StartTime,
-		Params.AttenuationSettings,
-		Params.ConcurrencySettings
-		);
+	if (Params.Location.IsZero())
+	{
+		UGameplayStatics::PlaySound2D(
+			GetWorld(),
+			Params.Sound,
+			Params.VolumeMultiplier,
+			Params.PitchMultiplier,
+			Params.StartTime,
+			Params.ConcurrencySettings
+			);
+	}
+	else
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			Params.Sound,
+			Params.Location,
+			Params.Rotation,
+			Params.VolumeMultiplier,
+			Params.PitchMultiplier,
+			Params.StartTime,
+			Params.AttenuationSettings,
+			Params.ConcurrencySettings
+			);
+	}
 }
+
