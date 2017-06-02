@@ -62,6 +62,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* smallExplosionParticles;
 
+	UPROPERTY(EditAnywhere)
+	UParticleSystemComponent* particleComponent;
+
 	FTimerHandle explodeTimer;
 	
 	UFUNCTION()
@@ -69,6 +72,9 @@ private:
 
 	UFUNCTION()
 	void onProjectileStop(const FHitResult& impactResult);
+
+	UFUNCTION()
+	void onParticlesFinished(UParticleSystemComponent* System);
 
 	void playExplosionSound();
 	void playParticleEffect();
