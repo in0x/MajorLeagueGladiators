@@ -61,7 +61,7 @@ void UPlayerDamageFeedbackComponent::DoGlitchEffect()
 	{
 		leftHitDurationGlitch = hitDurationGlitch;
 		
-		postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, 0.5f); //OLD: 0.f
+		postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, 1.f); //OLD: 0.f
 		postProcessComp->Settings.bOverride_SceneFringeIntensity = true;
 		postProcessComp->Settings.bOverride_VignetteIntensity = true;
 	}
