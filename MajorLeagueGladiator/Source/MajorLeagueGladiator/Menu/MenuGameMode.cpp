@@ -54,13 +54,24 @@ void AMenuGameMode::onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction)
 	}
 }
 
+void AMenuGameMode::setTutorialSettings()
+{
+	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(GetGameInstance());
+	WaveSystemSavedState& wsss = gameInstance->WaveSystemSavedState;
+	wsss.currentWaveNumber = 1;
+	wsss.remainingEnemies = 0;
+	wsss.startWaveNumber = 1;
+}
+
 void AMenuGameMode::startRangedTutorial()
 {
+	setTutorialSettings();
 	GetWorld()->ServerTravel(RANGED_TUTORIAL_MAP);
 }
 
 void AMenuGameMode::startMeleeTutorial()
 {
+	setTutorialSettings();
 	GetWorld()->ServerTravel(MELEE_TUTORIAL_MAP);
 }
 

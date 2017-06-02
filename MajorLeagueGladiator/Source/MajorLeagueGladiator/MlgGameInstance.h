@@ -14,9 +14,9 @@ DECLARE_MULTICAST_DELEGATE_OneParam(SearchFinishedDelegate, const TArray <FOnlin
 
 struct WaveSystemSavedState
 {
-	int32 currentWaveNumber;
-	int32 startWaveNumber;
-	int32 remainingEnemies;
+	int32 currentWaveNumber = 1;
+	int32 startWaveNumber = 1;
+	int32 remainingEnemies = 0;
 };
 
 UCLASS()
