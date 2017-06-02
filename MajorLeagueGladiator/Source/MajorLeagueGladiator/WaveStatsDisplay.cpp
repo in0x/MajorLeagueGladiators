@@ -18,13 +18,13 @@ void AWaveStatsDisplay::BeginPlay()
 	AGameStateBase* gamestate = GetWorld()->GetGameState();
 	UWaveSystemComponent* waveSystemComponent = gamestate->FindComponentByClass<UWaveSystemComponent>();
 	waveSystemComponent->OnRemainingEnemiesForWaveChanged.AddUObject(this, &AWaveStatsDisplay::OnEnemyCountChanged);
-	waveSystemComponent->OnWaveStarted.AddUObject(this, &AWaveStatsDisplay::OnWaveNumberChanged);
+	waveSystemComponent->OnWaveNumberChanged.AddUObject(this, &AWaveStatsDisplay::OnWaveNumberChanged);
 
 	OnEnemyCountChanged(waveSystemComponent->GetRemainingEnemiesForWave(), -1);
-	OnWaveNumberChanged(waveSystemComponent->GetCurrentWaveNumber());
+	OnWaveNumberChanged(waveSystemComponent->GetCurrentWaveNumber(), -1);
 }
 
-void AWaveStatsDisplay::OnWaveNumberChanged(int NewWaveCount)
+void AWaveStatsDisplay::OnWaveNumberChanged(int NewWaveCount, int OldWaveNumber)
 {
 	UpdateWaveNumber(NewWaveCount);
 }

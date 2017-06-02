@@ -3,7 +3,6 @@
 #include "WaveSystem/WaveSpawnerManagerComponent.h"
 #include "MlgGameMode.h"
 #include "MlgGameInstance.h"
-#include "MlgGameplayStatics.h"
 
 UWaveSystemComponent::UWaveSystemComponent()
 	: remainingEnemiesForWave(0)
@@ -54,14 +53,12 @@ void UWaveSystemComponent::StartWave()
 	check(GetOwner()->HasAuthority());
 
 	startWaveImpl(startWaveNumber);
-	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(firstWaveSound));
 }
 
 void UWaveSystemComponent::startNextWave()
 {
 	check(waveState == EWaveState::BetweemWave);
 	startWaveImpl(currentWaveNumber + 1);
-	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(beginOfWaveSound));
 }
 
 void UWaveSystemComponent::startWaveImpl(int32 WaveNumber)
@@ -113,7 +110,7 @@ void UWaveSystemComponent::Stop()
 
 bool UWaveSystemComponent::IsRunning() const
 {
-	return nextActionTimerHandle.IsValid() || remainingEnemiesForWave > 0;
+	return waveState != EWaveState::NotStarted;
 }
 
 void UWaveSystemComponent::changeRemainingEnemiesForWave(int32 ChangeInValue)
@@ -181,18 +178,48 @@ void UWaveSystemComponent::onRep_currentWaveNumber(int32 oldWaveNumber)
 void UWaveSystemComponent::fireRemainingEnemiesForWaveChangedDelegates(int32 oldremainingEnemiesForWave)
 {
 	OnRemainingEnemiesForWaveChanged.Broadcast(remainingEnemiesForWave, oldremainingEnemiesForWave);
-	if (remainingEnemiesForWave == 0 && remainingEnemiesForWave < oldremainingEnemiesForWave)
+
+	if (remainingEnemiesForWave == 0 && IsRunning())
 	{
+		playEndOfWaveEffects();
 		OnWaveCleared.Broadcast(currentWaveNumber);
 	}
 }
 
 void UWaveSystemComponent::fireWaveNumberChangedDelegates(int32 oldWaveNumber)
 {
-	if (currentWaveNumber == startWaveNumber && currentWaveNumber > oldWaveNumber)
+	OnWaveNumberChanged.Broadcast(currentWaveNumber, oldWaveNumber);
+	if(!IsRunning())
 	{
-		OnWaveStarted.Broadcast(currentWaveNumber);
+		return;
 	}
+
+	OnWaveStarted.Broadcast(currentWaveNumber);
+
+	if (currentWaveNumber == startWaveNumber)
+	{
+		playFirstWaveEffects();
+	}
+	else
+	{
+		playBeginOfWaveEffects();
+	}
+	
+}
+
+void UWaveSystemComponent::playFirstWaveEffects()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), firstWaveSound);
+}
+
+void UWaveSystemComponent::playBeginOfWaveEffects()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), beginOfWaveSound);
+}
+
+void UWaveSystemComponent::playEndOfWaveEffects()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), endWaveSound);
 }
 
 void UWaveSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
