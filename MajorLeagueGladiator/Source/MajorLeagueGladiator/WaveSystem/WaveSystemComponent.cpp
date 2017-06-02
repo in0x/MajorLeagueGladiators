@@ -153,14 +153,54 @@ int32 UWaveSystemComponent::GetCurrentWaveNumber() const
 void UWaveSystemComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
-	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(GetWorld()->GetGameInstance());
-	setFromSavedState(gameInstance->WaveSystemSavedState);
+
+	UWorld* world = GetWorld();
+	UGameInstance* gameInstance = nullptr;
+
+	if (world)
+	{
+		gameInstance = GetWorld()->GetGameInstance();
+
+		if (gameInstance)
+		{
+			UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);
+			setFromSavedState(mlgGameInstance->WaveSystemSavedState);
+		}
+		else
+		{
+			UE_LOG(DebugLog, Warning, TEXT("UWorld is null in " __FUNCTION__));
+		}
+	}
+	else
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance is null in " __FUNCTION__));
+	}
 }
 
 void UWaveSystemComponent::UninitializeComponent()
 {
-	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(GetWorld()->GetGameInstance());
-	writeIntoSavedState(gameInstance->WaveSystemSavedState);
+	UWorld* world = GetWorld();
+	UGameInstance* gameInstance = nullptr;
+
+	if (world)
+	{
+		gameInstance = GetWorld()->GetGameInstance();
+
+		if (gameInstance)
+		{
+			UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);
+			writeIntoSavedState(mlgGameInstance->WaveSystemSavedState);
+		}
+		else
+		{
+			UE_LOG(DebugLog, Warning, TEXT("UWorld is null in " __FUNCTION__));
+		}
+	}
+	else
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance is null in " __FUNCTION__));
+	}
+
 	Super::UninitializeComponent();
 }
 
