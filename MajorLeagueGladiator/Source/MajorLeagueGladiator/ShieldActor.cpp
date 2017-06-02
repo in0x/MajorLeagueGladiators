@@ -65,7 +65,6 @@ void AShieldActor::Tick(float DeltaSeconds)
 	}
 }
 
-
 FTransform AShieldActor::GetReflectSpawnTransform() const
 {
 	checkf(MeshComponent->DoesSocketExist(REFLECT_SOCKET_NAME), TEXT("Socket \"Reflect\" is missing in the shield actor mesh"));
