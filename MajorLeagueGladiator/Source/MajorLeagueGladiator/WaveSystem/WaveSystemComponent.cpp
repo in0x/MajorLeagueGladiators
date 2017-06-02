@@ -31,9 +31,8 @@ void UWaveSystemComponent::SetFromSavedState(const WaveSystemSavedState& savedSt
 	currentWaveNumber = savedState.currentWaveNumber;
 	remainingEnemiesForWave = savedState.remainingEnemies;
 
-	//Mabe not needed
-	onRep_remainingEnemiesForWave(remainingEnemiesForWave);
-	onRep_currentWaveNumber(currentWaveNumber);	
+	fireRemainingEnemiesForWaveChangedDelegates(remainingEnemiesForWave);
+	fireWaveNumberChangedDelegates(currentWaveNumber);	
 }
 void UWaveSystemComponent::WriteIntoSavedState(WaveSystemSavedState& savedState) const
 {

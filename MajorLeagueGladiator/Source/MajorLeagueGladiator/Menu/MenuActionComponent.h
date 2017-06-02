@@ -16,7 +16,8 @@ namespace EMenuAction
 		StartRangedTutorial UMETA(DisplayName = "StartRangedTutorial"),
 		StartGameEasy		UMETA(DisplayName = "StartGameEasy"),
 		StartGameMedium		UMETA(DisplayName = "StartGameMedium"),
-		StartGameHard		UMETA(DisplayName = "StartGameHard")
+		StartGameHard		UMETA(DisplayName = "StartGameHard"),
+		GoToMainMenu		UMETA(DisplayName = "GoToMainMenu")
 	};
 }
 
