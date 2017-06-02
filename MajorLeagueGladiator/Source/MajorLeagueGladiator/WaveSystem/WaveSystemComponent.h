@@ -55,8 +55,8 @@ public:
 	WaveDelegate OnWaveCleared;
 
 private:
-	void SetFromSavedState(const WaveSystemSavedState& savedState);
-	void WriteIntoSavedState(WaveSystemSavedState& savedState) const;
+	void setFromSavedState(const WaveSystemSavedState& savedState);
+	void writeIntoSavedState(WaveSystemSavedState& savedState) const;
 
 	void startNextWave();
 	void startWaveImpl(int32 WaveNumber);
@@ -106,6 +106,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	USoundBase* endWaveSound;
 
-	FTimerHandle nextActionTimerHandle;
+	FTimerHandle startNextWaveTimerHandle;
 };
 

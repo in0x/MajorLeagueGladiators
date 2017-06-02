@@ -38,7 +38,7 @@ void AMlgGameMode::BeginPlay()
 		iter->OnMenuActionTriggered.AddUObject(this, &AMlgGameMode::onMenuAction);
 	}
 
-	if (CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame)
+	if (isInRoomOfShame())
 	{
 		postEnterRoomOfShame();
 	}
@@ -56,6 +56,16 @@ void AMlgGameMode::enterGameMap()
 
 void AMlgGameMode::postEnterRoomOfShame()
 {
+}
+
+bool AMlgGameMode::isInRoomOfShame() const
+{
+	return CastChecked<UMlgGameInstance>(GetGameInstance())->bIsInRoomOfShame;
+}
+
+void AMlgGameMode::setIsInRoomOfShame(bool NewIsInRoomOfShame)
+{
+	CastChecked<UMlgGameInstance>(GetGameInstance())->bIsInRoomOfShame = NewIsInRoomOfShame;
 }
 
 UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
@@ -104,7 +114,7 @@ void AMlgGameMode::DestroyAllAi()
 
 void AMlgGameMode::travelToRoomOfShame()
 {
-	CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame = true;
+	setIsInRoomOfShame(true);
 
 	filterOutAiPlayerStates();
 	GetWorld()->ServerTravel(PRE_GAME_MAP, true);
@@ -157,7 +167,7 @@ void AMlgGameMode::travelToMainMenu()
 
 void AMlgGameMode::beginMatch(int32 StartWave)
 {
-	if (CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame)
+	if (isInRoomOfShame())
 	{
 		UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
 		waveSystemComponent->SetStartWave(StartWave);
@@ -167,7 +177,7 @@ void AMlgGameMode::beginMatch(int32 StartWave)
 
 void AMlgGameMode::travelToGameMap()
 {
-	CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame = false;
+	setIsInRoomOfShame(false);
 
 	GetWorld()->ServerTravel(GAME_MAP, true);
 }

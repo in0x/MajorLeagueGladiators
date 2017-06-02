@@ -67,7 +67,7 @@ void UJumpAbility::PlayJumpEffects()
 {
 	FSoundParams soundParams;
 	soundParams.Sound = jumpSoundCue;
-	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(cachedPlayer, soundParams);
+	UMlgGameplayStatics::PlaySoundNetworkedPredicted(cachedPlayer, soundParams);
 
 	UGameplayStatics::SpawnSoundAttached(jumpSoundCue, cachedPlayer->GetRootComponent(), NAME_None, cachedPlayer->GetActorLocation(), EAttachLocation::KeepRelativeOffset);
 }

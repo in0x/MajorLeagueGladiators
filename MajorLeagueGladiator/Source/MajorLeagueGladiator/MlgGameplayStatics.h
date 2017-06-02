@@ -27,7 +27,7 @@ public:
 	static void SpawnEmitterNetworkedPredicted(const APawn* Source, const FEmitterSpawnParams& Params);
 	static void SpawnEmitterLocalOnly(const APawn* Source, const FEmitterSpawnParams& Params);
 
-	static void PlaySoundAtLocationNetworked(UWorld* World, const FSoundParams& Params);
-	static void PlaySoundAtLocationNetworkedPredicted(const APawn* Source, const FSoundParams& Params);
-	static void PlaySoundAtLocationLocalOnly(const APawn* Source, const FSoundParams& Params);
+	static void PlaySoundNetworked(UWorld* World, const FSoundParams& Params);
+	static void PlaySoundNetworkedPredicted(const APawn* Source, const FSoundParams& Params);
+	static void PlaySoundLocalOnly(const APawn* Source, const FSoundParams& Params);
 };

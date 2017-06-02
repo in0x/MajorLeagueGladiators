@@ -35,22 +35,22 @@ void UReplicatedEffectsComponent::createParticleSystem_NetMulticast_Implementati
 /*                Sound                                                 */
 /************************************************************************/
 
-void UReplicatedEffectsComponent::PlaySoundAtLocation(const FSoundParams& Params) const
+void UReplicatedEffectsComponent::PlaySoundNetworked(const FSoundParams& Params) const
 {
-	playSoundAtLocation_Server(Params);
+	playSound_Server(Params);
 }
 
-void UReplicatedEffectsComponent::playSoundAtLocation_Server_Implementation(const FSoundParams& Params) const
+void UReplicatedEffectsComponent::playSound_Server_Implementation(const FSoundParams& Params) const
 {
-	playSoundAtLocation_NetMulticast(Params);
+	playSound_NetMulticast(Params);
 }
 
-bool UReplicatedEffectsComponent::playSoundAtLocation_Server_Validate(const FSoundParams& Params)
+bool UReplicatedEffectsComponent::playSound_Server_Validate(const FSoundParams& Params)
 {
 	return true;
 }
 
-void UReplicatedEffectsComponent::playSoundAtLocation_NetMulticast_Implementation(const FSoundParams& Params) const
+void UReplicatedEffectsComponent::playSound_NetMulticast_Implementation(const FSoundParams& Params) const
 {
 	if (Params.Location.IsZero())
 	{

@@ -58,47 +58,61 @@ void UPredictedEffectsComponent::createParticleSystem_NetMulticast_Implementatio
 /************************************************************************/
 /*							Sound                                       */
 /************************************************************************/
-void UPredictedEffectsComponent::PlaySoundAtLocationNetworkedPredicted(const FSoundParams& Params) const
+void UPredictedEffectsComponent::PlaySoundNetworkedPredicted(const FSoundParams& Params) const
 {
 	if (!IsLocallyControlled())
 	{
-		UE_LOG(DebugLog, Warning, TEXT("PlaySoundAtLocationNetworkedPredicted called from non local actor. This probably does not make sense"))
+		UE_LOG(DebugLog, Warning, TEXT("playSoundNetworkedPredicted called from non local actor. This probably does not make sense"))
 	}
 
-	PlaySoundAtLocationLocal(Params);
-	playSoundAtLocation_Server(Params);
+	PlaySoundLocal(Params);
+	playSound_Server(Params);
 }
 
-void UPredictedEffectsComponent::PlaySoundAtLocationLocal(const FSoundParams& Params) const
+void UPredictedEffectsComponent::PlaySoundLocal(const FSoundParams& Params) const
 {
-	UGameplayStatics::PlaySoundAtLocation(
-		GetWorld(),
-		Params.Sound,
-		Params.Location,
-		Params.Rotation,
-		Params.VolumeMultiplier,
-		Params.PitchMultiplier,
-		Params.StartTime,
-		Params.AttenuationSettings,
-		Params.ConcurrencySettings
-		);
+	if (Params.Location.IsZero())
+	{
+		UGameplayStatics::PlaySound2D(
+			GetWorld(),
+			Params.Sound,
+			Params.VolumeMultiplier,
+			Params.PitchMultiplier,
+			Params.StartTime,
+			Params.ConcurrencySettings
+			);
+	}
+	else
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			Params.Sound,
+			Params.Location,
+			Params.Rotation,
+			Params.VolumeMultiplier,
+			Params.PitchMultiplier,
+			Params.StartTime,
+			Params.AttenuationSettings,
+			Params.ConcurrencySettings
+			);
+	}	
 }
 
-bool UPredictedEffectsComponent::playSoundAtLocation_Server_Validate(const FSoundParams& Params)
+bool UPredictedEffectsComponent::playSound_Server_Validate(const FSoundParams& Params)
 {
 	return true;
 }
 
-void UPredictedEffectsComponent::playSoundAtLocation_Server_Implementation(const FSoundParams& Params) const
+void UPredictedEffectsComponent::playSound_Server_Implementation(const FSoundParams& Params) const
 {
-	playSoundAtLocation_NetMulticast(Params);
+	playSound_NetMulticast(Params);
 }
 
-void UPredictedEffectsComponent::playSoundAtLocation_NetMulticast_Implementation(const FSoundParams& Params) const
+void UPredictedEffectsComponent::playSound_NetMulticast_Implementation(const FSoundParams& Params) const
 {
 	// Prevent Playing Twice
 	if (!IsLocallyControlled())
 	{
-		PlaySoundAtLocationLocal(Params);;
+		PlaySoundLocal(Params);;
 	}
 }

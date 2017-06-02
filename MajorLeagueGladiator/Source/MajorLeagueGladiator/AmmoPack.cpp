@@ -46,7 +46,7 @@ void AAmmoPack::Use(AActor* User, TriggerType Type)
 		const float amoutToRefill = IsCharged() ? amountToRefillCharged : amountToRefillUncharged;			
 		ammoComponent->IncreaseAmmo(amoutToRefill);
 	
-		UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(userOwner, FSoundParams(reloadSoundCue, GetActorLocation()));
+		UMlgGameplayStatics::PlaySoundNetworkedPredicted(userOwner, FSoundParams(reloadSoundCue, GetActorLocation()));
 		ReleaseFromGrippedComponent();
 		Destroy();
 	}

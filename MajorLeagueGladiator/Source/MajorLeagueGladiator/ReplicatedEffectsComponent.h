@@ -17,7 +17,7 @@ public:
 
 	void CreateParticleSystemAtLocation(const FEmitterSpawnParams& Params) const;
 
-	void PlaySoundAtLocation(const FSoundParams& Params) const;
+	void PlaySoundNetworked(const FSoundParams& Params) const;
 
 private:
 	UFUNCTION(Server, unreliable, WithValidation)
@@ -27,8 +27,8 @@ private:
 	void createParticleSystem_NetMulticast(const FEmitterSpawnParams& Params) const;
 
 	UFUNCTION(Server, unreliable, WithValidation)
-	void playSoundAtLocation_Server(const FSoundParams& Params) const;
+	void playSound_Server(const FSoundParams& Params) const;
 
 	UFUNCTION(NetMulticast, unreliable)
-	void playSoundAtLocation_NetMulticast(const FSoundParams& Params) const;
+	void playSound_NetMulticast(const FSoundParams& Params) const;
 };

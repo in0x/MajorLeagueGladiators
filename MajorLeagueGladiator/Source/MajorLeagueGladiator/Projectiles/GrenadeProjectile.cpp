@@ -139,7 +139,7 @@ void AGrenadeProjectile::playExplosionSound()
 	FSoundParams soundParams(explodeSoundCue, GetActorLocation());
 	soundParams.VolumeMultiplier = ExplodeSoundMultiplier;
 
-	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), soundParams);
+	UMlgGameplayStatics::PlaySoundNetworked(GetWorld(), soundParams);
 }
 
 void AGrenadeProjectile::playParticleEffect()

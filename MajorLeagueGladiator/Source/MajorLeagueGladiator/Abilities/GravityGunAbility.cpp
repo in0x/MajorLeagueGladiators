@@ -142,7 +142,8 @@ void UGravityGunAbility::LaunchGrippedActor()
 
 	FSoundParams soundParams;
 	soundParams.Sound = shootSoundCue;
-	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(player, soundParams);
+
+	UMlgGameplayStatics::PlaySoundNetworkedPredicted(player, soundParams);
 
 	player->PlayRumbleLeft();
 

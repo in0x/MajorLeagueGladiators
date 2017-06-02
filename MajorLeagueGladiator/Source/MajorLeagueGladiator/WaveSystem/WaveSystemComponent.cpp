@@ -25,7 +25,7 @@ UWaveSystemComponent::UWaveSystemComponent()
 	bWantsInitializeComponent = true;
 }
 
-void UWaveSystemComponent::SetFromSavedState(const WaveSystemSavedState& savedState)
+void UWaveSystemComponent::setFromSavedState(const WaveSystemSavedState& savedState)
 {
 	startWaveNumber = savedState.startWaveNumber;
 	currentWaveNumber = savedState.currentWaveNumber;
@@ -34,7 +34,7 @@ void UWaveSystemComponent::SetFromSavedState(const WaveSystemSavedState& savedSt
 	fireRemainingEnemiesForWaveChangedDelegates(remainingEnemiesForWave);
 	fireWaveNumberChangedDelegates(currentWaveNumber);	
 }
-void UWaveSystemComponent::WriteIntoSavedState(WaveSystemSavedState& savedState) const
+void UWaveSystemComponent::writeIntoSavedState(WaveSystemSavedState& savedState) const
 {
 	savedState.startWaveNumber = startWaveNumber;
 	savedState.currentWaveNumber = currentWaveNumber;
@@ -101,9 +101,9 @@ void UWaveSystemComponent::Stop()
 	waveState = EWaveState::NotStarted;
 	GetWorld()->GetAuthGameMode<AMlgGameMode>()->DestroyAllAi();
 
-	if (nextActionTimerHandle.IsValid())
+	if (startNextWaveTimerHandle.IsValid())
 	{
-		GetWorld()->GetTimerManager().ClearTimer(nextActionTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(startNextWaveTimerHandle);
 	}
 }
 
@@ -128,7 +128,7 @@ void UWaveSystemComponent::setRemainingEnemiesForWave(int32 NewRemainingEnemiesF
 
 	if (NewRemainingEnemiesForWave == 0 && waveState == EWaveState::DuringWave)
 	{
-		GetWorld()->GetTimerManager().SetTimer(nextActionTimerHandle, this, &UWaveSystemComponent::startNextWave, timeBetweenWavesSeconds);
+		GetWorld()->GetTimerManager().SetTimer(startNextWaveTimerHandle, this, &UWaveSystemComponent::startNextWave, timeBetweenWavesSeconds);
 		waveState = EWaveState::BetweemWave;
 	}
 }
@@ -154,13 +154,13 @@ void UWaveSystemComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(GetWorld()->GetGameInstance());
-	SetFromSavedState(gameInstance->waveSystemSavedState);
+	setFromSavedState(gameInstance->WaveSystemSavedState);
 }
 
 void UWaveSystemComponent::UninitializeComponent()
 {
 	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(GetWorld()->GetGameInstance());
-	WriteIntoSavedState(gameInstance->waveSystemSavedState);
+	writeIntoSavedState(gameInstance->WaveSystemSavedState);
 	Super::UninitializeComponent();
 }
 

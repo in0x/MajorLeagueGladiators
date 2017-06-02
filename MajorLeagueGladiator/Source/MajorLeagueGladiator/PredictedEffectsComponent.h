@@ -22,8 +22,8 @@ public:
 	void CreateParticleSystemNetworkedPredicted(const FEmitterSpawnParams& Params) const;
 	void CreateParticleSystemLocal(const FEmitterSpawnParams& Params) const;
 	
-	void PlaySoundAtLocationNetworkedPredicted(const FSoundParams& Params) const;
-	void PlaySoundAtLocationLocal(const FSoundParams& Params) const;
+	void PlaySoundNetworkedPredicted(const FSoundParams& Params) const;
+	void PlaySoundLocal(const FSoundParams& Params) const;
 
 private:
 
@@ -34,8 +34,8 @@ private:
 	void createParticleSystem_NetMulticast(const FEmitterSpawnParams& Params) const;
 
 	UFUNCTION(Server, unreliable, WithValidation)
-	void playSoundAtLocation_Server(const FSoundParams& Params) const;
+	void playSound_Server(const FSoundParams& Params) const;
 
 	UFUNCTION(NetMulticast, unreliable)
-	void playSoundAtLocation_NetMulticast(const FSoundParams& Params) const;
+	void playSound_NetMulticast(const FSoundParams& Params) const;
 };

@@ -36,7 +36,7 @@ void UDamageVisualizerComponent::TickComponent(float DeltaTime, ELevelTick TickT
 void UDamageVisualizerComponent::AddVisual_NetMulticast_Implementation(UMeshComponent* AffectedMesh, bool bSpawnParticles, const FTransform& ParticleTrafo, const UDamageType* DamageType)
 {
 	//FDamageVisual visual;
-	////TODO: UGameplayStatics::PlaySoundAtLocation for concrete FeedbackComponents
+	////TODO: UGameplayStatics::playSound for concrete FeedbackComponents
 	//if (bSpawnParticles)
 	//{
 

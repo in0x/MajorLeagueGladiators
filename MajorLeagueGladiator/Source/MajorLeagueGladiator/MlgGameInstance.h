@@ -37,8 +37,8 @@ public:
 
 	EOnlineSessionState::Type GetGameSessionState() const;
 
-	WaveSystemSavedState waveSystemSavedState;
-	bool isInRoomOfShame;
+	WaveSystemSavedState WaveSystemSavedState;
+	bool bIsInRoomOfShame;
 
 private:
 

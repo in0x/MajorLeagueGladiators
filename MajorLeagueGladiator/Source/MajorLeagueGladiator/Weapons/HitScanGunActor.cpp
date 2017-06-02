@@ -141,7 +141,7 @@ void AHitScanGunActor::OnUsed()
 void AHitScanGunActor::playEmptyEffect()
 {
 	FSoundParams soundParams(shootEmptyCue, GetActorLocation());
-	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(Cast<APawn>(GetOwner()), soundParams);
+	UMlgGameplayStatics::PlaySoundNetworkedPredicted(Cast<APawn>(GetOwner()), soundParams);
 }
 
 void AHitScanGunActor::playShotEffect_NetMulticast_Implementation(float Charge)
@@ -151,7 +151,7 @@ void AHitScanGunActor::playShotEffect_NetMulticast_Implementation(float Charge)
 	bIsApplyingRecoil = true;
 
 	FSoundParams soundParams(shotSoundCue, GetActorLocation());
-	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(Cast<APawn>(GetOwner()), soundParams);
+	UMlgGameplayStatics::PlaySoundNetworkedPredicted(Cast<APawn>(GetOwner()), soundParams);
 }
 
 void AHitScanGunActor::OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) 
