@@ -29,7 +29,7 @@ public:
 private:
 	void filterOutAiPlayerStates();
 
-	void postEnterGameMap();
+	void enterGameMap();
 	void postEnterRoomOfShame();
 	
 	// The Tank Class. For now this is always assigned to the client.

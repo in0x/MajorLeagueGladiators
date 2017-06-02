@@ -12,12 +12,11 @@
 
 DECLARE_MULTICAST_DELEGATE_OneParam(SearchFinishedDelegate, const TArray <FOnlineSessionSearchResult>&);
 
-struct SavedState
+struct WaveSystemSavedState
 {
 	int32 currentWaveNumber;
 	int32 startWaveNumber;
 	int32 remainingEnemies;
-	bool isTravelingToGameMap;
 };
 
 UCLASS()
@@ -38,7 +37,8 @@ public:
 
 	EOnlineSessionState::Type GetGameSessionState() const;
 
-	SavedState savedState;
+	WaveSystemSavedState waveSystemSavedState;
+	bool isInRoomOfShame;
 
 private:
 

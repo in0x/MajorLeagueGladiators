@@ -19,7 +19,7 @@ namespace EWaveState
 	};
 }
 
-struct SavedState;
+struct WaveSystemSavedState;
 
 /*
 Manages the Enemy wave timings, such as when to start a new Wave, what wave number it should be and
@@ -43,15 +43,19 @@ public:
 
 	bool IsRunning() const;
 	int32 GetRemainingEnemiesForWave() const;
+	int32 GetCurrentWaveNumber() const;
 
-	void SetFromSavedState(const SavedState& savedState);
-	void WriteIntoSavedState(SavedState& savedState) const;
+	virtual void InitializeComponent() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	RemainingEnemiesForWaveChangedDelegate OnRemainingEnemiesForWaveChanged;
 	WaveDelegate OnWaveStarted;
 	WaveDelegate OnWaveCleared;
 
 private:
+	void SetFromSavedState(const WaveSystemSavedState& savedState);
+	void WriteIntoSavedState(WaveSystemSavedState& savedState) const;
+
 	void startNextWave();
 	void startWaveImpl(int32 WaveNumber);
 	void changeRemainingEnemiesForWave(int32 ChangeInValue);

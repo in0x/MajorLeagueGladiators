@@ -30,17 +30,14 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 void AMlgGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	SavedState& savedState = CastChecked<UMlgGameInstance>(GetGameInstance())->savedState;
-	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
-	waveSystemComponent->SetFromSavedState(savedState);
 
-	if (savedState.isTravelingToGameMap)
+	if (CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame)
 	{
-		postEnterGameMap();
+		postEnterRoomOfShame();
 	}
 	else
 	{
-		postEnterRoomOfShame();
+		enterGameMap();
 	}
 }
 
@@ -94,11 +91,7 @@ void AMlgGameMode::MatchLost()
 
 void AMlgGameMode::TravelToRoomOfShame()
 {
-	SavedState& savedState = CastChecked<UMlgGameInstance>(GetGameInstance())->savedState;
-	savedState.isTravelingToGameMap = false;
-
-	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
-	waveSystemComponent->WriteIntoSavedState(savedState);
+	CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame = true;
 
 	filterOutAiPlayerStates();
 	GetWorld()->ServerTravel(PRE_GAME_MAP, true);
@@ -106,11 +99,7 @@ void AMlgGameMode::TravelToRoomOfShame()
 
 void AMlgGameMode::TravelToGameMap()
 {
-	SavedState& savedState = CastChecked<UMlgGameInstance>(GetGameInstance())->savedState;
-	savedState.isTravelingToGameMap = true;
-
-	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
-	waveSystemComponent->WriteIntoSavedState(savedState);
+	CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame = false;
 
 	GetWorld()->ServerTravel(GAME_MAP, true);
 }
@@ -123,7 +112,7 @@ void AMlgGameMode::filterOutAiPlayerStates()
 	});
 }
 
-void AMlgGameMode::postEnterGameMap()
+void AMlgGameMode::enterGameMap()
 {
 	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
 	waveSystemComponent->StartWave();
