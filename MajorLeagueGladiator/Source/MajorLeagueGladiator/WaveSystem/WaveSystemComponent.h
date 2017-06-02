@@ -6,6 +6,7 @@
 #include "WaveSystemComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(RemainingEnemiesForWaveChangedDelegate, int32, int32);
+DECLARE_MULTICAST_DELEGATE_TwoParams(WaveChangedDelegate, int32, int32)
 DECLARE_MULTICAST_DELEGATE_OneParam(WaveDelegate, int32)
 
 UENUM(BlueprintType)
@@ -49,6 +50,7 @@ public:
 	virtual void UninitializeComponent() override;
 
 	RemainingEnemiesForWaveChangedDelegate OnRemainingEnemiesForWaveChanged;
+	WaveChangedDelegate OnWaveNumberChanged;
 	WaveDelegate OnWaveStarted;
 	WaveDelegate OnWaveCleared;
 
@@ -72,6 +74,10 @@ private:
 
 	void fireRemainingEnemiesForWaveChangedDelegates(int32 oldRemainingEnemiesForWave);
 	void fireWaveNumberChangedDelegates(int32 oldWaveNumber);
+
+	void playFirstWaveEffects();
+	void playBeginOfWaveEffects();
+	void playEndOfWaveEffects();
 
 	UPROPERTY(ReplicatedUsing = onRep_remainingEnemiesForWave, Transient)
 	int32 remainingEnemiesForWave;

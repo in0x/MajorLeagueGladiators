@@ -27,6 +27,6 @@ public:
 	void UpdateEnemyCount(int NewEnemyCount);
 private:
 
-	void OnWaveNumberChanged(int NewWaveCount);
+	void OnWaveNumberChanged(int NewWaveCount, int OldWaveNumber);
 	void OnEnemyCountChanged(int NewCount, int OldCount);	
 };
