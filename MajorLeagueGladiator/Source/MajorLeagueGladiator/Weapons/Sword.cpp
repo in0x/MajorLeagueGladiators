@@ -18,7 +18,7 @@ namespace
 }
 
 ASword::ASword(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponent>(Super::MESH_COMPONENT_NAME))
+	: Super(ObjectInitializer)
 	, oldSwingSpeed(FVector::ZeroVector)
 	, threshholdDoDamageSquared(2)
 	, slashVelocityLearnRate(0.1f)
@@ -37,26 +37,26 @@ ASword::ASword(const FObjectInitializer& ObjectInitializer)
 	MeshComponent->SetCollisionProfileName(MELEE_WEAPON_COLLISION_PROFILE_NAME);
 	PrimaryActorTick.bCanEverTick = true;
 
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SwordSkeletalMesh(TEXT("SkeletalMesh'/Game/MVRCFPS_Assets/MultiTool/sword/Sword_3_Floater/Sword_3_with_Floater2.Sword_3_with_Floater2'"));
-	USkeletalMeshComponent* skeletalMeshComp = Cast<USkeletalMeshComponent>(MeshComponent);
-	if (SwordSkeletalMesh.Succeeded() && skeletalMeshComp)
-	{
-		skeletalMeshComp->SetSkeletalMesh(SwordSkeletalMesh.Object);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Static Mesh for Sword not found."));
-	}
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SwordStaticMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/MultiTool/sword/sword_blade_3.sword_blade_3'"));
+	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
+	staticMeshComp->SetStaticMesh(SwordStaticMesh.Object);
+	staticMeshComp->SetVisibility(false);
 
 	ConstructorHelpers::FObjectFinder<USoundCue> swordSwingCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/SwordSwing_Cue.SwordSwing_Cue'"));
 	swordSwingCue = swordSwingCueFinder.Object;
+ 
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> swordSkeletonFinder(TEXT("SkeletalMesh'/Game/MVRCFPS_Assets/MultiTool/sword/Sword_3_Floater/Sword_3_with_Floater2.Sword_3_with_Floater2'"));
+	
+	swordSkeleton = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("SkeletonMesh"));
+	swordSkeleton->SetupAttachment(GetRootComponent());
+	swordSkeleton->SetSkeletalMesh(swordSkeletonFinder.Object);
 }
 
 void ASword::BeginPlay()
 {
 	Super::BeginPlay();
-	materialInstance = MeshComponent->CreateAndSetMaterialInstanceDynamic(1);
-	MeshComponent->SetMaterial(2, materialInstance);
+	materialInstance = swordSkeleton->CreateAndSetMaterialInstanceDynamic(1);
+	swordSkeleton->SetMaterial(2, materialInstance);
 	if (materialInstance == nullptr)
 	{
 		UE_LOG(DebugLog, Warning, TEXT("ASword::BeginPlay: Material Missing"));
