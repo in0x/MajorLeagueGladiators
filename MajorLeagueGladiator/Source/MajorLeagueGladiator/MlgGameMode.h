@@ -21,14 +21,14 @@ public:
 	virtual void BeginPlay() override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
-	void BeginMatch(int32 StartWave);
-
 	void MatchLost();
-
-	void TravelToRoomOfShame();
-	void TravelToGameMap();
+	
 	void DestroyAllAi();
 private:
+	void beginMatch(int32 StartWave);
+	void travelToMainMenu();
+	void travelToRoomOfShame();
+	void travelToGameMap();
 	void onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction);
 
 	void filterOutAiPlayerStates();

@@ -28,7 +28,6 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	PlayerStateClass = AMlgPlayerState::StaticClass();
 	GameStateClass = AMlgGameState::StaticClass();
 	waveSpawnerManger = ObjectInitializer.CreateDefaultSubobject<UWaveSpawnerManagerComponent>(this, TEXT("WaveSpawnerManager"));
-//	bUseSeamlessTravel = true;
 }
 
 void AMlgGameMode::BeginPlay()
@@ -47,6 +46,16 @@ void AMlgGameMode::BeginPlay()
 	{
 		enterGameMap();
 	}
+}
+
+void AMlgGameMode::enterGameMap()
+{
+	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
+	waveSystemComponent->StartWave();
+}
+
+void AMlgGameMode::postEnterRoomOfShame()
+{
 }
 
 UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
@@ -78,63 +87,27 @@ UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AControlle
 	}
 }
 
-void AMlgGameMode::BeginMatch(int32 StartWave)
-{
-	if (CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame)
-	{
-		UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
-		waveSystemComponent->SetStartWave(StartWave);
-		TravelToGameMap();
-	}
-}
-
 void AMlgGameMode::MatchLost()
 {
 	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
 	waveSystemComponent->Stop();
-	TravelToRoomOfShame();
+	travelToRoomOfShame();
 }
 
-void AMlgGameMode::TravelToRoomOfShame()
+void AMlgGameMode::DestroyAllAi()
+{
+	for (TActorIterator<AMlgAICharacter> iter(GetWorld(), AMlgAICharacter::StaticClass()); iter; ++iter)
+	{
+		iter->Destroy();
+	}
+}
+
+void AMlgGameMode::travelToRoomOfShame()
 {
 	CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame = true;
 
 	filterOutAiPlayerStates();
 	GetWorld()->ServerTravel(PRE_GAME_MAP, true);
-}
-
-void AMlgGameMode::TravelToGameMap()
-{
-	CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame = false;
-
-	GetWorld()->ServerTravel(GAME_MAP, true);
-}
-
-void AMlgGameMode::onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction)
-{
-	switch (menuAction)
-	{
-	case EMenuAction::StartGameEasy:
-	{
-		BeginMatch(easyStartWave);
-		break;
-	}
-	case EMenuAction::StartGameMedium:
-	{
-		BeginMatch(mediumStartWave);
-		break;
-	}
-	case EMenuAction::StartGameHard:
-	{
-		BeginMatch(hardStartWave);
-		break;
-	}
-	default:
-	{
-		checkNoEntry();
-		break;
-	}
-	}
 }
 
 void AMlgGameMode::filterOutAiPlayerStates()
@@ -145,20 +118,57 @@ void AMlgGameMode::filterOutAiPlayerStates()
 	});
 }
 
-void AMlgGameMode::enterGameMap()
+void AMlgGameMode::onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction)
 {
-	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
-	waveSystemComponent->StartWave();
-}
-
-void AMlgGameMode::postEnterRoomOfShame()
-{
-}
-
-void AMlgGameMode::DestroyAllAi()
-{
-	for (TActorIterator<AMlgAICharacter> iter(GetWorld(), AMlgAICharacter::StaticClass()); iter; ++iter)
+	switch (menuAction)
 	{
-		iter->Destroy();
+	case EMenuAction::GoToMainMenu:
+	{
+		travelToMainMenu();
+		break;
+	}
+	case EMenuAction::StartGameEasy:
+	{
+		beginMatch(easyStartWave);
+		break;
+	}
+	case EMenuAction::StartGameMedium:
+	{
+		beginMatch(mediumStartWave);
+		break;
+	}
+	case EMenuAction::StartGameHard:
+	{
+		beginMatch(hardStartWave);
+		break;
+	}
+	default:
+	{
+		checkNoEntry();
+		break;
+	}
 	}
 }
+
+void AMlgGameMode::travelToMainMenu()
+{
+	CastChecked<UMlgGameInstance>(GetGameInstance())->TravelToMainMenu();
+}
+
+void AMlgGameMode::beginMatch(int32 StartWave)
+{
+	if (CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame)
+	{
+		UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
+		waveSystemComponent->SetStartWave(StartWave);
+		travelToGameMap();
+	}
+}
+
+void AMlgGameMode::travelToGameMap()
+{
+	CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame = false;
+
+	GetWorld()->ServerTravel(GAME_MAP, true);
+}
+
