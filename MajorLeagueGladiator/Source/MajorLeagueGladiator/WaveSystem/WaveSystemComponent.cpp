@@ -3,6 +3,7 @@
 #include "WaveSystem/WaveSpawnerManagerComponent.h"
 #include "MlgGameMode.h"
 #include "MlgGameInstance.h"
+#include "MlgGameplayStatics.h"
 
 UWaveSystemComponent::UWaveSystemComponent()
 	: remainingEnemiesForWave(0)
@@ -21,6 +22,8 @@ UWaveSystemComponent::UWaveSystemComponent()
 
 	ConstructorHelpers::FObjectFinder<USoundCue> endWaveCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/TEMP/EndWave_Cue.EndWave_Cue'"));
 	endWaveSound = endWaveCueFinder.Object;
+
+	bWantsInitializeComponent = true;
 }
 
 void UWaveSystemComponent::SetFromSavedState(const WaveSystemSavedState& savedState)
@@ -51,12 +54,14 @@ void UWaveSystemComponent::StartWave()
 	check(GetOwner()->HasAuthority());
 
 	startWaveImpl(startWaveNumber);
+	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(firstWaveSound));
 }
 
 void UWaveSystemComponent::startNextWave()
 {
 	check(waveState == EWaveState::BetweemWave);
 	startWaveImpl(currentWaveNumber + 1);
+	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(beginOfWaveSound));
 }
 
 void UWaveSystemComponent::startWaveImpl(int32 WaveNumber)
@@ -156,11 +161,11 @@ void UWaveSystemComponent::InitializeComponent()
 	SetFromSavedState(gameInstance->waveSystemSavedState);
 }
 
-void UWaveSystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UWaveSystemComponent::UninitializeComponent()
 {
 	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(GetWorld()->GetGameInstance());
 	WriteIntoSavedState(gameInstance->waveSystemSavedState);
-	Super::EndPlay(EndPlayReason);
+	Super::UninitializeComponent();
 }
 
 void UWaveSystemComponent::onRep_remainingEnemiesForWave(int32 oldremainingEnemiesForWave)
@@ -176,39 +181,18 @@ void UWaveSystemComponent::onRep_currentWaveNumber(int32 oldWaveNumber)
 void UWaveSystemComponent::fireRemainingEnemiesForWaveChangedDelegates(int32 oldremainingEnemiesForWave)
 {
 	OnRemainingEnemiesForWaveChanged.Broadcast(remainingEnemiesForWave, oldremainingEnemiesForWave);
-	if (remainingEnemiesForWave == 0)
+	if (remainingEnemiesForWave == 0 && remainingEnemiesForWave < oldremainingEnemiesForWave)
 	{
-		playEndOfWaveEffects();
 		OnWaveCleared.Broadcast(currentWaveNumber);
 	}
 }
 
 void UWaveSystemComponent::fireWaveNumberChangedDelegates(int32 oldWaveNumber)
 {
-	if (currentWaveNumber == startWaveNumber)
+	if (currentWaveNumber == startWaveNumber && currentWaveNumber > oldWaveNumber)
 	{
-		playFirstWaveEffects();
+		OnWaveStarted.Broadcast(currentWaveNumber);
 	}
-	else
-	{
-		playBeginOfWaveEffects();
-	}
-	OnWaveStarted.Broadcast(currentWaveNumber);
-}
-
-void UWaveSystemComponent::playFirstWaveEffects()
-{
-	UGameplayStatics::PlaySound2D(GetWorld(), firstWaveSound);
-}
-
-void UWaveSystemComponent::playBeginOfWaveEffects()
-{
-	UGameplayStatics::PlaySound2D(GetWorld(), beginOfWaveSound);
-}
-
-void UWaveSystemComponent::playEndOfWaveEffects()
-{
-	UGameplayStatics::PlaySound2D(GetWorld(), endWaveSound);
 }
 
 void UWaveSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

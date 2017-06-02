@@ -10,6 +10,7 @@
 #include "Ai/MlgAICharacter.h"
 #include "MlgPlayerController.h"
 #include "MlgGameInstance.h"
+#include "Menu/MenuActionComponent.h"
 
 namespace
 {
@@ -18,6 +19,9 @@ namespace
 }
 
 AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
+	: easyStartWave(1)
+	, mediumStartWave(5)
+	, hardStartWave(8)
 {
 	//DefaultPawnClass = AMlgPlayerCharacter::StaticClass();
 	//PlayerControllerClass = AMlgPlayerController::StaticClass();
@@ -30,6 +34,10 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 void AMlgGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	for (TObjectIterator<UMenuActionComponent> iter; iter; ++iter)
+	{
+		iter->OnMenuActionTriggered.AddUObject(this, &AMlgGameMode::onMenuAction);
+	}
 
 	if (CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame)
 	{
@@ -70,16 +78,14 @@ UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AControlle
 	}
 }
 
-void AMlgGameMode::BeginMatchDefault()
-{
-	BeginMatch(1);
-}
-
 void AMlgGameMode::BeginMatch(int32 StartWave)
 {
-	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
-	waveSystemComponent->SetStartWave(StartWave);
-	TravelToGameMap();
+	if (CastChecked<UMlgGameInstance>(GetGameInstance())->isInRoomOfShame)
+	{
+		UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
+		waveSystemComponent->SetStartWave(StartWave);
+		TravelToGameMap();
+	}
 }
 
 void AMlgGameMode::MatchLost()
@@ -104,6 +110,33 @@ void AMlgGameMode::TravelToGameMap()
 	GetWorld()->ServerTravel(GAME_MAP, true);
 }
 
+void AMlgGameMode::onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction)
+{
+	switch (menuAction)
+	{
+	case EMenuAction::StartGameEasy:
+	{
+		BeginMatch(easyStartWave);
+		break;
+	}
+	case EMenuAction::StartGameMedium:
+	{
+		BeginMatch(mediumStartWave);
+		break;
+	}
+	case EMenuAction::StartGameHard:
+	{
+		BeginMatch(hardStartWave);
+		break;
+	}
+	default:
+	{
+		checkNoEntry();
+		break;
+	}
+	}
+}
+
 void AMlgGameMode::filterOutAiPlayerStates()
 {
 	GameState->PlayerArray.RemoveAllSwap([](APlayerState* playerState)
@@ -120,8 +153,6 @@ void AMlgGameMode::enterGameMap()
 
 void AMlgGameMode::postEnterRoomOfShame()
 {
-	FTimerHandle timerHandle;
-	GetWorldTimerManager().SetTimer(timerHandle, this, &AMlgGameMode::BeginMatchDefault, 5.f);
 }
 
 void AMlgGameMode::DestroyAllAi()
