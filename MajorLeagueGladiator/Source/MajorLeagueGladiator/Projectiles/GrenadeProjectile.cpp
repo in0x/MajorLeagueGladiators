@@ -40,9 +40,6 @@ AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializ
 	ConstructorHelpers::FObjectFinder<UParticleSystem> smallExplosionFinder(TEXT("ParticleSystem'/Game/ParticleSystems/GrenadeBlast/GrenadeBlast_small.GrenadeBlast_small'"));
 	smallExplosionParticles = smallExplosionFinder.Object;
 
-	//particleComponent = ObjectInitializer.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("ExplosionParticleComponent"));
-	//particleComponent->SetupAttachment(GetRootComponent());
-
 	UStaticMeshComponent* meshComponent = GetStaticMeshComponent();
 	meshComponent->Mobility = EComponentMobility::Movable;
 	meshComponent->SetCollisionProfileName(GRENADE_COLLISION_PROFILE_NAME);
@@ -147,14 +144,9 @@ void AGrenadeProjectile::playExplosionSound()
 
 void AGrenadeProjectile::playParticleEffect()
 {
-	FEmitterSpawnParams emitterParams;
-	emitterParams.Transform.SetTranslation(GetActorLocation());
-	emitterParams.Template = ExplosionRadius == NORMAL_EXPLOSION_RADIUS ? explosionParticles : smallExplosionParticles;
-	emitterParams.bAutoDestroy = true;
+	UParticleSystem* particles = ExplosionRadius == NORMAL_EXPLOSION_RADIUS ? explosionParticles : smallExplosionParticles;
 
-	//UMlgGameplayStatics::SpawnEmitterNetworked(GetWorld(), emitterParams);
-
-	particleComponent = UGameplayStatics::SpawnEmitterAttached(emitterParams.Template, RootComponent);
+	particleComponent = UGameplayStatics::SpawnEmitterAttached(particles, RootComponent);
 	particleComponent->ActivateSystem();
 	particleComponent->SetWorldScale3D(FVector(1, 1, 1));
 
@@ -188,7 +180,7 @@ void AGrenadeProjectile::TimedExplode()
 	projectileMovementComponent->OnProjectileBounce.RemoveDynamic(this, &AGrenadeProjectile::onProjectileBounce);
 	projectileMovementComponent->OnProjectileStop.RemoveDynamic(this, &AGrenadeProjectile::onProjectileStop);
 
-	//playParticleEffect();
+	playParticleEffect();
 }
 
 void AGrenadeProjectile::onParticlesFinished(UParticleSystemComponent* System)
