@@ -21,6 +21,7 @@ class UGameplayAbility;
 class UPredictedEffectsComponent;
 class UPlayerDeathComponent;
 class UPlayerDamageFeedbackComponent;
+class USpectatorComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityMoveTargetLocationSet, FVector, NewLocation);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityActivated, TSubclassOf<UGameplayAbility>, AbilityType);
@@ -115,6 +116,12 @@ private:
 	std::unique_ptr<ChaperoneBounds> pChaperoneBounds;
 
 	FVector abilityMoveTargetLocation;
+
+	UPROPERTY(EditAnywhere)
+	USpectatorComponent* spectator;
+
+	UPROPERTY(EditAnywhere)
+	USceneCaptureComponent2D* sceneCapture;
 
 	UPROPERTY(EditAnywhere)
 	USteamVRChaperoneComponent* chaperone;
