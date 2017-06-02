@@ -9,7 +9,7 @@
 UPlayerDamageFeedbackComponent::UPlayerDamageFeedbackComponent()
 	: hitDurationGlitch(0.3f)
 	, leftHitDurationGlitch(0.f)
-	, transitionDurationGlitch(0.2f)
+	, transitionDurationGlitch(0.1f)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	
@@ -45,9 +45,6 @@ void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick T
 
 	if (leftHitDurationGlitch > 0.f)
 	{
-		//float scaledValue = (transitionDurationGlitch - (1 - leftHitDurationGlitch)) / transitionDurationGlitch;
-		//postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, 1.f); //FMath::Clamp(scaledValue, 0.f, 1.f)); //1.f
-		
 		leftHitDurationGlitch -= DeltaTime;
 		if (leftHitDurationGlitch <= 0.f)
 		{
@@ -64,7 +61,7 @@ void UPlayerDamageFeedbackComponent::DoGlitchEffect()
 	{
 		leftHitDurationGlitch = hitDurationGlitch;
 		
-		postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, 1.f);
+		postProcessComp->Settings.AddBlendable(postProcessGlitchMaterial, 0.5f); //OLD: 0.f
 		postProcessComp->Settings.bOverride_SceneFringeIntensity = true;
 		postProcessComp->Settings.bOverride_VignetteIntensity = true;
 	}
