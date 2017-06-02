@@ -20,8 +20,8 @@ namespace
 
 AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	: easyStartWave(1)
-	, mediumStartWave(5)
-	, hardStartWave(8)
+	, mediumStartWave(11)
+	, hardStartWave(16)
 {
 	//DefaultPawnClass = AMlgPlayerCharacter::StaticClass();
 	//PlayerControllerClass = AMlgPlayerController::StaticClass();
