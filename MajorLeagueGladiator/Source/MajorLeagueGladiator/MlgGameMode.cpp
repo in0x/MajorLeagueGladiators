@@ -14,8 +14,8 @@
 
 namespace
 {
-	const FString PRE_GAME_MAP("/Game/PreGame");
-	const FString GAME_MAP("/Game/ScaleRef");
+	const FString PRE_GAME_MAP("/Game/PreGame?listen");
+	const FString GAME_MAP("/Game/ScaleRef?listen");
 }
 
 AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
