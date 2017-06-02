@@ -22,6 +22,7 @@
 #include "DamageFeedback/PlayerDamageFeedbackComponent.h"
 #include "MlgPlayerController.h"
 #include "MlgGameMode.h"
+#include "SpectatorComponent.h"
 
 #include "MlgGameInstance.h"
 
@@ -136,6 +137,11 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	rumbleLeft = helperLeft.Object;
 	rumbleRight = helperRight.Object;
+
+	spectator = ObjectInitializer.CreateDefaultSubobject<USpectatorComponent>(this, TEXT("Spectator"));
+	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
+	sceneCapture->SetupAttachment(VRReplicatedCamera);
+	spectator->SetSceneCapture(sceneCapture);
 }
 
 void AMlgPlayerCharacter::BeginPlay()
