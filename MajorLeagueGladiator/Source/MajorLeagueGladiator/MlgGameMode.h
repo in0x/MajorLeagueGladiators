@@ -35,6 +35,9 @@ private:
 
 	void enterGameMap();
 	void postEnterRoomOfShame();
+
+	bool isInRoomOfShame() const;
+	void setIsInRoomOfShame(bool NewIsInRoomOfShame);
 	
 	// The Tank Class. For now this is always assigned to the client.
 	UPROPERTY(EditAnywhere)

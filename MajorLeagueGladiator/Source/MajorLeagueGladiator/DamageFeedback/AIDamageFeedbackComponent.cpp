@@ -85,5 +85,5 @@ void UAIDamageFeedbackComponent::playSwordHitSound(const FVector& location)
 	FSoundParams soundParams;
 	soundParams.Location = location;
 	soundParams.Sound = swordSoundCue;
-	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetOwner()->GetWorld(), soundParams);
+	UMlgGameplayStatics::PlaySoundNetworked(GetOwner()->GetWorld(), soundParams);
 }

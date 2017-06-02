@@ -30,12 +30,12 @@ void AHealthPack::playHealSound(AActor* user)
 	
 	if (user->IsA<APawn>()) // Directly used by enemy.
 	{
-		UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), soundParams);
+		UMlgGameplayStatics::PlaySoundNetworked(GetWorld(), soundParams);
 	}
 	else // Indirectly used by trigger actor of player.
 	{
 		const APawn* triggerOwner = CastChecked<APawn>(user->GetOwner());
-		UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(triggerOwner, soundParams);
+		UMlgGameplayStatics::PlaySoundNetworkedPredicted(triggerOwner, soundParams);
 	}
 }
 

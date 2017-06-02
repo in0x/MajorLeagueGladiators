@@ -328,7 +328,7 @@ void UJumpDashAbility::PlayJumpEffects()
 
 	FSoundParams soundParams;
 	soundParams.Sound = jumpSoundCue;
-	UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(cachedCharacter, soundParams);		
+	UMlgGameplayStatics::PlaySoundNetworkedPredicted(cachedCharacter, soundParams);		
 }
 
 void UJumpDashAbility::PlayLandingEffects()
@@ -356,7 +356,7 @@ void UJumpDashAbility::PlayLandingEffects()
 	{
 		FSoundParams soundParams;
 		soundParams.Sound = landingSoundEffect;
-		UMlgGameplayStatics::PlaySoundAtLocationNetworkedPredicted(cachedCharacter, soundParams);
+		UMlgGameplayStatics::PlaySoundNetworkedPredicted(cachedCharacter, soundParams);
 	}
 	else
 	{

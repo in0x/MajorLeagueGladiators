@@ -73,7 +73,7 @@ FTransform AShieldActor::GetReflectSpawnTransform() const
 
 void AShieldActor::PlayReflectEffect()
 {
-	UMlgGameplayStatics::PlaySoundAtLocationNetworked(GetWorld(), FSoundParams(reflectSoundCue, GetActorLocation()));
+	UMlgGameplayStatics::PlaySoundNetworked(GetWorld(), FSoundParams(reflectSoundCue, GetActorLocation()));
 
 	AMlgPlayerCharacter* player = Cast<AMlgPlayerCharacter>(GetOwner());
 	player->PlayRumbleLeft();
