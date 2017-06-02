@@ -27,6 +27,7 @@ private:
 	void joinGame(const FOnlineSessionSearchResult& searchResultToJoin);
 	void onGamesFound(const TArray <FOnlineSessionSearchResult>& foundGames);
 	void onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction);
+	void setTutorialSettings();
 
 	UMlgGameInstance* getMlgGameInstance() const;
 	TSharedPtr<const FUniqueNetId> getUniqueNetID() const;
