@@ -23,23 +23,17 @@ UWaveSystemComponent::UWaveSystemComponent()
 	endWaveSound = endWaveCueFinder.Object;
 }
 
-void UWaveSystemComponent::SetFromSavedState(const SavedState& savedState)
+void UWaveSystemComponent::SetFromSavedState(const WaveSystemSavedState& savedState)
 {
-	if (savedState.isTravelingToGameMap)
-	{		
-		remainingEnemiesForWave = 0;
-	}
-	else
-	{
-		remainingEnemiesForWave = savedState.remainingEnemies;
-	}
-	waveState = EWaveState::NotStarted;
 	startWaveNumber = savedState.startWaveNumber;
 	currentWaveNumber = savedState.currentWaveNumber;
+	remainingEnemiesForWave = savedState.remainingEnemies;
+
+	//Mabe not needed
 	onRep_remainingEnemiesForWave(remainingEnemiesForWave);
 	onRep_currentWaveNumber(currentWaveNumber);	
 }
-void UWaveSystemComponent::WriteIntoSavedState(SavedState& savedState) const
+void UWaveSystemComponent::WriteIntoSavedState(WaveSystemSavedState& savedState) const
 {
 	savedState.startWaveNumber = startWaveNumber;
 	savedState.currentWaveNumber = currentWaveNumber;
@@ -88,7 +82,7 @@ void UWaveSystemComponent::startWaveImpl(int32 WaveNumber)
 		return;
 	}
 
-	changeRemainingEnemiesForWave(waveEnemyCount);
+	setRemainingEnemiesForWave(waveEnemyCount);
 }
 
 void UWaveSystemComponent::OnEnemyKilled(ACharacter* KilledCharacter)
@@ -148,6 +142,25 @@ void UWaveSystemComponent::setWaveNumber(int32 NewWaveNumber)
 int32 UWaveSystemComponent::GetRemainingEnemiesForWave() const
 {
 	return remainingEnemiesForWave;
+}
+
+int32 UWaveSystemComponent::GetCurrentWaveNumber() const
+{
+	return currentWaveNumber;
+}
+
+void UWaveSystemComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(GetWorld()->GetGameInstance());
+	SetFromSavedState(gameInstance->waveSystemSavedState);
+}
+
+void UWaveSystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(GetWorld()->GetGameInstance());
+	WriteIntoSavedState(gameInstance->waveSystemSavedState);
+	Super::EndPlay(EndPlayReason);
 }
 
 void UWaveSystemComponent::onRep_remainingEnemiesForWave(int32 oldremainingEnemiesForWave)

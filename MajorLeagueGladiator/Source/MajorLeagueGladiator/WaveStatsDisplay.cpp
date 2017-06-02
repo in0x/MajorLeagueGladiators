@@ -20,8 +20,8 @@ void AWaveStatsDisplay::BeginPlay()
 	waveSystemComponent->OnRemainingEnemiesForWaveChanged.AddUObject(this, &AWaveStatsDisplay::OnEnemyCountChanged);
 	waveSystemComponent->OnWaveStarted.AddUObject(this, &AWaveStatsDisplay::OnWaveNumberChanged);
 
-	OnEnemyCountChanged(waveSystemComponent->GetRemainingEnemiesForWave());
-	//TODO other one
+	OnEnemyCountChanged(waveSystemComponent->GetRemainingEnemiesForWave(), -1);
+	OnWaveNumberChanged(waveSystemComponent->GetCurrentWaveNumber());
 }
 
 void AWaveStatsDisplay::OnWaveNumberChanged(int NewWaveCount)

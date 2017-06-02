@@ -79,6 +79,7 @@ void UMlgGameInstance::onStartSessionComplete(FName SessionName, bool bWasSucces
 	Sessions->ClearOnStartSessionCompleteDelegate_Handle(onStartSessionCompleteDelegateHandle);
 	if (bWasSuccessful)
 	{
+		isInRoomOfShame = true;
 		GetWorld()->ServerTravel(PRE_BEGIN_MAP);
 	}
 	else
