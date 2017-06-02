@@ -8,7 +8,7 @@
 UCLASS()
 class MAJORLEAGUEGLADIATOR_API ASword : public AMlgGrippableMeshActor
 {
-	GENERATED_BODY()	
+	GENERATED_BODY()
 public:
 	ASword(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void Tick(float DeltaTime) override;
@@ -26,7 +26,7 @@ private:
 	void setMaterialOfOwnerMesh(UMaterialInstanceDynamic* material_Dyn);
 	void dealDamageTo(ACharacter* OtherCharacter, const FHitResult& HitResult);
 	UFUNCTION(Server, WithValidation, Reliable)
-	void dealDamageTo_Server(ACharacter* OtherCharacter, const FHitResult& HitResult);
+		void dealDamageTo_Server(ACharacter* OtherCharacter, const FHitResult& HitResult);
 	void updateMaterialIntensity(float intensity);
 	void updateMaterialColor(const FLinearColor& color);
 
@@ -42,45 +42,48 @@ private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(EditAnywhere)
-	USoundCue* swordSwingCue;
+	USkeletalMeshComponent* swordSkeleton;
+
+	UPROPERTY(EditAnywhere)
+		USoundCue* swordSwingCue;
 
 	FVector oldSwingSpeed;
 
 	UPROPERTY(EditAnywhere)
-	float damageAppliedOnHit;
+		float damageAppliedOnHit;
 
 	UPROPERTY(EditAnywhere)
-	int threshholdDoDamageSquared;
+		int threshholdDoDamageSquared;
 
 	UPROPERTY(EditAnywhere, Category = "Damage")
-	TSubclassOf<UDamageType> damageType;
+		TSubclassOf<UDamageType> damageType;
 
 	UPROPERTY(Transient)
-	UMaterialInstanceDynamic* materialInstance;
+		UMaterialInstanceDynamic* materialInstance;
 
 	UPROPERTY(EditAnywhere)
-	FLinearColor originalSwordColor;
+		FLinearColor originalSwordColor;
 
 	UPROPERTY(EditAnywhere)
-	FLinearColor damageSwordColor;
+		FLinearColor damageSwordColor;
 
 	UPROPERTY(EditAnywhere)
-	float glowStrengthMultiplier;
+		float glowStrengthMultiplier;
 
 	UPROPERTY(EditAnywhere)
-	float minGlowStrength;
+		float minGlowStrength;
 
 	UPROPERTY(EditAnywhere)
-	float maxGlowStrength;
+		float maxGlowStrength;
 
 	// Between 0 and 1 defines how fast new sword speed influences overall speedvalue
 	UPROPERTY(EditAnywhere)
-	float slashVelocityLearnRate;
+		float slashVelocityLearnRate;
 
 	bool bIsSwordFastEnough;
 
 	UPROPERTY(replicated)
-	bool bIsAlwaysFastEnough;
+		bool bIsAlwaysFastEnough;
 
 	FVector	lastLocation;
 	FVector currentVelocity;
