@@ -57,7 +57,7 @@ void UPlayerDamageFeedbackComponent::TickComponent(float DeltaTime, ELevelTick T
 
 void UPlayerDamageFeedbackComponent::DoGlitchEffect()
 {
-	if (leftHitDurationGlitch <= 0.f)
+	if (true) //leftHitDurationGlitch <= 0.f)
 	{
 		leftHitDurationGlitch = hitDurationGlitch;
 		
