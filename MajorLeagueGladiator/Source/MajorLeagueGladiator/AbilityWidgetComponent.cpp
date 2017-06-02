@@ -6,7 +6,7 @@
 
 UAbilityWidgetComponent::UAbilityWidgetComponent()
 	: SelectDepressDepth(-0.5f)
-	, ActivateDepressDepth(-1.0f)
+	, ActivateDepressDepth(-0.75f)
 	, BaseGlowStrength(5.0f)
 	, SelectGlowStrength(25.0f)
 	, ActivateGlowStrength(50.0f)
