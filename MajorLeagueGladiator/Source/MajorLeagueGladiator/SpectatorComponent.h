@@ -13,6 +13,7 @@ public:
 	USpectatorComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void BeginPlay() override;
 	void SetSceneCapture(USceneCaptureComponent2D* SceneCapture);
+	void Create();
 
 private:
 	TSharedPtr<SWindow> window;

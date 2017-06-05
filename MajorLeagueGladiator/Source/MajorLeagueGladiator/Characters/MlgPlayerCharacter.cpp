@@ -33,7 +33,8 @@ namespace
 	const FName VR_CAPSULE_COLLISION_NAME("VrCapsule");
 	const FName VR_GRIP_1_NAME("VRGripP1");
 	const FVector INVALID_TARGET_LOCATION = FVector(0,0, 9'999'999);
-	#define RENDER_SECOND_WINDOW 0
+
+	constexpr bool bRenderSecondWindow = false;
 }
 
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -139,14 +140,18 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	rumbleLeft = helperLeft.Object;
 	rumbleRight = helperRight.Object;
 
-#if RENDER_SECOND_WINDOW
-
-	spectator = ObjectInitializer.CreateDefaultSubobject<USpectatorComponent>(this, TEXT("Spectator"));
-	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
-	sceneCapture->SetupAttachment(VRReplicatedCamera);
-	spectator->SetSceneCapture(sceneCapture);
-
-#endif
+	if (bRenderSecondWindow)
+	{
+		spectator = ObjectInitializer.CreateDefaultSubobject<USpectatorComponent>(this, TEXT("Spectator"));
+		sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
+		sceneCapture->SetupAttachment(VRReplicatedCamera);
+		spectator->SetSceneCapture(sceneCapture);
+	}
+	else
+	{
+		spectator = nullptr;
+		sceneCapture = nullptr;
+	}
 }
 
 void AMlgPlayerCharacter::BeginPlay()
@@ -188,6 +193,19 @@ void AMlgPlayerCharacter::BeginPlay()
 	if (HasAuthority())
 	{
 		SpawnWeapon();
+	}
+
+	if (bRenderSecondWindow)
+	{
+		if (IsLocallyControlled())
+		{
+			spectator->Create();
+		}
+		else
+		{
+			sceneCapture->bCaptureOnMovement = false;
+			sceneCapture->bCaptureEveryFrame = false;
+		}
 	}
 }
 

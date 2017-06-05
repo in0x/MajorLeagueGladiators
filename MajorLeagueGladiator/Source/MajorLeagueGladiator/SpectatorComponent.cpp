@@ -6,7 +6,7 @@
 USpectatorComponent::USpectatorComponent(const FObjectInitializer& ObjectInitializer /* = FObjectInitializer::Get() */)
 	: Super(ObjectInitializer)
 	, window(nullptr)
-	, windowSize(1400, 900)
+	, windowSize(1920, 1080/*2080, 1170*/)
 {
 	const static ConstructorHelpers::FObjectFinder<UMaterialInterface> matFinder(TEXT("Material'/Game/Materials/M_DebugView.M_DebugView'"));
 	widgetMaterial = matFinder.Object;
@@ -20,26 +20,31 @@ void USpectatorComponent::SetSceneCapture(USceneCaptureComponent2D* SceneCapture
 void USpectatorComponent::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
+void USpectatorComponent::Create()
+{
 	sceneCapture->DetailMode = EDetailMode::DM_Medium;
 	sceneCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
-	
+
 	if (!window.IsValid())
 	{
 		auto SlateWinRef = SNew(SWindow)
+			.MinWidth(1920)
+			.MinHeight(1080)
+			//.Type(EWindowType::GameWindow)
+			.UserResizeBorder(FMargin(0, 0))
+			.UseOSWindowBorder(true)
 			.AutoCenter(EAutoCenter::None)
 			.Title(FText::FromString(TEXT("DebugSpectator")))
-			.IsInitiallyMaximized(false)
+			.IsInitiallyMaximized(true/*false*/)
 			.ScreenPosition(FVector2D(0, 0))
 			.ClientSize(windowSize)
-			.CreateTitleBar(true)
-			.SizingRule(ESizingRule::FixedSize)
-			.SupportsMaximize(false)
-			.SupportsMinimize(true)
-			.HasCloseButton(true);
-
-		FSlateApplication & SlateApp = FSlateApplication::Get();
-		SlateApp.AddWindow(SlateWinRef, true);
+			//.CreateTitleBar(true)
+			.SizingRule(ESizingRule::UserSized)
+			/*.SupportsMaximize(true)
+			.SupportsMinimize(true)*/
+			/*.HasCloseButton(true)*/;
 
 		window = SlateWinRef;
 
@@ -48,13 +53,16 @@ void USpectatorComponent::BeginPlay()
 		matInstance = UMaterialInstanceDynamic::Create(widgetMaterial, nullptr);
 		img->SetBrushFromMaterial(matInstance);
 
-		window->SetContent(img->TakeWidget());
-	}
+		if (!sceneCapture->TextureTarget)
+		{
+			sceneCapture->TextureTarget = UCanvasRenderTarget2D::CreateCanvasRenderTarget2D(GetWorld(), UCanvasRenderTarget2D::StaticClass(), 1920, 1080/*windowSize.X, windowSize.Y*/);
+			matInstance->SetTextureParameterValue(FName("RenderTex"), sceneCapture->TextureTarget);
+		}
 
-	if (!sceneCapture->TextureTarget)
-	{
-		sceneCapture->TextureTarget = UCanvasRenderTarget2D::CreateCanvasRenderTarget2D(GetWorld(), UCanvasRenderTarget2D::StaticClass(), windowSize.X, windowSize.Y);
-		matInstance->SetTextureParameterValue(FName("RenderTex"), sceneCapture->TextureTarget);
+		window->SetContent(img->TakeWidget());
+
+		FSlateApplication & SlateApp = FSlateApplication::Get();
+		SlateApp.AddWindow(SlateWinRef, true);
 	}
 
 	GetOwner()->OnEndPlay.AddDynamic(this, &USpectatorComponent::EndPlayCallback);
