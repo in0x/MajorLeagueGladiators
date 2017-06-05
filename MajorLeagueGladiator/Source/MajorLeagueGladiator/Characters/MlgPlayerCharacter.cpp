@@ -140,18 +140,18 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	rumbleLeft = helperLeft.Object;
 	rumbleRight = helperRight.Object;
 
-	if (bRenderSecondWindow)
-	{
-		spectator = ObjectInitializer.CreateDefaultSubobject<USpectatorComponent>(this, TEXT("Spectator"));
-		sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
-		sceneCapture->SetupAttachment(VRReplicatedCamera);
-		spectator->SetSceneCapture(sceneCapture);
-	}
-	else
-	{
-		spectator = nullptr;
-		sceneCapture = nullptr;
-	}
+	//if (bRenderSecondWindow)
+	//{
+	//	spectator = ObjectInitializer.CreateDefaultSubobject<USpectatorComponent>(this, TEXT("Spectator"));
+	//	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
+	//	sceneCapture->SetupAttachment(VRReplicatedCamera);
+	//	spectator->SetSceneCapture(sceneCapture);
+	//}
+	//else
+	//{
+	//	spectator = nullptr;
+	//	sceneCapture = nullptr;
+	//}
 }
 
 void AMlgPlayerCharacter::BeginPlay()
@@ -195,18 +195,18 @@ void AMlgPlayerCharacter::BeginPlay()
 		SpawnWeapon();
 	}
 
-	if (bRenderSecondWindow)
-	{
-		if (IsLocallyControlled())
-		{
-			spectator->Create();
-		}
-		else
-		{
-			sceneCapture->bCaptureOnMovement = false;
-			sceneCapture->bCaptureEveryFrame = false;
-		}
-	}
+	//if (bRenderSecondWindow)
+	//{
+	//	if (IsLocallyControlled())
+	//	{
+	//		spectator->Create();
+	//	}
+	//	else
+	//	{
+	//		sceneCapture->bCaptureOnMovement = false;
+	//		sceneCapture->bCaptureEveryFrame = false;
+	//	}
+	//}
 }
 
 void AMlgPlayerCharacter::OnHealthChanged(float newHealthPercentage, float oldHealthPercentage)

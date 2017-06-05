@@ -117,14 +117,14 @@ private:
 
 	FVector abilityMoveTargetLocation;
 
-	UPROPERTY(EditAnywhere)
-	USpectatorComponent* spectator;
+	/*UPROPERTY(EditAnywhere)
+	USpectatorComponent* spectator;*/
+
+	//UPROPERTY(EditAnywhere)
+	//USceneCaptureComponent2D* sceneCapture;
 
 	UPROPERTY(EditAnywhere)
-	USceneCaptureComponent2D* sceneCapture;
-
-	UPROPERTY(EditAnywhere)
-	USteamVRChaperoneComponent* chaperone;
+		USteamVRChaperoneComponent* chaperone;
 
 	UPROPERTY(EditAnywhere)
 	UHealthComponent* healthComp;
