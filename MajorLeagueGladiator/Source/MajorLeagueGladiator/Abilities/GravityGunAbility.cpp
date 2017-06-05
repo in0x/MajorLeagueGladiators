@@ -17,9 +17,8 @@ namespace
 
 UGravityGunAbility::UGravityGunAbility(const FObjectInitializer& ObjectInitializer)
 	: PullRange(1000)
-	, PullSpeed(500)
-	, GrabRange(10)
-	, LaunchVelocity(1000)
+	, PullSpeed(2000)
+	, LaunchVelocity(1700)
 	, HalfAngleDegrees(10.f)
 	, pullTask(nullptr)
 	, searchTask(nullptr)
@@ -101,7 +100,7 @@ void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHand
 	AActor* foundActor = Data.Data[0]->GetActors()[0].Get();
 
 	//This gets spawned on server and client, if he started the ability so that he has a prediction	
-	pullTask = UAbilityTask_PullTarget::Create(this, "Pull Actor Task", foundActor, gripController, PullSpeed, GrabRange);
+	pullTask = UAbilityTask_PullTarget::Create(this, "Pull Actor Task", foundActor, gripController, PullSpeed);
 	pullTask->OnSuccess.AddUObject(this, &UGravityGunAbility::OnActorPullFinished);
 	pullTask->OnFail.AddUObject(this, &UGravityGunAbility::OnActorPullFailed);
 	pullTask->ReadyForActivation();
