@@ -16,9 +16,6 @@ AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, MenuSelectionRayCastRange(1000000.f)
 {
-	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.bStartWithTickEnabled = true;
-
 	BaseEyeHeight = 0.0f;
 	CrouchedEyeHeight = 0.0f;
 
@@ -49,17 +46,6 @@ AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
 	bUseControllerRotationRoll = true;
 	bUseControllerRotationYaw = true;
 #endif
-}
-
-void AMenuCharacter::Tick(float DeltaTimeSeconds)
-{
-	//const FTransform aimSocketTransform = rightMesh->GetSocketTransform(FName("Aim"));
-
-	//const FVector start = aimSocketTransform.GetLocation();
-	//const FVector direction = aimSocketTransform.GetRotation().GetForwardVector();
-	//const FVector end = start + direction * MenuSelectionRayCastRange;
-
-	//DrawDebugLine(GetWorld(), start, end, FColor::Red,false, -1.f, 0, 2.f);
 }
 
 void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

@@ -12,8 +12,7 @@ class MAJORLEAGUEGLADIATOR_API AMenuCharacter : public AVRSimpleCharacter
 public:
 	AMenuCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	virtual void Tick(float DeltaTimeSeconds) override;
-
+	
 private:
 	void OnRightTriggerClicked();
 
