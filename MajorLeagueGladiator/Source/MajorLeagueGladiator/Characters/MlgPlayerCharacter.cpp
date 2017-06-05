@@ -60,6 +60,9 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	headMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh"));
 	bodyMesh2 = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh2"));
 	
+	headMesh->bRenderCustomDepth = true;
+	bodyMesh2->bRenderCustomDepth = true;
+
 	leftMesh->SetupAttachment(LeftMotionController);
 	rightMesh->SetupAttachment(RightMotionController);
 
