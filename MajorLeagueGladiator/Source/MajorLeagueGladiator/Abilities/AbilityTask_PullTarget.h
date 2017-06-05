@@ -17,7 +17,7 @@ class MAJORLEAGUEGLADIATOR_API UAbilityTask_PullTarget : public UAbilityTask
 	
 public:
 	static UAbilityTask_PullTarget* Create(UGameplayAbility* ThisAbility, FName TaskName, AActor* TargetActor, USceneComponent* EndLocation,
-		float PullSpeed, float MinDistanceThreshold, float MaxDistanceThreshold = 2000.f);
+		float PullSpeed, float MaxDistanceThreshold = 2000.f);
 
 	UAbilityTask_PullTarget();
 

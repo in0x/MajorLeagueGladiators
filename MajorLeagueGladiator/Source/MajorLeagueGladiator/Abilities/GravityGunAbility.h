@@ -24,10 +24,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	float PullSpeed;
 
-	// If the pulled Object reaches that Range you grab it
-	UPROPERTY(EditAnywhere)
-	float GrabRange;
-
 	// How fast the pulled Object gets launched
 	UPROPERTY(EditAnywhere)
 	float LaunchVelocity;

@@ -6,7 +6,7 @@
 #include "PackMovementComponent.h"
 
 UAbilityTask_PullTarget* UAbilityTask_PullTarget::Create(UGameplayAbility* ThisAbility, FName TaskName, AActor* TargetActor, USceneComponent* EndLocation,
-	float PullSpeed, float MinDistanceThreshold, float MaxDistanceThreshold)
+	float PullSpeed, float MaxDistanceThreshold)
 {
 	UAbilityTask_PullTarget* task = NewAbilityTask<UAbilityTask_PullTarget>(ThisAbility, TaskName);
 
@@ -14,7 +14,6 @@ UAbilityTask_PullTarget* UAbilityTask_PullTarget::Create(UGameplayAbility* ThisA
 	task->endLocationSceneComponent = EndLocation;
 	task->targetActor = TargetActor;
 	task->targetPrimitve = CastChecked<UPrimitiveComponent>(TargetActor->GetRootComponent());
-	task->minDistanceThreshold = MinDistanceThreshold;
 	task->maxDistanceThreshold = MaxDistanceThreshold;
 
 	return task;
@@ -40,7 +39,9 @@ void UAbilityTask_PullTarget::TickTask(float DeltaTime)
 
 	auto* moveComp = targetActor->FindComponentByClass<UPackMovementComponent>();
 	check(moveComp)
-	if (distance < minDistanceThreshold)
+
+	// Offset needed, at least in non-vr. Maybe we can get rid of it or make it smaller in VR.
+	if (distance < pullSpeed * DeltaTime + 30.f)
 	{
 		moveComp->StopMovementImmediately();
 		targetPrimitve->SetWorldLocation(endLocation);
