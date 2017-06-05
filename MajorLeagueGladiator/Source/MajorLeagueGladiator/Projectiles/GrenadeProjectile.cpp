@@ -110,7 +110,7 @@ void AGrenadeProjectile::refract(AShieldActor* ShieldActor)
 
 	for (int32 i = 0; i < RefractCount; ++i)
 	{
-		constexpr float angle = 30;
+		constexpr float angle = 30.f;
 		const FRotator randomRotation(FMath::RandRange(-angle, angle), FMath::RandRange(-angle, angle), FMath::RandRange(-angle, angle));
 		const FVector launchDirection = randomRotation.RotateVector(sourceDirection);
 
@@ -121,7 +121,7 @@ void AGrenadeProjectile::refract(AShieldActor* ShieldActor)
 
 		auto* spawnedMovement = spawnedProjectile->FindComponentByClass<UProjectileMovementComponent>();
 		spawnedMovement->ProjectileGravityScale = 1.f;
-		spawnedMovement->MaxSpeed = 1000.f;
+		spawnedMovement->MaxSpeed = 500.f;
 
 		auto* spawnedMesh = spawnedProjectile->FindComponentByClass<UStaticMeshComponent>();
 		spawnedMesh->IgnoreActorWhenMoving(ShieldActor, true);

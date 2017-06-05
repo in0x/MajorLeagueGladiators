@@ -6,7 +6,7 @@
 USpectatorComponent::USpectatorComponent(const FObjectInitializer& ObjectInitializer /* = FObjectInitializer::Get() */)
 	: Super(ObjectInitializer)
 	, window(nullptr)
-	, windowSize(1920, 1080/*2080, 1170*/)
+	, windowSize(1920, 1080)
 {
 	const static ConstructorHelpers::FObjectFinder<UMaterialInterface> matFinder(TEXT("Material'/Game/Materials/M_DebugView.M_DebugView'"));
 	widgetMaterial = matFinder.Object;
@@ -55,7 +55,7 @@ void USpectatorComponent::Create()
 
 		if (!sceneCapture->TextureTarget)
 		{
-			sceneCapture->TextureTarget = UCanvasRenderTarget2D::CreateCanvasRenderTarget2D(GetWorld(), UCanvasRenderTarget2D::StaticClass(), 1920, 1080/*windowSize.X, windowSize.Y*/);
+			sceneCapture->TextureTarget = UCanvasRenderTarget2D::CreateCanvasRenderTarget2D(GetWorld(), UCanvasRenderTarget2D::StaticClass(), windowSize.X, windowSize.Y);
 			matInstance->SetTextureParameterValue(FName("RenderTex"), sceneCapture->TextureTarget);
 		}
 
