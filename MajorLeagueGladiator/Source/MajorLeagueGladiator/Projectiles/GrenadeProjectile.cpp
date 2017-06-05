@@ -16,8 +16,8 @@ AGrenadeProjectile::AGrenadeProjectile(const FObjectInitializer& ObjectInitializ
 	: projectileMovementComponent(ObjectInitializer.CreateDefaultSubobject<UProjectileMovementComponent>(this, TEXT("ProjectileMovementComponent")))
 	, ExplosionMaxDamageRadius(20.f)
 	, ExplosionRadius(NORMAL_EXPLOSION_RADIUS)
-	, MaxDamage(50.f)
-	, MinDamage(10.f)
+	, MaxDamage(100.f)
+	, MinDamage(20.f)
 	, DamageFalloff(0.5f)
 	, TimeToExplode(3.f)
 	, InitialSpeed(5000.f)
@@ -110,7 +110,8 @@ void AGrenadeProjectile::refract(AShieldActor* ShieldActor)
 
 	for (int32 i = 0; i < RefractCount; ++i)
 	{
-		const FRotator randomRotation(FMath::RandRange(-45, 45), FMath::RandRange(-45, 45), FMath::RandRange(-45, 45));
+		constexpr float angle = 30;
+		const FRotator randomRotation(FMath::RandRange(-angle, angle), FMath::RandRange(-angle, angle), FMath::RandRange(-angle, angle));
 		const FVector launchDirection = randomRotation.RotateVector(sourceDirection);
 
 		auto* spawnedProjectile = CastChecked<AGrenadeProjectile>(FireProjectile(sourceLocation + sourceDirection * 10, launchDirection, GetOwner(), Instigator->GetController()));
@@ -120,7 +121,7 @@ void AGrenadeProjectile::refract(AShieldActor* ShieldActor)
 
 		auto* spawnedMovement = spawnedProjectile->FindComponentByClass<UProjectileMovementComponent>();
 		spawnedMovement->ProjectileGravityScale = 1.f;
-		spawnedMovement->MaxSpeed = 500.f;
+		spawnedMovement->MaxSpeed = 1000.f;
 
 		auto* spawnedMesh = spawnedProjectile->FindComponentByClass<UStaticMeshComponent>();
 		spawnedMesh->IgnoreActorWhenMoving(ShieldActor, true);
