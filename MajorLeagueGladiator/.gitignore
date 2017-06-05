@@ -1,5 +1,6 @@
 /ipch/
 /Intermediate/
+.vs/
 # Compiled Object files
 *.slo
 *.lo
