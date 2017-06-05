@@ -40,6 +40,10 @@ AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
 	leftMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	rightMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
+	pointerMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("PointerMesh"));
+	pointerMesh->SetMobility(EComponentMobility::Movable);
+	pointerMesh->SetupAttachment(rightMesh, AIM_SOCKET_NAME);
+
 #if 1 //If this is on you can move with the mouse, however it also causes the sliding bug
 	bUseControllerRotationPitch = true;
 	bUseControllerRotationRoll = true;
@@ -49,13 +53,13 @@ AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
 
 void AMenuCharacter::Tick(float DeltaTimeSeconds)
 {
-	const FTransform aimSocketTransform = rightMesh->GetSocketTransform(FName("Aim"));
+	//const FTransform aimSocketTransform = rightMesh->GetSocketTransform(FName("Aim"));
 
-	const FVector start = aimSocketTransform.GetLocation();
-	const FVector direction = aimSocketTransform.GetRotation().GetForwardVector();
-	const FVector end = start + direction * MenuSelectionRayCastRange;
+	//const FVector start = aimSocketTransform.GetLocation();
+	//const FVector direction = aimSocketTransform.GetRotation().GetForwardVector();
+	//const FVector end = start + direction * MenuSelectionRayCastRange;
 
-	DrawDebugLine(GetWorld(), start, end, FColor::Red,false, -1.f, 0, 2.f);
+	//DrawDebugLine(GetWorld(), start, end, FColor::Red,false, -1.f, 0, 2.f);
 }
 
 void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

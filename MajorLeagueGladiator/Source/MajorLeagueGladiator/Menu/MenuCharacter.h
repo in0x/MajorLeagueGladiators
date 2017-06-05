@@ -23,6 +23,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* rightMesh;
 	
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* pointerMesh;
+
 	UPROPERTY(EditAnywhere)
 	float MenuSelectionRayCastRange;
 };

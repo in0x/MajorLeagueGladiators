@@ -16,7 +16,8 @@ namespace
 
 AMenuGameMode::AMenuGameMode()
 {
-	DefaultPawnClass = AMenuCharacter::StaticClass();
+	ConstructorHelpers::FClassFinder<AMenuCharacter> menuCharacterBP(TEXT("/Game/BluePrints/Characters/MenuCharacterBP"));
+	DefaultPawnClass = menuCharacterBP.Class;
 }
 
 void AMenuGameMode::BeginPlay()
