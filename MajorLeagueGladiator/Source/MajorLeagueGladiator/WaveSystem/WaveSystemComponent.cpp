@@ -8,7 +8,7 @@ UWaveSystemComponent::UWaveSystemComponent()
 	: remainingEnemiesForWave(0)
 	, startWaveNumber(1)
 	, initialTimeBeforeStartSeconds(5.0f)
-	, timeBetweenWavesSeconds(6.0f)
+	, timeBetweenWavesSeconds(8.0f)
 	, waveState(EWaveState::NotStarted)
 {
 	SetIsReplicated(true);
