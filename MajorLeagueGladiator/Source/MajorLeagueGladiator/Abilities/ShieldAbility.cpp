@@ -108,9 +108,10 @@ void UShieldAbility::OnBoxTraceFinished(const FGameplayAbilityTargetDataHandle& 
 	FGameplayAbilityTargetData* targetData = Data.Data[0].Get();
 	FGameplayAbilityTargetData_ActorArray* actorArray = static_cast<FGameplayAbilityTargetData_ActorArray*>(targetData);
 	const FVector launchVelocity = actorArray->SourceLocation.GetTargetingTransform().GetRotation().Vector() * pushVelocity;
+	
 	for (auto actor : actorArray->GetActors())
 	{
-		if (!actor.IsValid() || actor->IsPendingKill() || actor->IsPendingKillPending())
+		if (!actor.IsValid() || actor->IsPendingKill() || actor->IsPendingKillPending() || actor == GetOwningActorFromActorInfo())
 		{
 			continue;
 		}
