@@ -12,6 +12,7 @@
 namespace 
 {
 	const char* NO_COLLISION_PROFILE_NAME = "NoCollision";
+	const int32 RANGED_STENCIL_INDEX = 2;
 }
 
 ARangedPlayerCharacter::ARangedPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -22,6 +23,9 @@ ARangedPlayerCharacter::ARangedPlayerCharacter(const FObjectInitializer& ObjectI
 
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> bodyMat(TEXT("Material'/Game/Materials/M_DPS.M_DPS'"));
 	bodyMaterial = bodyMat.Object;
+
+	headMesh->CustomDepthStencilValue = RANGED_STENCIL_INDEX;
+	bodyMesh2->CustomDepthStencilValue = RANGED_STENCIL_INDEX;
 
 	auto createWidget = [&](USceneComponent* attachTo, TSubclassOf<UGameplayAbility> boundAbilityType, EAbilityWidgetAngle::Type angle, EAbilityWidgetTriggerLocation::Type triggerLocation,
 		const TCHAR* WidgetName, const FName& SocketName) -> UAbilityWidgetComponent*

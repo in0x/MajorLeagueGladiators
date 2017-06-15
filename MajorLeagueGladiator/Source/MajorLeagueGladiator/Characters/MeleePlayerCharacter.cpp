@@ -11,6 +11,7 @@
 namespace
 {
 	const char* NO_COLLISION_PROFILE_NAME = "NoCollision";
+	const int32 MELEE_STENCIL_INDEX = 1;
 }
 
 AMeleePlayerCharacter::AMeleePlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -33,6 +34,9 @@ AMeleePlayerCharacter::AMeleePlayerCharacter(const FObjectInitializer& ObjectIni
 		}
 		rightMesh->SetSkeletalMesh(swordHandleMesh.Object);
 	}
+
+	headMesh->CustomDepthStencilValue = MELEE_STENCIL_INDEX;
+	bodyMesh2->CustomDepthStencilValue = MELEE_STENCIL_INDEX;
 
 	auto createWidget = [&](TSubclassOf<UGameplayAbility> boundAbilityType, EAbilityWidgetAngle::Type angle, EAbilityWidgetTriggerLocation::Type triggerLocation,
 		const TCHAR* WidgetName, const FName& SocketName) -> UAbilityWidgetComponent*
@@ -59,7 +63,7 @@ void AMeleePlayerCharacter::BeginPlay()
 	auto instance = UMaterialInstanceDynamic::Create(multiToolMaterial, nullptr);
 	auto swordInstance = UMaterialInstanceDynamic::Create(swordMaterial, nullptr);
 	auto bodyInstance = UMaterialInstanceDynamic::Create(bodyMaterial, nullptr);
-	
+
 	leftMesh->SetMaterial(0, instance);
 	rightMesh->SetMaterial(0, swordInstance);
 	headMesh->SetMaterial(0, bodyInstance);
