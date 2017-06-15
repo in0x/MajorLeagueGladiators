@@ -7,6 +7,11 @@
 #include "Characters/RangedPlayerCharacter.h"
 #include "MlgGameplayStatics.h"
 
+namespace 
+{
+	const int32 HEALTH_STENCIL_INDEX = 3;
+}
+
 AHealthPack::AHealthPack()
 	: amountToRefillUncharged(30.f)
 	, amountToRefillCharged(100.f)
@@ -22,6 +27,9 @@ AHealthPack::AHealthPack()
 		staticMeshComp->SetMaterial(0, healthPackMat.Object);
 	}
 	chargingPlayerClass = ARangedPlayerCharacter::StaticClass();
+
+	staticMeshComp->SetRenderCustomDepth(true);
+	staticMeshComp->CustomDepthStencilValue = HEALTH_STENCIL_INDEX;
 }
 
 void AHealthPack::playHealSound(AActor* user)

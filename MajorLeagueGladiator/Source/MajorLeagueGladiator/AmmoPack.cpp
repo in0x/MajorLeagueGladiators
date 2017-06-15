@@ -7,6 +7,11 @@
 #include "Characters/MeleePlayerCharacter.h"
 #include "MlgGameplayStatics.h"
 
+namespace
+{
+	const int32 AMMO_STENCIL_INDEX = 4;
+}
+
 AAmmoPack::AAmmoPack()
 	: amountToRefillUncharged(10)
 	, amountToRefillCharged(30)
@@ -16,11 +21,16 @@ AAmmoPack::AAmmoPack()
 
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> ammoPackMat(TEXT("Material'/Game/BluePrints/AmmoPackMat.AmmoPackMat'"));
 	UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
+	
 	if (staticMeshComp && ammoPackMat.Succeeded())
 	{		
 		staticMeshComp->SetMaterial(0, ammoPackMat.Object);
 	}
+
 	chargingPlayerClass = AMeleePlayerCharacter::StaticClass();
+
+	staticMeshComp->SetRenderCustomDepth(true);
+	staticMeshComp->CustomDepthStencilValue = AMMO_STENCIL_INDEX;
 }
 
 void AAmmoPack::Use(AActor* User, TriggerType Type)
