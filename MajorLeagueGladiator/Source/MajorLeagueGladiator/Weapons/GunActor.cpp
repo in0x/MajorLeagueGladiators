@@ -70,12 +70,12 @@ void AGunActor::Tick(float DeltaTime)
 	}
 }
 
-void AGunActor::OnUsed()
+void AGunActor::OnUsed_Implementation()
 {
 	bShooting = true;
 }
 
-void AGunActor::OnEndUsed()
+void AGunActor::OnEndUsed_Implementation()
 {
 	bShooting = false;
 }

@@ -7,7 +7,8 @@
 #include "PhysicsPublic.h"
 #if WITH_PHYSX
 #include "PhysXPublic.h"
-#include "PhysXSupport.h"
+//#include "PhysXSupport.h"
+#include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
 #endif // WITH_PHYSX
 
 #include "VRBPDatatypes.generated.h"

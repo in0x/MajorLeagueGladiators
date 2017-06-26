@@ -11,6 +11,13 @@ public class MajorLeagueGladiator : ModuleRules
         MinFilesUsingPrecompiledHeaderOverride = 1;
         bFasterWithoutUnity = true;
 
+        Definitions.Add("WITH_OPEN_VR_EXPANSION=1");
+
+        if (UEBuildConfiguration.bBuildEditor == true)
+        {
+            PrivateDependencyModuleNames.Add("UnrealEd");
+        }
+
         PublicIncludePaths.AddRange(
 			new string[] {
                 "HeadMountedDisplay/Public",
@@ -20,6 +27,7 @@ public class MajorLeagueGladiator : ModuleRules
                 "Runtime/GameplayTasks"
             }
 		);
+
 
         DynamicallyLoadedModuleNames.Add("OnlineSubsystemNull");
 

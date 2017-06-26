@@ -3,7 +3,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "IMotionController.h"
-#include "VRBPDataTypes.h"
+#include "../VRBPDataTypes.h"
 
 // #Note: Can now access VRSystem from the SteamHMD directly, however still cannot use the static pVRGenericInterface point due to 
 // linking errors since can't attain .cpp reference. So useless to convert to blueprint library as the render models wouldn't work.
@@ -25,9 +25,14 @@
 #include "ISteamVRPlugin.h"
 
 //This is a stupid way of gaining access to this header...see build.cs
-#include "SteamVRHMD.h"
+//#include "../../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Private/SteamVRHMD.h" 
+//#include "Runtime/Engine/Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Private/SteamVRHMD.h" 
+//#include "../../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Private/SteamVRHMD.h"
+#include "Runtime/../../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Private/SteamVRHMD.h"
+
+
 //#include "SteamVRPrivatePCH.h" // Need a define in here....this is so ugly
-#include "SteamVRPrivate.h" // Now in here since 4.15
+#include "Runtime/../../Plugins/Runtime/Steam/SteamVR/Source/SteamVR/Private/SteamVRPrivate.h" // Now in here since 4.15
 #include "SteamVRFunctionLibrary.h"
 
 #endif // STEAMVR_SUPPORTED_PLATFORM
@@ -39,7 +44,7 @@
 //#include "PhysicsEngine/ConvexElem.h" // Fixed in 4.13.1?
 
 #include "HeadMountedDisplay.h" 
-#include "HeadMountedDisplayFunctionLibrary.h"
+#include "Runtime/Engine/Classes/Kismet/HeadMountedDisplayFunctionLibrary.h"
 
 #include "OpenVRExpansionFunctionLibrary.generated.h"
 

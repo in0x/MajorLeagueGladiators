@@ -14,9 +14,9 @@ AMlgGrippableMeshActor::AMlgGrippableMeshActor(const FObjectInitializer& ObjectI
 	RootComponent = MeshComponent;
 }
 
-void AMlgGrippableMeshActor::OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation)
+void AMlgGrippableMeshActor::OnGrip_Implementation(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation)
 {
-	Super::OnGrip(GrippingController, GripInformation);
+	Super::OnGrip_Implementation(GrippingController, GripInformation);
 
 	// On Grip Gets called before Set Held is executed so calling this after super is safe
 	ReleaseFromGrippedComponent();

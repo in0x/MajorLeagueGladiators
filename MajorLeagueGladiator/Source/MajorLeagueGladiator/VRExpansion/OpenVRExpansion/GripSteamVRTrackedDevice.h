@@ -7,10 +7,10 @@
 #include "Engine/Engine.h"
 #include "IMotionController.h"
 #include "SceneViewExtension.h"
-#include "VRBPDatatypes.h"
-#include "VRGripInterface.h"
+#include "../VRBPDatatypes.h"
+#include "../VRGripInterface.h"
 #include "OpenVRExpansionFunctionLibrary.h"
-#include "GripMotionControllerComponent.h"
+#include "../GripMotionControllerComponent.h"
 
 #include "GripSteamVRTrackedDevice.generated.h"
 

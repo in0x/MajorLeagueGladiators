@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VRExpansion/VRSimpleCharacter.h"
-#include "HandMotionController.h"
+
 #include "ChaperoneBounds.h"
 #include "AbilitySystemInterface.h"
 #include "MlgPlayerCharacter.generated.h"
@@ -112,7 +112,7 @@ protected:
 	UPlayerDamageFeedbackComponent* damageFeedback;
 
 private:
-	std::unique_ptr<HandMotionController> pHandMotionController;
+
 	std::unique_ptr<ChaperoneBounds> pChaperoneBounds;
 
 	FVector abilityMoveTargetLocation;

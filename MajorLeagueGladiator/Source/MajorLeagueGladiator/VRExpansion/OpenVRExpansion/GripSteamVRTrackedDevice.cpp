@@ -3,7 +3,7 @@
 #include "MajorLeagueGladiator.h"
 #include "GripSteamVRTrackedDevice.h"
 #include "OpenVRExpansionFunctionLibrary.h"
-#include "GripMotionControllerComponent.h"
+#include "../GripMotionControllerComponent.h"
 
 
 //=============================================================================
