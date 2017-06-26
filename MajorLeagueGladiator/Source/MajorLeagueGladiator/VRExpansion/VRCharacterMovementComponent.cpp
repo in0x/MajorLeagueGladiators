@@ -4,6 +4,7 @@
 	Movement.cpp: Character movement implementation
 
 =============================================================================*/
+#include "MajorLeagueGladiator.h"
 
 #include "VRCharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"

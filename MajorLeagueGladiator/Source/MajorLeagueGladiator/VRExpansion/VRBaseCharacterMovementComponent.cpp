@@ -5,6 +5,7 @@
 
 =============================================================================*/
 
+#include "MajorLeagueGladiator.h"
 #include "VRBaseCharacterMovementComponent.h"
 #include "VRBPDataTypes.h"
 

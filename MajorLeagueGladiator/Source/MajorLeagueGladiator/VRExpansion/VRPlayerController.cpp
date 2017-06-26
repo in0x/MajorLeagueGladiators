@@ -1,5 +1,6 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
+#include "MajorLeagueGladiator.h"
 #include "VRPlayerController.h"
 //#include "Runtime/Engine/Private/EnginePrivate.h"
 
