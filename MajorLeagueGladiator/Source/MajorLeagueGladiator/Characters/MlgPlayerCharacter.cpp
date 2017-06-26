@@ -63,8 +63,11 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	headMesh->bRenderCustomDepth = true;
 	bodyMesh2->bRenderCustomDepth = true;
 
+	// For non-VR mode. VR mode will override these values every tick and the initial values don't matter.
 	LeftMotionController->SetRelativeLocation(FVector(75, -25, 0));
+	LeftMotionController->SetRelativeRotation(FRotator(60, 0, 0));
 	RightMotionController->SetRelativeLocation(FVector(75, 25, 0));
+	RightMotionController->SetRelativeRotation(FRotator(60, 0, 0));
 
 	leftMesh->SetupAttachment(LeftMotionController);
 	rightMesh->SetupAttachment(RightMotionController);
