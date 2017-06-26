@@ -44,6 +44,13 @@ namespace {
 } // anonymous namespace
 
 
+static const auto CVarEnableMotionControllerLateUpdate = []()
+{
+	auto result = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("vr.EnableMotionControllerLateUpdate"));
+	return result ? result : new TConsoleVariableData<int32>(0);
+
+}();
+
   //=============================================================================
 UGripMotionControllerComponent::UGripMotionControllerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -288,7 +295,6 @@ void UGripMotionControllerComponent::FViewExtension::BeginRenderViewFamily(FScen
 	}
 	FScopeLock ScopeLock(&CritSect);
 
-	static const auto CVarEnableMotionControllerLateUpdate = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("vr.EnableMotionControllerLateUpdate"));
 	if (MotionControllerComponent->bDisableLowLatencyUpdate || !CVarEnableMotionControllerLateUpdate->GetValueOnGameThread())
 	{
 		return;
@@ -3437,7 +3443,6 @@ void UGripMotionControllerComponent::FViewExtension::PreRenderViewFamily_RenderT
 
 	FScopeLock ScopeLock(&CritSect);
 
-	static const auto CVarEnableMotionControllerLateUpdate = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("vr.EnableMotionControllerLateUpdate"));
 	if (MotionControllerComponent->bDisableLowLatencyUpdate || !CVarEnableMotionControllerLateUpdate->GetValueOnRenderThread())
 	{
 		return;
