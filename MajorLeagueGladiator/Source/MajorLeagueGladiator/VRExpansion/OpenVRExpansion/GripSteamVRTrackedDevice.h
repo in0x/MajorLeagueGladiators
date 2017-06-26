@@ -15,7 +15,7 @@
 #include "GripSteamVRTrackedDevice.generated.h"
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = MotionController, hidecategories = ("MotionController|Types"))
-class OPENVREXPANSIONPLUGIN_API UGripSteamVRTrackedDevice : public UGripMotionControllerComponent
+class MAJORLEAGUEGLADIATOR_API UGripSteamVRTrackedDevice : public UGripMotionControllerComponent
 {
 
 public:

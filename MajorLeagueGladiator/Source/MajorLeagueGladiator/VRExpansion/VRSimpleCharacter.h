@@ -14,7 +14,7 @@
 
 
 UCLASS()
-class VREXPANSIONPLUGIN_API AVRSimpleCharacter : public AVRBaseCharacter
+class MAJORLEAGUEGLADIATOR_API AVRSimpleCharacter : public AVRBaseCharacter
 {
 	GENERATED_BODY()
 

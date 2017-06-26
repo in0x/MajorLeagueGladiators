@@ -16,7 +16,7 @@
 */
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = (VRExpansionPlugin))
-class VREXPANSIONPLUGIN_API AGrippableStaticMeshActor : public AStaticMeshActor, public IVRGripInterface, public IGameplayTagAssetInterface
+class MAJORLEAGUEGLADIATOR_API AGrippableStaticMeshActor : public AStaticMeshActor, public IVRGripInterface, public IGameplayTagAssetInterface
 {
 	GENERATED_UCLASS_BODY()
 

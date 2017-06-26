@@ -28,7 +28,7 @@ enum class EBPHMDWornState : uint8
 
 
 UCLASS()//, meta = (BlueprintSpawnableComponent))
-class VREXPANSIONPLUGIN_API UVRExpansionFunctionLibrary : public UBlueprintFunctionLibrary
+class MAJORLEAGUEGLADIATOR_API UVRExpansionFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	//GENERATED_BODY()
 	GENERATED_BODY()

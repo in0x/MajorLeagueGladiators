@@ -22,7 +22,7 @@ DECLARE_STATS_GROUP(TEXT("TICKGrip"), STATGROUP_TickGrip, STATCAT_Advanced);
 
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = MotionController)
-class VREXPANSIONPLUGIN_API UGripMotionControllerComponent : public UPrimitiveComponent
+class MAJORLEAGUEGLADIATOR_API UGripMotionControllerComponent : public UPrimitiveComponent
 {
 
 public:

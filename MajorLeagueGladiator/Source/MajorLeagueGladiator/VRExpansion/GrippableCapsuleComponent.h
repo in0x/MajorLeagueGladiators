@@ -15,7 +15,7 @@
 */
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = (VRExpansionPlugin))
-class VREXPANSIONPLUGIN_API UGrippableCapsuleComponent : public UCapsuleComponent, public IVRGripInterface, public IGameplayTagAssetInterface
+class MAJORLEAGUEGLADIATOR_API UGrippableCapsuleComponent : public UCapsuleComponent, public IVRGripInterface, public IGameplayTagAssetInterface
 {
 	GENERATED_UCLASS_BODY()
 

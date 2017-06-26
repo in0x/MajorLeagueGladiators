@@ -11,13 +11,13 @@
 
 
 UINTERFACE(meta = (CannotImplementInterfaceInBlueprint))
-class VREXPANSIONPLUGIN_API UVRTrackedParentInterface: public UInterface
+class MAJORLEAGUEGLADIATOR_API UVRTrackedParentInterface: public UInterface
 {
 	GENERATED_UINTERFACE_BODY()
 };
 
 
-class VREXPANSIONPLUGIN_API IVRTrackedParentInterface
+class MAJORLEAGUEGLADIATOR_API IVRTrackedParentInterface
 {
 	GENERATED_IINTERFACE_BODY()
  

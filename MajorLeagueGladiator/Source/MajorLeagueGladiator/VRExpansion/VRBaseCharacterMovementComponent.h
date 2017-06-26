@@ -28,7 +28,7 @@
 
 
 UCLASS()
-class VREXPANSIONPLUGIN_API UVRBaseCharacterMovementComponent : public UCharacterMovementComponent
+class MAJORLEAGUEGLADIATOR_API UVRBaseCharacterMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
 public:
@@ -201,7 +201,7 @@ public:
 };
 
 
-class VREXPANSIONPLUGIN_API FSavedMove_VRBaseCharacter : public FSavedMove_Character
+class MAJORLEAGUEGLADIATOR_API FSavedMove_VRBaseCharacter : public FSavedMove_Character
 {
 
 public:

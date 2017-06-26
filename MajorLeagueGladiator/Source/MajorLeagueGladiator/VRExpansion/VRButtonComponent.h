@@ -36,7 +36,7 @@ enum class EVRButtonDepressAxis : uint8
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FVRButtonStateChangedSignature, bool, ButtonState);
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = (VRExpansionPlugin))
-class VREXPANSIONPLUGIN_API UVRButtonComponent : public UStaticMeshComponent
+class MAJORLEAGUEGLADIATOR_API UVRButtonComponent : public UStaticMeshComponent
 {
 	GENERATED_UCLASS_BODY()
 

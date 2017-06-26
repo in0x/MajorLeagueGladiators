@@ -9,7 +9,7 @@
 
 
 UCLASS()
-class VREXPANSIONPLUGIN_API AVRPlayerController : public APlayerController
+class MAJORLEAGUEGLADIATOR_API AVRPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 

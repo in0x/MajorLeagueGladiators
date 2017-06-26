@@ -189,7 +189,7 @@ private:
 };
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = (VRExpansionPlugin))
-class VREXPANSIONPLUGIN_API UVRLogComponent : public UActorComponent
+class MAJORLEAGUEGLADIATOR_API UVRLogComponent : public UActorComponent
 {
 	GENERATED_UCLASS_BODY()
 

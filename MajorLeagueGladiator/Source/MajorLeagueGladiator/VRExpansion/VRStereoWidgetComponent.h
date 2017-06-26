@@ -15,7 +15,7 @@
 */
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = (VRExpansionPlugin))
-class VREXPANSIONPLUGIN_API UVRStereoWidgetComponent : public UWidgetComponent
+class MAJORLEAGUEGLADIATOR_API UVRStereoWidgetComponent : public UWidgetComponent
 {
 	GENERATED_UCLASS_BODY()
 	friend class FStereoLayerComponentVisualizer;

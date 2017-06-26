@@ -43,7 +43,7 @@ class AVRCharacter;
 //DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FAIMoveCompletedSignature, FAIRequestID, RequestID, EPathFollowingResult::Type, Result);
 
 // Using this fixes the problem where the character capsule isn't reset after a scoped movement update revert (pretty much just in StepUp operations)
-class VREXPANSIONPLUGIN_API FVRCharacterScopedMovementUpdate : public FScopedMovementUpdate
+class MAJORLEAGUEGLADIATOR_API FVRCharacterScopedMovementUpdate : public FScopedMovementUpdate
 {
 public:
 
@@ -67,7 +67,7 @@ public:
 
 
 UCLASS()
-class VREXPANSIONPLUGIN_API UVRCharacterMovementComponent : public UVRBaseCharacterMovementComponent
+class MAJORLEAGUEGLADIATOR_API UVRCharacterMovementComponent : public UVRBaseCharacterMovementComponent
 {
 	GENERATED_BODY()
 public:
@@ -289,7 +289,7 @@ public:
 };
 
 
-class VREXPANSIONPLUGIN_API FSavedMove_VRCharacter : public FSavedMove_VRBaseCharacter
+class MAJORLEAGUEGLADIATOR_API FSavedMove_VRCharacter : public FSavedMove_VRBaseCharacter
 {
 
 public:
@@ -303,7 +303,7 @@ public:
 };
 
 // Need this for capsule location replication
-class VREXPANSIONPLUGIN_API FNetworkPredictionData_Client_VRCharacter : public FNetworkPredictionData_Client_Character
+class MAJORLEAGUEGLADIATOR_API FNetworkPredictionData_Client_VRCharacter : public FNetworkPredictionData_Client_Character
 {
 public:
 	FNetworkPredictionData_Client_VRCharacter(const UCharacterMovementComponent& ClientMovement)
@@ -320,7 +320,7 @@ public:
 
 
 // Need this for capsule location replication?????
-class VREXPANSIONPLUGIN_API FNetworkPredictionData_Server_VRCharacter : public FNetworkPredictionData_Server_Character
+class MAJORLEAGUEGLADIATOR_API FNetworkPredictionData_Server_VRCharacter : public FNetworkPredictionData_Server_Character
 {
 public:
 	FNetworkPredictionData_Server_VRCharacter(const UCharacterMovementComponent& ClientMovement)

@@ -9,7 +9,7 @@
 
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = VRExpansionLibrary)
-class VREXPANSIONPLUGIN_API UParentRelativeAttachmentComponent : public USceneComponent, public IVRTrackedParentInterface
+class MAJORLEAGUEGLADIATOR_API UParentRelativeAttachmentComponent : public USceneComponent, public IVRTrackedParentInterface
 {
 	GENERATED_UCLASS_BODY()
 
