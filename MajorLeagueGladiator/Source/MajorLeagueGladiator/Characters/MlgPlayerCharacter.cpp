@@ -63,7 +63,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	headMesh->bRenderCustomDepth = true;
 	bodyMesh2->bRenderCustomDepth = true;
 
-	LeftMotionController->SetRelativeLocation(FVector(-75, 25, 0));
+	LeftMotionController->SetRelativeLocation(FVector(75, -25, 0));
 	RightMotionController->SetRelativeLocation(FVector(75, 25, 0));
 
 	leftMesh->SetupAttachment(LeftMotionController);
@@ -98,16 +98,14 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	bodyMesh2->SetupAttachment(VRReplicatedCamera);
 	bodyMesh2->SetOwnerNoSee(true);
 	bodyMesh2->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
-	bodyMesh2->SetRelativeLocation({ 0,0,0 });
+	BodyOffsetFromHead = { 0,0,-190 };
+	bodyMesh2->SetRelativeLocation(BodyOffsetFromHead);
 	bodyMesh2->bAbsoluteRotation = true;
 	bodyMesh2->bAbsoluteScale = true;
 	bodyMesh2->bAbsoluteLocation = true;
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> bodyMeshAsset(TEXT("StaticMesh'/Game/MVRCFPS_Assets/PlayerCharacters/tank_body.tank_body'"));
 	bodyMesh2->SetStaticMesh(bodyMeshAsset.Object);
-
-	BodyOffsetFromHead = { 0,0,-190 };
-	
 
 	hudHealth = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("HUDHealth"));
 	hudHealth->SetupAttachment(leftMesh, FName(TEXT("Touch")));
@@ -254,10 +252,15 @@ void AMlgPlayerCharacter::Tick(float DelataTime)
 {
 	Super::Tick(DelataTime);
 
+	updateBodyMeshTransform();
+}
+
+void AMlgPlayerCharacter::updateBodyMeshTransform()
+{
 	const FTransform cameraTrans = VRReplicatedCamera->GetComponentTransform();
 	const FRotator rot(0, cameraTrans.Rotator().Yaw, 0);
 	const FRotator bodyRotation = bodyMesh2->GetComponentRotation();
-	
+
 	bodyMesh2->SetWorldTransform(FTransform(rot, BodyOffsetFromHead + cameraTrans.GetLocation()));
 }
 
