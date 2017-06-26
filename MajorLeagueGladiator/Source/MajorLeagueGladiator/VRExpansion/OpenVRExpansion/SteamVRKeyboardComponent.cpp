@@ -3,7 +3,7 @@
 #include "MajorLeagueGladiator.h"
 #include "SteamVRKeyboardComponent.h"
 #include "OpenVRExpansionFunctionLibrary.h"
-#include "GripMotionControllerComponent.h"
+#include "../GripMotionControllerComponent.h"
 
 
 //=============================================================================

@@ -6,7 +6,7 @@
 #include "Components/DestructibleComponent.h"
 #include "Misc/ScopeLock.h"
 #include "Net/UnrealNetwork.h"
-#include "KismetMathLibrary.h"
+#include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "PrimitiveSceneInfo.h"
 #include "Engine/World.h"
 #include "GameFramework/WorldSettings.h"
@@ -15,7 +15,8 @@
 #include "PhysicsPublic.h"
 
 #if WITH_PHYSX
-#include "PhysXSupport.h"
+
+#include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
 #endif // WITH_PHYSX
 
 //#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION <= 11

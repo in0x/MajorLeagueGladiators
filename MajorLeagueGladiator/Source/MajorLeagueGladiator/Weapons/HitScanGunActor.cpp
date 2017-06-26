@@ -117,7 +117,7 @@ void AHitScanGunActor::BeginPlay()
 	});
 }
 
-void AHitScanGunActor::OnUsed()
+void AHitScanGunActor::OnUsed_Implementation()
 {
 	if (bIsApplyingRecoil) // Gun hasn't reset yet.
 		return;
@@ -154,9 +154,9 @@ void AHitScanGunActor::playShotEffect_NetMulticast_Implementation(float Charge)
 	UMlgGameplayStatics::PlaySoundNetworkedPredicted(Cast<APawn>(GetOwner()), soundParams);
 }
 
-void AHitScanGunActor::OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) 
+void AHitScanGunActor::OnGrip_Implementation(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) 
 {
-	Super::OnGrip(GrippingController, GripInformation);
+	//Super::OnGrip(GrippingController, GripInformation);
 
 	grippingController = GrippingController;
 	gripInfo = GripInformation;

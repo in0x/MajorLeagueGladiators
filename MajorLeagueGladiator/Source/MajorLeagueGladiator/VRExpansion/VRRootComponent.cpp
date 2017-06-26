@@ -7,7 +7,7 @@
 #include "PhysicsPublic.h"
 
 #if WITH_PHYSX
-#include "PhysXSupport.h"
+#include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
 #endif // WITH_PHYSX
 
 #include "Components/PrimitiveComponent.h"

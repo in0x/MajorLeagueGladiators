@@ -36,16 +36,10 @@ public:
 	bool SimulateOnDrop();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
-	void ObjectType(uint8 & ObjectType);
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 	EGripCollisionType SlotGripType();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 	EGripCollisionType FreeGripType();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
-	bool CanHaveDoubleGrip();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 	EGripMovementReplicationSettings GripMovementReplicationType();
@@ -79,4 +73,20 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 	FBPInteractionSettings GetInteractionSettings();
+
+	void OnEndUsed_Implementation() override { checkNoEntry(); }
+	void OnUsed_Implementation() override { checkNoEntry(); }
+	void OnEndSecondaryUsed_Implementation() override { checkNoEntry(); }
+	void OnSecondaryUsed_Implementation() override { checkNoEntry(); }
+	void OnSecondaryGrip_Implementation(USceneComponent* SceneComponent, const FBPActorGripInformation& GripInformation) override { checkNoEntry(); }
+	void OnSecondaryGripRelease_Implementation(USceneComponent* SceneComponent, const FBPActorGripInformation& GripInformation) override { checkNoEntry(); }
+
+	void OnChildGrip_Implementation(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation & GripInformation) override { checkNoEntry(); }
+	void OnChildGripRelease_Implementation(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation & GripInformation) override { checkNoEntry(); }
+	void OnGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation) override { checkNoEntry(); }
+	void OnGripRelease_Implementation(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation) override { checkNoEntry(); }
+	void TickGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation, FVector MControllerLocDelta, float DeltaTime) override {};
+	FBPAdvGripPhysicsSettings AdvancedPhysicsSettings_Implementation() override;
+	ESecondaryGripType SecondaryGripType_Implementation() override;
+
 };

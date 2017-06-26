@@ -116,8 +116,8 @@ class MAJORLEAGUEGLADIATOR_API UVRButtonComponent : public UStaticMeshComponent
 			return true;
 
 		// Because epic motion controllers are not owned by characters have to check here too in case someone implements it like that
-		USceneComponent * AttachParent = OverlapComponent->GetAttachParent();
-		if (AttachParent && (OverlapComponent->GetAttachParent()->IsA(UGripMotionControllerComponent::StaticClass()) || OverlapComponent->GetAttachParent()->IsA(UMotionControllerComponent::StaticClass())))
+		USceneComponent* overlappedAttachParent = OverlapComponent->GetAttachParent();
+		if (overlappedAttachParent && (overlappedAttachParent->IsA(UGripMotionControllerComponent::StaticClass()) || overlappedAttachParent->IsA(UMotionControllerComponent::StaticClass())))
 			return true;
 
 		// Now check for if it is a grippable object and if it is currently held

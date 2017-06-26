@@ -22,8 +22,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual void OnUsed() override;	
-	virtual void OnEndUsed() override;
+	virtual void OnUsed_Implementation() override;	
+	virtual void OnEndUsed_Implementation() override;
 
 private:
 	UPROPERTY(EditAnywhere)

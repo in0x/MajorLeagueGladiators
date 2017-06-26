@@ -20,7 +20,7 @@ public:
 
 	AMlgGrippableMeshActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	virtual void OnGrip(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) override;
+	virtual void OnGrip_Implementation(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) override;
 
 	void ReleaseFromGrippedComponent();
 

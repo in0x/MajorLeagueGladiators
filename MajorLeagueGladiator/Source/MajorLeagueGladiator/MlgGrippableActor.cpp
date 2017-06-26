@@ -9,10 +9,8 @@ AMlgGrippableActor::AMlgGrippableActor(const FObjectInitializer& ObjectInitializ
 	VRGripInterfaceSettings.bDenyGripping = false;
 	VRGripInterfaceSettings.OnTeleportBehavior = EGripInterfaceTeleportBehavior::TeleportAllComponents;
 	VRGripInterfaceSettings.bSimulateOnDrop = true;
-	VRGripInterfaceSettings.EnumObjectType = 0;
 	VRGripInterfaceSettings.SlotDefaultGripType = EGripCollisionType::InteractiveCollisionWithPhysics;
 	VRGripInterfaceSettings.FreeDefaultGripType = EGripCollisionType::InteractiveCollisionWithPhysics;
-	VRGripInterfaceSettings.bCanHaveDoubleGrip = false;
 	//VRGripInterfaceSettings.GripTarget = EGripTargetType::ActorGrip;
 	VRGripInterfaceSettings.MovementReplicationType = EGripMovementReplicationSettings::ForceClientSideMovement;
 	VRGripInterfaceSettings.LateUpdateSetting = EGripLateUpdateSettings::NotWhenCollidingOrDoubleGripping;
@@ -32,11 +30,13 @@ AMlgGrippableActor::AMlgGrippableActor(const FObjectInitializer& ObjectInitializ
 	this->bReplicates = true;
 }
 
+
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 ///////////// Grip Interface ///////////////////////////////
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
+
 
 bool AMlgGrippableActor::DenyGripping_Implementation()
 {
@@ -53,11 +53,6 @@ bool AMlgGrippableActor::SimulateOnDrop_Implementation()
 	return VRGripInterfaceSettings.bSimulateOnDrop;
 }
 
-void AMlgGrippableActor::ObjectType_Implementation(uint8 & ObjectType)
-{
-	ObjectType = VRGripInterfaceSettings.EnumObjectType;
-}
-
 EGripCollisionType AMlgGrippableActor::SlotGripType_Implementation()
 {
 	return VRGripInterfaceSettings.SlotDefaultGripType;
@@ -66,11 +61,6 @@ EGripCollisionType AMlgGrippableActor::SlotGripType_Implementation()
 EGripCollisionType AMlgGrippableActor::FreeGripType_Implementation()
 {
 	return VRGripInterfaceSettings.FreeDefaultGripType;
-}
-
-bool AMlgGrippableActor::CanHaveDoubleGrip_Implementation()
-{
-	return VRGripInterfaceSettings.bCanHaveDoubleGrip;
 }
 
 /*EGripTargetType AMlgGrippableActor::GripTargetType_Implementation()
@@ -137,5 +127,15 @@ void AMlgGrippableActor::SetHeld_Implementation(UGripMotionControllerComponent *
 FBPInteractionSettings AMlgGrippableActor::GetInteractionSettings_Implementation()
 {
 	return VRGripInterfaceSettings.InteractionSettings;
+}
+
+FBPAdvGripPhysicsSettings AMlgGrippableActor::AdvancedPhysicsSettings_Implementation()
+{
+	return VRGripInterfaceSettings.AdvancedPhysicsSettings;
+}
+
+ESecondaryGripType AMlgGrippableActor::SecondaryGripType_Implementation()
+{
+	return VRGripInterfaceSettings.SecondaryGripType;
 }
 

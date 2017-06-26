@@ -63,6 +63,9 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	headMesh->bRenderCustomDepth = true;
 	bodyMesh2->bRenderCustomDepth = true;
 
+	LeftMotionController->SetRelativeLocation(FVector(-75, 25, 0));
+	RightMotionController->SetRelativeLocation(FVector(75, 25, 0));
+
 	leftMesh->SetupAttachment(LeftMotionController);
 	rightMesh->SetupAttachment(RightMotionController);
 
@@ -170,7 +173,6 @@ void AMlgPlayerCharacter::BeginPlay()
 	}
 	else
 	{
-		pHandMotionController = std::make_unique<HandMotionController>(this);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("NON VR MODE"));
 #if 1 //If this is on you can move with the mouse, however it also causes the sliding bug
 		bUseControllerRotationPitch = true;

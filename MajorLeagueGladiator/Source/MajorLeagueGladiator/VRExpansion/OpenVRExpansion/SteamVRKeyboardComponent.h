@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "EngineMinimal.h"
-#include "VRBPDatatypes.h"
+#include "../VRBPDatatypes.h"
 #include "OpenVRExpansionFunctionLibrary.h"
-#include "GripMotionControllerComponent.h"
+#include "../GripMotionControllerComponent.h"
 
 #include "SteamVRKeyboardComponent.generated.h"
 

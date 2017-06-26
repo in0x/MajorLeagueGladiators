@@ -26,18 +26,38 @@
 #include <memory>
 
 // VREXPANSION
-#include "VRExpansion/VRBPDatatypes.h"
-#include "VRExpansion/GripMotionControllerComponent.h"
-#include "VRExpansion/VRExpansionFunctionLibrary.h"
-#include "VRExpansion/ReplicatedVRCameraComponent.h"
-#include "VRExpansion/ParentRelativeAttachmentComponent.h"
-#include "VRExpansion/VRRootComponent.h"
-#include "VRExpansion/VRCharacterMovementComponent.h"
-#include "VRExpansion/VRCharacter.h"
-#include "VRExpansion/VRPathFollowingComponent.h"
 #include "VRExpansion/VRPlayerController.h"
-#include "VRExpansion/VRGripInterface.h"
+#include "VRExpansion/VRRootComponent.h" 
 #include "VRExpansion/VRSimpleCharacter.h"
+#include "VRExpansion/VRSimpleCharacterMovementComponent.h"
+#include "VRExpansion/VRStereoWidgetComponent.h"
+#include "VRExpansion/VRTrackedParentInterface.h"
+#include "VRExpansion/GripMotionControllerComponent.h"
+#include "VRExpansion/GrippableBoxComponent.h"
+#include "VRExpansion/GrippableCapsuleComponent.h"
+#include "VRExpansion/GrippableSkeletalMeshActor.h"
+#include "VRExpansion/GrippableSkeletalMeshComponent.h"
+#include "VRExpansion/GrippableSphereComponent.h"
+#include "VRExpansion/GrippableStaticMeshActor.h"
+#include "VRExpansion/GrippableStaticMeshComponent.h"
+#include "VRExpansion/ParentRelativeAttachmentComponent.h"
+#include "VRExpansion/ReplicatedVRCameraComponent.h"
+#include "VRExpansion/VRAIController.h"
+#include "VRExpansion/VRBaseCharacter.h"
+#include "VRExpansion/VRBaseCharacterMovementComponent.h"
+#include "VRExpansion/VRBPDatatypes.h"
+#include "VRExpansion/VRButtonComponent.h"
+#include "VRExpansion/VRCharacter.h"
+#include "VRExpansion/VRCharacterMovementComponent.h"
+#include "VRExpansion/VRExpansionFunctionLibrary.h"
+#include "VRExpansion/VRGripInterface.h"
+#include "VRExpansion/VRLogComponent.h"
+#include "VRExpansion/VRPathFollowingComponent.h"
+
+//VRExpansion/OpenVRExpansion
+#include "VRExpansion/OpenVRExpansion/GripSteamVRTrackedDevice.h"
+#include "VRExpansion/OpenVRExpansion/OpenVRExpansionFunctionLibrary.h"
+#include "VRExpansion/OpenVRExpansion/SteamVRKeyboardComponent.h"
 
 // LOG
 DECLARE_LOG_CATEGORY_EXTERN(DebugLog, Log, All);
