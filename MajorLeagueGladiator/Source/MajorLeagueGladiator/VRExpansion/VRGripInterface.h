@@ -11,13 +11,13 @@
 
 
 UINTERFACE(Blueprintable)
-class VREXPANSIONPLUGIN_API UVRGripInterface: public UInterface
+class MAJORLEAGUEGLADIATOR_API UVRGripInterface: public UInterface
 {
 	GENERATED_UINTERFACE_BODY()
 };
 
 
-class VREXPANSIONPLUGIN_API IVRGripInterface
+class MAJORLEAGUEGLADIATOR_API IVRGripInterface
 {
 	GENERATED_IINTERFACE_BODY()
  

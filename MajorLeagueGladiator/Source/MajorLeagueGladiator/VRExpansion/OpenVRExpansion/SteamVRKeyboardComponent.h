@@ -15,7 +15,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FVRKeyboardStringCallbackSignature, 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FVRKeyboardNullCallbackSignature);
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
-class OPENVREXPANSIONPLUGIN_API USteamVRKeyboardComponent : public USceneComponent
+class MAJORLEAGUEGLADIATOR_API USteamVRKeyboardComponent : public USceneComponent
 {
 
 public:

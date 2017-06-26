@@ -16,7 +16,7 @@ DECLARE_CYCLE_STAT(TEXT("VR Root Set Half Height"), STAT_VRRootSetHalfHeight, ST
 DECLARE_CYCLE_STAT(TEXT("VR Root Set Capsule Size"), STAT_VRRootSetCapsuleSize, STATGROUP_VRRootComponent);
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = VRExpansionLibrary)
-class VREXPANSIONPLUGIN_API UVRRootComponent : public UCapsuleComponent, public IVRTrackedParentInterface
+class MAJORLEAGUEGLADIATOR_API UVRRootComponent : public UCapsuleComponent, public IVRTrackedParentInterface
 {
 	GENERATED_UCLASS_BODY()
 

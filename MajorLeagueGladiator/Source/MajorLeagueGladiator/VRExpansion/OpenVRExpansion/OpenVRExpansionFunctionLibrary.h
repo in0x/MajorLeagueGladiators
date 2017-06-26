@@ -95,7 +95,7 @@ enum class EBPVRDeviceIndex : uint8
 };
 
 //USTRUCT(BlueprintType, Category = "VRExpansionFunctions|SteamVR")
-struct OPENVREXPANSIONPLUGIN_API FBPOpenVRKeyboardHandle
+struct MAJORLEAGUEGLADIATOR_API FBPOpenVRKeyboardHandle
 {
 	//GENERATED_BODY()
 public:
@@ -125,7 +125,7 @@ public:
 
 
 USTRUCT(BlueprintType, Category = "VRExpansionFunctions|SteamVR|VRCamera")
-struct OPENVREXPANSIONPLUGIN_API FBPOpenVRCameraHandle
+struct MAJORLEAGUEGLADIATOR_API FBPOpenVRCameraHandle
 {
 	GENERATED_BODY()
 public:
@@ -348,7 +348,7 @@ Prop_DisplayMCImageData_Binary				= 2041,
 // Had to turn this in to a UObject, I felt the easiest way to use it was as an actor component to the player controller
 // It can be returned to just a blueprint library if epic ever upgrade steam to 1.33 or above
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))
-class OPENVREXPANSIONPLUGIN_API UOpenVRExpansionFunctionLibrary : public /*UActorComponent*/UBlueprintFunctionLibrary
+class MAJORLEAGUEGLADIATOR_API UOpenVRExpansionFunctionLibrary : public /*UActorComponent*/UBlueprintFunctionLibrary
 {
 	//GENERATED_BODY()
 	GENERATED_UCLASS_BODY()

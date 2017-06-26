@@ -13,7 +13,7 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogPathFollowingVR, Warning, All);
 
 UCLASS()
-class VREXPANSIONPLUGIN_API UVRPathFollowingComponent : public UPathFollowingComponent
+class MAJORLEAGUEGLADIATOR_API UVRPathFollowingComponent : public UPathFollowingComponent
 {
 	GENERATED_BODY()
 

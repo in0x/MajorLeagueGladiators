@@ -44,7 +44,7 @@ class AVRSimpleCharacter;
 
 
 UCLASS()
-class VREXPANSIONPLUGIN_API UVRSimpleCharacterMovementComponent : public UVRBaseCharacterMovementComponent
+class MAJORLEAGUEGLADIATOR_API UVRSimpleCharacterMovementComponent : public UVRBaseCharacterMovementComponent
 {
 	GENERATED_BODY()
 public:
@@ -111,7 +111,7 @@ public:
 	///////////////////////////
 };
 
-class VREXPANSIONPLUGIN_API FSavedMove_VRSimpleCharacter : public FSavedMove_VRBaseCharacter
+class MAJORLEAGUEGLADIATOR_API FSavedMove_VRSimpleCharacter : public FSavedMove_VRBaseCharacter
 {
 
 public:
@@ -148,7 +148,7 @@ public:
 };
 
 // Need this for capsule location replication
-class VREXPANSIONPLUGIN_API FNetworkPredictionData_Client_VRSimpleCharacter : public FNetworkPredictionData_Client_Character
+class MAJORLEAGUEGLADIATOR_API FNetworkPredictionData_Client_VRSimpleCharacter : public FNetworkPredictionData_Client_Character
 {
 public:
 	FNetworkPredictionData_Client_VRSimpleCharacter(const UCharacterMovementComponent& ClientMovement)
@@ -165,7 +165,7 @@ public:
 
 
 // Need this for capsule location replication?????
-class VREXPANSIONPLUGIN_API FNetworkPredictionData_Server_VRSimpleCharacter : public FNetworkPredictionData_Server_Character
+class MAJORLEAGUEGLADIATOR_API FNetworkPredictionData_Server_VRSimpleCharacter : public FNetworkPredictionData_Server_Character
 {
 public:
 	FNetworkPredictionData_Server_VRSimpleCharacter(const UCharacterMovementComponent& ClientMovement)

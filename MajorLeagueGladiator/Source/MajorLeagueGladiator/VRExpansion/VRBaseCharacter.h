@@ -10,7 +10,7 @@
 #include "VRBaseCharacter.generated.h"
 
 UCLASS()
-class VREXPANSIONPLUGIN_API AVRBaseCharacter : public ACharacter
+class MAJORLEAGUEGLADIATOR_API AVRBaseCharacter : public ACharacter
 {
 	GENERATED_BODY()
 

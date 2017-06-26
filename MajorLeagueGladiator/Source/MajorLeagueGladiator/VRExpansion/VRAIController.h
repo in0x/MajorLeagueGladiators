@@ -10,7 +10,7 @@
 
 
 UCLASS()
-class VREXPANSIONPLUGIN_API AVRAIController : public AAIController
+class MAJORLEAGUEGLADIATOR_API AVRAIController : public AAIController
 {
 	GENERATED_BODY()
 

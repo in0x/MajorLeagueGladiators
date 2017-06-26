@@ -70,7 +70,7 @@ enum class EBPVRWaistTrackingMode : uint8
 };
 
 USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
-struct VREXPANSIONPLUGIN_API FBPVRWaistTracking_Info
+struct MAJORLEAGUEGLADIATOR_API FBPVRWaistTracking_Info
 {
 	GENERATED_BODY()
 public:
@@ -228,7 +228,7 @@ enum class EVRVectorQuantization : uint8
 };
 
 USTRUCT()
-struct VREXPANSIONPLUGIN_API FBPVRComponentPosRep
+struct MAJORLEAGUEGLADIATOR_API FBPVRComponentPosRep
 {
 	GENERATED_USTRUCT_BODY()
 public:
@@ -430,7 +430,7 @@ enum class EPhysicsGripConstraintType : uint8
 };
 
 USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
-struct VREXPANSIONPLUGIN_API FBPAdvGripPhysicsSettings
+struct MAJORLEAGUEGLADIATOR_API FBPAdvGripPhysicsSettings
 {
 	GENERATED_BODY()
 public:
@@ -519,7 +519,7 @@ struct TStructOpsTypeTraits< FBPAdvGripPhysicsSettings > : public TStructOpsType
 };
 
 USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
-struct VREXPANSIONPLUGIN_API FBPInteractionSettings
+struct MAJORLEAGUEGLADIATOR_API FBPInteractionSettings
 {
 	GENERATED_BODY()
 public:
@@ -601,7 +601,7 @@ public:
 
 
 USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
-struct VREXPANSIONPLUGIN_API FBPActorGripInformation
+struct MAJORLEAGUEGLADIATOR_API FBPActorGripInformation
 {
 	GENERATED_BODY()
 public:
@@ -835,7 +835,7 @@ struct TStructOpsTypeTraits< FBPActorGripInformation > : public TStructOpsTypeTr
 };*/
 
 USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
-struct VREXPANSIONPLUGIN_API FBPInterfaceProperties
+struct MAJORLEAGUEGLADIATOR_API FBPInterfaceProperties
 {
 	GENERATED_BODY()
 public:
@@ -926,7 +926,7 @@ public:
 
 
 USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
-struct VREXPANSIONPLUGIN_API FBPActorPhysicsHandleInformation
+struct MAJORLEAGUEGLADIATOR_API FBPActorPhysicsHandleInformation
 {
 	GENERATED_BODY()
 public:
