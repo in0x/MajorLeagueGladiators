@@ -5,7 +5,8 @@ using System.IO;
 
 public class MajorLeagueGladiator : ModuleRules
 {
-    public MajorLeagueGladiator(TargetInfo Target)
+    public MajorLeagueGladiator(ReadOnlyTargetRules Target)
+        : base(Target)
 	{
         MinFilesUsingPrecompiledHeaderOverride = 1;
         bFasterWithoutUnity = true;

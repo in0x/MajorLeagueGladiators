@@ -1,5 +1,6 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
+#include "MajorLeagueGladiator.h"
 #include "VRAIController.h"
 #include "NetworkingDistanceConstants.h" // Needed for the LinOfSightTo function override to work
 //#include "Runtime/Engine/Private/EnginePrivate.h"
