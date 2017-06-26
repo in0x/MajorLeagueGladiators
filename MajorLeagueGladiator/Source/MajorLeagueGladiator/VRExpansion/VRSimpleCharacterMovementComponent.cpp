@@ -5,11 +5,11 @@
 
 =============================================================================*/
 
-#include "MajorLeagueGladiator.h"
+#include "VRSimpleCharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"
 #include "GameFramework/GameNetworkManager.h"
+#include "AI/Navigation/NavigationSystem.h"
 #include "GameFramework/Character.h"
-#include "VRSimpleCharacterMovementComponent.h"
 #include "GameFramework/GameState.h"
 #include "Components/PrimitiveComponent.h"
 #include "Animation/AnimMontage.h"
@@ -25,25 +25,10 @@
 #include "Engine/DemoNetDriver.h"
 #include "Engine/NetworkObjectList.h"
 
-#include "ConsoleManager.h"
 
 DECLARE_CYCLE_STAT(TEXT("Char ReplicateMoveToServerVRSimple"), STAT_CharacterMovementReplicateMoveToServerVRSimple, STATGROUP_Character);
 DECLARE_CYCLE_STAT(TEXT("Char CallServerMoveVRSimple"), STAT_CharacterMovementCallServerMoveVRSimple, STATGROUP_Character);
 
-//static const auto CVarNetEnableMoveCombiningVRSimple = IConsoleManager::Get().FindConsoleVariable(TEXT("p.NetEnableMoveCombining")); 
-// NOTE(Phil): Fixes a hard crash when console variable is not set in shipping build
-
-static const auto CVarNetEnableMoveCombiningVRSimple = []()
-{
-	auto result = IConsoleManager::Get().FindConsoleVariable(TEXT("p.NetEnableMoveCombining"));
-
-	if (!result)
-	{
-		result = IConsoleManager::Get().RegisterConsoleVariable(TEXT("__NetEnableMoveCombining"), 0, TEXT("This is a help text"), EConsoleVariableFlags::ECVF_Default);
-	}
-
-	return result;
-}();
 
 //#include "PerfCountersHelpers.h"
 //DECLARE_CYCLE_STAT(TEXT("Char PhysWalking"), STAT_CharPhysWalking, STATGROUP_Character);
@@ -474,9 +459,8 @@ void UVRSimpleCharacterMovementComponent::PhysNavWalking(float deltaTime, int32 
 
 		if (!AdjustedDelta.IsNearlyZero())
 		{
-			const bool bSweep = UpdatedPrimitive ? UpdatedPrimitive->bGenerateOverlapEvents : false;
 			FHitResult HitResult;
-			SafeMoveUpdatedComponent(AdjustedDelta, UpdatedComponent->GetComponentQuat(), bSweep, HitResult);
+			SafeMoveUpdatedComponent(AdjustedDelta, UpdatedComponent->GetComponentQuat(), bSweepWhileNavWalking, HitResult);
 		}
 
 		// Update velocity to reflect actual move
@@ -1015,10 +999,14 @@ void UVRSimpleCharacterMovementComponent::TickComponent(float DeltaTime, enum EL
 			if (!(curCameraLoc - lastCameraLoc).IsNearlyZero(0.001f) || !(curCameraRot - lastCameraRot).IsNearlyZero(0.001f))
 			{
 				FVector DifferenceFromLastFrame = (curCameraLoc - lastCameraLoc);
-				DifferenceFromLastFrame.Z = 0.0f;
+				//DifferenceFromLastFrame.Z = 0.0f;
 
 				if (VRRootCapsule)
+				{
+					DifferenceFromLastFrame *= VRRootCapsule->GetComponentScale(); // Scale up with character
 					AdditionalVRInputVector = VRRootCapsule->GetComponentRotation().RotateVector(DifferenceFromLastFrame); // Apply over a second
+					AdditionalVRInputVector.Z = 0.0f; // Don't use the Z value anyway, and lets me repurpose it for the CapsuleHalfHeight
+				}
 			}
 			else
 			{
@@ -1039,19 +1027,7 @@ void UVRSimpleCharacterMovementComponent::TickComponent(float DeltaTime, enum EL
 	if (AVRSimpleCharacter * owningChar = Cast<AVRSimpleCharacter>(GetOwner()))
 	{
 		if (VRRootCapsule)
-		{
 			owningChar->VRSceneComponent->SetRelativeLocation(FVector(0, 0, -VRRootCapsule->GetUnscaledCapsuleHalfHeight()));
-		}
-		else
-		{
-			owningChar->VRSceneComponent->SetRelativeLocation(FVector(0, 0, 0));
-		}
-		
-		// NOTE(Phil): Add offset back on if we're not in VR, so we're not stuck in the floor.
-		if (!g_IsVREnabled() /* && owningChar->IsLocallyControlled() */) 
-		{
-			owningChar->VRSceneComponent->AddRelativeLocation(FVector(0, 0, VRRootCapsule->GetUnscaledCapsuleHalfHeight()));
-		}
 
 		owningChar->GenerateOffsetToWorld();
 	}
@@ -1083,12 +1059,20 @@ void UVRSimpleCharacterMovementComponent::SetUpdatedComponent(USceneComponent* N
 
 /////////////////////////////// REPLICATION ///////////////////////////
 
-void UVRSimpleCharacterMovementComponent::CallServerMoveVR
+void UVRSimpleCharacterMovementComponent::CallServerMove
 (
-	const class FSavedMove_VRSimpleCharacter* NewMove,
-	const class FSavedMove_VRSimpleCharacter* OldMove
+	const class FSavedMove_Character* NewCMove,
+	const class FSavedMove_Character* OldCMove
 )
 {
+
+	// This is technically "safe", I know for sure that I am using my own FSavedMove
+	// I would have like to not override any of this, but I need a lot more specific information about the pawn
+	// So just setting flags in the FSaved Move doesn't cut it
+	// I could see a problem if someone overrides this override though
+	const FSavedMove_VRSimpleCharacter * NewMove = (const FSavedMove_VRSimpleCharacter *)NewCMove;
+	const FSavedMove_VRSimpleCharacter * OldMove = (const FSavedMove_VRSimpleCharacter *)OldCMove;
+
 	check(NewMove != NULL);
 
 	// Compress rotation down to 5 bytes
@@ -1328,15 +1312,19 @@ void UVRSimpleCharacterMovementComponent::ReplicateMoveToServer(float DeltaTime,
 	if (CharacterOwner->bReplicateMovement)
 	{
 		ClientData->SavedMoves.Push(NewMove);
+		const UWorld* MyWorld = GetWorld();
 
 		//const bool bCanDelayMove = (CharacterMovementCVars::NetEnableMoveCombining != 0) && CanDelaySendingMove(NewMove);
+		static const auto CVarNetEnableMoveCombiningVRSimple = IConsoleManager::Get().FindConsoleVariable(TEXT("p.NetEnableMoveCombining"));
 		const bool bCanDelayMove = (CVarNetEnableMoveCombiningVRSimple->GetInt() != 0) && CanDelaySendingMove(NewMove);
 
 		if (bCanDelayMove && ClientData->PendingMove.IsValid() == false)
 		{
 			// Decide whether to hold off on move
+
+			// COMMENT HERE
 			// send moves more frequently in small games where server isn't likely to be saturated
-			float NetMoveDelta;
+			/*float NetMoveDelta;
 			UPlayer* Player = (PC ? PC->Player : NULL);
 
 			if (Player && (Player->CurrentNetSpeed > 10000) && (GetWorld()->GetGameState() != NULL) && (GetWorld()->GetGameState()->PlayerArray.Num() <= 10))
@@ -1353,6 +1341,11 @@ void UVRSimpleCharacterMovementComponent::ReplicateMoveToServer(float DeltaTime,
 			}
 
 			if ((GetWorld()->TimeSeconds - ClientData->ClientUpdateTime) * CharacterOwner->GetWorldSettings()->GetEffectiveTimeDilation() < NetMoveDelta)
+			*/
+			// TO HERE for 4.16
+			const float NetMoveDelta = FMath::Clamp(GetClientNetSendDeltaTime(PC, ClientData, NewMove), 1.f / 120.f, 1.f / 15.f);
+			
+			if ((MyWorld->TimeSeconds - ClientData->ClientUpdateTime) * MyWorld->GetWorldSettings()->GetEffectiveTimeDilation() < NetMoveDelta)
 			{
 				// Delay sending this move.
 				ClientData->PendingMove = NewMove;
@@ -1360,7 +1353,11 @@ void UVRSimpleCharacterMovementComponent::ReplicateMoveToServer(float DeltaTime,
 			}
 		}
 
-		ClientData->ClientUpdateTime = GetWorld()->TimeSeconds;
+		// Remove 4.16
+		//ClientData->ClientUpdateTime = GetWorld()->TimeSeconds;
+
+		// Uncomment 4.16
+		ClientData->ClientUpdateTime = MyWorld->TimeSeconds;
 
 		UE_LOG(LogNetPlayerMovement, Verbose, TEXT("Client ReplicateMove Time %f Acceleration %s Position %s DeltaTime %f"),
 			NewMove->TimeStamp, *NewMove->Acceleration.ToString(), *UpdatedComponent->GetComponentLocation().ToString(), DeltaTime);
@@ -1369,7 +1366,7 @@ void UVRSimpleCharacterMovementComponent::ReplicateMoveToServer(float DeltaTime,
 		{
 			SCOPE_CYCLE_COUNTER(STAT_CharacterMovementCallServerMoveVRSimple);
 			//CallServerMove(NewMove.Get(), OldMove.Get());
-			CallServerMoveVR((FSavedMove_VRSimpleCharacter *)NewMove.Get(), (FSavedMove_VRSimpleCharacter *)OldMove.Get());
+			CallServerMove(/*(FSavedMove_VRSimpleCharacter *)*/NewMove.Get(), /*(FSavedMove_VRSimpleCharacter *)*/OldMove.Get());
 		}
 	}
 
@@ -1424,42 +1421,46 @@ void FSavedMove_VRSimpleCharacter::SetInitialPosition(ACharacter* C)
 {
 	// See if we can get the VR capsule location
 	if (AVRSimpleCharacter * VRC = Cast<AVRSimpleCharacter>(C))
-	{
-		/*if (VRC->VRRootReference)
-		{
-			VRCapsuleLocation = VRC->VRRootReference->curCameraLoc;
-			VRCapsuleRotation = VRC->VRRootReference->curCameraRot;
-			LFDiff = VRC->VRRootReference->DifferenceFromLastFrame;
-		}
-		else
-		{
-			VRCapsuleLocation = FVector::ZeroVector;
-			VRCapsuleRotation = FRotator::ZeroRotator;
-			LFDiff = FVector::ZeroVector;
-		}*/
-
-		
+	{	
 		if (VRC->VRMovementReference)
 		{
 			LFDiff = VRC->VRMovementReference->AdditionalVRInputVector;
 
-			CustomVRInputVector = VRC->VRMovementReference->CustomVRInputVector;
+			//CustomVRInputVector = VRC->VRMovementReference->CustomVRInputVector;
 
-			if (VRC->VRMovementReference->HasRequestedVelocity())
+		/*	if (VRC->VRMovementReference->HasRequestedVelocity())
 				RequestedVelocity = VRC->VRMovementReference->RequestedVelocity;
 			else
-				RequestedVelocity = FVector::ZeroVector;
+				RequestedVelocity = FVector::ZeroVector;*/
 		}
 		else
 		{
 			LFDiff = FVector::ZeroVector;
-			CustomVRInputVector = FVector::ZeroVector;
-			RequestedVelocity = FVector::ZeroVector;
+			//CustomVRInputVector = FVector::ZeroVector;
+		//	RequestedVelocity = FVector::ZeroVector;
 		}
 
 	}
 	FSavedMove_VRBaseCharacter::SetInitialPosition(C);
 }
+
+void FSavedMove_VRSimpleCharacter::PrepMoveFor(ACharacter* Character)
+{
+	UVRSimpleCharacterMovementComponent * CharMove = Cast<UVRSimpleCharacterMovementComponent>(Character->GetCharacterMovement());
+
+	// Set capsule location prior to testing movement
+	// I am overriding the replicated value here when movement is made on purpose
+	if (CharMove)
+	{
+		CharMove->AdditionalVRInputVector = FVector(LFDiff.X, LFDiff.Y, 0.0f);
+	}
+
+	if (CharMove->VRReplicateCapsuleHeight && LFDiff.Z != CharMove->VRRootCapsule->GetUnscaledCapsuleHalfHeight())
+		CharMove->VRRootCapsule->SetCapsuleHalfHeight(LFDiff.Z, false);
+
+	FSavedMove_VRBaseCharacter::PrepMoveFor(Character);
+}
+
 
 bool UVRSimpleCharacterMovementComponent::ServerMoveVR_Validate(float TimeStamp, FVector_NetQuantize10 InAccel, FVector_NetQuantize100 ClientLoc, FVector_NetQuantize100 rRequestedVelocity, FVector_NetQuantize100 LFDiff, FVector_NetQuantize100 CustVRInputVector, uint8 MoveFlags, uint8 ClientRoll, uint32 View, UPrimitiveComponent* ClientMovementBase, FName ClientBaseBoneName, uint8 ClientMovementMode)
 {
@@ -1612,15 +1613,18 @@ void UVRSimpleCharacterMovementComponent::ServerMoveVR_Implementation(
 			PC->UpdateRotation(DeltaTime);
 		}
 
-		RequestedVelocity = rRequestedVelocity;
 		if (!rRequestedVelocity.IsNearlyZero())
 		{
+			RequestedVelocity = rRequestedVelocity;
 			bHasRequestedVelocity = true;
-			//RequestedVelocity = rRequestedVelocity;
 		}
 
 		// Add in VR Input velocity
-		AdditionalVRInputVector = LFDiff;
+		AdditionalVRInputVector = FVector(LFDiff.Z, LFDiff.Y, 0.0f);
+
+		if (VRReplicateCapsuleHeight && LFDiff.Z != VRRootCapsule->GetUnscaledCapsuleHalfHeight())
+			VRRootCapsule->SetCapsuleHalfHeight(LFDiff.Z, false);
+
 		CustomVRInputVector = CustVRInputVector;
 
 		MoveAutonomous(TimeStamp, DeltaTime, MoveFlags, Accel);

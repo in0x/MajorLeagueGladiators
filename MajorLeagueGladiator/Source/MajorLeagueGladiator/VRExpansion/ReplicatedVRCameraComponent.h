@@ -1,13 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
-#include "Engine.h"
+#include "CoreMinimal.h"
 #include "ReplicatedVRCameraComponent.generated.h"
 
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = VRExpansionLibrary)
-class MAJORLEAGUEGLADIATOR_API UReplicatedVRCameraComponent : public UCameraComponent
+class VREXPANSIONPLUGIN_API UReplicatedVRCameraComponent : public UCameraComponent
 {
 	GENERATED_UCLASS_BODY()
 		//	~UGripMotionControllerComponent();
@@ -20,8 +19,13 @@ class MAJORLEAGUEGLADIATOR_API UReplicatedVRCameraComponent : public UCameraComp
 	/** Whether or not this component is currently on the network server*/
 	bool bIsServer;
 
+	// For non view target positional updates
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
+		bool bSetPositionDuringTick;
+
 //public:
-	// If to use HMD offset
+// If true will subtract the HMD's location from the position, useful for if the actors base is set to the HMD location always (simple character).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
 	bool bOffsetByHMD;
 
 //protected:
@@ -30,27 +34,16 @@ class MAJORLEAGUEGLADIATOR_API UReplicatedVRCameraComponent : public UCameraComp
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
 		uint32 bAutoSetLockToHmd : 1;
 
-	// Would have to offset controllers by same amount or will feel off
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
-	//bool bUseVRNeckOffset;
-
-	/** An optional extra transform to adjust the final view without moving the component, in the camera's local space, sets additive offset */
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
-	//FTransform VRNeckOffset;
-
-
 	UFUNCTION(BlueprintCallable, Category = Camera)
 		virtual void GetCameraView(float DeltaTime, FMinimalViewInfo& DesiredView) override;
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ReplicatedTransform, Category = "VRExpansionLibrary")
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = OnRep_ReplicatedTransform, Category = "VRExpansionLibrary|Networking")
 	FBPVRComponentPosRep ReplicatedTransform;
 
 	UFUNCTION()
 	virtual void OnRep_ReplicatedTransform()
 	{
-		ReplicatedTransform.Unpack();
-
-		SetRelativeLocationAndRotation(ReplicatedTransform.UnpackedLocation, ReplicatedTransform.UnpackedRotation);
+		SetRelativeLocationAndRotation(ReplicatedTransform.Position, ReplicatedTransform.Rotation);
 	}
 
 	// Rate to update the position to the server, 100htz is default (same as replication rate, should also hit every tick).

@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
-#include "Engine.h"
+#include "CoreMinimal.h"
 #include "Components/ShapeComponent.h"
+#include "VRTrackedParentInterface.h"
 #include "VRRootComponent.generated.h"
 
 //For UE4 Profiler ~ Stat Group
@@ -11,21 +11,48 @@
 
 class AVRBaseCharacter;
 
-// EXPERIMENTAL, don't use
+DECLARE_STATS_GROUP(TEXT("VRRootComponent"), STATGROUP_VRRootComponent, STATCAT_Advanced);
+DECLARE_CYCLE_STAT(TEXT("VR Root Set Half Height"), STAT_VRRootSetHalfHeight, STATGROUP_VRRootComponent);
+DECLARE_CYCLE_STAT(TEXT("VR Root Set Capsule Size"), STAT_VRRootSetCapsuleSize, STATGROUP_VRRootComponent);
+
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = VRExpansionLibrary)
-class MAJORLEAGUEGLADIATOR_API UVRRootComponent : public UCapsuleComponent//UShapeComponent
+class VREXPANSIONPLUGIN_API UVRRootComponent : public UCapsuleComponent, public IVRTrackedParentInterface
 {
 	GENERATED_UCLASS_BODY()
 
 public:
 	friend class FDrawCylinderSceneProxy;
 
-	void GenerateOffsetToWorld(bool bUpdateBounds = true);
+	FORCEINLINE void GenerateOffsetToWorld(bool bUpdateBounds = true);
+
+	// If valid will use this as the tracked parent instead of the HMD / Parent
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRTrackedParentInterface")
+		FBPVRWaistTracking_Info OptionalWaistTrackingParent;
+
+	virtual void SetTrackedParent(UPrimitiveComponent * NewParentComponent, float WaistRadius, EBPVRWaistTrackingMode WaistTrackingMode) override
+	{
+		IVRTrackedParentInterface::Default_SetTrackedParent_Impl(NewParentComponent, WaistRadius, WaistTrackingMode, OptionalWaistTrackingParent, this);
+	}
+
+	/**
+	* This is overidden for the VR Character to re-set physics location
+	* Change the capsule size. This is the unscaled size, before component scale is applied.
+	* @param	InRadius : radius of end-cap hemispheres and center cylinder.
+	* @param	InHalfHeight : half-height, from capsule center to end of top or bottom hemisphere.
+	* @param	bUpdateOverlaps: if true and this shape is registered and collides, updates touching array for owner actor.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Components|Capsule")
+		virtual void SetCapsuleSizeVR(float NewRadius, float NewHalfHeight, bool bUpdateOverlaps = true);
+
+	// Used to update the capsule half height and calculate the new offset value for VR
+	UFUNCTION(BlueprintCallable, Category = "Components|Capsule")
+		void SetCapsuleHalfHeightVR(float HalfHeight, bool bUpdateOverlaps = true);
 
 protected:
 
 	virtual bool MoveComponentImpl(const FVector& Delta, const FQuat& NewRotation, bool bSweep, FHitResult* OutHit = NULL, EMoveComponentFlags MoveFlags = MOVECOMP_NoFlags, ETeleportType Teleport = ETeleportType::None) override;
 	virtual void OnUpdateTransform(EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport = ETeleportType::None) override;
+
 	void SendPhysicsTransform(ETeleportType Teleport);
 
 	const TArray<FOverlapInfo>* ConvertRotationOverlapsToCurrentOverlaps(TArray<FOverlapInfo>& OverlapsAtEndLocation, const TArray<FOverlapInfo>& CurrentOverlaps);
@@ -67,13 +94,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
 	TEnumAsByte<ECollisionChannel> WalkingCollisionOverride;
 
-	ECollisionChannel GetVRCollisionObjectType()
+	/*ECollisionChannel GetVRCollisionObjectType()
 	{
 		if (bUseWalkingCollisionOverride)
 			return WalkingCollisionOverride;
 		else
 			return GetCollisionObjectType();
-	}
+	}*/
 
 	FVector curCameraLoc;
 	FRotator curCameraRot;
@@ -96,3 +123,64 @@ public:
 
 	virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
 };
+
+
+// Have to declare inlines here for blueprint
+
+void UVRRootComponent::GenerateOffsetToWorld(bool bUpdateBounds)
+{
+	FRotator CamRotOffset = UVRExpansionFunctionLibrary::GetHMDPureYaw_I(curCameraRot);
+
+	OffsetComponentToWorld = FTransform(CamRotOffset.Quaternion(), FVector(curCameraLoc.X, curCameraLoc.Y, CapsuleHalfHeight) + CamRotOffset.RotateVector(VRCapsuleOffset), FVector(1.0f)) * ComponentToWorld;
+
+	if (owningVRChar)
+	{
+		owningVRChar->OffsetComponentToWorld = OffsetComponentToWorld;
+	}
+
+	if (bUpdateBounds)
+		UpdateBounds();
+}
+
+
+FORCEINLINE void UVRRootComponent::SetCapsuleHalfHeightVR(float HalfHeight, bool bUpdateOverlaps)
+{
+	SCOPE_CYCLE_COUNTER(STAT_VRRootSetHalfHeight);
+
+	if (FMath::IsNearlyEqual(HalfHeight, CapsuleHalfHeight))
+	{
+		return;
+	}
+
+	SetCapsuleSizeVR(GetUnscaledCapsuleRadius(), HalfHeight, bUpdateOverlaps);
+}
+
+FORCEINLINE void UVRRootComponent::SetCapsuleSizeVR(float NewRadius, float NewHalfHeight, bool bUpdateOverlaps)
+{
+	SCOPE_CYCLE_COUNTER(STAT_VRRootSetCapsuleSize);
+
+	if (FMath::IsNearlyEqual(NewRadius, CapsuleRadius) && FMath::IsNearlyEqual(NewHalfHeight, CapsuleHalfHeight))
+	{
+		return;
+	}
+
+	CapsuleHalfHeight = FMath::Max3(0.f, NewHalfHeight, NewRadius);
+	CapsuleRadius = FMath::Max(0.f, NewRadius);
+	UpdateBounds();
+	UpdateBodySetup();
+	MarkRenderStateDirty();
+	GenerateOffsetToWorld();
+
+	// do this if already created
+	// otherwise, it hasn't been really created yet
+	if (bPhysicsStateCreated)
+	{
+		// Update physics engine collision shapes
+		BodyInstance.UpdateBodyScale(ComponentToWorld.GetScale3D(), true);
+
+		if (bUpdateOverlaps && IsCollisionEnabled() && GetOwner())
+		{
+			UpdateOverlaps();
+		}
+	}
+}

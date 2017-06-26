@@ -1,7 +1,7 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
-#include "VRBaseCharacterMovementComponent.h"
+#include "CoreMinimal.h"
 #include "AI/Navigation/NavigationAvoidanceTypes.h"
 #include "AI/RVOAvoidanceInterface.h"
 #include "AITypes.h"
@@ -15,11 +15,11 @@
 #include "Interfaces/NetworkPredictionInterface.h"
 #include "WorldCollision.h"
 #include "Runtime/Launch/Resources/Version.h"
+#include "VRBaseCharacterMovementComponent.h"
 #include "VRCharacterMovementComponent.generated.h"
 
 class FDebugDisplayInfo;
 class ACharacter;
-class UVRCharacterMovementComponent;
 class AVRCharacter;
 
 /** Shared pointer for easy memory management of FSavedMove_Character, for accumulating and replaying network moves. */
@@ -42,9 +42,32 @@ class AVRCharacter;
 
 //DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FAIMoveCompletedSignature, FAIRequestID, RequestID, EPathFollowingResult::Type, Result);
 
+// Using this fixes the problem where the character capsule isn't reset after a scoped movement update revert (pretty much just in StepUp operations)
+class VREXPANSIONPLUGIN_API FVRCharacterScopedMovementUpdate : public FScopedMovementUpdate
+{
+public:
+
+	FVRCharacterScopedMovementUpdate(USceneComponent* Component, EScopedUpdate::Type ScopeBehavior = EScopedUpdate::DeferredUpdates, bool bRequireOverlapsEventFlagToQueueOverlaps = true)
+		: FScopedMovementUpdate(Component, ScopeBehavior, bRequireOverlapsEventFlagToQueueOverlaps)
+	{}
+
+	/** Revert movement to the initial location of the Component at the start of the scoped update. Also clears pending overlaps and sets bHasMoved to false. */
+	void RevertMove()
+	{
+		FScopedMovementUpdate::RevertMove();
+
+		UVRRootComponent* RootComponent = Cast<UVRRootComponent>(Owner);
+		if (RootComponent)
+		{
+			RootComponent->GenerateOffsetToWorld();
+		}
+
+	}
+};
+
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API UVRCharacterMovementComponent : public UVRBaseCharacterMovementComponent
+class VREXPANSIONPLUGIN_API UVRCharacterMovementComponent : public UVRBaseCharacterMovementComponent
 {
 	GENERATED_BODY()
 public:
@@ -52,13 +75,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Transient, Category = VRMovement)
 	UVRRootComponent * VRRootCapsule;
 
-	//UPROPERTY(BlueprintReadOnly, Transient, Category = VRMovement)
-	//UCapsuleComponent * VRCameraCollider;
-
-	// Removing, it makes less sense now with optional secondary collision settings
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRCharacterMovementComponent")
-	//bool bAllowWalkingThroughWalls;
-
+	/** Reject sweep impacts that are this close to the edge of the vertical portion of the capsule when performing vertical sweeps, and try again with a smaller capsule. */
+	static const float CLIMB_SWEEP_EDGE_REJECT_DISTANCE;
+	virtual bool IsWithinClimbingEdgeTolerance(const FVector& CapsuleLocation, const FVector& TestImpactPoint, const float CapsuleRadius) const;
 	virtual bool VRClimbStepUp(const FVector& GravDir, const FVector& Delta, const FHitResult &InHit, FStepDownResult* OutStepDownResult = nullptr) override;
 
 	// Allow merging movement replication (may cause issues when >10 players due to capsule location
@@ -69,22 +88,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRCharacterMovementComponent", meta = (ClampMin = "0.01", UIMin = "0", ClampMax = "1.0", UIMax = "1"))
 	float WallRepulsionMultiplier;
 
-	/*FORCEINLINE bool HasRequestedVelocity()
-	{
-		return bHasRequestedVelocity;
-	}*/
-
-	/*UFUNCTION(BlueprintCallable, Category = "SimpleVRCharacterMovementComponent|VRLocations")
-		void AddCustomReplicatedMovement(FVector Movement);
-
-	FVector CustomVRInputVector;
-	
-	// Whether the custom replicated movement should be swept or not
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRCharacterMovementComponent")
-		bool bSweepCustomReplicatedMovement;
-	
-	virtual void PerformMovement(float DeltaSeconds) override;
+	/**
+	* Checks if new capsule size fits (no encroachment), and call CharacterOwner->OnStartCrouch() if successful.
+	* In general you should set bWantsToCrouch instead to have the crouch persist during movement, or just use the crouch functions on the owning Character.
+	* @param	bClientSimulation	true when called when bIsCrouched is replicated to non owned clients, to update collision cylinder and offset.
 	*/
+	virtual void Crouch(bool bClientSimulation = false) override;
+
+	/**
+	* Checks if default capsule size fits (no encroachment), and trigger OnEndCrouch() on the owner if successful.
+	* @param	bClientSimulation	true when called when bIsCrouched is replicated to non owned clients, to update collision cylinder and offset.
+	*/
+	virtual void UnCrouch(bool bClientSimulation = false) override;
+
+	/** @return true if the character is allowed to crouch in the current state. By default it is allowed when walking or falling, if CanEverCrouch() is true. */
+	//virtual bool CanCrouchInCurrentState() const;
 
 	///////////////////////////
 	// Navigation Functions
@@ -122,7 +140,8 @@ public:
 	///////////////////////////
 	// Replication Functions
 	///////////////////////////
-	void CallServerMoveVR(const class FSavedMove_VRCharacter* NewMove, const class FSavedMove_VRCharacter* OldMove);
+	// Using my own as I don't want to cast the standard fsavedmove
+	virtual void CallServerMove(const class FSavedMove_Character* NewMove, const class FSavedMove_Character* OldMove) override;
 
 	/** Replicated function sent by client to server - contains client movement and view info. */
 	UFUNCTION(unreliable, server, WithValidation)
@@ -201,10 +220,44 @@ public:
 	virtual void FindFloor(const FVector& CapsuleLocation, FFindFloorResult& OutFloorResult, bool bZeroDelta, const FHitResult* DownwardSweepResult) const override;
 
 	// Need to use actual capsule location for step up
-	bool StepUp(const FVector& GravDir, const FVector& Delta, const FHitResult &InHit, FStepDownResult* OutStepDownResult);
+	bool StepUp(const FVector& GravDir, const FVector& Delta, const FHitResult &InHit, FStepDownResult* OutStepDownResult) override;
 
+	virtual FVector GetPenetrationAdjustment(const FHitResult& Hit) const override
+	{
+		// This checks for a walking collision override on the penetrated object
+		// If found then it stops penetration adjustments.
+		if (MovementMode == EMovementMode::MOVE_Walking && VRRootCapsule && VRRootCapsule->bUseWalkingCollisionOverride && Hit.Component.IsValid())
+		{
+			ECollisionResponse WalkingResponse;
+			WalkingResponse = Hit.Component->GetCollisionResponseToChannel(VRRootCapsule->WalkingCollisionOverride);
+
+			if (WalkingResponse == ECR_Ignore || WalkingResponse == ECR_Overlap)
+			{
+				return FVector::ZeroVector;
+			}
+		}
+
+		FVector Result = Super::GetPenetrationAdjustment(Hit);
+
+		if (CharacterOwner)
+		{
+			const bool bIsProxy = (CharacterOwner->Role == ROLE_SimulatedProxy);
+			float MaxDistance = bIsProxy ? MaxDepenetrationWithGeometryAsProxy : MaxDepenetrationWithGeometry;
+			const AActor* HitActor = Hit.GetActor();
+			if (Cast<APawn>(HitActor))
+			{
+				MaxDistance = bIsProxy ? MaxDepenetrationWithPawnAsProxy : MaxDepenetrationWithPawn;
+			}
+
+			Result = Result.GetClampedToMaxSize(MaxDistance);
+		}
+
+		return Result;
+	}
+	// MOVED THIS TO THE BASE VR CHARACTER MOVEMENT COMPONENT
+	// Also added a control variable for it there
 	// Skip physics channels when looking for floor
-	virtual bool FloorSweepTest(
+	/*virtual bool FloorSweepTest(
 		FHitResult& OutHit,
 		const FVector& Start,
 		const FVector& End,
@@ -212,7 +265,7 @@ public:
 		const struct FCollisionShape& CollisionShape,
 		const struct FCollisionQueryParams& Params,
 		const struct FCollisionResponseParams& ResponseParam
-		) const override;
+		) const override;*/
 
 	// Multiple changes to support relative motion and ledge sweeps
 	virtual void PhysWalking(float deltaTime, int32 Iterations) override;
@@ -236,43 +289,21 @@ public:
 };
 
 
-class MAJORLEAGUEGLADIATOR_API FSavedMove_VRCharacter : public FSavedMove_VRBaseCharacter
+class VREXPANSIONPLUGIN_API FSavedMove_VRCharacter : public FSavedMove_VRBaseCharacter
 {
 
 public:
 
-	FVector VRCapsuleLocation;
-	FVector LFDiff;
-	FRotator VRCapsuleRotation;
-	FVector RequestedVelocity;
-	FVector AdditionalInputVector;
-
-	void Clear();
 	virtual void SetInitialPosition(ACharacter* C);
+	virtual void PrepMoveFor(ACharacter* Character) override;
 
 	FSavedMove_VRCharacter() : FSavedMove_VRBaseCharacter()
-	{
-		VRCapsuleLocation = FVector::ZeroVector;
-		LFDiff = FVector::ZeroVector;
-		AdditionalInputVector = FVector::ZeroVector;
-		VRCapsuleRotation = FRotator::ZeroRotator;
-		RequestedVelocity = FVector::ZeroVector;
-	}
-
-	bool CanCombineWith(const FSavedMovePtr& NewMove, ACharacter* Character, float MaxDelta) const override
-	{
-		FSavedMove_VRCharacter * nMove = (FSavedMove_VRCharacter *)NewMove.Get();
-
-		if (!nMove || (!LFDiff.IsNearlyZero() && !nMove->LFDiff.IsNearlyZero()) || (!RequestedVelocity.IsNearlyZero() && !nMove->RequestedVelocity.IsNearlyZero()) || (!AdditionalInputVector.IsNearlyZero() && !nMove->AdditionalInputVector.IsNearlyZero()))
-			return false;
-		
-		return FSavedMove_VRBaseCharacter::CanCombineWith(NewMove, Character, MaxDelta);
-	}
+	{}
 
 };
 
 // Need this for capsule location replication
-class MAJORLEAGUEGLADIATOR_API FNetworkPredictionData_Client_VRCharacter : public FNetworkPredictionData_Client_Character
+class VREXPANSIONPLUGIN_API FNetworkPredictionData_Client_VRCharacter : public FNetworkPredictionData_Client_Character
 {
 public:
 	FNetworkPredictionData_Client_VRCharacter(const UCharacterMovementComponent& ClientMovement)
@@ -289,7 +320,7 @@ public:
 
 
 // Need this for capsule location replication?????
-class MAJORLEAGUEGLADIATOR_API FNetworkPredictionData_Server_VRCharacter : public FNetworkPredictionData_Server_Character
+class VREXPANSIONPLUGIN_API FNetworkPredictionData_Server_VRCharacter : public FNetworkPredictionData_Server_Character
 {
 public:
 	FNetworkPredictionData_Server_VRCharacter(const UCharacterMovementComponent& ClientMovement)

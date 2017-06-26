@@ -14,11 +14,11 @@
 #include "Interfaces/NetworkPredictionInterface.h"
 #include "WorldCollision.h"
 #include "Runtime/Launch/Resources/Version.h"
+#include "VRBaseCharacterMovementComponent.h"
 #include "VRSimpleCharacterMovementComponent.generated.h"
 
 class FDebugDisplayInfo;
 class ACharacter;
-class UVRSimpleCharacterMovementComponent;
 class AVRSimpleCharacter;
 //class UVRSimpleRootComponent;
 
@@ -44,7 +44,7 @@ class AVRSimpleCharacter;
 
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API UVRSimpleCharacterMovementComponent : public UVRBaseCharacterMovementComponent
+class VREXPANSIONPLUGIN_API UVRSimpleCharacterMovementComponent : public UVRBaseCharacterMovementComponent
 {
 	GENERATED_BODY()
 public:
@@ -62,22 +62,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Transient, Category = VRMovement)
 		UCameraComponent * VRCameraComponent;
 
-	//UFUNCTION(BlueprintCallable, Category = "SimpleVRCharacterMovementComponent|VRLocations")
-	//void AddCustomReplicatedMovement(FVector Movement);
-
-	//FVector CustomVRInputVector;
-	//FVector AdditionalVRInputVector;
-
-	// Injecting custom movement in here, bypasses floor detection
-	//virtual void PerformMovement(float DeltaSeconds) override;
-
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 	void SetUpdatedComponent(USceneComponent* NewUpdatedComponent) override;
 
-/*	FORCEINLINE void ApplyVRMotionToVelocity(float deltaTime);
-	FORCEINLINE void RestorePreAdditiveVRMotionVelocity();
-	FVector LastPreAdditiveVRVelocity;
-	*/
 	void PhysWalking(float deltaTime, int32 Iterations) override;
 	void PhysFlying(float deltaTime, int32 Iterations) override;
 	void PhysFalling(float deltaTime, int32 Iterations) override;
@@ -92,7 +79,7 @@ public:
 	///////////////////////////
 	// Replication Functions
 	///////////////////////////
-	void CallServerMoveVR(const class FSavedMove_VRSimpleCharacter* NewMove, const class FSavedMove_VRSimpleCharacter* OldMove);
+	virtual void CallServerMove(const class FSavedMove_Character* NewMove, const class FSavedMove_Character* OldMove) override;
 	
 	// Use ServerMoveVR instead
 	virtual void ReplicateMoveToServer(float DeltaTime, const FVector& NewAcceleration) override;
@@ -124,7 +111,7 @@ public:
 	///////////////////////////
 };
 
-class MAJORLEAGUEGLADIATOR_API FSavedMove_VRSimpleCharacter : public FSavedMove_VRBaseCharacter
+class VREXPANSIONPLUGIN_API FSavedMove_VRSimpleCharacter : public FSavedMove_VRBaseCharacter
 {
 
 public:
@@ -137,6 +124,7 @@ public:
 
 	void Clear();
 	virtual void SetInitialPosition(ACharacter* C);
+	virtual void PrepMoveFor(ACharacter* Character) override;
 
 	FSavedMove_VRSimpleCharacter() : FSavedMove_VRBaseCharacter()
 	{
@@ -160,7 +148,7 @@ public:
 };
 
 // Need this for capsule location replication
-class MAJORLEAGUEGLADIATOR_API FNetworkPredictionData_Client_VRSimpleCharacter : public FNetworkPredictionData_Client_Character
+class VREXPANSIONPLUGIN_API FNetworkPredictionData_Client_VRSimpleCharacter : public FNetworkPredictionData_Client_Character
 {
 public:
 	FNetworkPredictionData_Client_VRSimpleCharacter(const UCharacterMovementComponent& ClientMovement)
@@ -177,7 +165,7 @@ public:
 
 
 // Need this for capsule location replication?????
-class MAJORLEAGUEGLADIATOR_API FNetworkPredictionData_Server_VRSimpleCharacter : public FNetworkPredictionData_Server_Character
+class VREXPANSIONPLUGIN_API FNetworkPredictionData_Server_VRSimpleCharacter : public FNetworkPredictionData_Server_Character
 {
 public:
 	FNetworkPredictionData_Server_VRSimpleCharacter(const UCharacterMovementComponent& ClientMovement)

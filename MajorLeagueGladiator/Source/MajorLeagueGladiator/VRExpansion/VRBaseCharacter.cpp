@@ -1,9 +1,14 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
-#include "MajorLeagueGladiator.h"
+#include "VRBaseCharacter.h"
+#include "VRPathFollowingComponent.h"
 //#include "Runtime/Engine/Private/EnginePrivate.h"
 
-#include "VRBaseCharacter.h"
+FName AVRBaseCharacter::LeftMotionControllerComponentName(TEXT("Left Grip Motion Controller"));
+FName AVRBaseCharacter::RightMotionControllerComponentName(TEXT("Right Grip Motion Controller"));
+FName AVRBaseCharacter::ReplicatedCameraComponentName(TEXT("VR Replicated Camera"));
+FName AVRBaseCharacter::ParentRelativeAttachmentComponentName(TEXT("Parent Relative Attachment"));
+
 
 AVRBaseCharacter::AVRBaseCharacter(const FObjectInitializer& ObjectInitializer)
  : Super(ObjectInitializer.DoNotCreateDefaultSubobject(ACharacter::MeshComponentName).SetDefaultSubobjectClass<UVRBaseCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -20,7 +25,7 @@ AVRBaseCharacter::AVRBaseCharacter(const FObjectInitializer& ObjectInitializer)
 		cap->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 	}
 
-	VRReplicatedCamera = CreateDefaultSubobject<UReplicatedVRCameraComponent>(TEXT("VR Replicated Camera"));
+	VRReplicatedCamera = CreateDefaultSubobject<UReplicatedVRCameraComponent>(AVRBaseCharacter::ReplicatedCameraComponentName);
 	if (VRReplicatedCamera)
 	{
 		VRReplicatedCamera->bOffsetByHMD = false;
@@ -41,7 +46,7 @@ AVRBaseCharacter::AVRBaseCharacter(const FObjectInitializer& ObjectInitializer)
 		VRHeadCollider->SetupAttachment(VRReplicatedCamera);
 	}*/
 
-	ParentRelativeAttachment = CreateDefaultSubobject<UParentRelativeAttachmentComponent>(TEXT("Parent Relative Attachment"));
+	ParentRelativeAttachment = CreateDefaultSubobject<UParentRelativeAttachmentComponent>(AVRBaseCharacter::ParentRelativeAttachmentComponentName);
 	if (ParentRelativeAttachment && VRReplicatedCamera)
 	{
 		// Moved this to be root relative as the camera late updates were killing how it worked
@@ -49,7 +54,7 @@ AVRBaseCharacter::AVRBaseCharacter(const FObjectInitializer& ObjectInitializer)
 		ParentRelativeAttachment->bOffsetByHMD = false;
 	}
 
-	LeftMotionController = CreateDefaultSubobject<UGripMotionControllerComponent>(TEXT("Left Grip Motion Controller"));
+	LeftMotionController = CreateDefaultSubobject<UGripMotionControllerComponent>(AVRBaseCharacter::LeftMotionControllerComponentName);
 	if (LeftMotionController)
 	{
 		LeftMotionController->SetupAttachment(RootComponent);
@@ -64,7 +69,7 @@ AVRBaseCharacter::AVRBaseCharacter(const FObjectInitializer& ObjectInitializer)
 
 	}
 
-	RightMotionController = CreateDefaultSubobject<UGripMotionControllerComponent>(TEXT("Right Grip Motion Controller"));
+	RightMotionController = CreateDefaultSubobject<UGripMotionControllerComponent>(AVRBaseCharacter::RightMotionControllerComponentName);
 	if (RightMotionController)
 	{
 		RightMotionController->SetupAttachment(RootComponent);
@@ -79,6 +84,10 @@ AVRBaseCharacter::AVRBaseCharacter(const FObjectInitializer& ObjectInitializer)
 
 	OffsetComponentToWorld = FTransform(FQuat(0.0f, 0.0f, 0.0f, 1.0f), FVector::ZeroVector, FVector(1.0f));
 
+
+	// Setting a minimum of every frame for replication consideration (UT uses this value for characters and projectiles).
+	// Otherwise we will get some massive slow downs if the replication is allowed to hit the 2 per second minimum default
+	MinNetUpdateFrequency = 100.0f;
 }
 
 FVector AVRBaseCharacter::GetTeleportLocation(FVector OriginalLocation)

@@ -5,11 +5,10 @@
 
 =============================================================================*/
 
-#include "MajorLeagueGladiator.h"
+#include "VRCharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"
 #include "GameFramework/GameNetworkManager.h"
 #include "GameFramework/Character.h"
-#include "VRCharacterMovementComponent.h"
 #include "GameFramework/GameState.h"
 #include "Components/PrimitiveComponent.h"
 #include "Animation/AnimMontage.h"
@@ -44,8 +43,6 @@ DECLARE_CYCLE_STAT(TEXT("Char PhysNavWalking"), STAT_CharPhysNavWalking, STATGRO
 DECLARE_CYCLE_STAT(TEXT("Char NavProjectPoint"), STAT_CharNavProjectPoint, STATGROUP_Character);
 DECLARE_CYCLE_STAT(TEXT("Char NavProjectLocation"), STAT_CharNavProjectLocation, STATGROUP_Character);
 
-static const auto CVarNetEnableMoveCombining = IConsoleManager::Get().FindConsoleVariable(TEXT("p.NetEnableMoveCombining"));
-
 // MAGIC NUMBERS
 const float MAX_STEP_SIDE_Z = 0.08f;	// maximum z value for the normal on the vertical side of steps
 const float VERTICAL_SLOPE_NORMAL_Z = 0.001f; // Slope is vertical if Abs(Normal.Z) <= this threshold. Accounts for precision problems that sometimes angle normals slightly off horizontal for vertical surface.
@@ -53,9 +50,276 @@ const float VERTICAL_SLOPE_NORMAL_Z = 0.001f; // Slope is vertical if Abs(Normal
 // Statics
 namespace CharacterMovementComponentStatics
 {
+	static const FName CrouchTraceName = FName(TEXT("CrouchTrace"));
 	static const FName ImmersionDepthName = FName(TEXT("MovementComp_Character_ImmersionDepth"));
 }
 
+void UVRCharacterMovementComponent::Crouch(bool bClientSimulation)
+{
+	if (!HasValidData())
+	{
+		return;
+	}
+
+	if (!CanCrouchInCurrentState())
+	{
+		return;
+	}
+
+	// See if collision is already at desired size.
+	if (CharacterOwner->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() == CrouchedHalfHeight)
+	{
+		if (!bClientSimulation)
+		{
+			CharacterOwner->bIsCrouched = true;
+		}
+		CharacterOwner->OnStartCrouch(0.f, 0.f);
+		return;
+	}
+
+	if (bClientSimulation && CharacterOwner->Role == ROLE_SimulatedProxy)
+	{
+		// restore collision size before crouching
+		ACharacter* DefaultCharacter = CharacterOwner->GetClass()->GetDefaultObject<ACharacter>();
+		if (VRRootCapsule)
+			VRRootCapsule->SetCapsuleSizeVR(DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleRadius(), DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight());
+		else
+			CharacterOwner->GetCapsuleComponent()->SetCapsuleSize(DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleRadius(), DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight());
+
+		bShrinkProxyCapsule = true;
+	}
+
+	// Change collision size to crouching dimensions
+	const float ComponentScale = CharacterOwner->GetCapsuleComponent()->GetShapeScale();
+	const float OldUnscaledHalfHeight = CharacterOwner->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+	const float OldUnscaledRadius = CharacterOwner->GetCapsuleComponent()->GetUnscaledCapsuleRadius();
+	// Height is not allowed to be smaller than radius.
+	const float ClampedCrouchedHalfHeight = FMath::Max3(0.f, OldUnscaledRadius, CrouchedHalfHeight);
+
+	if (VRRootCapsule)
+		VRRootCapsule->SetCapsuleSizeVR(OldUnscaledRadius, ClampedCrouchedHalfHeight);
+	else
+		CharacterOwner->GetCapsuleComponent()->SetCapsuleSize(OldUnscaledRadius, ClampedCrouchedHalfHeight);
+
+	float HalfHeightAdjust = (OldUnscaledHalfHeight - ClampedCrouchedHalfHeight);
+	float ScaledHalfHeightAdjust = HalfHeightAdjust * ComponentScale;
+
+	if (!bClientSimulation)
+	{
+		// Crouching to a larger height? (this is rare)
+		if (ClampedCrouchedHalfHeight > OldUnscaledHalfHeight)
+		{
+			FCollisionQueryParams CapsuleParams(CharacterMovementComponentStatics::CrouchTraceName, false, CharacterOwner);
+			FCollisionResponseParams ResponseParam;
+			InitCollisionParams(CapsuleParams, ResponseParam);
+
+			FVector capLocation;
+			if (VRRootCapsule)
+			{
+				capLocation = VRRootCapsule->OffsetComponentToWorld.GetLocation();
+			}
+			else
+				capLocation = UpdatedComponent->GetComponentLocation();
+
+			const bool bEncroached = GetWorld()->OverlapBlockingTestByChannel(capLocation - FVector(0.f, 0.f, ScaledHalfHeightAdjust), FQuat::Identity,
+				UpdatedComponent->GetCollisionObjectType(), GetPawnCapsuleCollisionShape(SHRINK_None), CapsuleParams, ResponseParam);
+
+			// If encroached, cancel
+			if (bEncroached)
+			{
+				if (VRRootCapsule)
+					VRRootCapsule->SetCapsuleSizeVR(OldUnscaledRadius, OldUnscaledHalfHeight);
+				else
+					CharacterOwner->GetCapsuleComponent()->SetCapsuleSize(OldUnscaledRadius, OldUnscaledHalfHeight);
+				return;
+			}
+		}
+
+		// Skipping this move down as the VR character's base root doesn't behave the same
+		if (bCrouchMaintainsBaseLocation)
+		{
+			// Intentionally not using MoveUpdatedComponent, where a horizontal plane constraint would prevent the base of the capsule from staying at the same spot.
+			//UpdatedComponent->MoveComponent(FVector(0.f, 0.f, -ScaledHalfHeightAdjust), UpdatedComponent->GetComponentQuat(), true, nullptr, EMoveComponentFlags::MOVECOMP_NoFlags, ETeleportType::TeleportPhysics);
+		}
+
+		CharacterOwner->bIsCrouched = true;
+	}
+
+	bForceNextFloorCheck = true;
+
+	// OnStartCrouch takes the change from the Default size, not the current one (though they are usually the same).
+	const float MeshAdjust = ScaledHalfHeightAdjust;
+	ACharacter* DefaultCharacter = CharacterOwner->GetClass()->GetDefaultObject<ACharacter>();
+	HalfHeightAdjust = (DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() - ClampedCrouchedHalfHeight);
+	ScaledHalfHeightAdjust = HalfHeightAdjust * ComponentScale;
+
+	AdjustProxyCapsuleSize();
+	CharacterOwner->OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	// Don't smooth this change in mesh position
+	if (bClientSimulation && CharacterOwner->Role == ROLE_SimulatedProxy)
+	{
+		FNetworkPredictionData_Client_Character* ClientData = GetPredictionData_Client_Character();
+		if (ClientData && ClientData->MeshTranslationOffset.Z != 0.f)
+		{
+			ClientData->MeshTranslationOffset -= FVector(0.f, 0.f, MeshAdjust);
+			ClientData->OriginalMeshTranslationOffset = ClientData->MeshTranslationOffset;
+		}
+	}
+}
+
+void UVRCharacterMovementComponent::UnCrouch(bool bClientSimulation)
+{
+	if (!HasValidData())
+	{
+		return;
+	}
+
+	ACharacter* DefaultCharacter = CharacterOwner->GetClass()->GetDefaultObject<ACharacter>();
+
+	// See if collision is already at desired size.
+	if (CharacterOwner->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() == DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight())
+	{
+		if (!bClientSimulation)
+		{
+			CharacterOwner->bIsCrouched = false;
+		}
+		CharacterOwner->OnEndCrouch(0.f, 0.f);
+		return;
+	}
+
+	const float CurrentCrouchedHalfHeight = CharacterOwner->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+
+	const float ComponentScale = CharacterOwner->GetCapsuleComponent()->GetShapeScale();
+	const float OldUnscaledHalfHeight = CharacterOwner->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+	const float HalfHeightAdjust = DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() - OldUnscaledHalfHeight;
+	const float ScaledHalfHeightAdjust = HalfHeightAdjust * ComponentScale;
+
+	/*const*/ FVector PawnLocation = UpdatedComponent->GetComponentLocation();
+
+	if (VRRootCapsule)
+	{
+		PawnLocation = VRRootCapsule->OffsetComponentToWorld.GetLocation();
+	}
+
+	// Grow to uncrouched size.
+	check(CharacterOwner->GetCapsuleComponent());
+
+	if (!bClientSimulation)
+	{
+		// Try to stay in place and see if the larger capsule fits. We use a slightly taller capsule to avoid penetration.
+		const float SweepInflation = KINDA_SMALL_NUMBER * 10.f;
+		FCollisionQueryParams CapsuleParams(CharacterMovementComponentStatics::CrouchTraceName, false, CharacterOwner);
+		FCollisionResponseParams ResponseParam;
+		InitCollisionParams(CapsuleParams, ResponseParam);
+
+		// Compensate for the difference between current capsule size and standing size
+		const FCollisionShape StandingCapsuleShape = GetPawnCapsuleCollisionShape(SHRINK_HeightCustom, -SweepInflation - ScaledHalfHeightAdjust); // Shrink by negative amount, so actually grow it.
+		const ECollisionChannel CollisionChannel = UpdatedComponent->GetCollisionObjectType();
+		bool bEncroached = true;
+
+		if (!bCrouchMaintainsBaseLocation)
+		{
+			// Expand in place
+			bEncroached = GetWorld()->OverlapBlockingTestByChannel(PawnLocation, FQuat::Identity, CollisionChannel, StandingCapsuleShape, CapsuleParams, ResponseParam);
+
+			if (bEncroached)
+			{
+				// Try adjusting capsule position to see if we can avoid encroachment.
+				if (ScaledHalfHeightAdjust > 0.f)
+				{
+					// Shrink to a short capsule, sweep down to base to find where that would hit something, and then try to stand up from there.
+					float PawnRadius, PawnHalfHeight;
+					CharacterOwner->GetCapsuleComponent()->GetScaledCapsuleSize(PawnRadius, PawnHalfHeight);
+					const float ShrinkHalfHeight = PawnHalfHeight - PawnRadius;
+					const float TraceDist = PawnHalfHeight - ShrinkHalfHeight;
+					const FVector Down = FVector(0.f, 0.f, -TraceDist);
+
+					FHitResult Hit(1.f);
+					const FCollisionShape ShortCapsuleShape = GetPawnCapsuleCollisionShape(SHRINK_HeightCustom, ShrinkHalfHeight);
+					const bool bBlockingHit = GetWorld()->SweepSingleByChannel(Hit, PawnLocation, PawnLocation + Down, FQuat::Identity, CollisionChannel, ShortCapsuleShape, CapsuleParams);
+					if (Hit.bStartPenetrating)
+					{
+						bEncroached = true;
+					}
+					else
+					{
+						// Compute where the base of the sweep ended up, and see if we can stand there
+						const float DistanceToBase = (Hit.Time * TraceDist) + ShortCapsuleShape.Capsule.HalfHeight;
+						const FVector NewLoc = FVector(PawnLocation.X, PawnLocation.Y, PawnLocation.Z - DistanceToBase + PawnHalfHeight + SweepInflation + MIN_FLOOR_DIST / 2.f);
+						bEncroached = GetWorld()->OverlapBlockingTestByChannel(NewLoc, FQuat::Identity, CollisionChannel, StandingCapsuleShape, CapsuleParams, ResponseParam);
+						if (!bEncroached)
+						{
+							// Intentionally not using MoveUpdatedComponent, where a horizontal plane constraint would prevent the base of the capsule from staying at the same spot.
+							UpdatedComponent->MoveComponent(NewLoc - PawnLocation, UpdatedComponent->GetComponentQuat(), false, nullptr, EMoveComponentFlags::MOVECOMP_NoFlags, ETeleportType::TeleportPhysics);
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			// Expand while keeping base location the same.
+			FVector StandingLocation = PawnLocation + FVector(0.f, 0.f, StandingCapsuleShape.GetCapsuleHalfHeight() - CurrentCrouchedHalfHeight);
+			bEncroached = GetWorld()->OverlapBlockingTestByChannel(StandingLocation, FQuat::Identity, CollisionChannel, StandingCapsuleShape, CapsuleParams, ResponseParam);
+
+			if (bEncroached)
+			{
+				if (IsMovingOnGround())
+				{
+					// Something might be just barely overhead, try moving down closer to the floor to avoid it.
+					const float MinFloorDist = KINDA_SMALL_NUMBER * 10.f;
+					if (CurrentFloor.bBlockingHit && CurrentFloor.FloorDist > MinFloorDist)
+					{
+						StandingLocation.Z -= CurrentFloor.FloorDist - MinFloorDist;
+						bEncroached = GetWorld()->OverlapBlockingTestByChannel(StandingLocation, FQuat::Identity, CollisionChannel, StandingCapsuleShape, CapsuleParams, ResponseParam);
+					}
+				}
+			}
+
+			// Canceling this move because our VR capsule isn't actor based like it expects it to be
+			if (!bEncroached)
+			{
+				// Commit the change in location.
+				//UpdatedComponent->MoveComponent(StandingLocation - PawnLocation, UpdatedComponent->GetComponentQuat(), false, nullptr, EMoveComponentFlags::MOVECOMP_NoFlags, ETeleportType::TeleportPhysics);
+				bForceNextFloorCheck = true;
+			}
+		}
+
+		// If still encroached then abort.
+		if (bEncroached)
+		{
+			return;
+		}
+
+		CharacterOwner->bIsCrouched = false;
+	}
+	else
+	{
+		bShrinkProxyCapsule = true;
+	}
+
+	// Now call SetCapsuleSize() to cause touch/untouch events and actually grow the capsule
+	if (VRRootCapsule)
+		VRRootCapsule->SetCapsuleSizeVR(DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleRadius(), DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight(), true);
+	else
+		CharacterOwner->GetCapsuleComponent()->SetCapsuleSize(DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleRadius(), DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight(), true);
+
+	const float MeshAdjust = ScaledHalfHeightAdjust;
+	AdjustProxyCapsuleSize();
+	CharacterOwner->OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	// Don't smooth this change in mesh position
+	if (bClientSimulation && CharacterOwner->Role == ROLE_SimulatedProxy)
+	{
+		FNetworkPredictionData_Client_Character* ClientData = GetPredictionData_Client_Character();
+		if (ClientData && ClientData->MeshTranslationOffset.Z != 0.f)
+		{
+			ClientData->MeshTranslationOffset += FVector(0.f, 0.f, MeshAdjust);
+			ClientData->OriginalMeshTranslationOffset = ClientData->MeshTranslationOffset;
+		}
+	}
+}
 
 
 //
@@ -172,18 +436,6 @@ FNetworkPredictionData_Server* UVRCharacterMovementComponent::GetPredictionData_
 	return ServerPredictionData;
 }
 
-
-void FSavedMove_VRCharacter::Clear()
-{
-	VRCapsuleLocation = FVector::ZeroVector;
-	VRCapsuleRotation = FRotator::ZeroRotator;
-	LFDiff = FVector::ZeroVector;
-	AdditionalInputVector = FVector::ZeroVector;
-	RequestedVelocity = FVector::ZeroVector;
-
-	FSavedMove_VRBaseCharacter::Clear();
-}
-
 void FSavedMove_VRCharacter::SetInitialPosition(ACharacter* C)
 {
 	// See if we can get the VR capsule location
@@ -201,27 +453,32 @@ void FSavedMove_VRCharacter::SetInitialPosition(ACharacter* C)
 			VRCapsuleRotation = FRotator::ZeroRotator;
 			LFDiff = FVector::ZeroVector;
 		}
-
-		if (UVRCharacterMovementComponent * charMove = Cast<UVRCharacterMovementComponent>(VRC->GetMovementComponent()))
-		{
-			//if (!charMove->RequestedVelocity.IsNearlyZero())
-		//	{
-			if (charMove->HasRequestedVelocity())
-				RequestedVelocity = charMove->RequestedVelocity;
-			else
-				RequestedVelocity = FVector::ZeroVector;
-
-			AdditionalInputVector = charMove->CustomVRInputVector;
-			//}
-		}
-		else
-		{
-			RequestedVelocity = FVector::ZeroVector;
-			AdditionalInputVector = FVector::ZeroVector;
-		}
-
 	}
+
 	FSavedMove_VRBaseCharacter::SetInitialPosition(C);
+}
+
+void FSavedMove_VRCharacter::PrepMoveFor(ACharacter* Character)
+{
+	UVRCharacterMovementComponent * CharMove = Cast<UVRCharacterMovementComponent>(Character->GetCharacterMovement());
+
+	// Set capsule location prior to testing movement
+	// I am overriding the replicated value here when movement is made on purpose
+	if (CharMove && CharMove->VRRootCapsule)
+	{
+		CharMove->VRRootCapsule->curCameraLoc = this->VRCapsuleLocation;
+		CharMove->VRRootCapsule->curCameraRot = this->VRCapsuleRotation;//FRotator(0.0f, FRotator::DecompressAxisFromByte(CapsuleYaw), 0.0f);
+		CharMove->VRRootCapsule->DifferenceFromLastFrame = FVector(LFDiff.X, LFDiff.Y, 0.0f);
+
+		if (CharMove->VRReplicateCapsuleHeight && !FMath::IsNearlyEqual(this->LFDiff.Z,CharMove->VRRootCapsule->GetUnscaledCapsuleHalfHeight()))
+		{
+			CharMove->VRRootCapsule->SetCapsuleHalfHeight(this->LFDiff.Z, false);
+		}
+
+		CharMove->VRRootCapsule->GenerateOffsetToWorld(false);
+	}
+
+	FSavedMove_VRBaseCharacter::PrepMoveFor(Character);
 }
 
 bool UVRCharacterMovementComponent::ServerMoveVR_Validate(float TimeStamp, FVector_NetQuantize10 InAccel, FVector_NetQuantize100 ClientLoc, FVector_NetQuantize100 CapsuleLoc, FVector_NetQuantize100 rRequestedVelocity, FVector_NetQuantize100 LFDiff, FVector_NetQuantize100 CustVRInputVector, uint8 CapsuleYaw, uint8 MoveFlags, uint8 ClientRoll, uint32 View, UPrimitiveComponent* ClientMovementBase, FName ClientBaseBoneName, uint8 ClientMovementMode)
@@ -368,29 +625,51 @@ void UVRCharacterMovementComponent::ServerMoveVR_Implementation(
 	}
 
 	// Perform actual movement
-	if ((CharacterOwner->GetWorldSettings()->Pauser == NULL) && (DeltaTime > 0.f))
+	//Comment out 4.16
+	//if ((CharacterOwner->GetWorldSettings()->Pauser == NULL) && (DeltaTime > 0.f))
+	// Add 4.16
+	if ((GetWorld()->GetWorldSettings()->Pauser == NULL) && (DeltaTime > 0.f))
 	{
 		if (PC)
 		{
 			PC->UpdateRotation(DeltaTime);
 		}
 
-		RequestedVelocity = rRequestedVelocity;
-		CustomVRInputVector = CustVRInputVector;
-
 		if (!rRequestedVelocity.IsNearlyZero())
 		{
+			RequestedVelocity = rRequestedVelocity;
 			bHasRequestedVelocity = true;
-			//RequestedVelocity = rRequestedVelocity;
 		}
+
+		CustomVRInputVector = CustVRInputVector;
+
 		// Set capsule location prior to testing movement
 		// I am overriding the replicated value here when movement is made on purpose
 		if (VRRootCapsule)
 		{
 			VRRootCapsule->curCameraLoc = CapsuleLoc;
 			VRRootCapsule->curCameraRot = FRotator(0.0f, FRotator::DecompressAxisFromByte(CapsuleYaw), 0.0f);
+			VRRootCapsule->DifferenceFromLastFrame = FVector(LFDiff.X, LFDiff.Y, 0.0f);
+		
+			if (VRReplicateCapsuleHeight && !FMath::IsNearlyEqual(LFDiff.Z,VRRootCapsule->GetUnscaledCapsuleHalfHeight()))
+				VRRootCapsule->SetCapsuleHalfHeight(LFDiff.Z, false);
+
 			VRRootCapsule->GenerateOffsetToWorld(false);
-			VRRootCapsule->DifferenceFromLastFrame = LFDiff;
+
+			// #TODO: Should I actually implement the mesh translation from "Crouch"? Generally people are going to be
+			//	IKing any mesh from the HMD instead.
+			/*
+				// Don't smooth this change in mesh position
+				if (bClientSimulation && CharacterOwner->Role == ROLE_SimulatedProxy)
+				{
+					FNetworkPredictionData_Client_Character* ClientData = GetPredictionData_Client_Character();
+					if (ClientData && ClientData->MeshTranslationOffset.Z != 0.f)
+					{
+						ClientData->MeshTranslationOffset += FVector(0.f, 0.f, MeshAdjust);
+						ClientData->OriginalMeshTranslationOffset = ClientData->MeshTranslationOffset;
+					}
+				}
+			*/
 		}
 
 		MoveAutonomous(TimeStamp, DeltaTime, MoveFlags, Accel);
@@ -405,12 +684,19 @@ void UVRCharacterMovementComponent::ServerMoveVR_Implementation(
 
 
 
-void UVRCharacterMovementComponent::CallServerMoveVR
+void UVRCharacterMovementComponent::CallServerMove
 (
-	const class FSavedMove_VRCharacter* NewMove,
-	const class FSavedMove_VRCharacter* OldMove
+	const class FSavedMove_Character* NewCMove,
+	const class FSavedMove_Character* OldCMove
 	)
 {
+	// This is technically "safe", I know for sure that I am using my own FSavedMove
+	// I would have like to not override any of this, but I need a lot more specific information about the pawn
+	// So just setting flags in the FSaved Move doesn't cut it
+	// I could see a problem if someone overrides this override though
+	const FSavedMove_VRCharacter * NewMove = (const FSavedMove_VRCharacter *)NewCMove;
+	const FSavedMove_VRCharacter * OldMove = (const FSavedMove_VRCharacter *)OldCMove;
+
 	check(NewMove != NULL);
 
 	// Compress rotation down to 5 bytes
@@ -449,7 +735,7 @@ void UVRCharacterMovementComponent::CallServerMoveVR
 					oldMove->VRCapsuleLocation,
 					oldMove->RequestedVelocity,
 					oldMove->LFDiff,
-					oldMove->AdditionalInputVector,
+					oldMove->CustomVRInputVector,//AdditionalInputVector,
 					OldCapsuleYawBYTE,
 					NewMove->TimeStamp,
 					NewMove->Acceleration,
@@ -457,7 +743,7 @@ void UVRCharacterMovementComponent::CallServerMoveVR
 					NewMove->VRCapsuleLocation,
 					NewMove->RequestedVelocity,
 					NewMove->LFDiff,
-					NewMove->AdditionalInputVector,
+					NewMove->CustomVRInputVector,//AdditionalInputVector,
 					CapsuleYawBYTE,
 					NewMove->GetCompressedFlags(),
 					ClientRollBYTE,
@@ -479,7 +765,7 @@ void UVRCharacterMovementComponent::CallServerMoveVR
 					oldMove->VRCapsuleLocation,
 					oldMove->RequestedVelocity,
 					oldMove->LFDiff,
-					oldMove->AdditionalInputVector,
+					oldMove->CustomVRInputVector,//AdditionalInputVector,
 					OldCapsuleYawBYTE,
 					NewMove->TimeStamp,
 					NewMove->Acceleration,
@@ -487,7 +773,7 @@ void UVRCharacterMovementComponent::CallServerMoveVR
 					NewMove->VRCapsuleLocation,
 					NewMove->RequestedVelocity,
 					NewMove->LFDiff,
-					NewMove->AdditionalInputVector,
+					NewMove->CustomVRInputVector,//AdditionalInputVector,
 					CapsuleYawBYTE,
 					NewMove->GetCompressedFlags(),
 					ClientRollBYTE,
@@ -508,7 +794,7 @@ void UVRCharacterMovementComponent::CallServerMoveVR
 				NewMove->VRCapsuleLocation,
 				NewMove->RequestedVelocity,
 				NewMove->LFDiff,
-				NewMove->AdditionalInputVector,
+				NewMove->CustomVRInputVector,//AdditionalInputVector,
 				CapsuleYawBYTE,
 				NewMove->GetCompressedFlags(),
 				ClientRollBYTE,
@@ -631,6 +917,24 @@ void UVRCharacterMovementComponent::PhysWalking(float deltaTime, int32 Iteration
 		if (bZeroDelta)
 		{
 			remainingTime = 0.f;
+			// TODO: Bugged currently
+			/*if (VRRootCapsule && VRRootCapsule->bUseWalkingCollisionOverride)
+			{
+
+				FHitResult HitRes;
+				FCollisionQueryParams Params("RelativeMovementSweep", false, GetOwner());
+				FCollisionResponseParams ResponseParam;
+
+				VRRootCapsule->InitSweepCollisionParams(Params, ResponseParam);
+				Params.bFindInitialOverlaps = true;
+				bool bWasBlockingHit = false;
+
+				bWasBlockingHit = GetWorld()->SweepSingleByChannel(HitRes, VRRootCapsule->OffsetComponentToWorld.GetLocation(), VRRootCapsule->OffsetComponentToWorld.GetLocation() + VRRootCapsule->DifferenceFromLastFrame, FQuat(0.0f, 0.0f, 0.0f, 1.0f), VRRootCapsule->GetCollisionObjectType(), VRRootCapsule->GetCollisionShape(), Params, ResponseParam);
+				
+				const FVector GravDir(0.f, 0.f, -1.f);
+				if (CanStepUp(HitRes) || (CharacterOwner->GetMovementBase() != NULL && CharacterOwner->GetMovementBase()->GetOwner() == HitRes.GetActor()))
+					StepUp(GravDir,VRRootCapsule->DifferenceFromLastFrame.GetSafeNormal2D(), HitRes, &StepDownResult);
+			}*/
 		}
 		else
 		{
@@ -725,8 +1029,6 @@ void UVRCharacterMovementComponent::PhysWalking(float deltaTime, int32 Iteration
 			}
 			else if (CurrentFloor.HitResult.bStartPenetrating && remainingTime <= 0.f)
 			{
-				// The floor check failed because it started in penetration
-				// We do not want to try to move downward because the downward sweep failed, rather we'd like to try to pop out of the floor.
 				FHitResult Hit(CurrentFloor.HitResult);
 				Hit.TraceEnd = Hit.TraceStart + FVector(0.f, 0.f, MAX_FLOOR_DIST);
 				const FVector RequestedAdjustment = GetPenetrationAdjustment(Hit);
@@ -897,7 +1199,7 @@ void UVRCharacterMovementComponent::ReplicateMoveToServer(float DeltaTime, const
 
 		if (!OverlapTest(OldStartLocation, ClientData->PendingMove->StartRotation.Quaternion(), UpdatedComponent->GetCollisionObjectType(), GetPawnCapsuleCollisionShape(SHRINK_None), CharacterOwner))
 		{
-			FScopedMovementUpdate ScopedMovementUpdate(UpdatedComponent, EScopedUpdate::DeferredUpdates);
+			/*FScopedMovementUpdate*/  FVRCharacterScopedMovementUpdate ScopedMovementUpdate(UpdatedComponent, EScopedUpdate::DeferredUpdates);
 			UE_LOG(LogNetPlayerMovement, VeryVerbose, TEXT("CombineMove: add delta %f + %f and revert from %f %f to %f %f"), DeltaTime, ClientData->PendingMove->DeltaTime, UpdatedComponent->GetComponentLocation().X, UpdatedComponent->GetComponentLocation().Y, OldStartLocation.X, OldStartLocation.Y);
 
 			// to combine move, first revert pawn position to PendingMove start position, before playing combined move on client
@@ -952,14 +1254,18 @@ void UVRCharacterMovementComponent::ReplicateMoveToServer(float DeltaTime, const
 	if (CharacterOwner->bReplicateMovement)
 	{
 		ClientData->SavedMoves.Push(NewMove);
-		
+		const UWorld* MyWorld = GetWorld();
+
+		static const auto CVarNetEnableMoveCombining = IConsoleManager::Get().FindConsoleVariable(TEXT("p.NetEnableMoveCombining"));
 		const bool bCanDelayMove = (CVarNetEnableMoveCombining->GetInt() != 0) && CanDelaySendingMove(NewMove);
 
 		if (bCanDelayMove && ClientData->PendingMove.IsValid() == false)
 		{
 			// Decide whether to hold off on move
+
+			//COMMENT HERE
 			// send moves more frequently in small games where server isn't likely to be saturated
-			float NetMoveDelta;
+			/*float NetMoveDelta;
 			UPlayer* Player = (PC ? PC->Player : NULL);
 
 			if (Player && (Player->CurrentNetSpeed > 10000) && (GetWorld()->GetGameState() != NULL) && (GetWorld()->GetGameState()->PlayerArray.Num() <= 10))
@@ -976,6 +1282,12 @@ void UVRCharacterMovementComponent::ReplicateMoveToServer(float DeltaTime, const
 			}
 
 			if ((GetWorld()->TimeSeconds - ClientData->ClientUpdateTime) * CharacterOwner->GetWorldSettings()->GetEffectiveTimeDilation() < NetMoveDelta)
+			*/
+			// TO HERE for 4.16
+		
+			const float NetMoveDelta = FMath::Clamp(GetClientNetSendDeltaTime(PC, ClientData, NewMove), 1.f / 120.f, 1.f / 15.f);
+			
+			if ((MyWorld->TimeSeconds - ClientData->ClientUpdateTime) * MyWorld->GetWorldSettings()->GetEffectiveTimeDilation() < NetMoveDelta)
 			{
 				// Delay sending this move.
 				ClientData->PendingMove = NewMove;
@@ -983,7 +1295,11 @@ void UVRCharacterMovementComponent::ReplicateMoveToServer(float DeltaTime, const
 			}
 		}
 
-		ClientData->ClientUpdateTime = GetWorld()->TimeSeconds;
+		// Remove 4.16
+		//ClientData->ClientUpdateTime = GetWorld()->TimeSeconds;
+		
+		// Uncomment 4.16
+		ClientData->ClientUpdateTime = MyWorld->TimeSeconds;
 
 		UE_LOG(LogNetPlayerMovement, Verbose, TEXT("Client ReplicateMove Time %f Acceleration %s Position %s DeltaTime %f"),
 			NewMove->TimeStamp, *NewMove->Acceleration.ToString(), *UpdatedComponent->GetComponentLocation().ToString(), DeltaTime);
@@ -991,7 +1307,7 @@ void UVRCharacterMovementComponent::ReplicateMoveToServer(float DeltaTime, const
 		// Send move to server if this character is replicating movement
 		{
 			SCOPE_CYCLE_COUNTER(STAT_CharacterMovementCallServerMove);
-			CallServerMoveVR((FSavedMove_VRCharacter *)NewMove.Get(), (FSavedMove_VRCharacter *)OldMove.Get());
+			CallServerMove(/*(FSavedMove_VRCharacter *)*/NewMove.Get(), /*(FSavedMove_VRCharacter *)*/OldMove.Get());
 		}
 	}
 
@@ -1261,7 +1577,7 @@ void UVRCharacterMovementComponent::MoveAlongFloor(const FVector& InVelocity, fl
 			{
 				// hit a barrier, try to step up
 				const FVector GravDir(0.f, 0.f, -1.f);
-				if (!StepUp(GravDir, Delta * (1.f - PercentTimeApplied), Hit, OutStepDownResult))
+				if (!StepUp(GravDir, (Delta * (1.f - PercentTimeApplied)) + VRRootCapsule->DifferenceFromLastFrame.GetSafeNormal2D(), Hit, OutStepDownResult))
 				{
 					UE_LOG(LogCharacterMovement, Verbose, TEXT("- StepUp (ImpactNormal %s, Normal %s"), *Hit.ImpactNormal.ToString(), *Hit.Normal.ToString());
 					HandleImpact(Hit, LastMoveTimeSlice, RampVector);
@@ -1285,7 +1601,6 @@ void UVRCharacterMovementComponent::MoveAlongFloor(const FVector& InVelocity, fl
 
 bool UVRCharacterMovementComponent::StepUp(const FVector& GravDir, const FVector& Delta, const FHitResult &InHit, FStepDownResult* OutStepDownResult)
 {
-
 	SCOPE_CYCLE_COUNTER(STAT_CharStepUp);
 
 	if (!CanStepUp(InHit) || MaxStepHeight <= 0.f)
@@ -1351,7 +1666,7 @@ bool UVRCharacterMovementComponent::StepUp(const FVector& GravDir, const FVector
 	}
 
 	// Scope our movement updates, and do not apply them until all intermediate moves are completed.
-	FScopedMovementUpdate ScopedStepUpMovement(UpdatedComponent, EScopedUpdate::DeferredUpdates);
+	/*FScopedMovementUpdate*/ FVRCharacterScopedMovementUpdate ScopedStepUpMovement(UpdatedComponent, EScopedUpdate::DeferredUpdates);
 
 	// step up - treat as vertical wall
 	FHitResult SweepUpHit(1.f);
@@ -1365,6 +1680,7 @@ bool UVRCharacterMovementComponent::StepUp(const FVector& GravDir, const FVector
 		return false;
 	}
 
+
 	// step fwd
 	FHitResult Hit(1.f);
 	
@@ -1372,9 +1688,10 @@ bool UVRCharacterMovementComponent::StepUp(const FVector& GravDir, const FVector
 	// Probably entirely wrong as Delta is divided by movement ticks but I want the effect to be stronger anyway
 	// This won't effect control based movement unless stepping forward at the same time, but gives RW movement
 	// the extra boost to get up over a lip
-	if(VRRootCapsule)
-		MoveUpdatedComponent(Delta + VRRootCapsule->DifferenceFromLastFrame.GetSafeNormal2D(), PawnRotation, true, &Hit);
-	else
+	// #TODO test this more, currently appears to be needed for walking, but is harmful for other modes
+	//if(VRRootCapsule && MovementMode == EMovementMode::MOVE_Walking)
+	//	MoveUpdatedComponent(Delta , PawnRotation, true, &Hit);
+	//else
 		MoveUpdatedComponent(Delta, PawnRotation, true, &Hit);
 
 	// Check result of forward movement
@@ -1514,9 +1831,15 @@ bool UVRCharacterMovementComponent::StepUp(const FVector& GravDir, const FVector
 	return true;
 }
 
+bool UVRCharacterMovementComponent::IsWithinClimbingEdgeTolerance(const FVector& CapsuleLocation, const FVector& TestImpactPoint, const float CapsuleRadius) const
+{
+	const float DistFromCenterSq = (TestImpactPoint - CapsuleLocation).SizeSquared2D();
+	const float ReducedRadiusSq = FMath::Square(FMath::Max(VRClimbingEdgeRejectDistance + KINDA_SMALL_NUMBER, CapsuleRadius - VRClimbingEdgeRejectDistance));
+	return DistFromCenterSq < ReducedRadiusSq;
+}
+
 bool UVRCharacterMovementComponent::VRClimbStepUp(const FVector& GravDir, const FVector& Delta, const FHitResult &InHit, FStepDownResult* OutStepDownResult)
 {
-
 	SCOPE_CYCLE_COUNTER(STAT_CharStepUp);
 
 	if (!CanStepUp(InHit) || MaxStepHeight <= 0.f)
@@ -1561,28 +1884,8 @@ bool UVRCharacterMovementComponent::VRClimbStepUp(const FVector& GravDir, const 
 	float PawnInitialFloorBaseZ = OldLocation.Z - PawnHalfHeight;
 	float PawnFloorPointZ = PawnInitialFloorBaseZ;
 
-	if (IsMovingOnGround() && CurrentFloor.IsWalkableFloor())
-	{
-		// Since we float a variable amount off the floor, we need to enforce max step height off the actual point of impact with the floor.
-		const float FloorDist = FMath::Max(0.f, CurrentFloor.FloorDist);
-		PawnInitialFloorBaseZ -= FloorDist;
-		StepTravelUpHeight = FMath::Max(StepTravelUpHeight - FloorDist, 0.f);
-		StepTravelDownHeight = (MaxStepHeight + MAX_FLOOR_DIST*2.f);
-
-		const bool bHitVerticalFace = !IsWithinEdgeTolerance(InHit.Location, InHit.ImpactPoint, PawnRadius);
-		if (!CurrentFloor.bLineTrace && !bHitVerticalFace)
-		{
-			PawnFloorPointZ = CurrentFloor.HitResult.ImpactPoint.Z;
-		}
-		else
-		{
-			// Base floor point is the base of the capsule moved down by how far we are hovering over the surface we are hitting.
-			PawnFloorPointZ -= CurrentFloor.FloorDist;
-		}
-	}
-
 	// Scope our movement updates, and do not apply them until all intermediate moves are completed.
-	FScopedMovementUpdate ScopedStepUpMovement(UpdatedComponent, EScopedUpdate::DeferredUpdates);
+	FVRCharacterScopedMovementUpdate ScopedStepUpMovement(UpdatedComponent, EScopedUpdate::DeferredUpdates);
 
 	// step up - treat as vertical wall
 	FHitResult SweepUpHit(1.f);
@@ -1599,7 +1902,18 @@ bool UVRCharacterMovementComponent::VRClimbStepUp(const FVector& GravDir, const 
 	// step fwd
 	FHitResult Hit(1.f);
 
-	MoveUpdatedComponent(Delta, PawnRotation, true, &Hit);
+
+	// Adding in the directional difference of the last HMD movement to promote stepping up
+	// Probably entirely wrong as Delta is divided by movement ticks but I want the effect to be stronger anyway
+	// This won't effect control based movement unless stepping forward at the same time, but gives RW movement
+	// the extra boost to get up over a lip
+	// #TODO test this more, currently appears to be needed for walking, but is harmful for other modes
+//	if (VRRootCapsule)
+//		MoveUpdatedComponent(Delta + VRRootCapsule->DifferenceFromLastFrame.GetSafeNormal2D(), PawnRotation, true, &Hit);
+//	else
+		MoveUpdatedComponent(Delta, PawnRotation, true, &Hit);
+
+	//MoveUpdatedComponent(Delta, PawnRotation, true, &Hit);
 
 	// Check result of forward movement
 	if (Hit.bBlockingHit)
@@ -1616,6 +1930,7 @@ bool UVRCharacterMovementComponent::VRClimbStepUp(const FVector& GravDir, const 
 		// In the case of hitting something above but not forward, we are not blocked from moving so we don't need the notification.
 		if (SweepUpHit.bBlockingHit && Hit.bBlockingHit)
 		{
+
 			HandleImpact(SweepUpHit);
 		}
 
@@ -1631,21 +1946,21 @@ bool UVRCharacterMovementComponent::VRClimbStepUp(const FVector& GravDir, const 
 		return false;
 
 		// adjust and try again
-		/*const float ForwardHitTime = Hit.Time;
-		const float ForwardSlideAmount = SlideAlongSurface(Delta, 1.f - Hit.Time, Hit.Normal, Hit, true);
+		//const float ForwardHitTime = Hit.Time;
+		//const float ForwardSlideAmount = SlideAlongSurface(Delta, 1.f - Hit.Time, Hit.Normal, Hit, true);
 
-		if (IsFalling())
-		{
-			ScopedStepUpMovement.RevertMove();
-			return false;
-		}
+		//if (IsFalling())
+		//{
+		//	ScopedStepUpMovement.RevertMove();
+		//	return false;
+		//}
 
 		// If both the forward hit and the deflection got us nowhere, there is no point in this step up.
-		if (ForwardHitTime == 0.f && ForwardSlideAmount == 0.f)
-		{
-			ScopedStepUpMovement.RevertMove();
-			return false;
-		}*/
+		//if (ForwardHitTime == 0.f && ForwardSlideAmount == 0.f)
+		//{
+		//	ScopedStepUpMovement.RevertMove();
+		//	return false;
+		//}
 	}
 
 	// Step down
@@ -1693,7 +2008,7 @@ bool UVRCharacterMovementComponent::VRClimbStepUp(const FVector& GravDir, const 
 		}
 
 		// Reject moves where the downward sweep hit something very close to the edge of the capsule. This maintains consistency with FindFloor as well.
-		if (!IsWithinEdgeTolerance(Hit.Location, Hit.ImpactPoint, PawnRadius))
+		if (!IsWithinClimbingEdgeTolerance(Hit.Location, Hit.ImpactPoint, PawnRadius))
 		{
 			UE_LOG(LogCharacterMovement, VeryVerbose, TEXT("- Reject StepUp (outside edge tolerance)"));
 			ScopedStepUpMovement.RevertMove();
@@ -1705,7 +2020,7 @@ bool UVRCharacterMovementComponent::VRClimbStepUp(const FVector& GravDir, const 
 		{
 			UE_LOG(LogCharacterMovement, VeryVerbose, TEXT("- Reject StepUp (up onto surface with !CanStepUp())"));
 			ScopedStepUpMovement.RevertMove();
-			return false;
+			return false;		
 		}
 
 		// See if we can validate the floor as a result of this step down. In almost all cases this should succeed, and we can avoid computing the floor outside this method.
@@ -1738,7 +2053,6 @@ bool UVRCharacterMovementComponent::VRClimbStepUp(const FVector& GravDir, const 
 
 	// Don't recalculate velocity based on this height adjustment, if considering vertical adjustments.
 	bJustTeleported |= !bMaintainHorizontalGroundVelocity;
-
 	return true;
 }
 
@@ -1924,12 +2238,11 @@ void UVRCharacterMovementComponent::FindFloor(const FVector& CapsuleLocation, FF
 		return;
 	}
 
-	FVector UseCapsuleLocation = CapsuleLocation;
+	check(CharacterOwner->GetCapsuleComponent());
 
+	FVector UseCapsuleLocation = CapsuleLocation;
 	if (VRRootCapsule)
 		UseCapsuleLocation = VRRootCapsule->OffsetComponentToWorld.GetLocation();
-
-	check(CharacterOwner->GetCapsuleComponent());
 
 	// Increase height check slightly if walking, to prevent floor height adjustment from later invalidating the floor result.
 	const float HeightCheckAdjust = (IsMovingOnGround() ? MAX_FLOOR_DIST + KINDA_SMALL_NUMBER : -MAX_FLOOR_DIST);
@@ -1937,6 +2250,9 @@ void UVRCharacterMovementComponent::FindFloor(const FVector& CapsuleLocation, FF
 	float FloorSweepTraceDist = FMath::Max(MAX_FLOOR_DIST, MaxStepHeight + HeightCheckAdjust);
 	float FloorLineTraceDist = FloorSweepTraceDist;
 	bool bNeedToValidateFloor = true;
+
+	// For reverting
+	FFindFloorResult LastFloor = CurrentFloor;
 
 	// Sweep floor
 	if (FloorLineTraceDist > 0.f || FloorSweepTraceDist > 0.f)
@@ -1956,10 +2272,7 @@ void UVRCharacterMovementComponent::FindFloor(const FVector& CapsuleLocation, FF
 			
 			ECollisionChannel CollisionChannel;
 			
-			if (VRRootCapsule)
-				CollisionChannel = VRRootCapsule->GetVRCollisionObjectType();
-			else
-				CollisionChannel = UpdatedComponent->GetCollisionObjectType();
+			CollisionChannel = UpdatedComponent->GetCollisionObjectType();
 
 			if (MovementBase != NULL)
 			{
@@ -1984,6 +2297,26 @@ void UVRCharacterMovementComponent::FindFloor(const FVector& CapsuleLocation, FF
 		}
 	}
 
+	// #TODO: Modify the floor compute floor distance instead? Or just run movement logic differently for the bWalkingCollisionOverride setup.
+	// #VR Specific - ignore floor traces that are negative, this can be caused by a failed floor check while starting in penetration
+	if (VRRootCapsule && VRRootCapsule->bUseWalkingCollisionOverride && OutFloorResult.bBlockingHit && OutFloorResult.FloorDist <= 0.0f)
+	{ 
+
+		if (OutFloorResult.FloorDist <= -FMath::Max(MAX_FLOOR_DIST, CharacterOwner->GetCapsuleComponent()->GetScaledCapsuleRadius()))
+		{
+			// This was a negative trace result, the game wants us to pull out of penetration
+			// But with walking collision override we don't want to do that, so check for the correct channel and throw away
+			// the new floor if it matches
+			ECollisionResponse FloorResponse;
+			if (OutFloorResult.HitResult.Component.IsValid())
+			{
+				FloorResponse = OutFloorResult.HitResult.Component->GetCollisionResponseToChannel(VRRootCapsule->WalkingCollisionOverride);
+				if (FloorResponse == ECR_Ignore || FloorResponse == ECR_Overlap)
+					OutFloorResult = LastFloor;	// Move back to the last floor value, we are in penetration with a walking override
+			}
+		}
+	}
+
 	// OutFloorResult.HitResult is now the result of the vertical floor check.
 	// See if we should try to "perch" at this location.
 	if (bNeedToValidateFloor && OutFloorResult.bBlockingHit && !OutFloorResult.bLineTrace)
@@ -1996,7 +2329,7 @@ void UVRCharacterMovementComponent::FindFloor(const FVector& CapsuleLocation, FF
 			{
 				MaxPerchFloorDist += FMath::Max(0.f, PerchAdditionalHeight);
 			}
-
+			
 			FFindFloorResult PerchFloorResult;
 			if (ComputePerchResult(GetValidPerchRadius(), OutFloorResult.HitResult, MaxPerchFloorDist, PerchFloorResult))
 			{
@@ -2023,6 +2356,9 @@ void UVRCharacterMovementComponent::FindFloor(const FVector& CapsuleLocation, FF
 	}
 }
 
+// MOVED TO BASE VR CHARCTER MOVEMENT COMPONENT
+// Also added a control variable for it there
+/*
 bool UVRCharacterMovementComponent::FloorSweepTest(
 	FHitResult& OutHit,
 	const FVector& Start,
@@ -2098,7 +2434,7 @@ bool UVRCharacterMovementComponent::FloorSweepTest(
 	}
 
 	return bBlockingHit;
-}
+}*/
 
 
 float UVRCharacterMovementComponent::ImmersionDepth() const
@@ -2712,9 +3048,15 @@ void UVRCharacterMovementComponent::PhysNavWalking(float deltaTime, int32 Iterat
 
 		if (!AdjustedDelta.IsNearlyZero())
 		{
-			const bool bSweep = UpdatedPrimitive ? UpdatedPrimitive->bGenerateOverlapEvents : false;
+			// 4.16 UNCOMMENT
 			FHitResult HitResult;
-			SafeMoveUpdatedComponent(AdjustedDelta, UpdatedComponent->GetComponentQuat(), bSweep, HitResult);
+			SafeMoveUpdatedComponent(AdjustedDelta, UpdatedComponent->GetComponentQuat(), bSweepWhileNavWalking, HitResult);
+			
+			/* 4.16 Delete*/
+			//const bool bSweep = UpdatedPrimitive ? UpdatedPrimitive->bGenerateOverlapEvents : false;
+			//FHitResult HitResult;
+			//SafeMoveUpdatedComponent(AdjustedDelta, UpdatedComponent->GetComponentQuat(), bSweep, HitResult);
+			// End 4.16 delete
 		}
 
 		// Update velocity to reflect actual move

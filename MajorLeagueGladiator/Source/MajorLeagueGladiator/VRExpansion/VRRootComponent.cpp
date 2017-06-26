@@ -1,33 +1,24 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
-#include "MajorLeagueGladiator.h"
+#include "VRRootComponent.h"
 //#include "Runtime/Engine/Private/EnginePrivate.h"
 
 #include "PhysicsPublic.h"
 
 #if WITH_PHYSX
-#include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
+#include "PhysXSupport.h"
 #endif // WITH_PHYSX
 
 #include "Components/PrimitiveComponent.h"
 
-#include "VRRootComponent.h"
 
 #define LOCTEXT_NAMESPACE "VRRootComponent"
 
 static int32 bEnableFastOverlapCheck = 1;
 
-static const auto CVarInitialOverlapTolerance = IConsoleManager::Get().FindTConsoleVariableDataFloat(TEXT("p.InitialOverlapTolerance"));
-
 
 // LOOKING_FOR_PERF_ISSUES
 #define PERF_MOVECOMPONENT_STATS 0
-
-#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
-static const auto CVarShowInitialOverlaps = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("p.ShowInitialOverlaps"));
-#endif // !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
-
-static const auto CVarAllowCachedOverlaps = IConsoleManager::Get().FindConsoleVariable(TEXT("p.AllowCachedOverlaps"));
 
 namespace PrimitiveComponentStatics
 {
@@ -101,7 +92,10 @@ static bool ShouldIgnoreHitResult(const UWorld* InWorld, FHitResult const& TestH
 		// This helps prevent getting stuck in walls.
 		if (TestHit.bStartPenetrating && !(MoveFlags & MOVECOMP_NeverIgnoreBlockingOverlaps))
 		{
-			const float DotTolerance = CVarInitialOverlapTolerance->GetValueOnGameThread();
+			// 4.16 converted to AutoConsoleVariable
+			//static const auto CVarInitialOverlapTolerance = IConsoleManager::Get().FindTConsoleVariableDataFloat(TEXT("p.InitialOverlapTolerance"));
+			static const auto CVarInitialOverlapTolerance = IConsoleManager::Get().FindConsoleVariable(TEXT("p.InitialOverlapTolerance"));
+			const float DotTolerance = CVarInitialOverlapTolerance->GetFloat();
 
 			// Dot product of movement direction against 'exit' direction
 			const FVector MovementDir = MovementDirDenormalized.GetSafeNormal();
@@ -111,15 +105,18 @@ static bool ShouldIgnoreHitResult(const UWorld* InWorld, FHitResult const& TestH
 
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 
-				if (CVarShowInitialOverlaps->GetValueOnGameThread() != 0)
+			// 4.16 converted to autoconsole variable
+			//static const auto CVarShowInitialOverlaps = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("p.ShowInitialOverlaps"));
+			static const auto CVarShowInitialOverlaps = IConsoleManager::Get().FindConsoleVariable(TEXT("p.ShowInitialOverlaps"));
+			if (CVarShowInitialOverlaps->GetInt() != 0)
+			{
+				UE_LOG(LogTemp, Log, TEXT("Overlapping %s Dir %s Dot %f Normal %s Depth %f"), *GetNameSafe(TestHit.Component.Get()), *MovementDir.ToString(), MoveDot, *TestHit.ImpactNormal.ToString(), TestHit.PenetrationDepth);
+				DrawDebugDirectionalArrow(InWorld, TestHit.TraceStart, TestHit.TraceStart + 30.f * TestHit.ImpactNormal, 5.f, bMovingOut ? FColor(64, 128, 255) : FColor(255, 64, 64), true, 4.f);
+				if (TestHit.PenetrationDepth > KINDA_SMALL_NUMBER)
 				{
-					UE_LOG(LogTemp, Log, TEXT("Overlapping %s Dir %s Dot %f Normal %s Depth %f"), *GetNameSafe(TestHit.Component.Get()), *MovementDir.ToString(), MoveDot, *TestHit.ImpactNormal.ToString(), TestHit.PenetrationDepth);
-					DrawDebugDirectionalArrow(InWorld, TestHit.TraceStart, TestHit.TraceStart + 30.f * TestHit.ImpactNormal, 5.f, bMovingOut ? FColor(64, 128, 255) : FColor(255, 64, 64), true, 4.f);
-					if (TestHit.PenetrationDepth > KINDA_SMALL_NUMBER)
-					{
-						DrawDebugDirectionalArrow(InWorld, TestHit.TraceStart, TestHit.TraceStart + TestHit.PenetrationDepth * TestHit.Normal, 5.f, FColor(64, 255, 64), true, 4.f);
-					}
+					DrawDebugDirectionalArrow(InWorld, TestHit.TraceStart, TestHit.TraceStart + TestHit.PenetrationDepth * TestHit.Normal, 5.f, FColor(64, 255, 64), true, 4.f);
 				}
+			}
 		//	}
 #endif
 
@@ -316,7 +313,13 @@ void UVRRootComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, 
 {		
 	if (IsLocallyControlled())
 	{
-		if (IsLocallyControlled() && GEngine->HMDDevice.IsValid() && GEngine->HMDDevice->IsHeadTrackingAllowed())
+		if (OptionalWaistTrackingParent.IsValid())
+		{
+			FTransform NewTrans = IVRTrackedParentInterface::Default_GetWaistOrientationAndPosition(OptionalWaistTrackingParent);
+			curCameraLoc = NewTrans.GetTranslation();
+			curCameraRot = NewTrans.Rotator();
+		}
+		else if (GEngine->HMDDevice.IsValid() && GEngine->HMDDevice->IsHeadTrackingAllowed())
 		{
 			FQuat curRot;
 			GEngine->HMDDevice->GetCurrentOrientationAndPosition(curRot, curCameraLoc);
@@ -339,7 +342,8 @@ void UVRRootComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, 
 			// Also calculate vector of movement for the movement component
 			FVector LastPosition = OffsetComponentToWorld.GetLocation();
 
-			GenerateOffsetToWorld(false);
+			OnUpdateTransform(EUpdateTransformFlags::None, ETeleportType::None);
+			//GenerateOffsetToWorld(false);
 
 			FHitResult OutHit;
 			FCollisionQueryParams Params("RelativeMovementSweep", false, GetOwner());
@@ -347,10 +351,32 @@ void UVRRootComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, 
 
 			InitSweepCollisionParams(Params, ResponseParam);
 			Params.bFindInitialOverlaps = true;
+			bool bBlockingHit = false;
 
-			bool bBlockingHit = GetWorld()->SweepSingleByChannel(OutHit, LastPosition, OffsetComponentToWorld.GetLocation(), FQuat(0.0f, 0.0f, 0.0f, 1.0f), GetVRCollisionObjectType(), GetCollisionShape(), Params, ResponseParam);
-			// If we had a valid blocking hit
+			if (bUseWalkingCollisionOverride)
+			{
+				ACharacter * OwningCharacter = Cast<ACharacter>(GetOwner());
 
+				bool bAllowWalkingCollision = false;
+				if (OwningCharacter)
+				{
+					if (UCharacterMovementComponent * CharMove = Cast<UCharacterMovementComponent>(OwningCharacter->GetCharacterMovement()))
+					{
+						if (CharMove->MovementMode == EMovementMode::MOVE_Walking || CharMove->MovementMode == EMovementMode::MOVE_NavWalking)
+							bAllowWalkingCollision = true;
+					}
+				}
+
+				if (bAllowWalkingCollision)
+					bBlockingHit = GetWorld()->SweepSingleByChannel(OutHit, LastPosition, OffsetComponentToWorld.GetLocation(), FQuat(0.0f, 0.0f, 0.0f, 1.0f), WalkingCollisionOverride, GetCollisionShape(), Params, ResponseParam);
+				else
+					bBlockingHit = GetWorld()->SweepSingleByChannel(OutHit, LastPosition, OffsetComponentToWorld.GetLocation(), FQuat(0.0f, 0.0f, 0.0f, 1.0f), GetCollisionObjectType(), GetCollisionShape(), Params, ResponseParam);
+				// If we had a valid blocking hit
+			}
+			else
+				bBlockingHit = GetWorld()->SweepSingleByChannel(OutHit, LastPosition, OffsetComponentToWorld.GetLocation(), FQuat(0.0f, 0.0f, 0.0f, 1.0f), GetCollisionObjectType(), GetCollisionShape(), Params, ResponseParam);
+
+			// #TODO: should i consider the ignore physics objects setting for the sim check here?
 			if (bBlockingHit && OutHit.Component.IsValid() && !OutHit.Component->IsSimulatingPhysics())
 			{
 				bHadRelativeMovement = true;
@@ -361,8 +387,8 @@ void UVRRootComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, 
 			lastCameraLoc = curCameraLoc;
 			lastCameraRot = curCameraRot;
 
-			OnUpdateTransform(EUpdateTransformFlags::None, ETeleportType::None);
 			DifferenceFromLastFrame = (OffsetComponentToWorld.GetLocation() - LastPosition);// .GetSafeNormal2D();
+			DifferenceFromLastFrame.Z = 0.0f; // Reset Z to zero, its not used anyway and this lets me reuse the Z component for capsule half height
 		}
 		else
 			bHadRelativeMovement = false;
@@ -387,25 +413,10 @@ void UVRRootComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, 
 }
 
 
-void UVRRootComponent::GenerateOffsetToWorld(bool bUpdateBounds)
-{
-	FRotator CamRotOffset = UVRExpansionFunctionLibrary::GetHMDPureYaw_I(curCameraRot);
-
-	OffsetComponentToWorld = FTransform(CamRotOffset.Quaternion(), FVector(curCameraLoc.X, curCameraLoc.Y, CapsuleHalfHeight) + CamRotOffset.RotateVector(VRCapsuleOffset), FVector(1.0f)) * ComponentToWorld;
-
-	if (owningVRChar)
-	{
-		owningVRChar->OffsetComponentToWorld = OffsetComponentToWorld;
-	}
-
-	if (bUpdateBounds)
-		UpdateBounds();
-}
-
 void UVRRootComponent::SendPhysicsTransform(ETeleportType Teleport)
 {
 	BodyInstance.SetBodyTransform(OffsetComponentToWorld, Teleport);
-	BodyInstance.UpdateBodyScale(OffsetComponentToWorld.GetScale3D());
+	//BodyInstance.UpdateBodyScale(OffsetComponentToWorld.GetScale3D());
 }
 
 // Override this so that the physics representation is in the correct location
@@ -803,6 +814,8 @@ const TArray<FOverlapInfo>* UVRRootComponent::ConvertSweptOverlapsToCurrentOverl
 {
 	checkSlow(SweptOverlapsIndex >= 0);
 
+	static const auto CVarAllowCachedOverlaps = IConsoleManager::Get().FindConsoleVariable(TEXT("p.AllowCachedOverlaps"));
+
 	const TArray<FOverlapInfo>* Result = nullptr;
 	if (bGenerateOverlapEvents && CVarAllowCachedOverlaps->GetInt())
 	{
@@ -859,6 +872,8 @@ const TArray<FOverlapInfo>* UVRRootComponent::ConvertSweptOverlapsToCurrentOverl
 
 const TArray<FOverlapInfo>* UVRRootComponent::ConvertRotationOverlapsToCurrentOverlaps(TArray<FOverlapInfo>& OverlapsAtEndLocation, const TArray<FOverlapInfo>& CurrentOverlaps)
 {
+	static const auto CVarAllowCachedOverlaps = IConsoleManager::Get().FindConsoleVariable(TEXT("p.AllowCachedOverlaps"));
+
 	const TArray<FOverlapInfo>* Result = nullptr;
 	if (bGenerateOverlapEvents && CVarAllowCachedOverlaps->GetInt())
 	{
@@ -876,3 +891,5 @@ const TArray<FOverlapInfo>* UVRRootComponent::ConvertRotationOverlapsToCurrentOv
 
 	return Result;
 }
+
+#undef LOCTEXT_NAMESPACE
