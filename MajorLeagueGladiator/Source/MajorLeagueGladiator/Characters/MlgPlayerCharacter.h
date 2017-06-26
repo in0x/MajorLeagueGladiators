@@ -201,4 +201,6 @@ private:
 
 	UFUNCTION()
 	void OnLand(const FHitResult& hit);
+
+	void updateBodyMeshTransform();
 };
