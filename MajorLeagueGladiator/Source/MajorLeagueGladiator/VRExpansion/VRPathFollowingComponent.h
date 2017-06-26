@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "CoreMinimal.h"
 #include "VRBPDatatypes.h"
 #include "VRRootComponent.h"
 #include "VRCharacterMovementComponent.h"
@@ -12,7 +13,7 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogPathFollowingVR, Warning, All);
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API UVRPathFollowingComponent : public UPathFollowingComponent
+class VREXPANSIONPLUGIN_API UVRPathFollowingComponent : public UPathFollowingComponent
 {
 	GENERATED_BODY()
 

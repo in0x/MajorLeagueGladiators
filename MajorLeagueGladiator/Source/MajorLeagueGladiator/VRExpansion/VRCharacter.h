@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "CoreMinimal.h"
 #include "VRBPDatatypes.h"
 #include "VRBaseCharacter.h"
 #include "GripMotionControllerComponent.h"
@@ -14,7 +15,7 @@
 
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AVRCharacter : public AVRBaseCharacter
+class VREXPANSIONPLUGIN_API AVRCharacter : public AVRBaseCharacter
 {
 	GENERATED_BODY()
 
@@ -26,6 +27,32 @@ public:
 
 	UPROPERTY(Category = VRCharacter, VisibleAnywhere, Transient, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))	
 	UVRRootComponent * VRRootReference;
+
+	UFUNCTION(BlueprintCallable, Category = "BaseVRCharacter")
+	virtual void SetCharacterSizeVR(float NewRadius, float NewHalfHeight, bool bUpdateOverlaps = true) override
+	{
+		if (VRRootReference)
+		{
+			VRRootReference->SetCapsuleSizeVR(NewRadius, NewHalfHeight, bUpdateOverlaps);
+		}
+		else
+		{
+			Super::SetCharacterSizeVR(NewRadius, NewHalfHeight, bUpdateOverlaps);
+		}
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "BaseVRCharacter")
+	virtual void SetCharacterHalfHeightVR(float HalfHeight, bool bUpdateOverlaps = true) override
+	{
+		if (VRRootReference)
+		{
+			VRRootReference->SetCapsuleHalfHeightVR(HalfHeight, bUpdateOverlaps);
+		}
+		else
+		{
+			Super::SetCharacterHalfHeightVR(HalfHeight, bUpdateOverlaps);
+		}
+	}
 
 	/* 
 	A helper function that offsets a given vector by the roots collision location
@@ -43,7 +70,7 @@ public:
 
 	// An extended simple move to location with additional parameters
 	UFUNCTION(BlueprintCallable, Category = "VRCharacter", Meta = (AdvancedDisplay = "bStopOnOverlap,bCanStrafe,bAllowPartialPath"))
-		void ExtendedSimpleMoveToLocation(const FVector& GoalLocation, float AcceptanceRadius = -1, bool bStopOnOverlap = false,
+		virtual void ExtendedSimpleMoveToLocation(const FVector& GoalLocation, float AcceptanceRadius = -1, bool bStopOnOverlap = false,
 			bool bUsePathfinding = true, bool bProjectDestinationToNavigation = true, bool bCanStrafe = false,
 			TSubclassOf<UNavigationQueryFilter> FilterClass = NULL, bool bAllowPartialPath = true) override;
 };

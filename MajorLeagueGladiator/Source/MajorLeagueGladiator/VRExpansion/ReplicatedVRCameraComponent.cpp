@@ -1,8 +1,7 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
-#include "MajorLeagueGladiator.h"
-#include "Net/UnrealNetwork.h"
 #include "ReplicatedVRCameraComponent.h"
+#include "Net/UnrealNetwork.h"
 
 
 UReplicatedVRCameraComponent::UReplicatedVRCameraComponent(const FObjectInitializer& ObjectInitializer)
@@ -22,6 +21,8 @@ UReplicatedVRCameraComponent::UReplicatedVRCameraComponent(const FObjectInitiali
 	bUsePawnControlRotation = false;
 	bAutoSetLockToHmd = true;
 	bOffsetByHMD = false;
+
+	bSetPositionDuringTick = false;
 
 	//bUseVRNeckOffset = true;
 	//VRNeckOffset = FTransform(FRotator::ZeroRotator, FVector(15.0f,0,0), FVector(1.0f));
@@ -66,23 +67,50 @@ void UReplicatedVRCameraComponent::TickComponent(float DeltaTime, enum ELevelTic
 {
 	bHasAuthority = IsLocallyControlled();
 	//bIsServer = IsServer();
-
+	
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (bHasAuthority && bReplicates)
+	// Don't do any of the below if we aren't the host
+	if (bHasAuthority)
 	{
-		ReplicatedTransform.Position = this->RelativeLocation;//Position;
-		ReplicatedTransform.SetRotation(this->RelativeRotation);//.Orientation = this->RelativeRotation;//Orientation;
-
-		// Don't bother with any of this if not replicating transform
-		if (GetNetMode() == NM_Client)	//if (bHasAuthority && bReplicateTransform)
+		// For non view target positional updates (third party and the like)
+		if (bSetPositionDuringTick && bLockToHmd && GEngine->HMDDevice.IsValid() && GEngine->HMDDevice->IsHeadTrackingAllowed() && GEngine->HMDDevice->HasValidTrackingPosition())
 		{
-			NetUpdateCount += DeltaTime;
-
-			if (NetUpdateCount >= (1.0f / NetUpdateRate))
+			//ResetRelativeTransform();
+			FQuat Orientation;
+			FVector Position;
+			if (GEngine->HMDDevice->UpdatePlayerCamera(Orientation, Position))
 			{
-				NetUpdateCount = 0.0f;
-				Server_SendTransform(ReplicatedTransform);
+				if (bOffsetByHMD)
+				{
+					Position.X = 0;
+					Position.Y = 0;
+				}
+
+				SetRelativeTransform(FTransform(Orientation, Position));
+			}
+		}
+
+		// Send changes
+		if (bReplicates)
+		{
+			// Don't rep if no changes
+			if (this->RelativeLocation != ReplicatedTransform.Position || this->RelativeRotation != ReplicatedTransform.Rotation)
+			{
+				ReplicatedTransform.Position = this->RelativeLocation;
+				ReplicatedTransform.Rotation = this->RelativeRotation;
+
+				// Don't bother with any of this if not replicating transform
+				if (GetNetMode() == NM_Client)	//if (bHasAuthority && bReplicateTransform)
+				{
+					NetUpdateCount += DeltaTime;
+
+					if (NetUpdateCount >= (1.0f / NetUpdateRate))
+					{
+						NetUpdateCount = 0.0f;
+						Server_SendTransform(ReplicatedTransform);
+					}
+				}
 			}
 		}
 	}

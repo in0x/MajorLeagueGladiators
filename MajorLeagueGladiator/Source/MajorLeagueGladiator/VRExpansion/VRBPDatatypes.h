@@ -1,45 +1,48 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-#include "Engine.h"
+#include "CoreMinimal.h"
+#include "EngineMinimal.h"
 
 #include "PhysicsPublic.h"
 #if WITH_PHYSX
 #include "PhysXPublic.h"
-#include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
+#include "PhysXSupport.h"
 #endif // WITH_PHYSX
 
 #include "VRBPDatatypes.generated.h"
 
 class UGripMotionControllerComponent;
 
-
 // Custom movement modes for the characters
 UENUM(BlueprintType)
 enum class EVRCustomMovementMode : uint8
 {
-	VRMOVE_Climbing UMETA(DisplayName = "Climbing")
+	VRMOVE_Climbing UMETA(DisplayName = "Climbing"),
+	VRMOVE_LowGrav  UMETA(DisplayName = "LowGrav")
 };
 
-
-// Redefined here so that non windows packages can compile
-/** Defines the class of tracked devices in SteamVR*/
+// We use 4 bits for this so a maximum of 16 elements
 UENUM(BlueprintType)
-enum class EBPSteamVRTrackedDeviceType : uint8
+enum class EVRConjoinedMovementModes : uint8
 {
-	/** Represents a Steam VR Controller */
-	Controller,
-
-	/** Represents a static tracking reference device, such as a Lighthouse or tracking camera */
-	TrackingReference,
-
-	/** Misc. device types, for future expansion */
-	Other,
-
-	/** DeviceId is invalid */
-	Invalid
+	C_MOVE_None	= 0x00	UMETA(DisplayName = "None"),
+	C_MOVE_Walking = 0x01	UMETA(DisplayName = "Walking"),
+	C_MOVE_NavWalking = 0x02	UMETA(DisplayName = "Navmesh Walking"),
+	C_MOVE_Falling = 0x03	UMETA(DisplayName = "Falling"),
+	C_MOVE_Swimming = 0x04	UMETA(DisplayName = "Swimming"),
+	C_MOVE_Flying = 0x05		UMETA(DisplayName = "Flying"),
+	//C_MOVE_Custom = 0x06	UMETA(DisplayName = "Custom"), // Skip this, could technically get a Custom7 out of using this slot but who needs 7?
+	C_MOVE_MAX = 0x07		UMETA(Hidden),
+	C_VRMOVE_Climbing = 0x08 UMETA(DisplayName = "Climbing"),
+	C_VRMOVE_LowGrav = 0x09 UMETA(DisplayName = "LowGrav"),
+	C_VRMOVE_Custom1 = 0x0A UMETA(DisplayName = "Custom1"),
+	C_VRMOVE_Custom2 = 0x0B UMETA(DisplayName = "Custom2"),
+	C_VRMOVE_Custom3 = 0x0C UMETA(DisplayName = "Custom3"),
+	C_VRMOVE_Custom4 = 0x0D UMETA(DisplayName = "Custom4"),
+	C_VRMOVE_Custom5 = 0x0E UMETA(DisplayName = "Custom5"),
+	C_VRMOVE_Custom6 = 0x0F UMETA(DisplayName = "Custom6")
 };
-
 
 // This makes a lot of the blueprint functions cleaner
 UENUM()
@@ -51,47 +54,263 @@ enum class EBPVRResultSwitch : uint8
 	OnFailed
 };
 
+// Wasn't needed when final setup was realized
+// Tracked device waist location
+UENUM(Blueprintable)
+enum class EBPVRWaistTrackingMode : uint8
+{
+	// Waist is tracked from the front
+	VRWaist_Tracked_Front,
+	// Waist is tracked from the rear
+	VRWaist_Tracked_Rear,
+	// Waist is tracked from the left (self perspective)
+	VRWaist_Tracked_Left,
+	// Waist is tracked from the right (self perspective)
+	VRWaist_Tracked_Right
+};
 
-USTRUCT()
-struct MAJORLEAGUEGLADIATOR_API FBPVRComponentPosRep
+USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
+struct VREXPANSIONPLUGIN_API FBPVRWaistTracking_Info
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY()
-		FVector_NetQuantize100 Position;
-	UPROPERTY()
-		uint32 YawPitchINT;
-	UPROPERTY()
-		uint16 RollSHORT;
 
-	// Removed roll BYTE, it was too inaccurate, using a short now
-	//FRotator Orientation;
+	// Initial "Resting" location of the tracker parent, assumed to be the calibration zero
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FRotator RestingRotation;
 
-	// This removes processing time from lerping
-	FRotator UnpackedRotation;
-	FVector UnpackedLocation;
 
-	FORCEINLINE void Unpack()
+	// Distance to offset to get center of waist from tracked parent location
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float WaistRadius;
+
+	// Controls forward vector
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	EBPVRWaistTrackingMode TrackingMode;
+
+	// Tracked parent reference
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UPrimitiveComponent * TrackedDevice;
+
+	bool IsValid()
 	{
-		UnpackedLocation = (FVector)Position;
-		UnpackedRotation = GetRotation();
+		return TrackedDevice != nullptr;
 	}
 
-	FORCEINLINE void SetRotation(FRotator NewRot)
+	void Clear()
 	{
-		//Orientation = NewRot;
-		YawPitchINT = (FRotator::CompressAxisToShort(NewRot.Yaw) << 16) | FRotator::CompressAxisToShort(NewRot.Pitch);
-		RollSHORT = FRotator::CompressAxisToShort(NewRot.Roll);
+		TrackedDevice = nullptr;
 	}
 
-	FORCEINLINE FRotator GetRotation()
+	FBPVRWaistTracking_Info()
 	{
-		//return Orientation;
-		const uint16 nPitch = (YawPitchINT & 65535);
-		const uint16 nYaw = (YawPitchINT >> 16);
-
-		return FRotator(FRotator::DecompressAxisFromShort(nPitch), FRotator::DecompressAxisFromShort(nYaw), FRotator::DecompressAxisFromShort(RollSHORT)/*DecompressAxisFromByte(RollBYTE)*/);
+		WaistRadius = 0.0f;
+		TrackedDevice = nullptr;
+		TrackingMode = EBPVRWaistTrackingMode::VRWaist_Tracked_Rear;
 	}
+
+};
+
+
+//USTRUCT(BlueprintType, Category = "VRExpansionLibrary|Transform")
+
+USTRUCT(/*noexport, */BlueprintType, Category = "VRExpansionLibrary|Transform", meta = (HasNativeMake = "VRExpansionPlugin.VRExpansionPluginFunctionLibrary.MakeTransform_NetQuantize", HasNativeBreak = "VRExpansionPlugin.VRExpansionPluginFunctionLibrary.BreakTransform_NetQuantize"))
+struct FTransform_NetQuantize : public FTransform
+{
+	GENERATED_USTRUCT_BODY()
+
+	FORCEINLINE FTransform_NetQuantize() : FTransform()
+	{}
+
+	FORCEINLINE explicit FTransform_NetQuantize(ENoInit Init) : FTransform(Init)
+	{}
+
+	FORCEINLINE explicit FTransform_NetQuantize(const FVector& InTranslation) : FTransform(InTranslation)
+	{}
+
+	FORCEINLINE explicit FTransform_NetQuantize(const FQuat& InRotation) : FTransform(InRotation)
+	{}
+
+	FORCEINLINE explicit FTransform_NetQuantize(const FRotator& InRotation) : FTransform(InRotation)
+	{}
+
+	FORCEINLINE FTransform_NetQuantize(const FQuat& InRotation, const FVector& InTranslation, const FVector& InScale3D = FVector::OneVector)
+		: FTransform(InRotation, InTranslation, InScale3D)
+	{}
+
+	FORCEINLINE FTransform_NetQuantize(const FRotator& InRotation, const FVector& InTranslation, const FVector& InScale3D = FVector::OneVector) 
+		: FTransform(InRotation, InTranslation, InScale3D)
+	{}
+
+	FORCEINLINE FTransform_NetQuantize(const FTransform& InTransform) : FTransform(InTransform)
+	{}
+
+	FORCEINLINE explicit FTransform_NetQuantize(const FMatrix& InMatrix) : FTransform(InMatrix)
+	{}
+
+	FORCEINLINE FTransform_NetQuantize(const FVector& InX, const FVector& InY, const FVector& InZ, const FVector& InTranslation) 
+		: FTransform(InX, InY, InZ, InTranslation)
+	{}
+
+	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess)
+	{
+		bOutSuccess = true;
+
+		FVector rTranslation;
+		FVector rScale3D;
+		//FQuat rRotation;
+		FRotator rRotation;
+
+		uint16 ShortPitch = 0;
+		uint16 ShortYaw = 0;
+		uint16 ShortRoll = 0;
+
+		if (Ar.IsSaving())
+		{
+			// Because transforms can be vectorized or not, need to use the inline retrievers
+			rTranslation = this->GetTranslation();
+			rScale3D = this->GetScale3D();
+			rRotation = this->Rotator();//this->GetRotation();
+
+			// Translation set to 2 decimal precision
+			bOutSuccess &= SerializePackedVector<100, 30>(rTranslation, Ar);
+
+			// Scale set to 2 decimal precision, had it 1 but realized that I used two already even
+			bOutSuccess &= SerializePackedVector<100, 30>(rScale3D, Ar);
+
+			// Rotation converted to FRotator and short compressed, see below for conversion reason
+			// FRotator already serializes compressed short by default but I can save a func call here
+			rRotation.SerializeCompressedShort(Ar);
+
+			//Ar << rRotation;
+
+			// If I converted it to a rotator and serialized as shorts I would save 6 bytes.
+			// I am unsure about a safe method of compressed serializing a quat, though I read through smallest three
+			// Epic already drops W from the Quat and reconstructs it after the send.
+			// Converting to rotator first may have conversion issues and has a perf cost....needs testing, epic attempts to handle
+			// Singularities in their conversion but I haven't tested it in all circumstances
+			//rRotation.SerializeCompressedShort(Ar);
+		}
+		else // If loading
+		{
+			bOutSuccess &= SerializePackedVector<100, 30>(rTranslation, Ar);
+			bOutSuccess &= SerializePackedVector<100, 30>(rScale3D, Ar);
+
+			rRotation.SerializeCompressedShort(Ar);
+
+			//Ar << rRotation;
+
+			// Set it
+			this->SetComponents(rRotation.Quaternion(), rTranslation, rScale3D);
+		}
+
+		return bOutSuccess;
+	}
+};
+
+template<>
+struct TStructOpsTypeTraits< FTransform_NetQuantize > : public TStructOpsTypeTraitsBase2<FTransform_NetQuantize>
+{
+	enum
+	{
+		WithNetSerializer = true
+	};
+};
+
+
+UENUM()
+enum class EVRVectorQuantization : uint8
+{
+	/** Each vector component will be rounded, preserving one decimal place. */
+	RoundOneDecimal = 0,
+	/** Each vector component will be rounded, preserving two decimal places. */
+	RoundTwoDecimals = 1
+};
+
+USTRUCT()
+struct VREXPANSIONPLUGIN_API FBPVRComponentPosRep
+{
+	GENERATED_USTRUCT_BODY()
+public:
+
+	UPROPERTY(Transient)
+		FVector Position;
+	UPROPERTY(Transient)
+		FRotator Rotation;
+
+	UPROPERTY(EditDefaultsOnly, Category = Replication, AdvancedDisplay)
+		EVRVectorQuantization QuantizationLevel;
+
+	FBPVRComponentPosRep()
+	{
+		QuantizationLevel = EVRVectorQuantization::RoundTwoDecimals;
+	}
+
+	/** Network serialization */
+	// Doing a custom NetSerialize here because this is sent via RPCs and should change on every update
+	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess)
+	{
+		bOutSuccess = true;
+
+		// Defines the level of Quantization
+		uint8 Flags = (uint8)QuantizationLevel;
+		Ar.SerializeBits(&Flags, 1);
+
+		// No longer using their built in rotation rep, as controllers will rarely if ever be at 0 rot on an axis and 
+		// so the 1 bit overhead per axis is just that, overhead
+		//Rotation.SerializeCompressedShort(Ar);
+
+		uint16 ShortPitch = 0;
+		uint16 ShortYaw = 0;
+		uint16 ShortRoll = 0;
+		
+		if (Ar.IsSaving())
+		{		
+			switch (QuantizationLevel)
+			{
+			case EVRVectorQuantization::RoundTwoDecimals: bOutSuccess &= SerializePackedVector<100, 30>(Position, Ar); break;
+			case EVRVectorQuantization::RoundOneDecimal: bOutSuccess &= SerializePackedVector<10, 24>(Position, Ar); break;
+			}
+
+			ShortPitch = FRotator::CompressAxisToShort(Rotation.Pitch);
+			ShortYaw = FRotator::CompressAxisToShort(Rotation.Yaw);
+			ShortRoll = FRotator::CompressAxisToShort(Rotation.Roll);
+
+			Ar << ShortPitch;
+			Ar << ShortYaw;
+			Ar << ShortRoll;
+		}
+		else // If loading
+		{
+			QuantizationLevel = (EVRVectorQuantization)Flags;
+
+			switch (QuantizationLevel)
+			{
+			case EVRVectorQuantization::RoundTwoDecimals: bOutSuccess &= SerializePackedVector<100, 30>(Position, Ar); break;
+			case EVRVectorQuantization::RoundOneDecimal: bOutSuccess &= SerializePackedVector<10, 24>(Position, Ar); break;
+			}
+
+			Ar << ShortPitch;
+			Ar << ShortYaw;
+			Ar << ShortRoll;
+			
+			Rotation.Pitch = FRotator::DecompressAxisFromShort(ShortPitch);
+			Rotation.Yaw = FRotator::DecompressAxisFromShort(ShortYaw);
+			Rotation.Roll = FRotator::DecompressAxisFromShort(ShortRoll);
+		}
+
+		return bOutSuccess;
+	}
+
+};
+
+template<>
+struct TStructOpsTypeTraits< FBPVRComponentPosRep > : public TStructOpsTypeTraitsBase2<FBPVRComponentPosRep>
+{
+	enum
+	{
+		WithNetSerializer = true
+	};
 };
 
 /*
@@ -99,7 +318,10 @@ Interactive Collision With Physics = Held items can be offset by geometry, uses 
 Interactive Collision With Sweep = Held items can be offset by geometry, uses sweep for the offset, pushes physics simulating objects, no weight
 Sweep With Physics = Only sweeps movement, will not be offset by geomtry, still pushes physics simulating objects, no weight
 Physics Only = Does not sweep at all (does not trigger OnHitEvents), still pushes physics simulating objects, no weight
+Manipulation grip = free constraint to controller base, no rotational drives
+ManipulationGripWithWristTwise = free constraint to controller base with a twist drive
 Custom grip is to be handled by the object itself, it just sends the TickGrip event every frame but doesn't move the object.
+InteractiveHybridCollisionWithPhysics = Uses Stiffness and damping settings on collision, on no collision uses stiffness values 10x stronger so it has less play.
 */
 UENUM(Blueprintable)
 enum class EGripCollisionType : uint8
@@ -107,10 +329,12 @@ enum class EGripCollisionType : uint8
 	InteractiveCollisionWithPhysics,
 //	InteractiveCollisionWithVelocity,
 	InteractiveCollisionWithSweep,
+	InteractiveHybridCollisionWithPhysics,
 	InteractiveHybridCollisionWithSweep,
 	SweepWithPhysics,
 	PhysicsOnly,
 	ManipulationGrip,
+	ManipulationGripWithWristTwist,
 	CustomGrip
 };
 
@@ -123,6 +347,7 @@ enum class EBPHMDDeviceType : uint8
 	DT_ES2GenericStereoMesh,
 	DT_SteamVR,
 	DT_GearVR,
+	DT_GoogleVR,
 	DT_Unknown
 };
 
@@ -136,7 +361,20 @@ enum class EGripLerpState : uint8
 	NotLerping
 };
 
-// Grip Late Update informaiton
+// Secondary Grip Type
+UENUM(Blueprintable)
+enum class ESecondaryGripType : uint8
+{
+	SG_None, // No secondary grip
+	SG_Free, // Free secondary grip
+	SG_SlotOnly, // Only secondary grip at a slot
+	SG_Free_Retain, // Retain pos on drop
+	SG_SlotOnly_Retain, 
+	SG_FreeWithScaling_Retain, // Scaling with retain pos on drop
+	SG_SlotOnlyWithScaling_Retain
+};
+
+// Grip Late Update information
 UENUM(Blueprintable)
 enum class EGripLateUpdateSettings : uint8
 {
@@ -148,14 +386,19 @@ enum class EGripLateUpdateSettings : uint8
 };
 
 // Grip movement replication settings
-// ServerSideMovementOnlyWhenColliding is not InteractivePhysicsGripCompatible
+// LocalOnly_Not_Replicated is useful for instant client grips 
+// that can be sent to the server and everyone locally grips it (IE: inventories that don't ever leave a player)
+// Objects that need to be handled possibly by multiple players should be ran
+// non locally gripped instead so that the server can validate grips instead.
+// ClientSide_Authoritive will grip on the client instantly without server intervention and then send a notice to the server
+// that the grip was made
 UENUM(Blueprintable)
 enum class EGripMovementReplicationSettings : uint8
 {
 	KeepOriginalMovement,
 	ForceServerSideMovement,
 	ForceClientSideMovement,
-	LocalOnly_Not_Replicated
+	ClientSide_Authoritive
 };
 
 // Grip Target Type
@@ -178,8 +421,105 @@ enum class EGripInterfaceTeleportBehavior : uint8
 	DontTeleport
 };
 
+// Type of physics constraint to use
+UENUM(Blueprintable)
+enum class EPhysicsGripConstraintType : uint8
+{
+	AccelerationConstraint,
+	ForceConstraint
+};
+
 USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
-struct MAJORLEAGUEGLADIATOR_API FBPInteractionSettings
+struct VREXPANSIONPLUGIN_API FBPAdvGripPhysicsSettings
+{
+	GENERATED_BODY()
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AdvancedPhysicsSettings")
+		bool bUseAdvancedPhysicsSettings;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AdvancedPhysicsSettings", meta = (editcondition = "bUseAdvancedPhysicsSettings"))
+		EPhysicsGripConstraintType PhysicsConstraintType;
+
+	// #TODO: Implement this
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AdvancedPhysicsSettings", meta = (editcondition = "bUseAdvancedPhysicsSettings"))
+	//	bool bSetCOMToGripLocation;
+
+	// Use the custom angular values on this grip
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AdvancedPhysicsSettings", meta = (editcondition = "bUseAdvancedPhysicsSettings"))
+		bool bUseCustomAngularValues;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AdvancedPhysicsSettings", meta = (editcondition = "bUseCustomAngularValues", ClampMin = "0.000", UIMin = "0.000"))
+		float AngularStiffness;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AdvancedPhysicsSettings", meta = (editcondition = "bUseCustomAngularValues", ClampMin = "0.000", UIMin = "0.000"))
+		float AngularDamping;
+
+	FBPAdvGripPhysicsSettings()
+	{
+		bUseAdvancedPhysicsSettings = false;
+		bUseCustomAngularValues = false;
+		//bSetCOMToGripLocation = false;
+		AngularStiffness = 0.0f;
+		AngularDamping = 0.0f;
+		PhysicsConstraintType = EPhysicsGripConstraintType::AccelerationConstraint;
+	}
+
+	FORCEINLINE bool operator==(const FBPAdvGripPhysicsSettings &Other) const
+	{
+		return (bUseAdvancedPhysicsSettings == Other.bUseAdvancedPhysicsSettings &&
+			//bSetCOMToGripLocation == Other.bSetCOMToGripLocation &&
+			bUseCustomAngularValues == Other.bUseCustomAngularValues &&
+			FMath::IsNearlyEqual(AngularStiffness, Other.AngularStiffness) &&
+			FMath::IsNearlyEqual(AngularDamping, Other.AngularDamping) &&
+			PhysicsConstraintType == Other.PhysicsConstraintType);
+	}
+
+	FORCEINLINE bool operator!=(const FBPAdvGripPhysicsSettings &Other) const
+	{
+		return (bUseAdvancedPhysicsSettings != Other.bUseAdvancedPhysicsSettings ||
+			//bSetCOMToGripLocation != Other.bSetCOMToGripLocation ||
+			bUseCustomAngularValues != Other.bUseCustomAngularValues ||
+			!FMath::IsNearlyEqual(AngularStiffness, Other.AngularStiffness) ||
+			!FMath::IsNearlyEqual(AngularDamping, Other.AngularDamping) ||
+			PhysicsConstraintType != Other.PhysicsConstraintType);
+	}
+
+	/** Network serialization */
+	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess)
+	{
+		Ar << bUseAdvancedPhysicsSettings;
+
+		if (bUseAdvancedPhysicsSettings)
+		{
+			//Ar << bSetCOMToGripLocation;
+			Ar << PhysicsConstraintType;
+
+			Ar << bUseCustomAngularValues;
+
+			if (bUseCustomAngularValues)
+			{
+				Ar << AngularStiffness;
+				Ar << AngularDamping;
+			}
+		}
+
+		bOutSuccess = true;
+		return true;
+	}
+};
+
+template<>
+struct TStructOpsTypeTraits< FBPAdvGripPhysicsSettings > : public TStructOpsTypeTraitsBase2<FBPAdvGripPhysicsSettings>
+{
+	enum
+	{
+		WithNetSerializer = true
+	};
+};
+
+USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
+struct VREXPANSIONPLUGIN_API FBPInteractionSettings
 {
 	GENERATED_BODY()
 public:
@@ -209,18 +549,26 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AngularSettings")
 		uint32 bIgnoreHandRotation:1;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "LinearSettings")
-		FVector InitialLinearTranslation;
+	// #TODO: Net quantize the initial and min/max values.
+	// I wanted to do it already but the editor treats it like a different type
+	// and reinitializes ALL values, which obviously is bad as it would force people
+	// to re-enter their offsets all over again......
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "LinearSettings")
-		FVector MinLinearTranslation;
+		FVector/*_NetQuantize100*/ InitialLinearTranslation;
+
+	// To use property, set value as -Distance
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "LinearSettings")
+		FVector/*_NetQuantize100*/ MinLinearTranslation;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "LinearSettings")
-		FVector MaxLinearTranslation;
+		FVector/*_NetQuantize100*/ MaxLinearTranslation;
 
+	// FRotators already by default NetSerialize as shorts
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AngularSettings")
 		FRotator InitialAngularTranslation;
 
+	// To use property, set value as -Rotation
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AngularSettings")
 		FRotator MinAngularTranslation;
 
@@ -249,11 +597,11 @@ public:
 		MinAngularTranslation = FRotator::ZeroRotator;
 		MaxAngularTranslation = FRotator::ZeroRotator;
 	}
-
 };
 
+
 USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
-struct MAJORLEAGUEGLADIATOR_API FBPActorGripInformation
+struct VREXPANSIONPLUGIN_API FBPActorGripInformation
 {
 	GENERATED_BODY()
 public:
@@ -262,19 +610,14 @@ public:
 		EGripTargetType GripTargetType;
 	UPROPERTY(BlueprintReadOnly)
 		UObject * GrippedObject;
-	/*UPROPERTY(BlueprintReadOnly)
-		AActor * Actor;
-	UPROPERTY(BlueprintReadOnly)
-		UPrimitiveComponent * Component;
-		*/
 	UPROPERTY(BlueprintReadOnly)
 		EGripCollisionType GripCollisionType;
 	UPROPERTY(BlueprintReadWrite)
 		EGripLateUpdateSettings GripLateUpdateSetting;
-	//UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, NotReplicated)
 		bool bColliding;
 	UPROPERTY(BlueprintReadWrite)
-		FTransform RelativeTransform;
+		FTransform_NetQuantize RelativeTransform;
 
 	UPROPERTY(BlueprintReadOnly)
 		EGripMovementReplicationSettings GripMovementReplicationSetting;
@@ -286,103 +629,67 @@ public:
 	UPROPERTY()
 		float Stiffness;
 
+	UPROPERTY()
+		FBPAdvGripPhysicsSettings AdvancedPhysicsSettings;
+
 	// For multi grip situations
 	UPROPERTY(BlueprintReadOnly)
 		bool bHasSecondaryAttachment;
+
 	UPROPERTY(BlueprintReadOnly)
 		USceneComponent * SecondaryAttachment;
 	UPROPERTY(BlueprintReadWrite)
 		float SecondarySmoothingScaler;
 	UPROPERTY()
-		FVector SecondaryRelativeLocation;
+		FVector_NetQuantize100 SecondaryRelativeLocation;
 
 	// Lerp transitions
+	// Max value is 16 seconds with two decimal precision, this is to reduce replication overhead
 	UPROPERTY()
 		float LerpToRate;
-	
+
 	// These are not replicated, they don't need to be
 	EGripLerpState GripLerpState;
-	FVector LastRelativeLocation;
 	float curLerp;
 
-	// Optional Additive Transform for programatic animation
+	// Store values for frame by frame changes of secondary grips
+	FVector LastRelativeLocation;
+
+	// Optional Additive Transform for programmatic animation
+	UPROPERTY(BlueprintReadWrite, NotReplicated)
 	FTransform AdditionTransform;
 
-	// Locked transitions
+	// Locked transitions for swept movement so they don't just rotate in place on contact
 	bool bIsLocked;
 	FQuat LastLockedRotation;
 
-	/** Network serialization */
-	bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess)
+	// Cached values - since not using a full serialize now the old array state may not contain what i need to diff
+	// I set these in On_Rep now and check against them when new replications happen to control some actions.
+	struct FGripValueCache
 	{
-		Ar << GripTargetType;
-		Ar << GrippedObject;
-		//Ar << Actor;
-		//Ar << Component;
-		Ar << GripCollisionType;
-		Ar << GripLateUpdateSetting;
+		bool bWasInitiallyRepped;
+		bool bCachedHasSecondaryAttachment;
+		FVector CachedSecondaryRelativeLocation;
+		EGripCollisionType CachedGripCollisionType;
+		EGripMovementReplicationSettings CachedGripMovementReplicationSetting;
+		float CachedStiffness;
+		float CachedDamping;
+		FBPAdvGripPhysicsSettings CachedAdvancedPhysicsSettings;
 
-		Ar << RelativeTransform;
-
-		Ar << GripMovementReplicationSetting;
-
-		// If on colliding server, otherwise doesn't matter to client
-		//	Ar << bColliding;
-
-		// This doesn't matter to clients
-		//Ar << bOriginalReplicatesMovement;
-		
-		bool bHadAttachment = bHasSecondaryAttachment;
-	
-		Ar << bHasSecondaryAttachment;
-		Ar << LerpToRate;
-
-		// If this grip has a secondary attachment
-		if (bHasSecondaryAttachment)
+		FGripValueCache()
 		{
-			Ar << SecondaryAttachment;
-			Ar << SecondaryRelativeLocation;
-			Ar << SecondarySmoothingScaler;
+			// Since i'm not full serializing now I need to check against cached values
+			// The OnRep last value only holds delta now so finding object off of it will not work
+			bWasInitiallyRepped = false;
+			bCachedHasSecondaryAttachment = false;
+			CachedSecondaryRelativeLocation = FVector::ZeroVector;
+			CachedGripCollisionType = EGripCollisionType::InteractiveCollisionWithSweep;
+			CachedGripMovementReplicationSetting = EGripMovementReplicationSettings::ForceClientSideMovement;
+			CachedStiffness = 1500.0f;
+			CachedDamping = 200.0f;
 		}
 
-		// Manage lerp states
-		if (Ar.IsLoading())
-		{
-			if (bHadAttachment != bHasSecondaryAttachment)
-			{
-				if (LerpToRate < 0.01f)
-					GripLerpState = EGripLerpState::NotLerping;
-				else
-				{
-					// New lerp
-					if (bHasSecondaryAttachment)
-					{
-						curLerp = LerpToRate;
-						GripLerpState = EGripLerpState::StartLerp;
-					}
-					else // Post Lerp
-					{
-						curLerp = LerpToRate;
-						GripLerpState = EGripLerpState::EndLerp;
-					}
-				}
-			}
-		}
-
-		// Don't bother replicated physics grip types if the grip type doesn't support it.
-		/*if (GripCollisionType == EGripCollisionType::InteractiveCollisionWithPhysics || 
-			GripCollisionType == EGripCollisionType::InteractiveHybridCollisionWithSweep || 
-			GripCollisionType == EGripCollisionType::ManipulationGrip ||
-			GripCollisionType == EGripCollisionType::CustomGrip)
-		{*/
-		// Now always replicating these two, in case people want to pass in custom values using it
-		Ar << Damping;
-		Ar << Stiffness;
-		/*}*/
-
-		bOutSuccess = true;
-		return true;
-	}
+	}ValueCache;
 
 	FORCEINLINE AActor * GetGrippedActor() const
 	{
@@ -435,35 +742,100 @@ public:
 		Damping = 200.0f;
 		Stiffness = 1500.0f;
 		GrippedObject = nullptr;
-		//Component = nullptr;
-		//Actor = nullptr;
 		bColliding = false;
 		GripCollisionType = EGripCollisionType::InteractiveCollisionWithSweep;
 		GripLateUpdateSetting = EGripLateUpdateSettings::NotWhenCollidingOrDoubleGripping;
+		GripMovementReplicationSetting = EGripMovementReplicationSettings::ForceClientSideMovement;
 		bIsLocked = false;
 		curLerp = 0.0f;
 		LerpToRate = 0.0f;
 		GripLerpState = EGripLerpState::NotLerping;
 		SecondarySmoothingScaler = 1.0f;
+		SecondaryRelativeLocation = FVector::ZeroVector;
 
 		SecondaryAttachment = nullptr;
 		bHasSecondaryAttachment = false;
 
+		RelativeTransform = FTransform::Identity;
 		AdditionTransform = FTransform::Identity;
-	}
+		//SecondaryScaler = 1.0f;
+	}	
+
+	/** Network serialization */
+	/*bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess)
+	{
+		Ar << GripTargetType;
+		Ar << GrippedObject;
+		Ar << GripCollisionType;
+		Ar << GripLateUpdateSetting;
+
+		Ar << RelativeTransform;
+
+		Ar << GripMovementReplicationSetting;
+
+		// If on colliding server, otherwise doesn't matter to client
+		//	Ar << bColliding;
+
+		// This doesn't matter to clients
+		//Ar << bOriginalReplicatesMovement;
+
+		bool bHadAttachment = bHasSecondaryAttachment;
+
+		Ar << bHasSecondaryAttachment;
+		Ar << LerpToRate;
+
+		// If this grip has a secondary attachment
+		if (bHasSecondaryAttachment)
+		{
+			Ar << SecondaryAttachment;
+			Ar << SecondaryRelativeLocation;
+			Ar << SecondarySmoothingScaler;
+		}
+
+		// Manage lerp states
+		if (Ar.IsLoading())
+		{
+			if (bHadAttachment != bHasSecondaryAttachment)
+			{
+				if (LerpToRate < 0.01f)
+					GripLerpState = EGripLerpState::NotLerping;
+				else
+				{
+					// New lerp
+					if (bHasSecondaryAttachment)
+					{
+						curLerp = LerpToRate;
+						GripLerpState = EGripLerpState::StartLerp;
+					}
+					else // Post Lerp
+					{
+						curLerp = LerpToRate;
+						GripLerpState = EGripLerpState::EndLerp;
+					}
+				}
+			}
+		}
+
+		// Now always replicating these two, in case people want to pass in custom values using it
+		Ar << Damping;
+		Ar << Stiffness;
+
+		bOutSuccess = true;
+		return true;
+	}*/
 };
 
-template<>
-struct TStructOpsTypeTraits< FBPActorGripInformation > : public TStructOpsTypeTraitsBase
+/*template<>
+struct TStructOpsTypeTraits< FBPActorGripInformation > : public TStructOpsTypeTraitsBase2<FBPActorGripInformation>
 {
 	enum
 	{
 		WithNetSerializer = true
 	};
-};
+};*/
 
 USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
-struct MAJORLEAGUEGLADIATOR_API FBPInterfaceProperties
+struct VREXPANSIONPLUGIN_API FBPInterfaceProperties
 {
 	GENERATED_BODY()
 public:
@@ -477,8 +849,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
 		bool bSimulateOnDrop;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
-		uint8 EnumObjectType;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
+	//	uint8 EnumObjectType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
 		EGripCollisionType SlotDefaultGripType;
@@ -486,8 +858,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
 		EGripCollisionType FreeDefaultGripType;
 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
+	//	bool bCanHaveDoubleGrip;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
-		bool bCanHaveDoubleGrip;
+		ESecondaryGripType SecondaryGripType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
 		EGripMovementReplicationSettings MovementReplicationType;
@@ -502,6 +877,9 @@ public:
 		float ConstraintDamping;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
+		FBPAdvGripPhysicsSettings AdvancedPhysicsSettings;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
 		float ConstraintBreakDistance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
@@ -513,13 +891,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
 		bool bIsInteractible;
 
-	UPROPERTY(BlueprintReadWrite, Category = "VRGripInterface")
-		bool bIsHeld;
+	UPROPERTY(BlueprintReadWrite, NotReplicated, Category = "VRGripInterface")
+		bool bIsHeld; // Set on grip notify, not net serializing
 
-	UPROPERTY(BlueprintReadWrite, Category = "VRGripInterface")
-		UGripMotionControllerComponent * HoldingController;
+	UPROPERTY(BlueprintReadWrite, NotReplicated, Category = "VRGripInterface")
+		UGripMotionControllerComponent * HoldingController; // Set on grip notify, not net serializing
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRGripInterface", meta = (editcondition = "bIsInteractible"))
 		FBPInteractionSettings InteractionSettings;
 
 	FBPInterfaceProperties()
@@ -527,10 +905,10 @@ public:
 		bDenyGripping = false;
 		OnTeleportBehavior = EGripInterfaceTeleportBehavior::DropOnTeleport;
 		bSimulateOnDrop = true;
-		EnumObjectType = 0;
 		SlotDefaultGripType = EGripCollisionType::ManipulationGrip;
 		FreeDefaultGripType = EGripCollisionType::ManipulationGrip;
-		bCanHaveDoubleGrip = false;
+		//bCanHaveDoubleGrip = false;
+		SecondaryGripType = ESecondaryGripType::SG_None;
 		//GripTarget = EGripTargetType::ComponentGrip;
 		MovementReplicationType = EGripMovementReplicationSettings::ForceClientSideMovement;
 		LateUpdateSetting = EGripLateUpdateSettings::LateUpdatesAlwaysOff;
@@ -548,16 +926,12 @@ public:
 
 
 USTRUCT(BlueprintType, Category = "VRExpansionLibrary")
-struct MAJORLEAGUEGLADIATOR_API FBPActorPhysicsHandleInformation
+struct VREXPANSIONPLUGIN_API FBPActorPhysicsHandleInformation
 {
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintReadOnly)
 		UObject * HandledObject;
-	//UPROPERTY(BlueprintReadOnly)
-	//	AActor * Actor;
-	//UPROPERTY(BlueprintReadOnly)
-	//	UPrimitiveComponent * Component;
 
 	/** Physics scene index of the body we are grabbing. */
 	int32 SceneIndex;

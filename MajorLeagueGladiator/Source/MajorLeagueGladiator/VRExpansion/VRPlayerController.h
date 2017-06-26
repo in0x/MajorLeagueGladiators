@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "CoreMinimal.h"
 #include "VRBPDatatypes.h"
 #include "VRPathFollowingComponent.h"
 
@@ -8,7 +9,7 @@
 
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AVRPlayerController : public APlayerController
+class VREXPANSIONPLUGIN_API AVRPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 

@@ -1,9 +1,8 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
-#include "MajorLeagueGladiator.h"
-//#include "Runtime/Engine/Private/EnginePrivate.h"
-#include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "ParentRelativeAttachmentComponent.h"
+//#include "Runtime/Engine/Private/EnginePrivate.h"
+#include "KismetMathLibrary.h"
 #include "VRSimpleCharacter.h"
 
 
@@ -18,11 +17,16 @@ UParentRelativeAttachmentComponent::UParentRelativeAttachmentComponent(const FOb
 	this->RelativeLocation = FVector(0, 0, 0);
 	YawTolerance = 0.0f;
 	bOffsetByHMD = false;
+	
 }
 
 void UParentRelativeAttachmentComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
-	if (IsLocallyControlled() && GEngine->HMDDevice.IsValid() && GEngine->HMDDevice->IsHeadTrackingAllowed() && GEngine->HMDDevice->HasValidTrackingPosition())
+	if (OptionalWaistTrackingParent.IsValid())
+	{
+		SetRelativeTransform(IVRTrackedParentInterface::Default_GetWaistOrientationAndPosition(OptionalWaistTrackingParent));
+	}
+	else if (IsLocallyControlled() && GEngine->HMDDevice.IsValid() && GEngine->HMDDevice->IsHeadTrackingAllowed() && GEngine->HMDDevice->HasValidTrackingPosition())
 	{
 		FQuat curRot;
 		FVector curCameraLoc;

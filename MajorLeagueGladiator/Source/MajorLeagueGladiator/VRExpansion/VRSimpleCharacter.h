@@ -14,14 +14,14 @@
 
 
 UCLASS()
-class MAJORLEAGUEGLADIATOR_API AVRSimpleCharacter : public AVRBaseCharacter
+class VREXPANSIONPLUGIN_API AVRSimpleCharacter : public AVRBaseCharacter
 {
 	GENERATED_BODY()
 
 public:
 	AVRSimpleCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	void GenerateOffsetToWorld();
+	FORCEINLINE void GenerateOffsetToWorld();
 
 	// Overriding teleport so that it auto calls my controllers re-positioning
 	virtual bool TeleportTo(const FVector& DestLocation, const FRotator& DestRotation, bool bIsATest = false, bool bNoCheck = false) override;

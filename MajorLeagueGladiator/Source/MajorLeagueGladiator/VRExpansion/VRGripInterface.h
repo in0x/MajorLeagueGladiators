@@ -1,19 +1,23 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "CoreMinimal.h"
+#include "UObject/ObjectMacros.h"
+#include "UObject/ScriptMacros.h"
 #include "VRBPDatatypes.h"
+#include "UObject/Interface.h"
 
 #include "VRGripInterface.generated.h"
 
 
-UINTERFACE(BlueprintType)
-class MAJORLEAGUEGLADIATOR_API UVRGripInterface: public UInterface
+UINTERFACE(Blueprintable)
+class VREXPANSIONPLUGIN_API UVRGripInterface: public UInterface
 {
 	GENERATED_UINTERFACE_BODY()
 };
 
 
-class MAJORLEAGUEGLADIATOR_API IVRGripInterface
+class VREXPANSIONPLUGIN_API IVRGripInterface
 {
 	GENERATED_IINTERFACE_BODY()
  
@@ -31,10 +35,6 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 		bool SimulateOnDrop();
 
-	// Type of object, fill in with your own enum
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
-		void ObjectType(uint8 & ObjectType);
-
 	// Grip type to use when gripping a slot
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 		EGripCollisionType SlotGripType();
@@ -44,12 +44,12 @@ public:
 		EGripCollisionType FreeGripType();
 
 	// Can have secondary grip
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
-		bool CanHaveDoubleGrip();
-
-	// Define which grip target to use for gripping
 	//UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
-	//	EGripTargetType GripTargetType();
+	//	bool CanHaveDoubleGrip();
+
+	// Double Grip Type
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
+		ESecondaryGripType SecondaryGripType();
 
 	// Define the late update setting
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
@@ -67,6 +67,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 		float GripDamping();
 
+	// Get the advanced physics settings for this grip
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
+		FBPAdvGripPhysicsSettings AdvancedPhysicsSettings();
+
 	// What distance to break a grip at (only relevent with physics enabled grips
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 		float GripBreakDistance();
@@ -83,61 +87,49 @@ public:
 	// Events that can be called for interface inheriting actors
 
 	// Event triggered each tick on the interfaced object when gripped, can be used for custom movement or grip based logic
-	UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
 		void TickGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation, FVector MControllerLocDelta, float DeltaTime);
 
-	/*============
-
-	NOTE(Phil): I had to change OnGrip and OnGripRelease to virtual so that I can implement them in C++.
-	We need this to notify objects when they are gripped / dropped.
-	*/
 	// Event triggered on the interfaced object when gripped
-	// UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
-	virtual void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation) {}
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
+		void OnGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation);
 
 	// Event triggered on the interfaced object when grip is released
-	//UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
-	virtual void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation) {}
-
-	//===========
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
+		void OnGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation);
 
 	// Event triggered on the interfaced object when child component is gripped
-	UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
 		void OnChildGrip(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation);
 
 	// Event triggered on the interfaced object when child component is released
-	UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
 		void OnChildGripRelease(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation);
 
 	// Event triggered on the interfaced object when secondary gripped
-	UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
 		void OnSecondaryGrip(USceneComponent * SecondaryGripComponent, const FBPActorGripInformation & GripInformation);
 
 	// Event triggered on the interfaced object when secondary grip is released
-	UFUNCTION(BlueprintImplementableEvent, Category = "VRGripInterface")
+	UFUNCTION(BlueprintNativeEvent, Category = "VRGripInterface")
 		void OnSecondaryGripRelease(USceneComponent * ReleasingSecondaryGripComponent, const FBPActorGripInformation & GripInformation);
 
 	// Interaction Functions
 
-	//===========
-
-	// NOTE(PHIL): Changed so we can use them in C++ 
 	// Call to use an object
-	//UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VRGripInterface")
-	virtual void OnUsed() {}
-
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
+		void OnUsed();
+		
 	// Call to stop using an object
-	//UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VRGripInterface")
-	virtual void OnEndUsed() {}
-
-	//===========
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
+		void OnEndUsed();
 
 	// Call to use an object
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VRGripInterface")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 		void OnSecondaryUsed();
 
 	// Call to stop using an object
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VRGripInterface")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 		void OnEndSecondaryUsed();
 		
 	// Check if the object is an interactable
