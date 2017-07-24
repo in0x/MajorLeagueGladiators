@@ -21,7 +21,8 @@ class MAJORLEAGUEGLADIATOR_API AVRSimpleCharacter : public AVRBaseCharacter
 public:
 	AVRSimpleCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	FORCEINLINE void GenerateOffsetToWorld();
+	// NOTE(Phil): Removed another FORCEINLINE here due to no definition.
+	void GenerateOffsetToWorld();
 
 	// Overriding teleport so that it auto calls my controllers re-positioning
 	virtual bool TeleportTo(const FVector& DestLocation, const FRotator& DestRotation, bool bIsATest = false, bool bNoCheck = false) override;

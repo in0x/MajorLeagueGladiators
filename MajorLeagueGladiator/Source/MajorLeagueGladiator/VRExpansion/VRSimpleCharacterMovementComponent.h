@@ -62,13 +62,14 @@ public:
 	UPROPERTY(BlueprintReadOnly, Transient, Category = VRMovement)
 		UCameraComponent * VRCameraComponent;
 
-	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
-	void SetUpdatedComponent(USceneComponent* NewUpdatedComponent) override;
+	// NOTE(Phil): The next six functions were overriden, but not marked virtual.
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
+	virtual void SetUpdatedComponent(USceneComponent* NewUpdatedComponent) override;
 
-	void PhysWalking(float deltaTime, int32 Iterations) override;
-	void PhysFlying(float deltaTime, int32 Iterations) override;
-	void PhysFalling(float deltaTime, int32 Iterations) override;
-	void PhysNavWalking(float deltaTime, int32 Iterations) override;
+	virtual void PhysWalking(float deltaTime, int32 Iterations) override;
+	virtual void PhysFlying(float deltaTime, int32 Iterations) override;
+	virtual void PhysFalling(float deltaTime, int32 Iterations) override;
+	virtual void PhysNavWalking(float deltaTime, int32 Iterations) override;
 	/**
 	* Default UObject constructor.
 	*/
