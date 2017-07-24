@@ -35,7 +35,7 @@ public:
 
 	UVRBaseCharacterMovementComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	virtual void PerformMovement(float DeltaSeconds) override;
+	virtual void PerformMovement(float DeltaSeconds) override; 
 
 	FORCEINLINE bool HasRequestedVelocity()
 	{
@@ -75,8 +75,9 @@ public:
 	// Injecting custom movement in here, bypasses floor detection
 	//virtual void PerformMovement(float DeltaSeconds) override;
 
-	FORCEINLINE void ApplyVRMotionToVelocity(float deltaTime);
-	FORCEINLINE void RestorePreAdditiveVRMotionVelocity();
+	// NOTE(Phil): Removed the FORCEINLINE decls on the two functions below not defined here...
+	void ApplyVRMotionToVelocity(float deltaTime);
+	void RestorePreAdditiveVRMotionVelocity();
 	FVector LastPreAdditiveVRVelocity;
 
 	virtual void PhysCustom(float deltaTime, int32 Iterations) override;
@@ -153,7 +154,8 @@ public:
 	// We use 4 bits for this so a maximum of 16 elements
 	EVRConjoinedMovementModes VRReplicatedMovementMode;
 
-	void UpdateFromCompressedFlags(uint8 Flags) override
+	// NOTE(Phil): Added missing virtual
+	virtual void UpdateFromCompressedFlags(uint8 Flags) override
 	{
 		// If is a custom or VR custom movement mode
 		int32 MovementFlags = (Flags >> 2) & 15;
