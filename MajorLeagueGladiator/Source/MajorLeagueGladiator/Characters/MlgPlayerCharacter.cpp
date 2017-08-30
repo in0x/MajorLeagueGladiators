@@ -534,7 +534,8 @@ bool AMlgPlayerCharacter::rightHandGrab_Server_Validate()
 
 void AMlgPlayerCharacter::rightHandGrab_Server_Implementation()
 {
-	attachedWeapon->OnUsed();
+	//attachedWeapon->OnUsed();
+	AMlgGrippableMeshActor::Execute_OnUsed(attachedWeapon);
 }
 
 bool AMlgPlayerCharacter::rightHandRelease_Server_Validate()
