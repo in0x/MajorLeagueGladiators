@@ -44,7 +44,9 @@
 //#include "PhysicsEngine/ConvexElem.h" // Fixed in 4.13.1?
 
 #include "HeadMountedDisplay.h" 
-#include "Runtime/Engine/Classes/Kismet/HeadMountedDisplayFunctionLibrary.h"
+//#include "Runtime/Engine/Classes/Kismet/HeadMountedDisplayFunctionLibrary.h"
+#include "HeadMountedDisplayFunctionLibrary.h" 
+#include "HeadMountedDisplayTypes.h"
 
 #include "OpenVRExpansionFunctionLibrary.generated.h"
 
