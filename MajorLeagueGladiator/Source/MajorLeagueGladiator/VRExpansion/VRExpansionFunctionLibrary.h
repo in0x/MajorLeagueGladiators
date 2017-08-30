@@ -5,7 +5,9 @@
 #include "IMotionController.h"
 
 #include "HeadMountedDisplay.h" 
-#include "Runtime/Engine/Classes/Kismet/HeadMountedDisplayFunctionLibrary.h"
+//#include "Runtime/Engine/Classes/Kismet/HeadMountedDisplayFunctionLibrary.h"
+#include "HeadMountedDisplayFunctionLibrary.h" 
+#include "HeadMountedDisplayTypes.h"
 
 #include "VRBPDatatypes.h"
 
