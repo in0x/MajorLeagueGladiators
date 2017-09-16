@@ -20,6 +20,25 @@ namespace EWaveState
 	};
 }
 
+// NOTE(Phil): UE4 doesnt seem to let me use bitflag enum values another way. Errors
+// when combination is specified as OR (i.e. FirstBegin = FirstWave | BeginWave). 
+// Probably due to macros.
+UENUM(BlueprintType)
+namespace EPlaySoundSettings
+{
+	enum Type
+	{
+		None = 0			UMETA(DisplayName = "None"),
+		FirstWave = 1		UMETA(DisplayName = "FirstWave"),
+		BeginWave = 2		UMETA(DisplayName = "BeginWave"),
+		FirstBegin = 3		UMETA(DisplayName = "FirstBegin"),
+		EndWave = 4			UMETA(DisplayName = "EndWave"), 
+		FirstEnd = 5 		UMETA(DisplayName = "FirstEnd"),
+		BeginEnd = 6		UMETA(DisplayName = "BeginEnd"),
+		FirstBeginEnd = 7	UMETA(DisplayName = "FirstBeginEnd")
+	};
+}
+
 struct WaveSystemSavedState;
 
 /*
@@ -78,6 +97,7 @@ private:
 	void playFirstWaveEffects();
 	void playBeginOfWaveEffects();
 	void playEndOfWaveEffects();
+	bool HasSoundSetting(EPlaySoundSettings::Type option);
 
 	UPROPERTY(ReplicatedUsing = onRep_remainingEnemiesForWave, Transient)
 	int32 remainingEnemiesForWave;
@@ -105,6 +125,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USoundBase* endWaveSound;
+
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EPlaySoundSettings::Type> soundSettings;
 
 	FTimerHandle startNextWaveTimerHandle;
 };

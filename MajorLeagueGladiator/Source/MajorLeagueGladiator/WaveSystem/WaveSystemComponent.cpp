@@ -10,6 +10,7 @@ UWaveSystemComponent::UWaveSystemComponent()
 	, initialTimeBeforeStartSeconds(5.0f)
 	, timeBetweenWavesSeconds(8.0f)
 	, waveState(EWaveState::NotStarted)
+	, soundSettings(EPlaySoundSettings::FirstBeginEnd)
 {
 	SetIsReplicated(true);
 
@@ -246,19 +247,33 @@ void UWaveSystemComponent::fireWaveNumberChangedDelegates(int32 oldWaveNumber)
 	
 }
 
+bool UWaveSystemComponent::HasSoundSetting(EPlaySoundSettings::Type option)
+{
+	return ((soundSettings & option) == option);
+}
+
 void UWaveSystemComponent::playFirstWaveEffects()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), firstWaveSound);
+	if (HasSoundSetting(EPlaySoundSettings::FirstWave))
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), firstWaveSound);
+	}
 }
 
 void UWaveSystemComponent::playBeginOfWaveEffects()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), beginOfWaveSound);
+ 	if (HasSoundSetting(EPlaySoundSettings::BeginWave))
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), beginOfWaveSound);
+	}
 }
 
 void UWaveSystemComponent::playEndOfWaveEffects()
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), endWaveSound);
+	if (HasSoundSetting(EPlaySoundSettings::EndWave))
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), endWaveSound);
+	}
 }
 
 void UWaveSystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
