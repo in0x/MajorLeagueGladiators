@@ -534,7 +534,6 @@ bool AMlgPlayerCharacter::rightHandGrab_Server_Validate()
 
 void AMlgPlayerCharacter::rightHandGrab_Server_Implementation()
 {
-	//attachedWeapon->OnUsed();
 	AMlgGrippableMeshActor::Execute_OnUsed(attachedWeapon);
 }
 
@@ -557,7 +556,7 @@ bool AMlgPlayerCharacter::rightHandDrop_Server_Validate()
 
 void AMlgPlayerCharacter::rightHandDrop_Server_Implementation()
 {
-	attachedWeapon->OnEndUsed();
+	AMlgGrippableMeshActor::Execute_OnEndUsed(attachedWeapon);
 }
 
 void AMlgPlayerCharacter::EnableActorCollison_NetMulticast_Implementation(bool bNewActorEnableCollision)
