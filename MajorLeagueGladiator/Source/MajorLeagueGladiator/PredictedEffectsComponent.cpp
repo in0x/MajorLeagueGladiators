@@ -51,7 +51,7 @@ void UPredictedEffectsComponent::createParticleSystem_NetMulticast_Implementatio
 	// Prevent Playing Twice
 	if (!IsLocallyControlled())
 	{
-		CreateParticleSystemLocal(Params);;
+		CreateParticleSystemLocal(Params);
 	}	
 }
 
