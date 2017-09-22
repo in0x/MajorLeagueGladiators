@@ -174,6 +174,8 @@ void AMlgPlayerCharacter::BeginPlay()
 	}
 	else
 	{
+		pHandMotionController = std::make_unique<HandMotionController>(this);
+
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("NON VR MODE"));
 #if 1 //If this is on you can move with the mouse, however it also causes the sliding bug
 		bUseControllerRotationPitch = true;

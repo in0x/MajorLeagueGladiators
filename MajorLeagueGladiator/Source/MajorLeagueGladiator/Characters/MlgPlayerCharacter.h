@@ -4,6 +4,7 @@
 
 #include "ChaperoneBounds.h"
 #include "AbilitySystemInterface.h"
+#include "HandMotionController.h"
 #include "MlgPlayerCharacter.generated.h"
 
 class UHealthComponent;
@@ -112,7 +113,7 @@ protected:
 	UPlayerDamageFeedbackComponent* damageFeedback;
 
 private:
-
+	std::unique_ptr<HandMotionController> pHandMotionController;
 	std::unique_ptr<ChaperoneBounds> pChaperoneBounds;
 
 	FVector abilityMoveTargetLocation;
