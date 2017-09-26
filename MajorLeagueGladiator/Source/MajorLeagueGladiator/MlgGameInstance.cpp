@@ -5,10 +5,9 @@
 
 namespace
 {
-	const FString PRE_BEGIN_MAP("/Game/PreGame?listen");
+	const FString PRE_BEGIN_MAP("/Game/PreGame?game=Blueprint'/Game/BluePrints/MlgGameModeBP.MlgGameModeBP'");
 	const FString MAIN_MENU_MAP("/Game/MainMenu?game=Class'/Script/MajorLeagueGladiator.MenuGameMode'");
-
-
+	
 	IOnlineSessionPtr findOnlineSession()
 	{
 		IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
@@ -43,7 +42,7 @@ bool UMlgGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, bool b
 	sessionSettings->bShouldAdvertise = true;
 	sessionSettings->bAllowJoinViaPresence = true;
 	sessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
-
+	
 	/*
 	Fill in all the Session Settings that we want to use.
 	There are more with SessionSettings.Set(...);
