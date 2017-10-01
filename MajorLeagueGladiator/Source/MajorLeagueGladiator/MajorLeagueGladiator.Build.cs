@@ -65,10 +65,10 @@ public class MajorLeagueGladiator : ModuleRules
 			}
 			);
 
+		DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
 
-
-        // Don't load APEX on incompatible platforms
-        if (
+		// Don't load APEX on incompatible platforms
+		if (
             Target.Platform != UnrealTargetPlatform.IOS &&
             Target.Platform != UnrealTargetPlatform.TVOS &&
             Target.Platform != UnrealTargetPlatform.Android &&

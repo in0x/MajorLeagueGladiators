@@ -10,7 +10,7 @@ public class MajorLeagueGladiatorTarget : TargetRules
 	{
 		Type = TargetType.Game;
         ExtraModuleNames.Add("MajorLeagueGladiator");
-
+		bUsesSteam = true;
     }
 
 	//
