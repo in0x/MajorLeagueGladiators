@@ -26,6 +26,11 @@ void AMenuGameMode::BeginPlay()
 	{
 		iter->OnMenuActionTriggered.AddUObject(this, &AMenuGameMode::onMenuAction);
 	}
+
+	for (TObjectIterator<AMenuCharacter> iter; iter; ++iter)
+	{
+		iter->OnMenuActionTriggered.AddUObject(this, &AMenuGameMode::onMenuAction);
+	}
 }
 
 void AMenuGameMode::onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction)

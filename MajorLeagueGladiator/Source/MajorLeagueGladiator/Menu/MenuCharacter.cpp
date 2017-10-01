@@ -48,10 +48,33 @@ AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
 #endif
 }
 
+void AMenuCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (!g_IsVREnabled())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'4\' -> Ranged Tutorial"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'3\' -> Melee Tutorial"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'2\' -> Join Game"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'1\' -> Host Game"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Non-VR Menu Bindings:"));
+	}
+}
+
 void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnRightTriggerClicked);
+
+	if (!g_IsVREnabled())
+	{
+		PlayerInputComponent->BindAction("HostGamePressed", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnHostGamePressed);
+		PlayerInputComponent->BindAction("JoinGamePressed", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnJoinGamePressed);
+		PlayerInputComponent->BindAction("MeleeTutPressed", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnMeleeTutPressed);
+		PlayerInputComponent->BindAction("RangeTutPressed", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnRangeTutPressed);
+	}
 }
 
 void AMenuCharacter::OnRightTriggerClicked()
@@ -85,6 +108,26 @@ void AMenuCharacter::OnRightTriggerClicked()
 			}
 		}
 	}
+}
+
+void AMenuCharacter::OnHostGamePressed()
+{
+	OnMenuActionTriggered.Broadcast(EMenuAction::HostGame);
+}
+
+void AMenuCharacter::OnJoinGamePressed()
+{
+	OnMenuActionTriggered.Broadcast(EMenuAction::JoinGame);
+}
+
+void AMenuCharacter::OnMeleeTutPressed()
+{
+	OnMenuActionTriggered.Broadcast(EMenuAction::StartMeleeTutorial);
+}
+
+void AMenuCharacter::OnRangeTutPressed()
+{
+	OnMenuActionTriggered.Broadcast(EMenuAction::StartRangedTutorial);
 }
 
 
