@@ -31,6 +31,12 @@ public:
 	void FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence, int32 MaxSearchResults = 20, int32 PingBucketSize = 50);
 	virtual bool JoinSession(ULocalPlayer* localPlayer, const FOnlineSessionSearchResult& SearchResult) override;
 
+	const TArray<TSharedRef<FOnlineFriend>>& QueryFriendList(bool bRefreshFriendsList = true);
+	
+	void JoinFriend(const FUniqueNetId& FriendToJoin);
+	void InviteFriend(const FUniqueNetId& FriendToInvite);
+	void InviteFriend(int32 IndexInLastReturnedFriendlist);
+
 	void TravelToMainMenu();
 
 	SearchFinishedDelegate OnFindSessionFinished;
@@ -47,19 +53,24 @@ private:
 	void onFindSessionsComplete(bool bWasSuccessful);
 	void onJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 	virtual void onDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+	void onFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult);
 
 	FOnCreateSessionCompleteDelegate  onCreateSessionCompleteDelegate;
 	FOnStartSessionCompleteDelegate  onStartSessionCompleteDelegate;
 	FOnFindSessionsCompleteDelegate onFindSessionsCompleteDelegate;
 	FOnJoinSessionCompleteDelegate onJoinSessionCompleteDelegate;
 	FOnDestroySessionCompleteDelegate onDestroySessionCompleteDelegate;
+	FOnFindFriendSessionCompleteDelegate onFindFriendSessionCompleteDelegate;
 
 	FDelegateHandle onCreateSessionCompleteDelegateHandle;
 	FDelegateHandle onStartSessionCompleteDelegateHandle;
 	FDelegateHandle onFindSessionsCompleteDelegateHandle;
 	FDelegateHandle onJoinSessionCompleteDelegateHandle;
 	FDelegateHandle onDestroySessionCompleteDelegateHandle;
+	FDelegateHandle onFindFriendSessionCompleteDelegateHandle;
+
 	
 	TSharedPtr<class FOnlineSessionSettings> sessionSettings;
 	TSharedPtr<class FOnlineSessionSearch> sessionSearch;
+	TArray<TSharedRef<FOnlineFriend>> friendList;
 };
