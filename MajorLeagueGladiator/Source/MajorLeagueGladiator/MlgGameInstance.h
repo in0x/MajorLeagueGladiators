@@ -31,7 +31,7 @@ public:
 	void FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence, int32 MaxSearchResults = 20, int32 PingBucketSize = 50);
 	virtual bool JoinSession(ULocalPlayer* localPlayer, const FOnlineSessionSearchResult& SearchResult) override;
 
-	const TArray<TSharedRef<FOnlineFriend>>& QueryFriendList(bool bRefreshFriendsList = true);
+	const TArray<TSharedRef<FOnlineFriend>>& QueryFriendList(bool bRefreshFriendsList = true, bool bOnlyPlayersInGame = true);
 	
 	void JoinFriend(const FUniqueNetId& FriendToJoin);
 	void InviteFriend(const FUniqueNetId& FriendToInvite);

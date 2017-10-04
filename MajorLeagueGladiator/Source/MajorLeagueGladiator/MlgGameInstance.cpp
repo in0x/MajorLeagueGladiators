@@ -228,7 +228,7 @@ EOnlineSessionState::Type UMlgGameInstance::GetGameSessionState() const
 	return Sessions->GetSessionState(GameSessionName);
 }
 
-const TArray<TSharedRef<FOnlineFriend>>& UMlgGameInstance::QueryFriendList(bool bRefreshFriendsList /* = true */)
+const TArray<TSharedRef<FOnlineFriend>>& UMlgGameInstance::QueryFriendList(bool bRefreshFriendsList /* = true */, bool bOnlyPlayersInGame /* = true */)
 {
 	if (bRefreshFriendsList)
 	{
@@ -242,6 +242,13 @@ const TArray<TSharedRef<FOnlineFriend>>& UMlgGameInstance::QueryFriendList(bool 
 		{
 			UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::QueryFriendList(): GetFriendsList Failed"));
 		}
+		if (bOnlyPlayersInGame)
+		{
+			friendList.RemoveAllSwap([](const decltype(friendList)::ElementType& element) {
+				return !element->GetPresence().bIsPlayingThisGame;
+			});
+		}
+
 	}
 
 	for (int i = 0; i < friendList.Num();++i)
