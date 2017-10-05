@@ -267,6 +267,14 @@ void UMlgGameInstance::JoinFriend(const FUniqueNetId& FriendToJoin)
 	session->FindFriendSession(0, FriendToJoin);
 }
 
+void UMlgGameInstance::JoinFriend(int32 IndexInLastReturnedFriendlist)
+{
+	if (IndexInLastReturnedFriendlist < friendList.Num())
+	{
+		JoinFriend(*friendList[IndexInLastReturnedFriendlist]->GetUserId());
+	}
+}
+
 void UMlgGameInstance::onFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult)
 {
 	IOnlineSessionPtr session = findOnlineSession();

@@ -26,6 +26,10 @@ private:
 	void OnMeleeTutPressed();
 	void OnRangeTutPressed();
 
+	void OnShowFriends();
+	void JoinFirstFriendInList();
+	void InviteFirstPlayerInFriendslist();
+
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* leftMesh;
 

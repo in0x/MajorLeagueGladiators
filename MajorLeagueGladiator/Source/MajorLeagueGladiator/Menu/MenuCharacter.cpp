@@ -5,6 +5,7 @@
 #include "Menu/MenuGameMode.h"
 #include "CollisionStatics.h"
 #include "MenuActionComponent.h"
+#include "MlgGameInstance.h"
 
 namespace
 {
@@ -54,6 +55,10 @@ void AMenuCharacter::BeginPlay()
 
 	if (!g_IsVREnabled())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'j\' -> Join first Friend"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'i\' -> Invite first Friend"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'l\' -> List friends, even the ones not playing"));
+
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'4\' -> Ranged Tutorial"));
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'3\' -> Melee Tutorial"));
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'2\' -> Join Game"));
@@ -74,6 +79,12 @@ void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PlayerInputComponent->BindAction("JoinGamePressed", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnJoinGamePressed);
 		PlayerInputComponent->BindAction("MeleeTutPressed", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnMeleeTutPressed);
 		PlayerInputComponent->BindAction("RangeTutPressed", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnRangeTutPressed);
+
+		PlayerInputComponent->BindAction("ShowFriends", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnShowFriends);
+		PlayerInputComponent->BindAction("JoinFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::JoinFirstFriendInList);
+		PlayerInputComponent->BindAction("InviteFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::InviteFirstPlayerInFriendslist);
+
+
 	}
 }
 
@@ -130,5 +141,31 @@ void AMenuCharacter::OnRangeTutPressed()
 	OnMenuActionTriggered.Broadcast(EMenuAction::StartRangedTutorial);
 }
 
+void AMenuCharacter::OnShowFriends()
+{
+	UGameInstance* gameInstance = GetGameInstance();
+	UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);
 
+	// Currently will display as debug Draw
+	mlgGameInstance->QueryFriendList(true, false);
+}
+
+void AMenuCharacter::JoinFirstFriendInList()
+{
+	UGameInstance* gameInstance = GetGameInstance();
+	UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);
+
+	mlgGameInstance->QueryFriendList();
+	mlgGameInstance->JoinFriend(0);
+}
+
+void AMenuCharacter::InviteFirstPlayerInFriendslist()
+{
+	UGameInstance* gameInstance = GetGameInstance();
+	UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);
+
+	// Currently will display as debug Draw
+	mlgGameInstance->QueryFriendList();
+	mlgGameInstance->InviteFriend(0);
+}
 

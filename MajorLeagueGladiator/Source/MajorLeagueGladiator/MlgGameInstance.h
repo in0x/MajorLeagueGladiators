@@ -34,6 +34,8 @@ public:
 	const TArray<TSharedRef<FOnlineFriend>>& QueryFriendList(bool bRefreshFriendsList = true, bool bOnlyPlayersInGame = true);
 	
 	void JoinFriend(const FUniqueNetId& FriendToJoin);
+	void JoinFriend(int32 IndexInLastReturnedFriendlist);
+
 	void InviteFriend(const FUniqueNetId& FriendToInvite);
 	void InviteFriend(int32 IndexInLastReturnedFriendlist);
 
@@ -54,6 +56,9 @@ private:
 	void onJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 	virtual void onDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 	void onFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult);
+	// TODO
+	//void onReceiveFriendInvite(const bool, const int32, TSharedPtr<const FUniqueNetId>, const FOnlineSessionSearchResult&)
+	
 
 	FOnCreateSessionCompleteDelegate  onCreateSessionCompleteDelegate;
 	FOnStartSessionCompleteDelegate  onStartSessionCompleteDelegate;
