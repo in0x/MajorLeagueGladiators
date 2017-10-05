@@ -37,12 +37,29 @@ namespace
 }
 
 UMlgGameInstance::UMlgGameInstance(const FObjectInitializer & ObjectInitializer)
+{}
+
+void UMlgGameInstance::Init()
 {
+	Super::Init();
+
 	onCreateSessionCompleteDelegate = FOnCreateSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onCreateSessionComplete);
 	onStartSessionCompleteDelegate = FOnStartSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onStartSessionComplete);
 	onFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onFindSessionsComplete);
 	onJoinSessionCompleteDelegate = FOnJoinSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onJoinSessionComplete);
 	onDestroySessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onDestroySessionComplete);
+	onFindFriendSessionCompleteDelegate = FOnFindFriendSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onFindFriendSessionComplete);
+	onReadFriendsListCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UMlgGameInstance::onReadFriendsListComplete);
+
+	//onSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UMlgGameInstance::onSessionUserInviteAccepted);
+	//onSessionUserInviteAcceptedDelegateHandle = findOnlineSession()->AddOnSessionUserInviteAcceptedDelegate_Handle(onSessionUserInviteAcceptedDelegate);
+}
+
+void UMlgGameInstance::Shutdown()
+{
+	//findOnlineSession()->ClearOnSessionUserInviteAcceptedDelegate_Handle(onSessionUserInviteAcceptedDelegateHandle);
+
+	Super::Shutdown();
 }
 
 bool UMlgGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, bool bIsLan, bool bIsPresence, int32 MaxNumPlayers)
@@ -151,14 +168,24 @@ void UMlgGameInstance::onFindSessionsComplete(bool bWasSuccessful)
 	OnFindSessionFinished.Broadcast(sessionSearch->SearchResults);
 }
 
-bool UMlgGameInstance::JoinSession(ULocalPlayer* localPlayer, const FOnlineSessionSearchResult& SearchResult)
+bool UMlgGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult)
 {
-	check(localPlayer && localPlayer->IsValidLowLevel());
+	check(LocalPlayer && LocalPlayer->IsValidLowLevel());
 
 	IOnlineSessionPtr Sessions = findOnlineSession();
 	onJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(onJoinSessionCompleteDelegate);
 
-	return Sessions->JoinSession(*localPlayer->GetPreferredUniqueNetId(), GameSessionName, SearchResult);
+
+	return Sessions->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SearchResult);
+}
+
+bool UMlgGameInstance::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults)
+{
+	if (sessionSearch->SearchResults.Num() > SessionIndexInSearchResults)
+	{
+		return JoinSession(LocalPlayer, sessionSearch->SearchResults[SessionIndexInSearchResults]);
+	}
+	return false;
 }
 
 void UMlgGameInstance::onJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
@@ -228,50 +255,68 @@ EOnlineSessionState::Type UMlgGameInstance::GetGameSessionState() const
 	return Sessions->GetSessionState(GameSessionName);
 }
 
-const TArray<TSharedRef<FOnlineFriend>>& UMlgGameInstance::QueryFriendList(bool bRefreshFriendsList /* = true */, bool bOnlyPlayersInGame /* = true */)
+void UMlgGameInstance::ReadFriendList()
 {
-	if (bRefreshFriendsList)
+	IOnlineFriendsPtr OnlineFriends = findOnlineFriends();
+
+	if (!OnlineFriends->ReadFriendsList(0, DefaultFriendsList, onReadFriendsListCompleteDelegate))
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::ReadFriendList(): Start ReadFriendsList Failed"));
+	}
+}
+
+void UMlgGameInstance::onReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr)
+{
+	if (!bWasSuccessful)
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::onReadFriendsListComplete(): ReadFriendsList Failed %s"), *ErrorStr);
+	}
+	else
 	{
 		IOnlineFriendsPtr OnlineFriends = findOnlineFriends();
 
-		if (!OnlineFriends->ReadFriendsList(0, DefaultFriendsList))
-		{
-			UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::QueryFriendList(): ReadFriendsList Failed"));
-		}
+		friendList.Empty();
 		if (!OnlineFriends->GetFriendsList(0, DefaultFriendsList, friendList))
 		{
 			UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::QueryFriendList(): GetFriendsList Failed"));
 		}
-		if (bOnlyPlayersInGame)
+
+		for (int i = 0; i < friendList.Num(); ++i)
 		{
-			friendList.RemoveAllSwap([](const decltype(friendList)::ElementType& element) {
-				return !element->GetPresence().bIsPlayingThisGame;
-			});
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Index %i: Name: %s"), i, *friendList[i]->GetDisplayName()));
 		}
-
 	}
-
-	for (int i = 0; i < friendList.Num();++i)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Index %i: Name: %s"), *friendList[i]->GetDisplayName()));
-	}
-
-	return friendList;
 }
 
-void UMlgGameInstance::JoinFriend(const FUniqueNetId& FriendToJoin)
+void UMlgGameInstance::JoinFirstAvailableFriend()
 {
+	int32 IndexOfFirstAvailableFriend = 0;
+	const int32 friendlistLength = friendList.Num();
+
+	while (IndexOfFirstAvailableFriend < friendlistLength)
+	{
+		if (friendList[IndexOfFirstAvailableFriend]->GetPresence().bIsPlayingThisGame)
+		{
+			break;
+		}
+		++IndexOfFirstAvailableFriend;
+	}
+
+	if (IndexOfFirstAvailableFriend >= friendlistLength)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("No Friend Found to Join"));
+		return;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Joining: %s"), *friendList[IndexOfFirstAvailableFriend]->GetDisplayName()));
+
 	IOnlineSessionPtr session = findOnlineSession();
 
 	onFindFriendSessionCompleteDelegateHandle = session->AddOnFindFriendSessionCompleteDelegate_Handle(0, onFindFriendSessionCompleteDelegate);
-	session->FindFriendSession(0, FriendToJoin);
-}
-
-void UMlgGameInstance::JoinFriend(int32 IndexInLastReturnedFriendlist)
-{
-	if (IndexInLastReturnedFriendlist < friendList.Num())
+	if (!session->FindFriendSession(0, *friendList[IndexOfFirstAvailableFriend]->GetUserId()))
 	{
-		JoinFriend(*friendList[IndexInLastReturnedFriendlist]->GetUserId());
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::JoinFirstAvailableFriend(): Start Find Friend Session Failed"));
+		session->ClearOnFindFriendSessionCompleteDelegate_Handle(0, onFindFriendSessionCompleteDelegateHandle);
 	}
 }
 
@@ -291,25 +336,52 @@ void UMlgGameInstance::onFindFriendSessionComplete(int32 LocalUserNum, bool bWas
 		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::onFindFriendSessionComplete(): SearchResult Empty"));
 		return;
 	}
-
 	ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	JoinSession(localPlayer, SearchResult[0]);
 }
 
-void UMlgGameInstance::InviteFriend(const FUniqueNetId& FriendToInvite)
+
+void UMlgGameInstance::InviteFirstAvailableFriend()
 {
+	int32 IndexOfFirstAvailableFriend = 0;
+	const int32 friendlistLength = friendList.Num();
+
+	while (IndexOfFirstAvailableFriend < friendlistLength)
+	{
+		if (friendList[IndexOfFirstAvailableFriend]->GetPresence().bIsPlayingThisGame)
+		{
+			break;
+		}
+		++IndexOfFirstAvailableFriend;
+	}
+
+	if (IndexOfFirstAvailableFriend >= friendlistLength)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::InviteFirstAvailableFriend: No Friend Found to Invite"));
+		return;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Inviting: %s"), *friendList[IndexOfFirstAvailableFriend]->GetDisplayName()));
+
 	IOnlineSessionPtr session = findOnlineSession();
 
-	if (!session->SendSessionInviteToFriend(0, GameSessionName, FriendToInvite))
+	/*session->AddOnSessionInviteReceivedDelegate_Handle;
+	session->AddOnSessionUserInviteAcceptedDelegate_Handle(;
+*/
+	onFindFriendSessionCompleteDelegateHandle = session->AddOnFindFriendSessionCompleteDelegate_Handle(0, onFindFriendSessionCompleteDelegate);
+	if (!session->FindFriendSession(0, *friendList[IndexOfFirstAvailableFriend]->GetUserId()))
 	{
-		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::InviteFriend(): SendSessionInviteToFriend Failed"));
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::JoinFirstAvailableFriend(): Start Find Friend Session Failed"));
+		session->ClearOnFindFriendSessionCompleteDelegate_Handle(0, onFindFriendSessionCompleteDelegateHandle);
 	}
 }
 
-void UMlgGameInstance::InviteFriend(int32 IndexInLastReturnedFriendlist)
-{
-	if (IndexInLastReturnedFriendlist < friendList.Num())
-	{
-		InviteFriend(*friendList[IndexInLastReturnedFriendlist]->GetUserId());
-	}
-}
+// Should Already be handled by OnlineSessionClient
+//void UMlgGameInstance::onSessionUserInviteAccepted(const bool bWasSuccessful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult)
+//{
+//	if (InviteResult.IsValid())
+//	{
+//		ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+//		JoinSession(localPlayer,InviteResult);
+//	}
+//}

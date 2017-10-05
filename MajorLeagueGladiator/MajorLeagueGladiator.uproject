@@ -13,7 +13,8 @@
 				"CoreUObject",
 				"UMG",
 				"GameplayAbilities",
-				"AIModule"
+				"AIModule",
+				"OnlineSubsystemUtils"
 			]
 		}
 	],
