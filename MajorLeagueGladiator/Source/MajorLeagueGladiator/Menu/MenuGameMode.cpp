@@ -8,6 +8,7 @@
 #include "Menu/MenuCharacter.h"
 #include "MenuActionComponent.h"
 #include "MlgGameSession.h"
+#include "MenuActionWidget.h"
 
 namespace
 {
@@ -21,20 +22,27 @@ AMenuGameMode::AMenuGameMode()
 	DefaultPawnClass = menuCharacterBP.Class;
 }
 
-
 TSubclassOf<AGameSession> AMenuGameMode::GetGameSessionClass() const
 {
 	return AMlgGameSession::StaticClass();
 }
 
-
 void AMenuGameMode::BeginPlay()
 {
+	//registerMenuAction<UMenuActionComponent>(this);
+	//registerMenuAction<UMenuActionWidget>(this);
+	//registerMenuAction<AMenuCharacter>(this);
+
 	for (TObjectIterator<UMenuActionComponent> iter; iter; ++iter)
 	{
 		iter->OnMenuActionTriggered.AddUObject(this, &AMenuGameMode::onMenuAction);
 	}
-
+	
+	for (TObjectIterator<UMenuActionWidget> iter; iter; ++iter)
+	{
+		iter->OnMenuActionTriggered.AddUObject(this, &AMenuGameMode::onMenuAction);
+	}
+	
 	for (TObjectIterator<AMenuCharacter> iter; iter; ++iter)
 	{
 		iter->OnMenuActionTriggered.AddUObject(this, &AMenuGameMode::onMenuAction);

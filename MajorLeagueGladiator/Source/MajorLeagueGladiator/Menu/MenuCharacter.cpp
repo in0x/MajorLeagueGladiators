@@ -6,6 +6,7 @@
 #include "CollisionStatics.h"
 #include "MenuActionComponent.h"
 #include "MlgGameInstance.h"
+#include "WidgetInteractionComponent.h"
 
 namespace
 {
@@ -38,9 +39,15 @@ AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
 	leftMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	rightMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
-	pointerMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("PointerMesh"));
-	pointerMesh->SetMobility(EComponentMobility::Movable);
-	pointerMesh->SetupAttachment(rightMesh, AIM_SOCKET_NAME);
+	// TODO(Phil): Pull out pointer mesh, hook widgetinteraction to input, build menuwidget, add it to character
+	widgetInteraction = ObjectInitializer.CreateDefaultSubobject<UWidgetInteractionComponent>(this, TEXT("WidgetInteraction"));
+	widgetInteraction->SetupAttachment(rightMesh, FName(TEXT("Touch")));
+	widgetInteraction->bShowDebug = true;
+
+	menuWidgetComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("MenuWidgetComponent"));
+	ConstructorHelpers::FClassFinder<UUserWidget> mainMenuWidget(TEXT("/Game/BluePrints/Menu/MainMenuWidget"));
+	menuWidgetComponent->SetWidgetClass(mainMenuWidget.Class);
+	menuWidgetComponent->SetupAttachment(leftMesh, FName(TEXT("Touch")));
 
 #if 1 //If this is on you can move with the mouse, however it also causes the sliding bug
 	bUseControllerRotationPitch = true;
@@ -83,42 +90,18 @@ void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PlayerInputComponent->BindAction("ShowFriends", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnShowFriends);
 		PlayerInputComponent->BindAction("JoinFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnJoinFirstFriendInList);
 		PlayerInputComponent->BindAction("InviteFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnInviteFirstPlayerInFriendslist);
-
-
 	}
 }
 
 void AMenuCharacter::OnRightTriggerClicked()
 {
-	const FTransform aimSocketTransform = rightMesh->GetSocketTransform(FName("Aim"));
-
-	const FVector start = aimSocketTransform.GetLocation();
-	const FVector direction = aimSocketTransform.GetRotation().GetForwardVector();
-	const FVector end = start + direction * MenuSelectionRayCastRange;
-
-	const TArray<TEnumAsByte<EObjectTypeQuery>> queryTypes{
-		UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic),
-	};
-
-	TArray<FHitResult> hitResults;
-	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this);
-
-	const UWorld* world = GetWorld();
-	world->LineTraceMultiByObjectType(hitResults, start, end, queryTypes, CollisionParams);
-	
-	for (FHitResult& hitResult : hitResults)
+	if (widgetInteraction->IsOverInteractableWidget())
 	{
-		if (hitResult.Actor.IsValid())
-		{
-			UMenuActionComponent* menuAction = hitResult.Actor->FindComponentByClass<UMenuActionComponent>();
-
-			if (menuAction)
-			{
-				menuAction->TriggerMenuAction();
-			}
-		}
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("Over Interactive Widget"));
 	}
+	
+	widgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
+	widgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
 }
 
 void AMenuCharacter::OnHostGamePressed()
