@@ -27,17 +27,20 @@ class MAJORLEAGUEGLADIATOR_API UMlgGameInstance : public UGameInstance
 public:
 	UMlgGameInstance(const FObjectInitializer& ObjectInitializer);
 
+	virtual void Init() override;
+	virtual void Shutdown() override;
+
 	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, bool bIsLan, bool bIsPresence, int32 MaxNumPlayers);
 	void FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence, int32 MaxSearchResults = 20, int32 PingBucketSize = 50);
-	virtual bool JoinSession(ULocalPlayer* localPlayer, const FOnlineSessionSearchResult& SearchResult) override;
 
-	const TArray<TSharedRef<FOnlineFriend>>& QueryFriendList(bool bRefreshFriendsList = true, bool bOnlyPlayersInGame = true);
+	virtual bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults) override;
+	virtual bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult) override;
+
+	void ReadFriendList();
 	
-	void JoinFriend(const FUniqueNetId& FriendToJoin);
-	void JoinFriend(int32 IndexInLastReturnedFriendlist);
+	void JoinFirstAvailableFriend();
+	void InviteFirstAvailableFriend();
 
-	void InviteFriend(const FUniqueNetId& FriendToInvite);
-	void InviteFriend(int32 IndexInLastReturnedFriendlist);
 
 	void TravelToMainMenu();
 
@@ -56,16 +59,19 @@ private:
 	void onJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 	virtual void onDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 	void onFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult);
-	// TODO
-	//void onReceiveFriendInvite(const bool, const int32, TSharedPtr<const FUniqueNetId>, const FOnlineSessionSearchResult&)
-	
 
+	//void onSessionUserInviteAccepted(bool bWasSuccessful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);
+
+	void onReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
+
+	
 	FOnCreateSessionCompleteDelegate  onCreateSessionCompleteDelegate;
 	FOnStartSessionCompleteDelegate  onStartSessionCompleteDelegate;
 	FOnFindSessionsCompleteDelegate onFindSessionsCompleteDelegate;
 	FOnJoinSessionCompleteDelegate onJoinSessionCompleteDelegate;
 	FOnDestroySessionCompleteDelegate onDestroySessionCompleteDelegate;
 	FOnFindFriendSessionCompleteDelegate onFindFriendSessionCompleteDelegate;
+	//FOnSessionUserInviteAcceptedDelegate onSessionUserInviteAcceptedDelegate;
 
 	FDelegateHandle onCreateSessionCompleteDelegateHandle;
 	FDelegateHandle onStartSessionCompleteDelegateHandle;
@@ -73,7 +79,9 @@ private:
 	FDelegateHandle onJoinSessionCompleteDelegateHandle;
 	FDelegateHandle onDestroySessionCompleteDelegateHandle;
 	FDelegateHandle onFindFriendSessionCompleteDelegateHandle;
+	//FDelegateHandle onSessionUserInviteAcceptedDelegateHandle;
 
+	FOnReadFriendsListComplete onReadFriendsListCompleteDelegate;
 	
 	TSharedPtr<class FOnlineSessionSettings> sessionSettings;
 	TSharedPtr<class FOnlineSessionSearch> sessionSearch;

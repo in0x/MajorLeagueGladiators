@@ -55,9 +55,9 @@ void AMenuCharacter::BeginPlay()
 
 	if (!g_IsVREnabled())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'j\' -> Join first Friend"));
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'i\' -> Invite first Friend"));
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'l\' -> List friends, even the ones not playing"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'J\' -> Join first Friend"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'I\' -> Invite first Friend"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'L\' -> Refresh friend List"));
 
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'4\' -> Ranged Tutorial"));
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'3\' -> Melee Tutorial"));
@@ -147,7 +147,7 @@ void AMenuCharacter::OnShowFriends()
 	UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);
 
 	// Currently will display as debug Draw
-	mlgGameInstance->QueryFriendList(true, false);
+	mlgGameInstance->ReadFriendList();
 }
 
 void AMenuCharacter::JoinFirstFriendInList()
@@ -155,8 +155,8 @@ void AMenuCharacter::JoinFirstFriendInList()
 	UGameInstance* gameInstance = GetGameInstance();
 	UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);
 
-	mlgGameInstance->QueryFriendList();
-	mlgGameInstance->JoinFriend(0);
+	mlgGameInstance->ReadFriendList();
+	mlgGameInstance->JoinFirstAvailableFriend();
 }
 
 void AMenuCharacter::InviteFirstPlayerInFriendslist()
@@ -165,7 +165,7 @@ void AMenuCharacter::InviteFirstPlayerInFriendslist()
 	UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);
 
 	// Currently will display as debug Draw
-	mlgGameInstance->QueryFriendList();
-	mlgGameInstance->InviteFriend(0);
+	mlgGameInstance->ReadFriendList();
+	mlgGameInstance->InviteFirstAvailableFriend();
 }
 
