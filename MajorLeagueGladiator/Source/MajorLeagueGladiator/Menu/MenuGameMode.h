@@ -17,6 +17,7 @@ class MAJORLEAGUEGLADIATOR_API AMenuGameMode : public AGameMode
 	GENERATED_BODY()
 public:
 	AMenuGameMode();
+	virtual	TSubclassOf<AGameSession> GetGameSessionClass() const override;
 	virtual void BeginPlay() override;
 
 private:

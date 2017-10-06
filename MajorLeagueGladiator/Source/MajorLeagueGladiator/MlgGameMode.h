@@ -18,6 +18,7 @@ class MAJORLEAGUEGLADIATOR_API AMlgGameMode : public AGameMode
 public:
 	AMlgGameMode(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	virtual	TSubclassOf<AGameSession> GetGameSessionClass() const override;
 	virtual void BeginPlay() override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
