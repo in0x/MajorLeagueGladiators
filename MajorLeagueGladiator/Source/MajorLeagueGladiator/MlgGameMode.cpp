@@ -11,6 +11,7 @@
 #include "MlgPlayerController.h"
 #include "MlgGameInstance.h"
 #include "Menu/MenuActionComponent.h"
+#include "MlgGameSession.h"
 
 namespace
 {
@@ -28,6 +29,11 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	PlayerStateClass = AMlgPlayerState::StaticClass();
 	GameStateClass = AMlgGameState::StaticClass();
 	waveSpawnerManger = ObjectInitializer.CreateDefaultSubobject<UWaveSpawnerManagerComponent>(this, TEXT("WaveSpawnerManager"));
+}
+
+TSubclassOf<AGameSession> AMlgGameMode::GetGameSessionClass() const
+{
+	return AMlgGameSession::StaticClass();
 }
 
 void AMlgGameMode::BeginPlay()

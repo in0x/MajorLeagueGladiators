@@ -7,6 +7,7 @@
 #include "MlgGameInstance.h"
 #include "Menu/MenuCharacter.h"
 #include "MenuActionComponent.h"
+#include "MlgGameSession.h"
 
 namespace
 {
@@ -19,6 +20,13 @@ AMenuGameMode::AMenuGameMode()
 	ConstructorHelpers::FClassFinder<AMenuCharacter> menuCharacterBP(TEXT("/Game/BluePrints/Characters/MenuCharacterBP"));
 	DefaultPawnClass = menuCharacterBP.Class;
 }
+
+
+TSubclassOf<AGameSession> AMenuGameMode::GetGameSessionClass() const
+{
+	return AMlgGameSession::StaticClass();
+}
+
 
 void AMenuGameMode::BeginPlay()
 {
