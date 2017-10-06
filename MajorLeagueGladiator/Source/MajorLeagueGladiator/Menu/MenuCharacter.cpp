@@ -155,17 +155,13 @@ void AMenuCharacter::JoinFirstFriendInList()
 	UGameInstance* gameInstance = GetGameInstance();
 	UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);
 
-	mlgGameInstance->ReadFriendList();
 	mlgGameInstance->JoinFirstAvailableFriend();
 }
-
 void AMenuCharacter::InviteFirstPlayerInFriendslist()
 {
 	UGameInstance* gameInstance = GetGameInstance();
 	UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);
 
-	// Currently will display as debug Draw
-	mlgGameInstance->ReadFriendList();
 	mlgGameInstance->InviteFirstAvailableFriend();
 }
 
