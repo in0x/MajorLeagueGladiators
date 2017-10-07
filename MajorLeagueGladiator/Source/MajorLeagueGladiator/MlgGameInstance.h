@@ -9,6 +9,7 @@
 
 //Used Tutorial : https://wiki.unrealengine.com/How_To_Use_Sessions_In_C%2B%2B
 
+class AMlgGameSession;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(SearchFinishedDelegate, const TArray <FOnlineSessionSearchResult>&);
 
@@ -30,8 +31,12 @@ public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
 
-	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, bool bIsLan, bool bIsPresence, int32 MaxNumPlayers);
-	void FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence, int32 MaxSearchResults = 20, int32 PingBucketSize = 50);
+	AMlgGameSession* GetGameSession() const;
+	void AddNetworkFailureHandlers();
+	void RemoveNetworkFailureHandlers();
+	void TravelLocalSessionFailure(UWorld *World, ETravelFailure::Type FailureType, const FString& ReasonString);
+	bool HostSession(bool bIsLan, bool bIsPresence, int32 MaxNumPlayers);
+	bool FindSessions(ULocalPlayer* PlayerOwner, bool bFindLan);
 
 	virtual bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults) override;
 	virtual bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult) override;
@@ -56,22 +61,14 @@ private:
 	virtual void onCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void onStartSessionComplete(FName SessionName, bool bWasSuccessful);
 	void onFindSessionsComplete(bool bWasSuccessful);
-	void onJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+	void onJoinSessionComplete(EOnJoinSessionCompleteResult::Type Result);
 	virtual void onDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 	void onFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult);
 
-	//void onSessionUserInviteAccepted(bool bWasSuccessful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);
-
 	void onReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
 
-	
-	FOnCreateSessionCompleteDelegate  onCreateSessionCompleteDelegate;
-	FOnStartSessionCompleteDelegate  onStartSessionCompleteDelegate;
-	FOnFindSessionsCompleteDelegate onFindSessionsCompleteDelegate;
-	FOnJoinSessionCompleteDelegate onJoinSessionCompleteDelegate;
 	FOnDestroySessionCompleteDelegate onDestroySessionCompleteDelegate;
 	FOnFindFriendSessionCompleteDelegate onFindFriendSessionCompleteDelegate;
-	//FOnSessionUserInviteAcceptedDelegate onSessionUserInviteAcceptedDelegate;
 
 	FDelegateHandle onCreateSessionCompleteDelegateHandle;
 	FDelegateHandle onStartSessionCompleteDelegateHandle;
@@ -79,11 +76,9 @@ private:
 	FDelegateHandle onJoinSessionCompleteDelegateHandle;
 	FDelegateHandle onDestroySessionCompleteDelegateHandle;
 	FDelegateHandle onFindFriendSessionCompleteDelegateHandle;
-	//FDelegateHandle onSessionUserInviteAcceptedDelegateHandle;
+	FDelegateHandle TravelLocalSessionFailureDelegateHandle;
 
 	FOnReadFriendsListComplete onReadFriendsListCompleteDelegate;
 	
-	TSharedPtr<class FOnlineSessionSettings> sessionSettings;
-	TSharedPtr<class FOnlineSessionSearch> sessionSearch;
 	TArray<TSharedRef<FOnlineFriend>> friendList;
 };
