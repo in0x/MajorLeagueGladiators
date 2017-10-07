@@ -19,6 +19,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TriggerMenuAction();
 
+	/*UFunction(BluePrintCallable)
+	void SetText(const FString& string);*/
+
+	virtual bool Initialize() override;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TextWidget")
+	FString centerText;
+
 private:
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EMenuAction::Type> menuAction;
