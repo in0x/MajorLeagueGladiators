@@ -44,11 +44,9 @@ void UMlgGameInstance::Init()
 {
 	Super::Init();
 
-	//onStartSessionCompleteDelegate = FOnStartSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onStartSessionComplete);
-	//onFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onFindSessionsComplete);
 	onDestroySessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onDestroySessionComplete);
 	onFindFriendSessionCompleteDelegate = FOnFindFriendSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onFindFriendSessionComplete);
-	//onReadFriendsListCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UMlgGameInstance::onReadFriendsListComplete);
+	onReadFriendsListCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UMlgGameInstance::onReadFriendsListComplete);
 
 	//onSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UMlgGameInstance::onSessionUserInviteAccepted);
 	//onSessionUserInviteAcceptedDelegateHandle = findOnlineSession()->AddOnSessionUserInviteAcceptedDelegate_Handle(onSessionUserInviteAcceptedDelegate);
