@@ -113,6 +113,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UPlayerDamageFeedbackComponent* damageFeedback;
 
+	void toggleMenu();
+	virtual void enableMenu();
+	virtual void disableMenu();
+
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
 	std::unique_ptr<ChaperoneBounds> pChaperoneBounds;
@@ -222,8 +226,4 @@ private:
 
 	UPROPERTY()
 	UStaticMeshComponent* rightViveMesh;
-
-	void toggleMenu();
-	void enableMenu();
-	void disableMenu();
 };

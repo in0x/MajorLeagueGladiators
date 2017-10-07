@@ -100,3 +100,18 @@ void AMeleePlayerCharacter::OnLeftTouchpadY(float Value)
 	bottomAbilityWidget->SetTouchInputY(Value);
 }
 
+void AMeleePlayerCharacter::enableMenu()
+{
+	Super::enableMenu();
+
+	topAbilityWidget->SetVisibility(false);
+	bottomAbilityWidget->SetVisibility(false);
+}
+
+void AMeleePlayerCharacter::disableMenu()
+{
+	Super::disableMenu();
+
+	topAbilityWidget->SetVisibility(false);
+	bottomAbilityWidget->SetVisibility(false);
+}
