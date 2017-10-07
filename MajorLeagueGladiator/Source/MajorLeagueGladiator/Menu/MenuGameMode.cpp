@@ -91,7 +91,7 @@ void AMenuGameMode::startMeleeTutorial()
 
 void AMenuGameMode::hostGame()
 {
-	getMlgGameInstance()->HostSession(getUniqueNetID(), true, true, 2);
+	getMlgGameInstance()->HostSession(false, true, 2);
 }
 
 void AMenuGameMode::findGame()
@@ -99,7 +99,8 @@ void AMenuGameMode::findGame()
 	UMlgGameInstance* gameInstance = getMlgGameInstance();
 
 	gameInstance->OnFindSessionFinished.AddUObject(this, &AMenuGameMode::onGamesFound);
-	gameInstance->FindSessions(getUniqueNetID(), true, true);
+	ULocalPlayer* localplayer = GetWorld()->GetFirstLocalPlayerFromController();
+	gameInstance->FindSessions(localplayer, false);
 }
 
 void AMenuGameMode::onGamesFound(const TArray <FOnlineSessionSearchResult>& foundGames)
