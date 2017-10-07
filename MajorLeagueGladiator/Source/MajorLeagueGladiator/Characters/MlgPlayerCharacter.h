@@ -23,6 +23,7 @@ class UPredictedEffectsComponent;
 class UPlayerDeathComponent;
 class UPlayerDamageFeedbackComponent;
 class USpectatorComponent;
+class UWidgetInteractionComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityMoveTargetLocationSet, FVector, NewLocation);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityActivated, TSubclassOf<UGameplayAbility>, AbilityType);
@@ -125,7 +126,13 @@ private:
 	//USceneCaptureComponent2D* sceneCapture;
 
 	UPROPERTY(EditAnywhere)
-		USteamVRChaperoneComponent* chaperone;
+	UWidgetInteractionComponent* widgetInteraction;
+
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* menuWidgetComponent;
+
+	UPROPERTY(EditAnywhere)
+	USteamVRChaperoneComponent* chaperone;
 
 	UPROPERTY(EditAnywhere)
 	UHealthComponent* healthComp;
@@ -204,4 +211,19 @@ private:
 	void OnLand(const FHitResult& hit);
 
 	void updateBodyMeshTransform();
+
+	bool bIsMenuEnabled;
+
+	UPROPERTY()
+	UStaticMesh* viveMesh;
+
+	UPROPERTY()
+	UStaticMeshComponent* leftViveMesh;
+
+	UPROPERTY()
+	UStaticMeshComponent* rightViveMesh;
+
+	void toggleMenu();
+	void enableMenu();
+	void disableMenu();
 };

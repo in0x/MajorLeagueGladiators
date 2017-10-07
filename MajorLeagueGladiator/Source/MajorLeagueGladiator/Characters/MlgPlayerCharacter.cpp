@@ -23,7 +23,7 @@
 #include "MlgPlayerController.h"
 #include "MlgGameMode.h"
 #include "SpectatorComponent.h"
-
+#include "WidgetInteractionComponent.h"
 #include "MlgGameInstance.h"
 
 namespace 
@@ -146,6 +146,31 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	rumbleLeft = helperLeft.Object;
 	rumbleRight = helperRight.Object;
+
+	leftViveMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftViveMesh"));
+	rightViveMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightViveMesh"));
+
+	widgetInteraction = ObjectInitializer.CreateDefaultSubobject<UWidgetInteractionComponent>(this, TEXT("WidgetInteraction"));
+	widgetInteraction->SetupAttachment(rightViveMesh, FName(TEXT("Touch")));
+	widgetInteraction->bShowDebug = true;
+
+	menuWidgetComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("MenuWidgetComponent"));
+	ConstructorHelpers::FClassFinder<UUserWidget> mainMenuWidget(TEXT("/Game/BluePrints/Menu/MainMenuWidget"));
+	menuWidgetComponent->SetWidgetClass(mainMenuWidget.Class);
+	menuWidgetComponent->SetupAttachment(leftViveMesh, FName(TEXT("Touch")));
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> viveMeshLoader(TEXT("StaticMesh'/Game/MVRCFPS_Assets/vive_controller.vive_controller'"));
+	if (viveMeshLoader.Succeeded())
+	{
+		leftViveMesh->SetStaticMesh(viveMeshLoader.Object);
+		rightViveMesh->SetStaticMesh(viveMeshLoader.Object);
+	}
+
+	leftViveMesh->SetupAttachment(LeftMotionController);
+	rightViveMesh->SetupAttachment(RightMotionController);
+
+	bIsMenuEnabled = true;
+	toggleMenu();
 
 	//if (bRenderSecondWindow)
 	//{
@@ -296,6 +321,7 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed,  this, &AMlgPlayerCharacter::OnRightTriggerClicked);
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerReleased);
+	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerClicked);
 
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
@@ -314,13 +340,14 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		abilitySet->BindAbilitiesToInput(PlayerInputComponent, abilitySystemComponent);
 	}
 
+	PlayerInputComponent->BindAction("Menu", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::toggleMenu);
+
 	// REFACTOR: For Quick Testing
 	if (HasAuthority())
 	{
-		UMlgGameInstance* instance = CastChecked<UMlgGameInstance>(GetGameInstance());
-		PlayerInputComponent->BindAction("Menu", EInputEvent::IE_Pressed, instance, &UMlgGameInstance::TravelToMainMenu);
+		//UMlgGameInstance* instance = CastChecked<UMlgGameInstance>(GetGameInstance());
+		//PlayerInputComponent->BindAction("Menu", EInputEvent::IE_Pressed, instance, &UMlgGameInstance::TravelToMainMenu);
 	}
-	
 }
 
 void AMlgPlayerCharacter::PossessedBy(AController* NewController)
@@ -594,3 +621,32 @@ void AMlgPlayerCharacter::SetRightTriggerStatus(float Value)
 	rightMesh->GetSingleNodeInstance()->SetBlendSpaceInput(BlendParams);
 }
 
+void AMlgPlayerCharacter::toggleMenu()
+{
+	bIsMenuEnabled = !bIsMenuEnabled;
+
+	if (bIsMenuEnabled)
+	{
+		enableMenu();
+	}
+	else
+	{
+		disableMenu();
+	}
+}
+
+void AMlgPlayerCharacter::enableMenu()
+{
+	leftMesh->SetActive(false);
+	rightMesh->SetActive(false);
+	leftViveMesh->SetActive(true);
+	rightViveMesh->SetActive(true);
+}
+
+void AMlgPlayerCharacter::disableMenu()
+{
+	leftMesh->SetActive(true);
+	rightMesh->SetActive(true);
+	leftViveMesh->SetActive(false);
+	rightViveMesh->SetActive(false);
+}
