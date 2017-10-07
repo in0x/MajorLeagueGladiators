@@ -169,9 +169,6 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	leftViveMesh->SetupAttachment(LeftMotionController);
 	rightViveMesh->SetupAttachment(RightMotionController);
 
-	bIsMenuEnabled = true;
-	toggleMenu();
-
 	//if (bRenderSecondWindow)
 	//{
 	//	spectator = ObjectInitializer.CreateDefaultSubobject<USpectatorComponent>(this, TEXT("Spectator"));
@@ -227,6 +224,9 @@ void AMlgPlayerCharacter::BeginPlay()
 	{
 		SpawnWeapon();
 	}
+
+	bIsMenuEnabled = true;
+	toggleMenu();
 
 	//if (bRenderSecondWindow)
 	//{
@@ -458,12 +458,23 @@ void AMlgPlayerCharacter::OnLeftTriggerReleased()
 
 void AMlgPlayerCharacter::OnRightTriggerClicked()
 {
-	rightHandGrab_Server();
+	if (bIsMenuEnabled)
+	{
+		widgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
+		widgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
+	}
+	else
+	{
+		rightHandGrab_Server();
+	}
 }
 
 void AMlgPlayerCharacter::OnRightTriggerReleased()
 {
-	rightHandRelease_Server();
+	if (!bIsMenuEnabled)
+	{
+		rightHandRelease_Server();
+	}
 }
 
 void AMlgPlayerCharacter::OnSideGripButtonLeft()
@@ -636,17 +647,39 @@ void AMlgPlayerCharacter::toggleMenu()
 }
 
 void AMlgPlayerCharacter::enableMenu()
-{
-	leftMesh->SetActive(false);
-	rightMesh->SetActive(false);
-	leftViveMesh->SetActive(true);
-	rightViveMesh->SetActive(true);
+{	
+	// Menu stuff
+	{
+		leftViveMesh->SetVisibility(true);
+		rightViveMesh->SetVisibility(true);
+		widgetInteraction->SetActive(true);
+		menuWidgetComponent->SetVisibility(true);
+	}
+	
+	// Non-Menu stuff
+	{
+		leftMesh->SetVisibility(false);
+		rightMesh->SetVisibility(false);
+		attachedWeapon->GetRootComponent()->SetVisibility(false, true);
+		hudHealth->SetVisibility(false);
+	}
 }
 
 void AMlgPlayerCharacter::disableMenu()
 {
-	leftMesh->SetActive(true);
-	rightMesh->SetActive(true);
-	leftViveMesh->SetActive(false);
-	rightViveMesh->SetActive(false);
+	// Menu stuff
+	{
+		leftViveMesh->SetVisibility(false);
+		rightViveMesh->SetVisibility(false);
+		widgetInteraction->SetActive(false);
+		menuWidgetComponent->SetVisibility(false);
+	}
+
+	// Non-Menu stuff
+	{
+		leftMesh->SetVisibility(true);
+		rightMesh->SetVisibility(true);
+		attachedWeapon->GetRootComponent()->SetVisibility(true, true);
+		hudHealth->SetVisibility(true);
+	}
 }

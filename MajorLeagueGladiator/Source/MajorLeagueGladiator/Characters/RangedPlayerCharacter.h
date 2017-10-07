@@ -23,6 +23,9 @@ private:
 	void OnRightTouchpadX(float Value);
 	void OnRightTouchpadY(float Value);
 
+	virtual void enableMenu() override;
+	virtual void disableMenu() override;
+
 	UPROPERTY(EditAnywhere)
 	UAbilityWidgetComponent* lefthandTopAbilityWidget;
 

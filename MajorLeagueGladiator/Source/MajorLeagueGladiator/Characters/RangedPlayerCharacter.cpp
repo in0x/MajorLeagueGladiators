@@ -101,4 +101,21 @@ void ARangedPlayerCharacter::OnRightTouchpadY(float Value)
 	rightHandAbilityWidget->SetTouchInputY(Value);
 }
 
+void ARangedPlayerCharacter::enableMenu()
+{
+	Super::enableMenu();
+	
+	lefthandTopAbilityWidget->SetVisibility(false);
+	lefthandBottomAbilityWidget->SetVisibility(false);
+	rightHandAbilityWidget->SetVisibility(false);
+}
+
+void ARangedPlayerCharacter::disableMenu()
+{
+	Super::disableMenu();
+
+	lefthandTopAbilityWidget->SetVisibility(false);
+	lefthandBottomAbilityWidget->SetVisibility(false);
+	rightHandAbilityWidget->SetVisibility(false);
+}
 
