@@ -69,6 +69,7 @@ private:
 
 	FOnDestroySessionCompleteDelegate onDestroySessionCompleteDelegate;
 	FOnFindFriendSessionCompleteDelegate onFindFriendSessionCompleteDelegate;
+	FOnStartSessionCompleteDelegate onStartSessionCompleteDelegate;
 
 	FDelegateHandle onCreateSessionCompleteDelegateHandle;
 	FDelegateHandle onStartSessionCompleteDelegateHandle;

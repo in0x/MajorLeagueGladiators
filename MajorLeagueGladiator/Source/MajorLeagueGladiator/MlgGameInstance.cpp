@@ -47,7 +47,7 @@ void UMlgGameInstance::Init()
 	onDestroySessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onDestroySessionComplete);
 	onFindFriendSessionCompleteDelegate = FOnFindFriendSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onFindFriendSessionComplete);
 	onReadFriendsListCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UMlgGameInstance::onReadFriendsListComplete);
-
+	onStartSessionCompleteDelegate = FOnStartSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onStartSessionComplete);
 	//onSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UMlgGameInstance::onSessionUserInviteAccepted);
 	//onSessionUserInviteAcceptedDelegateHandle = findOnlineSession()->AddOnSessionUserInviteAcceptedDelegate_Handle(onSessionUserInviteAcceptedDelegate);
 }
@@ -120,10 +120,21 @@ void UMlgGameInstance::onCreateSessionComplete(FName SessionName, bool bWasSucce
 		GameSession->CreateSessionCompleteEvent.Remove(onCreateSessionCompleteDelegateHandle);
 		//Session Can be started by Changing the Gamemode state to MatchState::InProgress
 	}
-	if (!bWasSuccessful)
+	if (bWasSuccessful)
+	{
+	}
+	else
 	{
 		UE_LOG(DebugLog, Error, TEXT("UMlgGameInstance::onCreateSessionComplete: CreateSession failed"));
 	}
+
+	IOnlineSessionPtr session = findOnlineSession();
+
+	// Set the StartSession delegate handle
+	onStartSessionCompleteDelegateHandle = session->AddOnStartSessionCompleteDelegate_Handle(onStartSessionCompleteDelegate);
+
+	// Our StartSessionComplete delegate should get called after this
+	session->StartSession(SessionName);
 }
 
 void UMlgGameInstance::onStartSessionComplete(FName SessionName, bool bWasSuccessful)
@@ -131,15 +142,16 @@ void UMlgGameInstance::onStartSessionComplete(FName SessionName, bool bWasSucces
 	IOnlineSessionPtr Sessions = findOnlineSession();
 
 	Sessions->ClearOnStartSessionCompleteDelegate_Handle(onStartSessionCompleteDelegateHandle);
-	if (bWasSuccessful)
-	{
-		bIsInRoomOfShame = true;
-		GetWorld()->ServerTravel(PRE_BEGIN_MAP);
-	}
-	else
+	
+	if (!bWasSuccessful)
 	{
 		UE_LOG(DebugLog, Error, TEXT("UMlgGameInstance::onStartSessionComplete: StartSession failed"));
 		return;
+	}
+	else
+	{
+		bIsInRoomOfShame = true;
+		GetWorld()->ServerTravel(PRE_BEGIN_MAP);
 	}
 }
 
