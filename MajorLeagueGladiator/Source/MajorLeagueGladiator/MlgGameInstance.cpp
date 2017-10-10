@@ -10,7 +10,6 @@ namespace
 	const FString MAIN_MENU_MAP("/Game/MainMenu?game=Class'/Script/MajorLeagueGladiator.MenuGameMode'");
 	const FString DefaultFriendsList(EFriendsLists::ToString(EFriendsLists::Default));
 	
-
 	IOnlineSubsystem* getOnlineSubsystem()
 	{
 		IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
@@ -120,21 +119,22 @@ void UMlgGameInstance::onCreateSessionComplete(FName SessionName, bool bWasSucce
 		GameSession->CreateSessionCompleteEvent.Remove(onCreateSessionCompleteDelegateHandle);
 		//Session Can be started by Changing the Gamemode state to MatchState::InProgress
 	}
-	if (bWasSuccessful)
-	{
-	}
-	else
+	if (!bWasSuccessful)
 	{
 		UE_LOG(DebugLog, Error, TEXT("UMlgGameInstance::onCreateSessionComplete: CreateSession failed"));
+		return;
 	}
 
 	IOnlineSessionPtr session = findOnlineSession();
 
-	// Set the StartSession delegate handle
-	onStartSessionCompleteDelegateHandle = session->AddOnStartSessionCompleteDelegate_Handle(onStartSessionCompleteDelegate);
+	bIsInRoomOfShame = true;
+	GetWorld()->ServerTravel(PRE_BEGIN_MAP);
 
-	// Our StartSessionComplete delegate should get called after this
-	session->StartSession(SessionName);
+	//// Set the StartSession delegate handle
+	//onStartSessionCompleteDelegateHandle = session->AddOnStartSessionCompleteDelegate_Handle(onStartSessionCompleteDelegate);
+
+	//// Our StartSessionComplete delegate should get called after this
+	//session->StartSession(SessionName);
 }
 
 void UMlgGameInstance::onStartSessionComplete(FName SessionName, bool bWasSuccessful)
