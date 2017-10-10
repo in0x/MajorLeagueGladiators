@@ -6,8 +6,8 @@
 
 namespace
 {
-	const FString PRE_BEGIN_MAP("/Game/PreGame?game=Blueprint'/Game/BluePrints/MlgGameModeBP.MlgGameModeBP'");
-	const FString MAIN_MENU_MAP("/Game/MainMenu?game=Class'/Script/MajorLeagueGladiator.MenuGameMode'");
+	const FString PRE_BEGIN_MAP("/Game/PreGame?listen");
+	const FString MAIN_MENU_MAP("/Game/MainMenu");
 	const FString DefaultFriendsList(EFriendsLists::ToString(EFriendsLists::Default));
 	
 	IOnlineSubsystem* getOnlineSubsystem()
