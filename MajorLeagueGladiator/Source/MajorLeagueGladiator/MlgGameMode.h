@@ -25,6 +25,8 @@ public:
 	void MatchLost();
 	
 	void DestroyAllAi();
+	virtual void HandleMatchHasStarted() override;
+	virtual void HandleMatchHasEnded() override;
 private:
 	void beginMatch(int32 StartWave);
 	void travelToMainMenu();
