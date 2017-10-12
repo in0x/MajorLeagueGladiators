@@ -34,7 +34,7 @@ public:
 	AMlgGameSession* GetGameSession() const;
 	void AddNetworkFailureHandlers();
 	void RemoveNetworkFailureHandlers();
-	void TravelLocalSessionFailure(UWorld *World, ETravelFailure::Type FailureType, const FString& ReasonString);
+	void OnTravelLocalSessionFailure(UWorld *World, ETravelFailure::Type FailureType, const FString& ReasonString);
 	bool HostSession(bool bIsLan, bool bIsPresence, int32 MaxNumPlayers);
 	bool FindSessions(ULocalPlayer* PlayerOwner, bool bFindLan);
 
@@ -58,14 +58,13 @@ public:
 
 private:
 
-	virtual void onCreateSessionComplete(FName SessionName, bool bWasSuccessful);
-	void onStartSessionComplete(FName SessionName, bool bWasSuccessful);
+	void onCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void onFindSessionsComplete(bool bWasSuccessful);
-	void onJoinSessionComplete(EOnJoinSessionCompleteResult::Type Result);
-	virtual void onDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+	void OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type Result);
+	void onDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 	void onFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult);
 
-	void onReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
+	void OnReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
 
 	FOnDestroySessionCompleteDelegate onDestroySessionCompleteDelegate;
 	FOnFindFriendSessionCompleteDelegate onFindFriendSessionCompleteDelegate;
@@ -77,7 +76,7 @@ private:
 	FDelegateHandle onJoinSessionCompleteDelegateHandle;
 	FDelegateHandle onDestroySessionCompleteDelegateHandle;
 	FDelegateHandle onFindFriendSessionCompleteDelegateHandle;
-	FDelegateHandle TravelLocalSessionFailureDelegateHandle;
+	FDelegateHandle onTravelLocalSessionFailureDelegateHandle;
 
 	FOnReadFriendsListComplete onReadFriendsListCompleteDelegate;
 	

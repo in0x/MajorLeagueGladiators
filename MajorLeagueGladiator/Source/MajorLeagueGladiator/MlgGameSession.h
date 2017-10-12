@@ -36,20 +36,13 @@ class MAJORLEAGUEGLADIATOR_API AMlgGameSession : public AGameSession
 public:
 	AMlgGameSession(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 protected:
-	/** Delegate for creating a new session */
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
-	/** Delegate after starting a session */
 	FOnStartSessionCompleteDelegate OnStartSessionCompleteDelegate;
-	/** Delegate for searching for sessions */
 	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;
-	/** Delegate after joining a session */
 	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
 
-	/** Transient properties of a session during game creation/matchmaking */
 	FMlgSessionParams CurrentSessionParams;
-	/** Current host settings */
 	TSharedPtr<class FOnlineSessionSettings> HostSettings;
-	/** Current search settings */
 	TSharedPtr<class FOnlineSessionSearch> SearchSettings;
 
 	/**
@@ -83,12 +76,6 @@ protected:
 	*/
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
-	/**
-	* Called when this instance is starting up as a dedicated server
-	*/
-	virtual void RegisterServer() override;
-
-
 public:
 
 	/*
@@ -106,13 +93,9 @@ public:
 	* @param SessionName name of session that was joined
 	* @param bWasSuccessful was the create successful
 	*/
-	//DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnJoinSessionComplete, FName /*SessionName*/, bool /*bWasSuccessful*/);
 	DECLARE_EVENT_OneParam(MlgGameSession, FOnJoinSessionComplete, EOnJoinSessionCompleteResult::Type /*Result*/);
 	FOnJoinSessionComplete JoinSessionCompleteEvent;
 
-	/*
-	* Event triggered after session search completes
-	*/
 	DECLARE_EVENT_OneParam(MlgGameSession, FOnFindSessionsComplete, bool /*bWasSuccessful*/);
 	FOnFindSessionsComplete FindSessionsCompleteEvent;
 
@@ -166,13 +149,10 @@ public:
 
 	const TArray<FOnlineSessionSearchResult> & GetSearchResults() const;
 
-	/** Handle starting the match */
 	virtual void HandleMatchHasStarted() override;
 
-	/** Handles when the match has ended */
 	virtual void HandleMatchHasEnded() override;
 
-	/** Handles to various registered delegates */
 	FDelegateHandle OnStartSessionCompleteDelegateHandle;
 	FDelegateHandle OnCreateSessionCompleteDelegateHandle;
 	FDelegateHandle OnFindSessionsCompleteDelegateHandle;

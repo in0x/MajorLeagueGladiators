@@ -20,15 +20,12 @@ void AMlgPlayerController::ClientStartOnlineGame_Implementation()
 	if (MlgPlayerState)
 	{
 		IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
-		if (OnlineSub)
-		{
-			IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
-			if (Sessions.IsValid())
-			{
-				UE_LOG(LogOnline, Log, TEXT("Starting session %s on client"), *MlgPlayerState->SessionName.ToString());
-				Sessions->StartSession(MlgPlayerState->SessionName);
-			}
-		}
+		check(OnlineSub);
+		
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+		check (Sessions.IsValid())
+		
+		Sessions->StartSession(MlgPlayerState->SessionName);	
 	}
 	else
 	{
@@ -44,17 +41,13 @@ void AMlgPlayerController::ClientEndOnlineGame_Implementation()
 		return;
 
 	AMlgPlayerState* MlgPlayerState = Cast<AMlgPlayerState>(PlayerState);
-	if (MlgPlayerState)
-	{
-		IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
-		if (OnlineSub)
-		{
-			IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
-			if (Sessions.IsValid())
-			{
-				UE_LOG(LogOnline, Log, TEXT("Ending session %s on client"), *MlgPlayerState->SessionName.ToString());
-				Sessions->EndSession(MlgPlayerState->SessionName);
-			}
-		}
-	}
+	check(MlgPlayerState);
+	
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	check(OnlineSub);
+	
+	IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+	check(Sessions.IsValid())
+	
+	Sessions->EndSession(MlgPlayerState->SessionName);		
 }
