@@ -26,9 +26,6 @@ namespace
 
 	IOnlineFriendsPtr findOnlineFriends()
 	{
-		IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
-		check(OnlineSub);
-
 		IOnlineFriendsPtr Sessions = getOnlineSubsystem()->GetFriendsInterface();
 		check(Sessions.IsValid());
 		return Sessions;
@@ -45,32 +42,23 @@ void UMlgGameInstance::Init()
 
 	onDestroySessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onDestroySessionComplete);
 	onFindFriendSessionCompleteDelegate = FOnFindFriendSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onFindFriendSessionComplete);
-	onReadFriendsListCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UMlgGameInstance::onReadFriendsListComplete);
-	onStartSessionCompleteDelegate = FOnStartSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onStartSessionComplete);
-	//onSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UMlgGameInstance::onSessionUserInviteAccepted);
-	//onSessionUserInviteAcceptedDelegateHandle = findOnlineSession()->AddOnSessionUserInviteAcceptedDelegate_Handle(onSessionUserInviteAcceptedDelegate);
+	onReadFriendsListCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UMlgGameInstance::OnReadFriendsListComplete);
 }
 
 void UMlgGameInstance::Shutdown()
 {
-	//findOnlineSession()->ClearOnSessionUserInviteAcceptedDelegate_Handle(onSessionUserInviteAcceptedDelegateHandle);
-
 	Super::Shutdown();
 }
 
 AMlgGameSession* UMlgGameInstance::GetGameSession() const
 {
 	UWorld* const World = GetWorld();
-	if (World)
-	{
-		AGameModeBase* const Game = World->GetAuthGameMode();
-		if (Game)
-		{
-			return CastChecked<AMlgGameSession>(Game->GameSession);
-		}
-	}
+	check(World);	
 
-	return nullptr;
+	AGameModeBase* const Game = World->GetAuthGameMode();
+	check(Game);
+	
+	return CastChecked<AMlgGameSession>(Game->GameSession);
 }
 
 void UMlgGameInstance::AddNetworkFailureHandlers()
@@ -78,7 +66,7 @@ void UMlgGameInstance::AddNetworkFailureHandlers()
 	// Add network/travel error handlers (if they are not already there)
 	if (GEngine->OnTravelFailure().IsBoundToObject(this) == false)
 	{
-		TravelLocalSessionFailureDelegateHandle = GEngine->OnTravelFailure().AddUObject(this, &UMlgGameInstance::TravelLocalSessionFailure);
+		onTravelLocalSessionFailureDelegateHandle = GEngine->OnTravelFailure().AddUObject(this, &UMlgGameInstance::OnTravelLocalSessionFailure);
 	}
 }
 
@@ -87,11 +75,11 @@ void UMlgGameInstance::RemoveNetworkFailureHandlers()
 	// Remove the local session/travel failure bindings if they exist
 	if (GEngine->OnTravelFailure().IsBoundToObject(this) == true)
 	{
-		GEngine->OnTravelFailure().Remove(TravelLocalSessionFailureDelegateHandle);
+		GEngine->OnTravelFailure().Remove(onTravelLocalSessionFailureDelegateHandle);
 	}
 }
 
-void UMlgGameInstance::TravelLocalSessionFailure(UWorld *World, ETravelFailure::Type FailureType, const FString& ReasonString)
+void UMlgGameInstance::OnTravelLocalSessionFailure(UWorld *World, ETravelFailure::Type FailureType, const FString& ReasonString)
 {
 	// TODO
 }
@@ -99,81 +87,48 @@ void UMlgGameInstance::TravelLocalSessionFailure(UWorld *World, ETravelFailure::
 bool UMlgGameInstance::HostSession(bool bIsLan, bool bIsPresence, int32 MaxNumPlayers)
 {
 	AMlgGameSession* const GameSession = GetGameSession();
-	if (GameSession)
-	{
-		ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-		onCreateSessionCompleteDelegateHandle = GameSession->CreateSessionCompleteEvent.AddUObject(this, &UMlgGameInstance::onCreateSessionComplete);
-		if (GameSession->HostSession(localPlayer->GetPreferredUniqueNetId(), GameSessionName, bIsLan, bIsPresence, MaxNumPlayers))
-		{	
-			return true;
-		}
+	check(GameSession);
+	
+	ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	onCreateSessionCompleteDelegateHandle = GameSession->CreateSessionCompleteEvent.AddUObject(this, &UMlgGameInstance::onCreateSessionComplete);
+	if (GameSession->HostSession(localPlayer->GetPreferredUniqueNetId(), GameSessionName, bIsLan, bIsPresence, MaxNumPlayers))
+	{	
+		return true;
 	}
+	
 	return false;
 }
 
 void UMlgGameInstance::onCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
 	AMlgGameSession* const GameSession = GetGameSession();
-	if (GameSession)
-	{
-		GameSession->CreateSessionCompleteEvent.Remove(onCreateSessionCompleteDelegateHandle);
-		//Session Can be started by Changing the Gamemode state to MatchState::InProgress
-	}
+	check(GameSession);
+	
+	GameSession->CreateSessionCompleteEvent.Remove(onCreateSessionCompleteDelegateHandle);
+	
 	if (!bWasSuccessful)
 	{
 		UE_LOG(DebugLog, Error, TEXT("UMlgGameInstance::onCreateSessionComplete: CreateSession failed"));
 		return;
 	}
 
-	IOnlineSessionPtr session = findOnlineSession();
-
 	bIsInRoomOfShame = true;
 	GetWorld()->ServerTravel(PRE_BEGIN_MAP);
-
-	//// Set the StartSession delegate handle
-	//onStartSessionCompleteDelegateHandle = session->AddOnStartSessionCompleteDelegate_Handle(onStartSessionCompleteDelegate);
-
-	//// Our StartSessionComplete delegate should get called after this
-	//session->StartSession(SessionName);
-}
-
-void UMlgGameInstance::onStartSessionComplete(FName SessionName, bool bWasSuccessful)
-{
-	IOnlineSessionPtr Sessions = findOnlineSession();
-
-	Sessions->ClearOnStartSessionCompleteDelegate_Handle(onStartSessionCompleteDelegateHandle);
-	
-	if (!bWasSuccessful)
-	{
-		UE_LOG(DebugLog, Error, TEXT("UMlgGameInstance::onStartSessionComplete: StartSession failed"));
-		return;
-	}
-	else
-	{
-		bIsInRoomOfShame = true;
-		GetWorld()->ServerTravel(PRE_BEGIN_MAP);
-	}
 }
 
 bool UMlgGameInstance::FindSessions(ULocalPlayer* PlayerOwner, bool bFindLan)
 {
-	bool bResult = false;
+	check(PlayerOwner);	
+	
+	AMlgGameSession* const GameSession = GetGameSession();
+	check(GameSession);
+	
+	GameSession->FindSessionsCompleteEvent.RemoveAll(this);
+	onFindSessionsCompleteDelegateHandle = GameSession->FindSessionsCompleteEvent.AddUObject(this, &UMlgGameInstance::onFindSessionsComplete);
 
-	check(PlayerOwner != nullptr);
-	if (PlayerOwner)
-	{
-		AMlgGameSession* const GameSession = GetGameSession();
-		if (GameSession)
-		{
-			GameSession->FindSessionsCompleteEvent.RemoveAll(this);
-			onFindSessionsCompleteDelegateHandle = GameSession->FindSessionsCompleteEvent.AddUObject(this, &UMlgGameInstance::onFindSessionsComplete);
-
-			GameSession->FindSessions(PlayerOwner->GetPreferredUniqueNetId(), GameSessionName, bFindLan, true);
-
-			bResult = true;
-		}
-	}
-	return bResult;
+	GameSession->FindSessions(PlayerOwner->GetPreferredUniqueNetId(), GameSessionName, bFindLan, true);
+	
+	return true;
 }
 
 void UMlgGameInstance::onFindSessionsComplete(bool bWasSuccessful)
@@ -184,11 +139,10 @@ void UMlgGameInstance::onFindSessionsComplete(bool bWasSuccessful)
 	}
 
 	AMlgGameSession* const Session = GetGameSession();
-	if (Session)
-	{
-		Session->FindSessionsCompleteEvent.Remove(onFindSessionsCompleteDelegateHandle);
-		OnFindSessionFinished.Broadcast(Session->GetSearchResults());
-	}	
+	check(Session)
+	
+	Session->FindSessionsCompleteEvent.Remove(onFindSessionsCompleteDelegateHandle);
+	OnFindSessionFinished.Broadcast(Session->GetSearchResults());		
 }
 
 bool UMlgGameInstance::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults)
@@ -201,32 +155,26 @@ bool UMlgGameInstance::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndex
 	return false;
 }
 
-
 bool UMlgGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult)
 {
 	check(LocalPlayer);
 	AMlgGameSession* const GameSession = GetGameSession();
-	if (GameSession)
-	{
-		AddNetworkFailureHandlers();
+	check(GameSession)
+	
+	AddNetworkFailureHandlers();
 
-		onJoinSessionCompleteDelegateHandle = GameSession->JoinSessionCompleteEvent.AddUObject(this, &UMlgGameInstance::onJoinSessionComplete);
-		if (GameSession->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SearchResult))
-		{
-			return true;
-		}
-	}
-	return false;
+	onJoinSessionCompleteDelegateHandle = GameSession->JoinSessionCompleteEvent.AddUObject(this, &UMlgGameInstance::OnJoinSessionComplete);
+
+	return GameSession->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SearchResult);
 }
 
 
-void UMlgGameInstance::onJoinSessionComplete(EOnJoinSessionCompleteResult::Type Result)
+void UMlgGameInstance::OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type Result)
 {
 	AMlgGameSession* const GameSession = GetGameSession();
-	if (GameSession)
-	{
-		GameSession->JoinSessionCompleteEvent.Remove(onJoinSessionCompleteDelegateHandle);
-	}
+	check(GameSession);
+	
+	GameSession->JoinSessionCompleteEvent.Remove(onJoinSessionCompleteDelegateHandle);
 
 	if (Result != EOnJoinSessionCompleteResult::Success)
 	{
@@ -234,13 +182,13 @@ void UMlgGameInstance::onJoinSessionComplete(EOnJoinSessionCompleteResult::Type 
 		switch (Result)
 		{
 		case EOnJoinSessionCompleteResult::SessionIsFull:
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("JoinSessionFailed - Game is full."));
+			UE_LOG(DebugLog, Error, TEXT("JoinSessionFailed - Game is full."));
 			break;
 		case EOnJoinSessionCompleteResult::SessionDoesNotExist:
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("JoinSessionFailed - Game no longer exists"));
+			UE_LOG(DebugLog, Error, TEXT("JoinSessionFailed - Game no longer exists"));
 			break;
 		default:
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("JoinSessionFailed"));
+			UE_LOG(DebugLog, Error, TEXT("JoinSessionFailed"));
 			break;
 		}
 
@@ -255,8 +203,7 @@ void UMlgGameInstance::onJoinSessionComplete(EOnJoinSessionCompleteResult::Type 
 
 	if (!Sessions.IsValid() || !Sessions->GetResolvedConnectString(GameSessionName, URL))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Travel to Session failed"));
-		UE_LOG(LogOnlineGame, Warning, TEXT("Failed to travel to session upon joining it"));
+		UE_LOG(DebugLog, Warning, TEXT("Failed to travel to session upon joining it"));
 		return;
 	}
 
@@ -314,7 +261,7 @@ void UMlgGameInstance::ReadFriendList()
 	}
 }
 
-void UMlgGameInstance::onReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr)
+void UMlgGameInstance::OnReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr)
 {
 	if (!bWasSuccessful)
 	{
@@ -382,14 +329,14 @@ void UMlgGameInstance::onFindFriendSessionComplete(int32 LocalUserNum, bool bWas
 
 	if (SearchResult.Num() < 1)
 	{
-		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::onFindFriendSessionComplete(): SearchResult Empty"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::onFindFriendSessionComplete(): SearchResult Empty. Player probably has no open session"));
 		return;
 	}
 	ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	JoinSession(localPlayer, SearchResult[0]);
 }
 
-
+// Work in Progress
 void UMlgGameInstance::InviteFirstAvailableFriend()
 {
 	int32 IndexOfFirstAvailableFriend = 0;
@@ -397,6 +344,7 @@ void UMlgGameInstance::InviteFirstAvailableFriend()
 
 	while (IndexOfFirstAvailableFriend < friendlistLength)
 	{
+		// we might want to invite non playing friends
 		if (friendList[IndexOfFirstAvailableFriend]->GetPresence().bIsPlayingThisGame)
 		{
 			break;
@@ -421,13 +369,3 @@ void UMlgGameInstance::InviteFirstAvailableFriend()
 		session->ClearOnFindFriendSessionCompleteDelegate_Handle(0, onFindFriendSessionCompleteDelegateHandle);
 	}
 }
-
-// Should Already be handled by OnlineSessionClient
-//void UMlgGameInstance::onSessionUserInviteAccepted(const bool bWasSuccessful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult)
-//{
-//	if (InviteResult.IsValid())
-//	{
-//		ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-//		JoinSession(localPlayer,InviteResult);
-//	}
-//}

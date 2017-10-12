@@ -81,8 +81,8 @@ void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PlayerInputComponent->BindAction("RangeTutPressed", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnRangeTutPressed);
 
 		PlayerInputComponent->BindAction("ShowFriends", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnShowFriends);
-		PlayerInputComponent->BindAction("JoinFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::JoinFirstFriendInList);
-		PlayerInputComponent->BindAction("InviteFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::InviteFirstPlayerInFriendslist);
+		PlayerInputComponent->BindAction("JoinFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnJoinFirstFriendInList);
+		PlayerInputComponent->BindAction("InviteFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnInviteFirstPlayerInFriendslist);
 
 
 	}
@@ -150,14 +150,14 @@ void AMenuCharacter::OnShowFriends()
 	mlgGameInstance->ReadFriendList();
 }
 
-void AMenuCharacter::JoinFirstFriendInList()
+void AMenuCharacter::OnJoinFirstFriendInList()
 {
 	UGameInstance* gameInstance = GetGameInstance();
 	UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);
 
 	mlgGameInstance->JoinFirstAvailableFriend();
 }
-void AMenuCharacter::InviteFirstPlayerInFriendslist()
+void AMenuCharacter::OnInviteFirstPlayerInFriendslist()
 {
 	UGameInstance* gameInstance = GetGameInstance();
 	UMlgGameInstance* mlgGameInstance = CastChecked<UMlgGameInstance>(gameInstance);

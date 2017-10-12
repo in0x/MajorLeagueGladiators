@@ -109,17 +109,11 @@ void AMlgGameMode::MatchLost()
 	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
 	waveSystemComponent->Stop();
 	travelToRoomOfShame();
-	//EndMatch();
 }
 
 void AMlgGameMode::HandleMatchHasEnded()
 {
 	Super::HandleMatchHasEnded();
-
-	/*UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
-	waveSystemComponent->Stop();
-
-	travelToRoomOfShame();*/
 }
 
 void AMlgGameMode::travelToRoomOfShame()
@@ -191,7 +185,6 @@ void AMlgGameMode::beginMatch(int32 StartWave)
 	{
 		UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
 		waveSystemComponent->SetStartWave(StartWave);
-		//StartMatch();
 		travelToGameMap();
 	}
 }
@@ -199,7 +192,6 @@ void AMlgGameMode::beginMatch(int32 StartWave)
 void AMlgGameMode::HandleMatchHasStarted()
 {
 	Super::HandleMatchHasStarted();
-	//travelToGameMap();
 }
 
 void AMlgGameMode::travelToGameMap()
