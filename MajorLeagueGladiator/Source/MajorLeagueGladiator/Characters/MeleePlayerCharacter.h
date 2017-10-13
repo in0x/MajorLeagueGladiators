@@ -24,8 +24,9 @@ private:
 	void OnLeftTouchpadX(float Value);
 	void OnLeftTouchpadY(float Value);
 
-	virtual void enableMenu() override;
-	virtual void disableMenu() override;
+	virtual void OnEnableMenu() override;
+	virtual void OnDisableMenu() override;
+	virtual void SetupActionBindings(UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere)
 	UAbilityWidgetComponent* topAbilityWidget;
