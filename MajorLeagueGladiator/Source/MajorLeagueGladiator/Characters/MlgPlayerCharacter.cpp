@@ -225,8 +225,8 @@ void AMlgPlayerCharacter::BeginPlay()
 		SpawnWeapon();
 	}
 
-	bIsMenuEnabled = true;
-	toggleMenu();
+	bIsMenuEnabled = false;
+	ToggleMenuState(false);
 
 	//if (bRenderSecondWindow)
 	//{
@@ -319,7 +319,14 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("LeftTriggerAxis", this, &AMlgPlayerCharacter::SetLeftTriggerStatus);
 	PlayerInputComponent->BindAxis("RightTriggerAxis", this, &AMlgPlayerCharacter::SetRightTriggerStatus);
 
-	SetupActionBindings(PlayerInputComponent);
+	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnRightTriggerClicked);
+	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerReleased);
+	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerClicked);
+
+	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonLeft);
+	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
+
+	//SetupActionBindings(PlayerInputComponent);
 	SetupMenuBindings(PlayerInputComponent);
 
 	// SUPER IMPORTANT, must be called, when playercontroller status changes (in this case we are sure that we now possess a Controller so its different than before)
@@ -335,30 +342,12 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	{
 		abilitySet->BindAbilitiesToInput(PlayerInputComponent, abilitySystemComponent);
 	}
-
-	// REFACTOR: For Quick Testing
-	if (HasAuthority())
-	{
-		//UMlgGameInstance* instance = CastChecked<UMlgGameInstance>(GetGameInstance());
-		//PlayerInputComponent->BindAction("Menu", EInputEvent::IE_Pressed, instance, &UMlgGameInstance::TravelToMainMenu);
-	}
-}
-
-void AMlgPlayerCharacter::SetupActionBindings(UInputComponent* PlayerInputComponent)
-{
-	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnRightTriggerClicked);
-	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerReleased);
-	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerClicked);
-
-	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonLeft);
-	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
-
 }
 
 void AMlgPlayerCharacter::SetupMenuBindings(UInputComponent* PlayerInputComponent)
 {
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnMenuInteract);
-	PlayerInputComponent->BindAction("Menu", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::toggleMenu);
+	PlayerInputComponent->BindAction("Menu", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::ToggleMenu);
 }
 
 void AMlgPlayerCharacter::PossessedBy(AController* NewController)
@@ -641,9 +630,10 @@ void AMlgPlayerCharacter::SetRightTriggerStatus(float Value)
 	rightMesh->GetSingleNodeInstance()->SetBlendSpaceInput(BlendParams);
 }
 
-void AMlgPlayerCharacter::toggleMenu()
+void AMlgPlayerCharacter::ToggleMenu()
 {
 	bIsMenuEnabled = !bIsMenuEnabled;
+	InputComponent->AxisBindings;
 
 	if (bIsMenuEnabled)
 	{
@@ -654,36 +644,43 @@ void AMlgPlayerCharacter::toggleMenu()
 		OnDisableMenu();
 	}
 
-	toggleMenuState(bIsMenuEnabled);
+	ToggleMenuState(bIsMenuEnabled);
+}
+
+void ClearBindings(UInputComponent* InputComponent)
+{
+	InputComponent->ClearActionBindings();
+	InputComponent->AxisBindings.Empty();
 }
 
 void AMlgPlayerCharacter::OnEnableMenu()
 {
-	InputComponent->ClearActionBindings();
+	ClearBindings(InputComponent);
 	SetupMenuBindings(InputComponent);
 }
 
 void AMlgPlayerCharacter::OnDisableMenu()
 {
-	SetupActionBindings(InputComponent);
+	ClearBindings(InputComponent);
+	SetupPlayerInputComponent(InputComponent);
 }
 
-void AMlgPlayerCharacter::toggleMenuState(bool menuEnabled)
+void AMlgPlayerCharacter::ToggleMenuState(bool bMenuEnabled)
 {
 	// Menu stuff
 	{
-		leftViveMesh->SetVisibility(menuEnabled);
-		rightViveMesh->SetVisibility(menuEnabled);
-		widgetInteraction->SetActive(menuEnabled);
-		menuWidgetComponent->SetVisibility(menuEnabled);
+		leftViveMesh->SetVisibility(bMenuEnabled);
+		rightViveMesh->SetVisibility(bMenuEnabled);
+		widgetInteraction->SetActive(bMenuEnabled);
+		menuWidgetComponent->SetVisibility(bMenuEnabled);
 	}
 
 	// Non-Menu stuff
 	{
-		leftMesh->SetVisibility(!menuEnabled);
-		rightMesh->SetVisibility(!menuEnabled);
-		attachedWeapon->GetRootComponent()->SetVisibility(!menuEnabled, true);
-		hudHealth->SetVisibility(!menuEnabled);
+		leftMesh->SetVisibility(!bMenuEnabled);
+		rightMesh->SetVisibility(!bMenuEnabled);
+		attachedWeapon->GetRootComponent()->SetVisibility(!bMenuEnabled, true);
+		hudHealth->SetVisibility(!bMenuEnabled);
 	}
 }
 

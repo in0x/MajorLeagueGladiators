@@ -21,13 +21,11 @@ public:
 	UMaterialInterface* swordMaterial;
 
 private:
+	virtual void ToggleMenuState(bool bMenuEnabled) override;
+	
 	void OnLeftTouchpadX(float Value);
 	void OnLeftTouchpadY(float Value);
-
-	virtual void OnEnableMenu() override;
-	virtual void OnDisableMenu() override;
-	virtual void SetupActionBindings(UInputComponent* PlayerInputComponent) override;
-
+	
 	UPROPERTY(EditAnywhere)
 	UAbilityWidgetComponent* topAbilityWidget;
 
