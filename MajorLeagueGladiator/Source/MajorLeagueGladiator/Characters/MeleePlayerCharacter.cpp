@@ -83,10 +83,7 @@ void AMeleePlayerCharacter::BeginPlay()
 void AMeleePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
 
-void AMeleePlayerCharacter::SetupActionBindings(UInputComponent* PlayerInputComponent)
-{
 	PlayerInputComponent->BindAxis("LeftTouchpadX", this, &AMeleePlayerCharacter::OnLeftTouchpadX);
 	PlayerInputComponent->BindAxis("LeftTouchpadY", this, &AMeleePlayerCharacter::OnLeftTouchpadY);
 }
@@ -103,18 +100,10 @@ void AMeleePlayerCharacter::OnLeftTouchpadY(float Value)
 	bottomAbilityWidget->SetTouchInputY(Value);
 }
 
-void AMeleePlayerCharacter::OnEnableMenu()
+void AMeleePlayerCharacter::ToggleMenuState(bool bMenuEnabled)
 {
-	Super::OnEnableMenu();
+	Super::ToggleMenuState(bMenuEnabled);
 
-	topAbilityWidget->SetVisibility(false);
-	bottomAbilityWidget->SetVisibility(false);
-}
-
-void AMeleePlayerCharacter::OnDisableMenu()
-{
-	Super::OnDisableMenu();
-
-	topAbilityWidget->SetVisibility(false);
-	bottomAbilityWidget->SetVisibility(false);
+	topAbilityWidget->SetVisibility(!bMenuEnabled);
+	bottomAbilityWidget->SetVisibility(!bMenuEnabled);
 }

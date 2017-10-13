@@ -72,11 +72,6 @@ void ARangedPlayerCharacter::BeginPlay()
 void ARangedPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
-void ARangedPlayerCharacter::SetupActionBindings(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupActionBindings(PlayerInputComponent);
 
 	PlayerInputComponent->BindAxis("LeftTouchpadX", this, &ARangedPlayerCharacter::OnLeftTouchpadX);
 	PlayerInputComponent->BindAxis("LeftTouchpadY", this, &ARangedPlayerCharacter::OnLeftTouchpadY);
@@ -106,21 +101,11 @@ void ARangedPlayerCharacter::OnRightTouchpadY(float Value)
 	rightHandAbilityWidget->SetTouchInputY(Value);
 }
 
-void ARangedPlayerCharacter::OnEnableMenu()
+void ARangedPlayerCharacter::ToggleMenuState(bool bMenuEnabled)
 {
-	Super::OnEnableMenu();
-	
-	lefthandTopAbilityWidget->SetVisibility(false);
-	lefthandBottomAbilityWidget->SetVisibility(false);
-	rightHandAbilityWidget->SetVisibility(false);
+	Super::ToggleMenuState(bMenuEnabled);
+
+	lefthandTopAbilityWidget->SetVisibility(!bMenuEnabled);
+	lefthandBottomAbilityWidget->SetVisibility(!bMenuEnabled);
+	rightHandAbilityWidget->SetVisibility(!bMenuEnabled);
 }
-
-void ARangedPlayerCharacter::OnDisableMenu()
-{
-	Super::OnDisableMenu();
-
-	lefthandTopAbilityWidget->SetVisibility(false);
-	lefthandBottomAbilityWidget->SetVisibility(false);
-	rightHandAbilityWidget->SetVisibility(false);
-}
-

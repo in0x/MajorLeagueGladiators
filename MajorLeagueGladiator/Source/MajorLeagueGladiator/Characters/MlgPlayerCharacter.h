@@ -113,11 +113,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UPlayerDamageFeedbackComponent* damageFeedback;
 
-	// Note(Phil): These are extension points for subclasses if they also need change state 
+	// Note(Phil): This is the extension point for subclasses if they also need change state 
 	// when using the menu (i.e. hiding the subclass-specific widgets).
-	virtual void OnEnableMenu();
-	virtual void OnDisableMenu();
-	virtual void SetupActionBindings(UInputComponent* PlayerInputComponent);
+	virtual void ToggleMenuState(bool bMenuEnabled);
 
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
@@ -224,9 +222,11 @@ private:
 
 	bool bIsMenuEnabled;
 
-	void toggleMenu();
+	void ToggleMenu();
 
-	void toggleMenuState(bool menuEnabled);
+	void OnEnableMenu();
+
+	void OnDisableMenu();
 
 	UPROPERTY()
 	UStaticMesh* viveMesh;

@@ -18,14 +18,12 @@ public:
 	virtual void BeginPlay() override;
 
 private:
+	virtual void ToggleMenuState(bool bMenuEnabled) override;
+	
 	void OnLeftTouchpadX(float Value);
 	void OnLeftTouchpadY(float Value);
 	void OnRightTouchpadX(float Value);
 	void OnRightTouchpadY(float Value);
-
-	virtual void OnEnableMenu() override;
-	virtual void OnDisableMenu() override;
-	virtual void SetupActionBindings(UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere)
 	UAbilityWidgetComponent* lefthandTopAbilityWidget;
