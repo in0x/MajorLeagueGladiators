@@ -62,11 +62,13 @@ private:
 	void onFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type Result);
 	void onDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+	void onDestroySessionCompleteWhenShutdown(FName SessionName, bool bWasSuccessful);
 	void onFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult);
 
 	void OnReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
 
 	FOnDestroySessionCompleteDelegate onDestroySessionCompleteDelegate;
+	FOnDestroySessionCompleteDelegate onDestroySessionCompleteWhenShutdownDelegate;
 	FOnFindFriendSessionCompleteDelegate onFindFriendSessionCompleteDelegate;
 	FOnStartSessionCompleteDelegate onStartSessionCompleteDelegate;
 

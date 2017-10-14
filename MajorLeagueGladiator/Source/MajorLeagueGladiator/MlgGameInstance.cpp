@@ -41,6 +41,7 @@ void UMlgGameInstance::Init()
 	Super::Init();
 
 	onDestroySessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onDestroySessionComplete);
+	onDestroySessionCompleteWhenShutdownDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onDestroySessionCompleteWhenShutdown);
 	onFindFriendSessionCompleteDelegate = FOnFindFriendSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onFindFriendSessionComplete);
 	onReadFriendsListCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UMlgGameInstance::OnReadFriendsListComplete);
 }
@@ -48,6 +49,15 @@ void UMlgGameInstance::Init()
 void UMlgGameInstance::Shutdown()
 {
 	Super::Shutdown();
+
+	IOnlineSessionPtr Sessions = findOnlineSession();
+
+	if (Sessions.IsValid())
+	{
+		Sessions->AddOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteWhenShutdownDelegate);
+
+		Sessions->DestroySession(GameSessionName);
+	}
 }
 
 AMlgGameSession* UMlgGameInstance::GetGameSession() const
@@ -238,6 +248,22 @@ void UMlgGameInstance::onDestroySessionComplete(FName SessionName, bool bWasSucc
 	if (bWasSuccessful)
 	{
 		GetWorld()->ServerTravel(MAIN_MENU_MAP);
+	}
+	else
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::onDestroySessionComplete: Session destroy failed"));
+	}
+}
+
+void UMlgGameInstance::onDestroySessionCompleteWhenShutdown(FName SessionName, bool bWasSuccessful)
+{
+	IOnlineSessionPtr Sessions = findOnlineSession();
+
+	Sessions->ClearOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteDelegateHandle);
+
+	if (bWasSuccessful)
+	{
+		UE_LOG(DebugLog, Warning, TEXT("Successfully destroyed session while shutting down"));
 	}
 	else
 	{
