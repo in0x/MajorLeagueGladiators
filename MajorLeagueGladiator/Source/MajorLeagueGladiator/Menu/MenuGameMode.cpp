@@ -29,10 +29,6 @@ TSubclassOf<AGameSession> AMenuGameMode::GetGameSessionClass() const
 
 void AMenuGameMode::BeginPlay()
 {
-	//registerMenuAction<UMenuActionComponent>(this);
-	//registerMenuAction<UMenuActionWidget>(this);
-	//registerMenuAction<AMenuCharacter>(this);
-
 	for (TObjectIterator<UMenuActionComponent> iter; iter; ++iter)
 	{
 		iter->OnMenuActionTriggered.AddUObject(this, &AMenuGameMode::onMenuAction);
