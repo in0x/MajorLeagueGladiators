@@ -77,6 +77,7 @@ private:
 	FDelegateHandle onFindSessionsCompleteDelegateHandle;
 	FDelegateHandle onJoinSessionCompleteDelegateHandle;
 	FDelegateHandle onDestroySessionCompleteDelegateHandle;
+	FDelegateHandle onDestroySessionCompleteWhenShutdownDelegateHandle;
 	FDelegateHandle onFindFriendSessionCompleteDelegateHandle;
 	FDelegateHandle onTravelLocalSessionFailureDelegateHandle;
 
