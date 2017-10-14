@@ -11,6 +11,7 @@
 #include "MlgPlayerController.h"
 #include "MlgGameInstance.h"
 #include "Menu/MenuActionComponent.h"
+#include "Menu/MenuActionWidget.h"
 #include "MlgGameSession.h"
 
 namespace
@@ -40,7 +41,13 @@ TSubclassOf<AGameSession> AMlgGameMode::GetGameSessionClass() const
 void AMlgGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	for (TObjectIterator<UMenuActionComponent> iter; iter; ++iter)
+	{
+		iter->OnMenuActionTriggered.AddUObject(this, &AMlgGameMode::onMenuAction);
+	}
+
+	for (TObjectIterator<UMenuActionWidget> iter; iter; ++iter)
 	{
 		iter->OnMenuActionTriggered.AddUObject(this, &AMlgGameMode::onMenuAction);
 	}
