@@ -3,6 +3,7 @@
 
 HandMotionController::HandMotionController(ACharacter* PlayerCharacter)
 	: playerChar(PlayerCharacter)
+	, rotation(FRotator())
 {
 	IModularFeatures::Get().RegisterModularFeature(IMotionController::GetModularFeatureName(), this);
 }
@@ -15,6 +16,11 @@ HandMotionController::~HandMotionController()
 FName HandMotionController::GetMotionControllerDeviceTypeName() const
 {
 	return FName("Non-VR Mock Controller");
+}
+
+void HandMotionController::SetCustomRotation(const FRotator& Rotation)
+{
+	rotation = Rotation;
 }
 
 bool HandMotionController::GetControllerOrientationAndPosition(const int32 ControllerIndex, const EControllerHand DeviceHand, FRotator& OutOrientation, FVector& OutPosition, float WorldToMetersScale) const
@@ -32,7 +38,7 @@ bool HandMotionController::GetControllerOrientationAndPosition(const int32 Contr
 	trafo.AddToTranslation(offset);
 
 	OutPosition = offset;
-	OutOrientation = FRotator{};
+	OutOrientation = rotation;
 
 	return true;
 }
