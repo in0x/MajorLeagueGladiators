@@ -197,8 +197,9 @@ void AMlgPlayerCharacter::BeginPlay()
 	else
 	{
 		pHandMotionController = std::make_unique<HandMotionController>(this);
-
+		pHandMotionController->SetCustomRotation(FRotator::MakeFromEuler(FVector(0, 60, 0)));
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("NON VR MODE"));
+
 #if 1 //If this is on you can move with the mouse, however it also causes the sliding bug
 		bUseControllerRotationPitch = true;
 		bUseControllerRotationRoll = true;
@@ -310,12 +311,6 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &AMlgPlayerCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AMlgPlayerCharacter::MoveRight);
-
-	PlayerInputComponent->BindAxis("Turn", this, &AMlgPlayerCharacter::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &AMlgPlayerCharacter::AddControllerPitchInput);
-
 	PlayerInputComponent->BindAxis("LeftTriggerAxis", this, &AMlgPlayerCharacter::SetLeftTriggerStatus);
 	PlayerInputComponent->BindAxis("RightTriggerAxis", this, &AMlgPlayerCharacter::SetRightTriggerStatus);
 
@@ -326,7 +321,6 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
 
-	//SetupActionBindings(PlayerInputComponent);
 	SetupMenuBindings(PlayerInputComponent);
 
 	// SUPER IMPORTANT, must be called, when playercontroller status changes (in this case we are sure that we now possess a Controller so its different than before)
@@ -344,8 +338,16 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
+// NOTE(Phil): These are the bindings we still need when the menu is active. Having them in a seperate function allows us to
+// only bind them when activating the menu.
 void AMlgPlayerCharacter::SetupMenuBindings(UInputComponent* PlayerInputComponent)
 {
+	PlayerInputComponent->BindAxis("MoveForward", this, &AMlgPlayerCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AMlgPlayerCharacter::MoveRight);
+
+	PlayerInputComponent->BindAxis("Turn", this, &AMlgPlayerCharacter::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &AMlgPlayerCharacter::AddControllerPitchInput);
+
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnMenuInteract);
 	PlayerInputComponent->BindAction("Menu", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::ToggleMenu);
 }
@@ -657,12 +659,22 @@ void AMlgPlayerCharacter::OnEnableMenu()
 {
 	ClearBindings(InputComponent);
 	SetupMenuBindings(InputComponent);
+	
+	if (pHandMotionController)
+	{
+		pHandMotionController->SetCustomRotation(FRotator::MakeFromEuler(FVector(0, 0, 0)));
+	}
 }
 
 void AMlgPlayerCharacter::OnDisableMenu()
 {
 	ClearBindings(InputComponent);
 	SetupPlayerInputComponent(InputComponent);
+
+	if (pHandMotionController)
+	{
+		pHandMotionController->SetCustomRotation(FRotator::MakeFromEuler(FVector(0, 60, 0)));
+	}
 }
 
 void AMlgPlayerCharacter::ToggleMenuState(bool bMenuEnabled)

@@ -25,6 +25,9 @@ public:
 
 	virtual ETrackingStatus GetControllerTrackingStatus(const int32 ControllerIndex, const EControllerHand DeviceHand) const override;
 	
+	void SetCustomRotation(const FRotator& Rotation);
+
 private:
 	ACharacter* playerChar;
+	FRotator rotation;
 };

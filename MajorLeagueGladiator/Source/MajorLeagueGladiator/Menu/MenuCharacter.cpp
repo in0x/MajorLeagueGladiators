@@ -39,7 +39,6 @@ AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
 	leftMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	rightMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
-	// TODO(Phil): Pull out pointer mesh, hook widgetinteraction to input, build menuwidget, add it to character
 	widgetInteraction = ObjectInitializer.CreateDefaultSubobject<UWidgetInteractionComponent>(this, TEXT("WidgetInteraction"));
 	widgetInteraction->SetupAttachment(rightMesh, FName(TEXT("Touch")));
 	widgetInteraction->bShowDebug = true;
@@ -71,6 +70,15 @@ void AMenuCharacter::BeginPlay()
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'2\' -> Join Game"));
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'1\' -> Host Game"));
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Non-VR Menu Bindings:"));
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("NON VR MODE"));
+
+		bUseControllerRotationPitch = true;
+		bUseControllerRotationRoll = true;
+		bUseControllerRotationYaw = true;
+
+		pHandMotionController = std::make_unique<HandMotionController>(this);
+		pHandMotionController->SetCustomRotation(FRotator::MakeFromEuler(FVector(0, 0, 0)));
 	}
 }
 
@@ -82,6 +90,12 @@ void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	if (!g_IsVREnabled())
 	{
+		PlayerInputComponent->BindAxis("MoveForward", this, &AMenuCharacter::MoveForward);
+		PlayerInputComponent->BindAxis("MoveRight", this, &AMenuCharacter::MoveRight);
+
+		PlayerInputComponent->BindAxis("Turn", this, &AMenuCharacter::AddControllerYawInput);
+		PlayerInputComponent->BindAxis("LookUp", this, &AMenuCharacter::AddControllerPitchInput);
+
 		PlayerInputComponent->BindAction("HostGamePressed", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnHostGamePressed);
 		PlayerInputComponent->BindAction("JoinGamePressed", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnJoinGamePressed);
 		PlayerInputComponent->BindAction("MeleeTutPressed", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnMeleeTutPressed);
@@ -91,6 +105,18 @@ void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PlayerInputComponent->BindAction("JoinFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnJoinFirstFriendInList);
 		PlayerInputComponent->BindAction("InviteFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnInviteFirstPlayerInFriendslist);
 	}
+}
+
+void AMenuCharacter::MoveForward(float Value)
+{
+	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
+	AddMovementInput(direction, Value);
+}
+
+void AMenuCharacter::MoveRight(float Value)
+{
+	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
+	AddMovementInput(direction, Value);
 }
 
 void AMenuCharacter::OnRightTriggerClicked()

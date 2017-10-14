@@ -4,6 +4,7 @@
 
 #include "VRExpansion/VRSimpleCharacter.h"
 #include "MenuActionComponent.h"
+#include "HandMotionController.h"
 #include "MenuCharacter.generated.h"
 
 class UWidgetInteractionComponent;
@@ -32,6 +33,9 @@ private:
 	void OnJoinFirstFriendInList();
 	void OnInviteFirstPlayerInFriendslist();
 
+	void MoveForward(float Value);
+	void MoveRight(float Value);
+
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* leftMesh;
 
@@ -46,4 +50,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float MenuSelectionRayCastRange;
+
+	std::unique_ptr<HandMotionController> pHandMotionController;
 };
