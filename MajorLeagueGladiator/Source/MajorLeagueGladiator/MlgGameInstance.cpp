@@ -54,7 +54,7 @@ void UMlgGameInstance::Shutdown()
 
 	if (Sessions.IsValid())
 	{
-		Sessions->AddOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteWhenShutdownDelegate);
+		onDestroySessionCompleteWhenShutdownDelegateHandle = Sessions->AddOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteWhenShutdownDelegate);
 
 		Sessions->DestroySession(GameSessionName);
 	}
@@ -233,7 +233,7 @@ void UMlgGameInstance::TravelToMainMenu()
 
 	if (Sessions.IsValid())
 	{
-		Sessions->AddOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteDelegate);
+		onDestroySessionCompleteDelegateHandle = Sessions->AddOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteDelegate);
 			
 		Sessions->DestroySession(GameSessionName);
 	}
@@ -259,7 +259,7 @@ void UMlgGameInstance::onDestroySessionCompleteWhenShutdown(FName SessionName, b
 {
 	IOnlineSessionPtr Sessions = findOnlineSession();
 
-	Sessions->ClearOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteDelegateHandle);
+	Sessions->ClearOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteWhenShutdownDelegateHandle);
 
 	if (bWasSuccessful)
 	{
