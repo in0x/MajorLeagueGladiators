@@ -36,7 +36,12 @@ void AMenuGameMode::BeginPlay()
 	
 	for (TObjectIterator<UMenuActionWidget> iter; iter; ++iter)
 	{
-		iter->OnMenuActionTriggered.AddUObject(this, &AMenuGameMode::onMenuAction);
+		if (iter->GetWorld() != world)
+		{
+			continue;
+		}
+
+		iter->OnMenuActionTriggered.AddUObject(this, &AMlgGameMode::onMenuAction);
 	}
 	
 	for (TObjectIterator<AMenuCharacter> iter; iter; ++iter)

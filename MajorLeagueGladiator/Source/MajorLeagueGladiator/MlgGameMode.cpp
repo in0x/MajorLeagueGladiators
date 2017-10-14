@@ -41,17 +41,24 @@ TSubclassOf<AGameSession> AMlgGameMode::GetGameSessionClass() const
 void AMlgGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	for (TObjectIterator<UMenuActionComponent> iter; iter; ++iter)
 	{
 		iter->OnMenuActionTriggered.AddUObject(this, &AMlgGameMode::onMenuAction);
 	}
 
+	UWorld* world = GetWorld();
+
 	for (TObjectIterator<UMenuActionWidget> iter; iter; ++iter)
 	{
+		if (iter->GetWorld() != world)
+		{
+			continue;
+		}
+		
 		iter->OnMenuActionTriggered.AddUObject(this, &AMlgGameMode::onMenuAction);
 	}
-
+	
 	if (isInRoomOfShame())
 	{
 		postEnterRoomOfShame();
@@ -138,8 +145,6 @@ void AMlgGameMode::DestroyAllAi()
 		iter->Destroy();
 	}
 }
-
-
 
 void AMlgGameMode::filterOutAiPlayerStates()
 {
