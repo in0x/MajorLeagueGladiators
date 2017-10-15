@@ -24,9 +24,12 @@ void AFriendsMenuActor::BeginPlay()
 
 	if (!GEngine->IsEditor())
 	{
-		UE_LOG(DebugLog, Log, TEXT("Not fetching friends in editor to prevent crash"));
 		gameInstance->OnFriendlistRead.AddUObject(this, &AFriendsMenuActor::OnFriendlistLoaded);
 		gameInstance->ReadFriendList();
+	}
+	else
+	{
+		UE_LOG(DebugLog, Log, TEXT("Not fetching friends in editor to prevent crash"));
 	}
 	
 	/*ConstructorHelpers::FClassFinder<UFriendWidget> friendWidgetFinder(TEXT("/Game/BluePrints/Menu/FriendWidgetBP"));
@@ -35,6 +38,11 @@ void AFriendsMenuActor::BeginPlay()
 
 	widgetComponent->GetUserWidgetObject();
 	friendWidget->*/
+}
+
+void AFriendsMenuActor::OnFriendsInfoLoaded_Implementation(const TArray<FFriendState>& friends)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("OnFriendsInfoLoaded_Implementation called"));
 }
 
 void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend>>& friendlist)
