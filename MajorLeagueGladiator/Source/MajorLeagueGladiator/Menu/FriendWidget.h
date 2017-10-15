@@ -40,20 +40,20 @@ struct FFriendState
 	bool bCanJoin;
 };
 
-UCLASS()
+UCLASS(Blueprintable)
 class MAJORLEAGUEGLADIATOR_API UFriendWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintImplementableEvent)
-	void SetOnlineState(EOnlineState::Type OnlineState);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void ChangeOnlineState(EOnlineState::Type OnlineState);
 	
-	UFUNCTION(BlueprintImplementableEvent)
-	void SetUsername(const FString& Name);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void ChangeUsername(const FString& Name);
 	
-	UFUNCTION(BlueprintImplementableEvent)
-	void SetCanJoin(bool bJoinable);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void ChangeCanJoin(bool bJoinable);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
