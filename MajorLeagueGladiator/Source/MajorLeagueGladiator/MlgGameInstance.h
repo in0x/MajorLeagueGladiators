@@ -11,7 +11,8 @@
 
 class AMlgGameSession;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(SearchFinishedDelegate, const TArray <FOnlineSessionSearchResult>&);
+DECLARE_MULTICAST_DELEGATE_OneParam(SearchFinishedDelegate, const TArray<FOnlineSessionSearchResult>&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FriendlistReadFinishedDelegate, const TArray<TSharedRef<FOnlineFriend>>&);
 
 struct WaveSystemSavedState
 {
@@ -46,10 +47,11 @@ public:
 	void JoinFirstAvailableFriend();
 	void InviteFirstAvailableFriend();
 
-
 	void TravelToMainMenu();
 
 	SearchFinishedDelegate OnFindSessionFinished;
+
+	FriendlistReadFinishedDelegate OnFriendlistRead;
 
 	EOnlineSessionState::Type GetGameSessionState() const;
 
