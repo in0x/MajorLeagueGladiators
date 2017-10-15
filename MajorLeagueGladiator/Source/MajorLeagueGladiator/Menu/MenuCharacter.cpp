@@ -87,6 +87,7 @@ void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnRightTriggerClicked);
+	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMenuCharacter::OnRightTriggerReleased);
 
 	if (!g_IsVREnabled())
 	{
@@ -127,6 +128,10 @@ void AMenuCharacter::OnRightTriggerClicked()
 	}
 	
 	widgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
+}
+
+void AMenuCharacter::OnRightTriggerReleased()
+{
 	widgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
 }
 
