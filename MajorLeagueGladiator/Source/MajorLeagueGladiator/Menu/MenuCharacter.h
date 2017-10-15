@@ -24,6 +24,10 @@ public:
 
 private:
 	void OnRightTriggerClicked();
+	void OnRightTriggerReleased();
+	void MoveForward(float Value);
+	void MoveRight(float Value);
+
 	void OnHostGamePressed();
 	void OnJoinGamePressed();
 	void OnMeleeTutPressed();
@@ -32,9 +36,6 @@ private:
 	void OnShowFriends();
 	void OnJoinFirstFriendInList();
 	void OnInviteFirstPlayerInFriendslist();
-
-	void MoveForward(float Value);
-	void MoveRight(float Value);
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* leftMesh;
