@@ -50,6 +50,9 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 	TArray<FFriendState> friendStates;
 
 	int32 numFriends = friendlist.Num();
+	
+	// Insert mock user
+	
 	for (int32 i = 0; i < numFriends; ++i)
 	{
 		FString name = friendlist[i]->GetDisplayName();
@@ -64,7 +67,7 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 		{
 			state = EOnlineState::InGame;
 		}
-		else if (bIsOnline)
+		else if (!bIsPlaying && bIsOnline)
 		{
 			state = EOnlineState::Online;
 		}

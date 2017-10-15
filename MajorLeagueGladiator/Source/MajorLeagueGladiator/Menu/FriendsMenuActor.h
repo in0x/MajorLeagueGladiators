@@ -21,7 +21,7 @@ public:
 	virtual void BeginPlay() override;
 	
 protected:
-	UFUNCTION(BlueprintNativeEvent/*BlueprintImplementableEvent*/)
+	UFUNCTION(BlueprintNativeEvent)
 	void OnFriendsInfoLoaded(const TArray<FFriendState>& friends);
 
 	void OnFriendsInfoLoaded_Implementation(const TArray<FFriendState>& friends);
