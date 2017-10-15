@@ -33,6 +33,8 @@ namespace
 	const FName VR_CAPSULE_COLLISION_NAME("VrCapsule");
 	const FName VR_GRIP_1_NAME("VRGripP1");
 	const FVector INVALID_TARGET_LOCATION = FVector(0,0, 9'999'999);
+	const FName TETHER_SOURCE_NAME("Source");
+	const FName TETHER_TARGET_NAME("Target");
 
 	constexpr bool bRenderSecondWindow = false;
 }
@@ -171,6 +173,19 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	leftViveMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	rightViveMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
+	tetherParticleSystemComponent = ObjectInitializer.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("tetherParticleSystemComponent"));
+	ConstructorHelpers::FObjectFinder<UParticleSystem> tether(TEXT("ParticleSystem'/Game/ParticleSystems/PS_GravityBeam.PS_GravityBeam'"));
+	tetherParticleSystemComponent->SetTemplate(tether.Object);
+	tetherParticleSystemComponent->SetupAttachment(leftMesh);
+
+
+	pullConeParticleSystemComponent = ObjectInitializer.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("pullConeParticleSystemComponent"));
+	ConstructorHelpers::FObjectFinder<UParticleSystem> cone(TEXT("ParticleSystem'/Game/ParticleSystems/PS_GravityGun_2.PS_GravityGun_2'"));
+	pullConeParticleSystemComponent->SetTemplate(cone.Object);
+	pullConeParticleSystemComponent->SetupAttachment(leftMesh);
+
+	
+
 	//if (bRenderSecondWindow)
 	//{
 	//	spectator = ObjectInitializer.CreateDefaultSubobject<USpectatorComponent>(this, TEXT("Spectator"));
@@ -230,6 +245,9 @@ void AMlgPlayerCharacter::BeginPlay()
 
 	bIsMenuEnabled = false;
 	ToggleMenuState(false);
+	
+	tetherParticleSystemComponent->DeactivateSystem();
+	pullConeParticleSystemComponent->DeactivateSystem();
 
 	//if (bRenderSecondWindow)
 	//{
@@ -698,3 +716,59 @@ void AMlgPlayerCharacter::ToggleMenuState(bool bMenuEnabled)
 	}
 }
 
+bool AMlgPlayerCharacter::SetTetherTarget_Server_Validate(AActor * targetActor)
+{
+	return true;
+}
+
+void AMlgPlayerCharacter::SetTetherTarget_Server_Implementation(AActor * targetActor)
+{
+	AActor* oldtether = tetherTarget;
+	tetherTarget = targetActor;
+	OnRep_tetherTarget(oldtether);
+}
+
+void AMlgPlayerCharacter::OnRep_tetherTarget(AActor* oldValue)
+{
+	if (tetherTarget == oldValue)
+	{
+		return;
+	}
+
+	if (tetherTarget == nullptr)
+	{
+		tetherParticleSystemComponent->DeactivateSystem();
+		return;
+	}
+
+	tetherParticleSystemComponent->SetActorParameter(TETHER_TARGET_NAME, tetherTarget);
+
+	if (!tetherParticleSystemComponent->IsActive())
+	{
+		tetherParticleSystemComponent->ActivateSystem();
+	}
+}
+
+bool AMlgPlayerCharacter::SetIsLookingForPullTarget_Server_Validate(bool newIsLookingForPullTarget)
+{
+	return true;
+}
+
+void AMlgPlayerCharacter::SetIsLookingForPullTarget_Server_Implementation(bool newIsLookingForPullTarget)
+{
+	bool oldValue = bIsLookingForPullTarget;
+	bIsLookingForPullTarget = newIsLookingForPullTarget;
+	OnRep_bIsLookingForPullTarget(oldValue);
+}
+
+void AMlgPlayerCharacter::OnRep_bIsLookingForPullTarget(bool oldValue)
+{
+	if (bIsLookingForPullTarget)
+	{
+		pullConeParticleSystemComponent->ActivateSystem();
+	}
+	else
+	{
+		pullConeParticleSystemComponent->DeactivateSystem();
+	}
+}
