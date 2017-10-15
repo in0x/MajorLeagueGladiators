@@ -13,7 +13,26 @@
 namespace
 {
 	const FName AIM_SOCKET_NAME("Aim");
+
+	void SetTether(AMlgPlayerCharacter* mlgCharacter, AActor* actor)
+	{
+		mlgCharacter->SetTetherTarget_Server_Implementation(actor);
+		if (!mlgCharacter->HasAuthority())
+		{
+			mlgCharacter->SetTetherTarget_Server(actor);
+		}
+	}
+
+	void SetIsLookingForPullTarget(AMlgPlayerCharacter* mlgCharacter, bool bIsLookingForPullTarget)
+	{
+		mlgCharacter->SetIsLookingForPullTarget_Server_Implementation(bIsLookingForPullTarget);
+		if (!mlgCharacter->HasAuthority())
+		{
+			mlgCharacter->SetIsLookingForPullTarget_Server(bIsLookingForPullTarget);
+		}
+	}
 }
+
 
 UGravityGunAbility::UGravityGunAbility(const FObjectInitializer& ObjectInitializer)
 	: PullRange(1000)
@@ -73,7 +92,7 @@ void UGravityGunAbility::SearchAndPull()
 	if (!searchTask->BeginSpawningActor(this, AGameplayAbilityTargetActor_Cone::StaticClass(), spawnedActor))
 	{
 		return;
-	}	
+	}
 
 	auto* searchActor = CastChecked<AGameplayAbilityTargetActor_Cone>(spawnedActor);
 
@@ -91,10 +110,15 @@ void UGravityGunAbility::SearchAndPull()
 	searchActor->CollisionChannel = CollisionStatics::GetCollsionChannelByName(CollisionStatics::GRIPSCAN_TRACE_CHANNEL_NAME);
 
 	searchTask->FinishSpawningActor(this, spawnedActor);
+
+	AMlgPlayerCharacter* owner = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	SetIsLookingForPullTarget(owner, true);
 }
 
 void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHandle& Data)
 {
+	AMlgPlayerCharacter* owner = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	SetIsLookingForPullTarget(owner, false);
 	searchTask = nullptr;
 
 	AActor* foundActor = Data.Data[0]->GetActors()[0].Get();
@@ -104,10 +128,15 @@ void UGravityGunAbility::OnSearchSuccessful(const FGameplayAbilityTargetDataHand
 	pullTask->OnSuccess.AddUObject(this, &UGravityGunAbility::OnActorPullFinished);
 	pullTask->OnFail.AddUObject(this, &UGravityGunAbility::OnActorPullFailed);
 	pullTask->ReadyForActivation();
+
+	auto* mlgCharacter = CastChecked<AMlgPlayerCharacter>(gripController->GetOwner());
+	SetTether(mlgCharacter, foundActor);	
 }
 
 void UGravityGunAbility::OnSearchCancelled(const FGameplayAbilityTargetDataHandle& Data)
 {
+	AMlgPlayerCharacter* owner = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	SetIsLookingForPullTarget(owner, false);
 	searchTask = nullptr;
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
@@ -125,6 +154,7 @@ void UGravityGunAbility::OnActorPullFinished(AActor* pulledActor)
 			pack->ChargePackIfPossible(owner);
 		}
 	}
+	SetTether(owner, nullptr);
 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
@@ -132,6 +162,8 @@ void UGravityGunAbility::OnActorPullFinished(AActor* pulledActor)
 void UGravityGunAbility::OnActorPullFailed()
 {
 	pullTask = nullptr;
+	AMlgPlayerCharacter* owner = CastChecked<AMlgPlayerCharacter>(GetOwningActorFromActorInfo());
+	SetTether(owner, nullptr);
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }
 

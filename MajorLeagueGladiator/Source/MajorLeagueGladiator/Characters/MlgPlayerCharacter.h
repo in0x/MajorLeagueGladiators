@@ -88,6 +88,12 @@ public:
 	void PlayRumbleLeft() const;
 	void PlayRumbleRight() const;
 
+	UFUNCTION(Server, WithValidation, reliable)
+	void SetTetherTarget_Server(AActor* targetActor);
+
+	UFUNCTION(Server, WithValidation, reliable)
+	void SetIsLookingForPullTarget_Server(bool newIsLookingForPullTarget);
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	USkeletalMeshComponent* leftMesh;
@@ -119,6 +125,12 @@ protected:
 	// Note(Phil): This is the extension point for subclasses if they also need change state 
 	// when using the menu (i.e. hiding the subclass-specific widgets).
 	virtual void ToggleMenuState(bool bMenuEnabled);
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystemComponent* tetherParticleSystemComponent;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystemComponent* pullConeParticleSystemComponent;
 
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
@@ -236,4 +248,16 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* rightViveMesh;
+	
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_tetherTarget)
+	AActor* tetherTarget;
+
+	UFUNCTION()
+	void OnRep_tetherTarget(AActor* oldValue);
+
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_bIsLookingForPullTarget)
+	bool bIsLookingForPullTarget;
+
+	UFUNCTION()
+	void OnRep_bIsLookingForPullTarget(bool oldValue);
 };
