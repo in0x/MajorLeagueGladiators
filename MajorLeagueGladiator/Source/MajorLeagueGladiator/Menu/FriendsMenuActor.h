@@ -10,7 +10,7 @@
 class FOnlineFriend;
 class UWidgetComponent;
 
-UCLASS()
+UCLASS(Blueprintable)
 class MAJORLEAGUEGLADIATOR_API AFriendsMenuActor : public AActor
 {
 	GENERATED_BODY()
@@ -21,8 +21,10 @@ public:
 	virtual void BeginPlay() override;
 	
 protected:
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintNativeEvent/*BlueprintImplementableEvent*/)
 	void OnFriendsInfoLoaded(const TArray<FFriendState>& friends);
+
+	void OnFriendsInfoLoaded_Implementation(const TArray<FFriendState>& friends);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UWidgetComponent* widgetComponent;
