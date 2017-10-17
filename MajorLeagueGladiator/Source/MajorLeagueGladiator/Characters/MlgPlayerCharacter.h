@@ -113,6 +113,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UPlayerDamageFeedbackComponent* damageFeedback;
 
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_AttachedWeapon)
+	AMlgGrippableMeshActor* attachedWeapon;
+
 	// Note(Phil): This is the extension point for subclasses if they also need change state 
 	// when using the menu (i.e. hiding the subclass-specific widgets).
 	virtual void ToggleMenuState(bool bMenuEnabled);
@@ -152,9 +155,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AMlgGrippableMeshActor> startWeaponClass;
-
-	UPROPERTY(Transient, ReplicatedUsing = OnRep_AttachedWeapon)
-	AMlgGrippableMeshActor* attachedWeapon;
 
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* hudHealth;
