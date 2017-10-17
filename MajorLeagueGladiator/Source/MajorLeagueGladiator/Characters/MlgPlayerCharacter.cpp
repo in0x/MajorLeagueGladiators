@@ -636,6 +636,8 @@ void AMlgPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AMlgPlayerCharacter, attachedWeapon);
+	DOREPLIFETIME(AMlgPlayerCharacter, bIsLookingForPullTarget);
+	DOREPLIFETIME(AMlgPlayerCharacter, tetherTarget);
 }
 
 void AMlgPlayerCharacter::SetLeftTriggerStatus(float Value)
