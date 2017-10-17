@@ -231,9 +231,9 @@ private:
 	UPROPERTY()
 	UStaticMesh* viveMesh;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* leftViveMesh;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* rightViveMesh;
 };
