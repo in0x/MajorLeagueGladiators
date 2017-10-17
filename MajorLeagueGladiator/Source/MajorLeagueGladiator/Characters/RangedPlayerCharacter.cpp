@@ -8,6 +8,8 @@
 #include "Abilities/DashAbility.h"
 #include "Abilities/GrenadeAbility.h"
 #include "PlayerDeathComponent.h"
+#include "MlgGrippableMeshActor.h"
+#include "TriggerZoneComponent.h"
 
 namespace 
 {
@@ -108,4 +110,7 @@ void ARangedPlayerCharacter::ToggleMenuState(bool bMenuEnabled)
 	lefthandTopAbilityWidget->SetVisibility(!bMenuEnabled);
 	lefthandBottomAbilityWidget->SetVisibility(!bMenuEnabled);
 	rightHandAbilityWidget->SetVisibility(!bMenuEnabled);
+	
+	auto triggerZone = attachedWeapon->FindComponentByClass<UTriggerZoneComponent>();
+	triggerZone->SetVisibility(false);
 }
