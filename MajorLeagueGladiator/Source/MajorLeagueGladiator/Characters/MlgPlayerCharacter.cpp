@@ -33,7 +33,6 @@ namespace
 	const FName VR_CAPSULE_COLLISION_NAME("VrCapsule");
 	const FName VR_GRIP_1_NAME("VRGripP1");
 	const FVector INVALID_TARGET_LOCATION = FVector(0,0, 9'999'999);
-	const FName TETHER_SOURCE_NAME("Source");
 	const FName TETHER_TARGET_NAME("Target");
 
 	constexpr bool bRenderSecondWindow = false;
@@ -177,12 +176,15 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	ConstructorHelpers::FObjectFinder<UParticleSystem> tether(TEXT("ParticleSystem'/Game/ParticleSystems/PS_GravityBeam.PS_GravityBeam'"));
 	tetherParticleSystemComponent->SetTemplate(tether.Object);
 	tetherParticleSystemComponent->SetupAttachment(leftMesh);
+	tetherParticleSystemComponent->bAutoActivate = false;
 
 
 	pullConeParticleSystemComponent = ObjectInitializer.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("pullConeParticleSystemComponent"));
 	ConstructorHelpers::FObjectFinder<UParticleSystem> cone(TEXT("ParticleSystem'/Game/ParticleSystems/PS_GravityGun_2.PS_GravityGun_2'"));
 	pullConeParticleSystemComponent->SetTemplate(cone.Object);
 	pullConeParticleSystemComponent->SetupAttachment(leftMesh);
+	pullConeParticleSystemComponent->bAutoActivate = false;
+
 
 	
 
@@ -246,9 +248,6 @@ void AMlgPlayerCharacter::BeginPlay()
 	bIsMenuEnabled = false;
 	ToggleMenuState(false);
 	
-	tetherParticleSystemComponent->DeactivateSystem();
-	pullConeParticleSystemComponent->DeactivateSystem();
-
 	//if (bRenderSecondWindow)
 	//{
 	//	if (IsLocallyControlled())
