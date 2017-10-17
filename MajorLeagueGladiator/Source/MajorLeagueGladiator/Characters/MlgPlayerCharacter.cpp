@@ -168,6 +168,8 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	leftViveMesh->SetupAttachment(LeftMotionController);
 	rightViveMesh->SetupAttachment(RightMotionController);
+	leftViveMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+	rightViveMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
 	//if (bRenderSecondWindow)
 	//{
