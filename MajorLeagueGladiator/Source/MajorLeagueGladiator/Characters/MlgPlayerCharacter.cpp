@@ -709,7 +709,12 @@ void AMlgPlayerCharacter::ToggleMenuState(bool bMenuEnabled)
 	{
 		leftMesh->SetVisibility(!bMenuEnabled);
 		rightMesh->SetVisibility(!bMenuEnabled);
-		attachedWeapon->GetRootComponent()->SetVisibility(!bMenuEnabled, true);
+	
+		if (attachedWeapon != nullptr)
+		{
+			attachedWeapon->GetRootComponent()->SetVisibility(!bMenuEnabled, true);
+		}
+
 		hudHealth->SetVisibility(!bMenuEnabled);
 	}
 }
