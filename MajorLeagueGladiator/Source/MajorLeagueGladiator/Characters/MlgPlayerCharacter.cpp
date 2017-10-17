@@ -34,6 +34,7 @@ namespace
 	const FName VR_GRIP_1_NAME("VRGripP1");
 	const FVector INVALID_TARGET_LOCATION = FVector(0,0, 9'999'999);
 	const FName TETHER_TARGET_NAME("Target");
+	const FName AIM_SOCKET_NAME("Aim");
 
 	constexpr bool bRenderSecondWindow = false;
 }
@@ -175,17 +176,15 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	tetherParticleSystemComponent = ObjectInitializer.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("tetherParticleSystemComponent"));
 	ConstructorHelpers::FObjectFinder<UParticleSystem> tether(TEXT("ParticleSystem'/Game/ParticleSystems/PS_GravityBeam.PS_GravityBeam'"));
 	tetherParticleSystemComponent->SetTemplate(tether.Object);
-	tetherParticleSystemComponent->SetupAttachment(leftMesh);
+	tetherParticleSystemComponent->SetupAttachment(leftMesh, AIM_SOCKET_NAME);
 	tetherParticleSystemComponent->bAutoActivate = false;
 
 
 	pullConeParticleSystemComponent = ObjectInitializer.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("pullConeParticleSystemComponent"));
 	ConstructorHelpers::FObjectFinder<UParticleSystem> cone(TEXT("ParticleSystem'/Game/ParticleSystems/PS_GravityGun_2.PS_GravityGun_2'"));
 	pullConeParticleSystemComponent->SetTemplate(cone.Object);
-	pullConeParticleSystemComponent->SetupAttachment(leftMesh);
+	pullConeParticleSystemComponent->SetupAttachment(leftMesh, AIM_SOCKET_NAME);
 	pullConeParticleSystemComponent->bAutoActivate = false;
-
-
 	
 
 	//if (bRenderSecondWindow)
