@@ -761,6 +761,11 @@ void AMlgPlayerCharacter::SetIsLookingForPullTarget_Server_Implementation(bool n
 
 void AMlgPlayerCharacter::OnRep_bIsLookingForPullTarget(bool oldValue)
 {
+	if (bIsLookingForPullTarget == oldValue)
+	{
+		return;
+	}
+
 	if (bIsLookingForPullTarget)
 	{
 		pullConeParticleSystemComponent->ActivateSystem();
