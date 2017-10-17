@@ -110,7 +110,10 @@ void ARangedPlayerCharacter::ToggleMenuState(bool bMenuEnabled)
 	lefthandTopAbilityWidget->SetVisibility(!bMenuEnabled);
 	lefthandBottomAbilityWidget->SetVisibility(!bMenuEnabled);
 	rightHandAbilityWidget->SetVisibility(!bMenuEnabled);
-	
-	auto triggerZone = attachedWeapon->FindComponentByClass<UTriggerZoneComponent>();
-	triggerZone->SetVisibility(false);
+
+	if (attachedWeapon != nullptr)
+	{
+		auto triggerZone = attachedWeapon->FindComponentByClass<UTriggerZoneComponent>();
+		triggerZone->SetVisibility(false);
+	}
 }
