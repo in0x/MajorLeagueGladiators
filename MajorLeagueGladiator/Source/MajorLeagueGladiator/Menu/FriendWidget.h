@@ -17,6 +17,8 @@ namespace EOnlineState
 	};
 }
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FJoinFriendRequestDelegate, int32, FriendIndex);
+
 USTRUCT(BlueprintType)
 struct FFriendState
 {
@@ -55,10 +57,22 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void ChangeCanJoin(bool bJoinable);
 
+	UFUNCTION(BlueprintCallable)
+	void ChangeFriendIndex(int32 Index);
+
+	UPROPERTY(BlueprintAssignable)
+	FJoinFriendRequestDelegate JoinFriendRequested;
+
 protected:
+	UFUNCTION(BlueprintCallable)
+	void EmitJoinFriendRequested() const;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString username;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 friendIndex;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TEnumAsByte<EOnlineState::Type> onlineState;
 	

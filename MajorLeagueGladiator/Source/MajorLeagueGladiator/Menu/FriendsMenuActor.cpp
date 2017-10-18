@@ -31,13 +31,6 @@ void AFriendsMenuActor::BeginPlay()
 	{
 		UE_LOG(DebugLog, Log, TEXT("Not fetching friends in editor to prevent crash"));
 	}
-	
-	/*ConstructorHelpers::FClassFinder<UFriendWidget> friendWidgetFinder(TEXT("/Game/BluePrints/Menu/FriendWidgetBP"));
-
-	UFriendWidget* friendWidget = CreateWidget<TSubclassOf<UFriendWidget>>(GetGameInstance(), friendWidgetFinder.Class);
-
-	widgetComponent->GetUserWidgetObject();
-	friendWidget->*/
 }
 
 void AFriendsMenuActor::OnFriendsInfoLoaded_Implementation(const TArray<FFriendState>& friends)
@@ -48,10 +41,7 @@ void AFriendsMenuActor::OnFriendsInfoLoaded_Implementation(const TArray<FFriendS
 void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend>>& friendlist)
 {
 	TArray<FFriendState> friendStates;
-
 	int32 numFriends = friendlist.Num();
-	
-	// Insert mock user
 	
 	for (int32 i = 0; i < numFriends; ++i)
 	{
@@ -79,37 +69,12 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 		friendStates.Emplace(name, state, bCanJoin);
 	}
 
-	OnFriendsInfoLoaded(friendStates);
-
-	/*
-		TODO(Phil): For each friend:
-		
-		* CreateWidget call on FriendWidget
-		* Set state using info
-		* Add widget to scrollable widget;
-	
-	*/
-
-	//
-
-	/*int32 IndexOfFirstAvailableFriend = 0;
-	const int32 friendlistLength = friendList.Num();
-
-	while (IndexOfFirstAvailableFriend < friendlistLength)
-	{
-		if (friendList[IndexOfFirstAvailableFriend]->GetPresence().bIsPlayingThisGame)
-		{
-			break;
-		}
-		++IndexOfFirstAvailableFriend;
-	}
-
-	if (IndexOfFirstAvailableFriend >= friendlistLength)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("No Friend Found to Join"));
-		return;
-	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Joining: %s"), *friendList[IndexOfFirstAvailableFriend]->GetDisplayName()));*/
+	OnFriendsInfoLoaded(friendStates);	
 }
+
+void AFriendsMenuActor::OnJoinFriendRequest(int32 friendIndex)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("OnJoinFriendRequested called but not implemented yet."));
+}
+
 
