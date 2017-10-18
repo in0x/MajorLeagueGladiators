@@ -31,4 +31,7 @@ protected:
 
 private:
 	void OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend>>& friendlist);
+
+	UFUNCTION(BlueprintCallable, BlueprintAssignable)
+	void OnJoinFriendRequest(int32 friendIndex);
 };
