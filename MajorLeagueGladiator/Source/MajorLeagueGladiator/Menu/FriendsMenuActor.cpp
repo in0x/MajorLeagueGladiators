@@ -42,7 +42,11 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 {
 	TArray<FFriendState> friendStates;
 	int32 numFriends = friendlist.Num();
-	
+
+	friendStates.Emplace(TEXT("TestInGame"), EOnlineState::InGame, true);
+	friendStates.Emplace(TEXT("TestOnline"), EOnlineState::Online, false);
+	friendStates.Emplace(TEXT("TestOffline"), EOnlineState::Offline, false);
+
 	for (int32 i = 0; i < numFriends; ++i)
 	{
 		FString name = friendlist[i]->GetDisplayName();
@@ -77,4 +81,8 @@ void AFriendsMenuActor::OnJoinFriendRequest(int32 friendIndex)
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("OnJoinFriendRequested called but not implemented yet."));
 }
 
+void AFriendsMenuActor::BindToFriendWidget(UFriendWidget* Widget)
+{
+	Widget->JoinFriendRequested.AddDynamic(this, &AFriendsMenuActor::OnJoinFriendRequest);
+}
 

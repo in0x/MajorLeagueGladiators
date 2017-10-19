@@ -21,7 +21,7 @@ public:
 	virtual void BeginPlay() override;
 	
 protected:
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void OnFriendsInfoLoaded(const TArray<FFriendState>& friends);
 
 	void OnFriendsInfoLoaded_Implementation(const TArray<FFriendState>& friends);
@@ -29,9 +29,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UWidgetComponent* widgetComponent;
 
+	UFUNCTION()
+	void OnJoinFriendRequest(int32 friendIndex);
+
+	UFUNCTION(BlueprintCallable)
+	void BindToFriendWidget(UFriendWidget* Widget);
+
 private:
 	void OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend>>& friendlist);
-
-	UFUNCTION(BlueprintCallable, BlueprintAssignable)
-	void OnJoinFriendRequest(int32 friendIndex);
 };
