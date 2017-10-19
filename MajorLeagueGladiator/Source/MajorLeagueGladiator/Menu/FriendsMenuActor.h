@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "FriendWidget.h"
+#include "Online.h"
 #include "FriendsMenuActor.generated.h"
 
 class FOnlineFriend;
@@ -32,9 +33,24 @@ protected:
 	UFUNCTION()
 	void OnJoinFriendRequest(int32 friendIndex);
 
-	UFUNCTION(BlueprintCallable)
-	void BindToFriendWidget(UFriendWidget* Widget);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<UFriendWidget*> friendWidgets;
 
 private:
 	void OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend>>& friendlist);
+
+	UFUNCTION()
+	void OnFriendsRefreshRequested();
+
+	UFUNCTION(BlueprintCallable)
+	void BindToFriendWidget(UFriendWidget* Widget);
+
+	UFUNCTION(BlueprintCallable)
+	void HideUnusedWidgets(int32 LastUsedIndex);
+
+	void FindFriendSession(TSharedRef<FOnlineFriend> Friend);
+	void OnFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult);
+
+	FOnFindFriendSessionCompleteDelegate onFindFriendSessionCompleteDelegate;
+	FDelegateHandle onFindFriendSessionCompleteDelegateHandle;
 };
