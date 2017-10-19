@@ -44,6 +44,7 @@ public:
 
 	void ReadFriendList();
 	
+	void JoinFriend(int32 friendlistIndex);
 	void JoinFirstAvailableFriend();
 	void InviteFirstAvailableFriend();
 

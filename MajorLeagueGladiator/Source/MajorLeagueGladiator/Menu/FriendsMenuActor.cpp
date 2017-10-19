@@ -78,7 +78,11 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 
 void AFriendsMenuActor::OnJoinFriendRequest(int32 friendIndex)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("OnJoinFriendRequested called but not implemented yet."));
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("OnJoinFriendRequested called"));
+
+	UGameInstance* result = GetGameInstance();
+	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(result);
+	gameInstance->JoinFriend(friendIndex);
 }
 
 void AFriendsMenuActor::BindToFriendWidget(UFriendWidget* Widget)
