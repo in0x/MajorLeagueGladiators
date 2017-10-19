@@ -379,12 +379,17 @@ void UMlgGameInstance::JoinFirstAvailableFriend()
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Joining: %s"), *friendList[IndexOfFirstAvailableFriend]->GetDisplayName()));
+	JoinFriend(IndexOfFirstAvailableFriend);
+}
+
+void UMlgGameInstance::JoinFriend(int32 friendlistIndex)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Joining: %s"), *friendList[friendlistIndex]->GetDisplayName()));
 
 	IOnlineSessionPtr session = findOnlineSession();
 
 	onFindFriendSessionCompleteDelegateHandle = session->AddOnFindFriendSessionCompleteDelegate_Handle(0, onFindFriendSessionCompleteDelegate);
-	if (!session->FindFriendSession(0, *friendList[IndexOfFirstAvailableFriend]->GetUserId()))
+	if (!session->FindFriendSession(0, *friendList[friendlistIndex]->GetUserId()))
 	{
 		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::JoinFirstAvailableFriend(): Start Find Friend Session Failed"));
 		session->ClearOnFindFriendSessionCompleteDelegate_Handle(0, onFindFriendSessionCompleteDelegateHandle);
