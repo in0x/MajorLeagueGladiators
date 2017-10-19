@@ -26,14 +26,18 @@ struct FFriendState
 
 	FFriendState() = default;
 
-	FFriendState(const FString& Username, EOnlineState::Type OnlineState, bool bJoinable)
+	FFriendState(const FString& Username, int32 FriendIndex, EOnlineState::Type OnlineState, bool bJoinable)
 		: username(Username)
+		, friendIndex(FriendIndex)
 		, onlineState(OnlineState)
 		, bCanJoin(bJoinable)
 	{}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString username;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 friendIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TEnumAsByte<EOnlineState::Type> onlineState;
@@ -62,6 +66,15 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FJoinFriendRequestDelegate JoinFriendRequested;
+
+	UFUNCTION(BlueprintCallable)
+	const FString& GetUsername() const;
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetFriendIndex() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool GetCanJoin() const;
 
 protected:
 	UFUNCTION(BlueprintCallable)

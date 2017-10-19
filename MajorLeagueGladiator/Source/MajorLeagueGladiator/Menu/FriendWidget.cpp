@@ -12,3 +12,18 @@ void UFriendWidget::EmitJoinFriendRequested() const
 {
 	JoinFriendRequested.Broadcast(friendIndex);
 }
+
+const FString& UFriendWidget::GetUsername() const
+{
+	return username;
+}
+
+int32 UFriendWidget::GetFriendIndex() const
+{
+	return friendIndex;
+}
+
+bool UFriendWidget::GetCanJoin() const
+{
+	return bCanJoin;
+}
