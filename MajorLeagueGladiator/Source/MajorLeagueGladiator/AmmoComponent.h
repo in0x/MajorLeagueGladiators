@@ -25,15 +25,12 @@ public:
 	void ConsumeAmmo();
 	void IncreaseAmmo(int32 Amount);
 	
-	TSubclassOf<ABaseProjectile> GetProjectileType();
 	int32 GetAmmoCount() const;
 	int32 GetMaxAmmoCount() const;
 	
 	AmmoChangedDelegate OnAmmoChanged;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Ammo")
-	TSubclassOf<ABaseProjectile> projectileClass;
 	
 	UPROPERTY(EditAnywhere, Category = "Ammo")
 	int32 maxAmmo;
