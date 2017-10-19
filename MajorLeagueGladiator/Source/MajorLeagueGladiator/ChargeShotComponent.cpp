@@ -2,6 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "ChargeShotComponent.h"
+#include "Projectiles/HitscanProjectile.h"
 
 UChargeShotComponent::UChargeShotComponent()
 	: MaxValue(2.0f)
@@ -9,6 +10,7 @@ UChargeShotComponent::UChargeShotComponent()
 	, TimeToReachMaxValue(3.0f)
 	, currentValue(0.0f)
 	, currentTime(0.0f)
+	, projectileClass(AHitscanProjectile::StaticClass())
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -39,6 +41,24 @@ float UChargeShotComponent::GetValue()
 float UChargeShotComponent::GetValuePercentage()
 {
 	return currentValue / MaxValue;
+}
+
+void UChargeShotComponent::FireHitscanShot()
+{
+	// This component should be attached onto the socket we want to shoot from
+	FTransform transform = GetComponentTransform();
+
+	float charge = GetValue();
+
+	FProjectileSpawnParams params;
+	params.DamageScale = charge;
+	params.Scale3DMultiplier = FVector(charge, charge, 1.f);
+
+	ABaseProjectile* defaultProjectile = projectileClass.GetDefaultObject();
+
+	defaultProjectile->FireProjectile(transform.GetLocation(), transform.GetRotation().GetForwardVector(), GetOwner(), GetOwner()->GetInstigatorController(), params);
+
+	Reset();
 }
 
 void UChargeShotComponent::Reset()

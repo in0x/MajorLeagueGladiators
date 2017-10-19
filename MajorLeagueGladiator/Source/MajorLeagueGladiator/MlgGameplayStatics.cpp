@@ -23,6 +23,9 @@ namespace
 		check(predictEffectComp);
 		return predictEffectComp;
 	}
+
+	FName BEAM_EMITTER_TARGET_NAME("BeamTarget");
+
 }
 
 
@@ -222,6 +225,36 @@ bool UMlgGameplayStatics::ApplyRadialDamageWithFalloff(const UObject* WorldConte
 	return bAppliedDamage;
 }
 
+
+UParticleSystemComponent* UMlgGameplayStatics::CreateParticleSystem(UParticleSystem* EmitterTemplate, UWorld* World, AActor* Actor, bool bAutoDestroy)
+{
+	UParticleSystemComponent* PSC = NewObject<UParticleSystemComponent>((Actor ? Actor : (UObject*)World));
+	PSC->bAutoDestroy = bAutoDestroy;
+	PSC->bAllowAnyoneToDestroyMe = true;
+	PSC->SecondsBeforeInactive = 0.0f;
+	PSC->bAutoActivate = false;
+	PSC->SetTemplate(EmitterTemplate);
+	PSC->bOverrideLODMethod = false;
+
+	return PSC;
+}
+
+UParticleSystemComponent* UMlgGameplayStatics::SpawnBeamEmitter(UWorld* World, const FBeamEmitterSpawnParams& Params)
+{
+	UParticleSystemComponent* PSC = nullptr;
+	if (World && Params.Template)
+	{
+		PSC = UGameplayStatics::SpawnEmitterAtLocation(World, Params.Template, Params.Source, (Params.Target - Params.Source).Rotation(), Params.bAutoDestroy);
+
+
+
+		PSC->SetVectorParameter(BEAM_EMITTER_TARGET_NAME, Params.Target);
+
+
+	}
+	return PSC;
+}
+
 void UMlgGameplayStatics::SpawnEmitterNetworked(UWorld* World, const FEmitterSpawnParams& Params)
 {
 	getReplicatedEffectsComponent(World)->CreateParticleSystemAtLocation(Params);
@@ -236,6 +269,26 @@ void UMlgGameplayStatics::SpawnEmitterLocalOnly(const APawn* Source, const FEmit
 {
 	getPredictedEffectsComponent(Source)->CreateParticleSystemLocal(Params);
 }
+
+
+
+void UMlgGameplayStatics::SpawnBeamEmitterNetworked(UWorld* World, const FBeamEmitterSpawnParams& Params)
+{
+	getReplicatedEffectsComponent(World)->CreateBeamParticleSystemAtLocation(Params);
+}
+
+void UMlgGameplayStatics::SpawnBeamEmitterNetworkedPredicted(const APawn* Source, const FBeamEmitterSpawnParams& Params)
+{
+	getPredictedEffectsComponent(Source)->CreateBeamParticleSystemNetworkedPredicted(Params);
+}
+
+void UMlgGameplayStatics::SpawnBeamEmitterLocalOnly(const APawn* Source, const FBeamEmitterSpawnParams& Params)
+{
+	getPredictedEffectsComponent(Source)->CreateBeamParticleSystemLocal(Params);
+}
+
+
+
 
 void UMlgGameplayStatics::PlaySoundNetworked(UWorld* World, const FSoundParams& Params)
 {
