@@ -62,9 +62,3 @@ void UAmmoComponent::IncreaseAmmo(int32 Amount)
 	ammoCount = FMath::Min(maxAmmo, ammoCount + Amount);
 	OnAmmoChanged.Broadcast(ammoCount);
 }
-
-TSubclassOf<ABaseProjectile> UAmmoComponent::GetProjectileType()
-{
-	return projectileClass;
-}
-
