@@ -5,6 +5,8 @@
 #include "Components/ActorComponent.h"
 
 #include "EmitterSpawnParams.h"
+#include "BeamEmitterSpawnParams.h"
+
 #include "SoundParams.h"
 
 #include "PredictedEffectsComponent.generated.h"
@@ -21,6 +23,9 @@ public:
 
 	void CreateParticleSystemNetworkedPredicted(const FEmitterSpawnParams& Params) const;
 	void CreateParticleSystemLocal(const FEmitterSpawnParams& Params) const;
+
+	void CreateBeamParticleSystemNetworkedPredicted(const FBeamEmitterSpawnParams& Params) const;
+	void CreateBeamParticleSystemLocal(const FBeamEmitterSpawnParams& Params) const;
 	
 	void PlaySoundNetworkedPredicted(const FSoundParams& Params) const;
 	void PlaySoundLocal(const FSoundParams& Params) const;
@@ -32,6 +37,12 @@ private:
 
 	UFUNCTION(NetMulticast, unreliable)
 	void createParticleSystem_NetMulticast(const FEmitterSpawnParams& Params) const;
+
+	UFUNCTION(Server, unreliable, WithValidation)
+	void createBeamParticleSystem_Server(const FBeamEmitterSpawnParams& Params) const;
+
+	UFUNCTION(NetMulticast, unreliable)
+	void createBeamParticleSystem_NetMulticast(const FBeamEmitterSpawnParams& Params) const;
 
 	UFUNCTION(Server, unreliable, WithValidation)
 	void playSound_Server(const FSoundParams& Params) const;

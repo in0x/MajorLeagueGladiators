@@ -1,5 +1,6 @@
 #include "MajorLeagueGladiator.h"
 #include "ReplicatedEffectsComponent.h"
+#include "MlgGameplayStatics.h"
 
 
 UReplicatedEffectsComponent::UReplicatedEffectsComponent()
@@ -29,6 +30,30 @@ bool UReplicatedEffectsComponent::createParticleSystem_Server_Validate(const FEm
 void UReplicatedEffectsComponent::createParticleSystem_NetMulticast_Implementation(const FEmitterSpawnParams& Params) const
 {
 	UParticleSystemComponent* psc = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Params.Template, Params.Transform, Params.bAutoDestroy);
+}
+
+/************************************************************************/
+/*              Beam  Particles                                             */
+/************************************************************************/
+
+void UReplicatedEffectsComponent::CreateBeamParticleSystemAtLocation(const FBeamEmitterSpawnParams& Params) const
+{
+	createBeamParticleSystem_Server(Params);
+}
+
+void UReplicatedEffectsComponent::createBeamParticleSystem_Server_Implementation(const FBeamEmitterSpawnParams& Params) const
+{
+	createBeamParticleSystem_NetMulticast(Params);
+}
+
+bool UReplicatedEffectsComponent::createBeamParticleSystem_Server_Validate(const FBeamEmitterSpawnParams& Params)
+{
+	return true;
+}
+
+void UReplicatedEffectsComponent::createBeamParticleSystem_NetMulticast_Implementation(const FBeamEmitterSpawnParams& Params) const
+{
+	UParticleSystemComponent* psc = UMlgGameplayStatics::SpawnBeamEmitter(GetWorld(), Params);
 }
 
 /************************************************************************/

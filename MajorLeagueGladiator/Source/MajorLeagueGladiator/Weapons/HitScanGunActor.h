@@ -10,7 +10,6 @@ class UAmmoComponent;
 class UTextWidget;
 class UWidgetComponent;
 struct FBPActorGripInformation;
-class AHitscanProjectile;
 class UChargeShotComponent;
 class UPlayerHudWidget;
 
@@ -27,7 +26,6 @@ public:
 	virtual void OnGrip_Implementation(UGripMotionControllerComponent* GrippingController, const FBPActorGripInformation& GripInformation) override;
 	
 private:
-	void shoot();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void playShotEffect_NetMulticast(float Charge);
@@ -62,9 +60,6 @@ private:
 	UWidgetComponent* chargeShotHud;
 
 	UPlayerHudWidget* chargeWidget;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AHitscanProjectile> projectileClass;
 
 	UTextWidget* textWidget;
 

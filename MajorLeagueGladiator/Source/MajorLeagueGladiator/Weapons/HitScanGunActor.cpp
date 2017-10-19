@@ -2,11 +2,9 @@
 
 #include "MajorLeagueGladiator.h"
 #include "HitScanGunActor.h"
-#include "DamageTypes/PlayerDamage.h"
 #include "AmmoComponent.h"
 #include "WidgetComponent.h"
 #include "TextWidget.h"
-#include "Projectiles/HitscanProjectile.h"
 #include "ChargeShotComponent.h"
 #include "PlayerHudWidget.h"
 #include "MlgGameplayStatics.h"
@@ -25,7 +23,6 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	, elapsedAnimTime(0.f)
 	, recoilOrigin(0.f)
 	, recoilDistance(-30.f)
-	, projectileClass(AHitscanProjectile::StaticClass())
 	, MaxGlow(100.f)
 	, MinGlow(0.f)
 {
@@ -74,6 +71,7 @@ AHitScanGunActor::AHitScanGunActor(const FObjectInitializer& ObjectInitializer)
 	chargeShotHud->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
 	chargeShot = ObjectInitializer.CreateDefaultSubobject<UChargeShotComponent>(this, TEXT("ChargeShot"));
+	chargeShot->SetupAttachment(MeshComponent, PROJECTILE_SPAWN_SOCKET_NAME);
 } 
 
 void AHitScanGunActor::BeginPlay()
@@ -129,10 +127,9 @@ void AHitScanGunActor::OnUsed_Implementation()
 	}
 	
 	ammoComponent->ConsumeAmmo();
-	shoot();
+	chargeShot->FireHitscanShot();
 
 	playShotEffect_NetMulticast(chargeShot->GetValuePercentage());
-	chargeShot->Reset();
 
 	AMlgPlayerCharacter* player = CastChecked<AMlgPlayerCharacter>(GetOwner());
 	player->PlayRumbleRight();
@@ -160,21 +157,6 @@ void AHitScanGunActor::OnGrip_Implementation(UGripMotionControllerComponent* Gri
 
 	grippingController = GrippingController;
 	gripInfo = GripInformation;
-}
-
-void AHitScanGunActor::shoot() 
-{
-	FTransform socketTransform = MeshComponent->GetSocketTransform(PROJECTILE_SPAWN_SOCKET_NAME);
-
-	float charge = chargeShot->GetValue();
-
-	FProjectileSpawnParams params;
-	params.DamageScale = charge;
-	params.Scale3DMultiplier = FVector(charge, charge, 1.f);
-
-	ABaseProjectile* defaultProjectile = projectileClass.GetDefaultObject();
-
-	defaultProjectile->FireProjectile(socketTransform.GetLocation(), socketTransform.GetRotation().GetForwardVector(), this, Instigator->GetController(), params);
 }
 
 void AHitScanGunActor::Tick(float DeltaTime)

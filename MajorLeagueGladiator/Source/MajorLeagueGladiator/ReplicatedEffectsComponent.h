@@ -4,6 +4,7 @@
 
 #include "Components/ActorComponent.h"
 #include "EmitterSpawnParams.h"
+#include "BeamEmitterSpawnParams.h"
 #include "SoundParams.h"
 #include "ReplicatedEffectsComponent.generated.h"
 
@@ -17,6 +18,8 @@ public:
 
 	void CreateParticleSystemAtLocation(const FEmitterSpawnParams& Params) const;
 
+	void CreateBeamParticleSystemAtLocation(const FBeamEmitterSpawnParams& Params) const;
+
 	void PlaySoundNetworked(const FSoundParams& Params) const;
 
 private:
@@ -25,6 +28,12 @@ private:
 	
 	UFUNCTION(NetMulticast, unreliable)
 	void createParticleSystem_NetMulticast(const FEmitterSpawnParams& Params) const;
+
+	UFUNCTION(Server, unreliable, WithValidation)
+	void createBeamParticleSystem_Server(const FBeamEmitterSpawnParams& Params) const;
+
+	UFUNCTION(NetMulticast, unreliable)
+	void createBeamParticleSystem_NetMulticast(const FBeamEmitterSpawnParams& Params) const;
 
 	UFUNCTION(Server, unreliable, WithValidation)
 	void playSound_Server(const FSoundParams& Params) const;

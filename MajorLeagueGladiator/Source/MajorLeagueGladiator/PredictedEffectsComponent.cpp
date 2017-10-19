@@ -2,6 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "PredictedEffectsComponent.h"
+#include "MlgGameplayStatics.h"
 
 
 // Sets default values for this component's properties
@@ -53,6 +54,45 @@ void UPredictedEffectsComponent::createParticleSystem_NetMulticast_Implementatio
 	{
 		CreateParticleSystemLocal(Params);
 	}	
+}
+
+/************************************************************************/
+/*                Beam Particle Effects                                 */
+/************************************************************************/
+void UPredictedEffectsComponent::CreateBeamParticleSystemNetworkedPredicted(const FBeamEmitterSpawnParams& Params) const
+{
+	if (!IsLocallyControlled())
+	{
+		UE_LOG(DebugLog, Warning, TEXT("CreateBeamParticleSystemNetworkedPredicted called from non local actor. This probably does not make sense"))
+	}
+
+	CreateBeamParticleSystemLocal(Params);
+	createBeamParticleSystem_Server(Params);
+}
+
+void UPredictedEffectsComponent::CreateBeamParticleSystemLocal(const FBeamEmitterSpawnParams& Params) const
+{
+	UParticleSystemComponent* psc = UMlgGameplayStatics::SpawnBeamEmitter(GetWorld(), Params);
+	check(psc);
+}
+
+bool UPredictedEffectsComponent::createBeamParticleSystem_Server_Validate(const FBeamEmitterSpawnParams& Params)
+{
+	return true;
+}
+
+void UPredictedEffectsComponent::createBeamParticleSystem_Server_Implementation(const FBeamEmitterSpawnParams& Params) const
+{
+	createBeamParticleSystem_NetMulticast(Params);
+}
+
+void UPredictedEffectsComponent::createBeamParticleSystem_NetMulticast_Implementation(const FBeamEmitterSpawnParams& Params) const
+{
+	// Prevent Playing Twice
+	if (!IsLocallyControlled())
+	{
+		CreateBeamParticleSystemLocal(Params);
+	}
 }
 
 /************************************************************************/

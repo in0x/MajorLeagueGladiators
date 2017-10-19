@@ -32,21 +32,31 @@ ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector Di
 	params.Transform = transform;
 	params.bAutoDestroy = true;
 
-	UMlgGameplayStatics::SpawnEmitterNetworked(ProjectileOwner->GetWorld(), params);
+	//UMlgGameplayStatics::SpawnEmitterNetworkedPredicted(ProjectileInstigator->GetPawn(), params);
+
+
+	FVector target = hitresult.ImpactPoint;
 
 	if (hitActor == nullptr)
 	{
-		return nullptr;
+		//target = transform.GetLocation() + DirectionVector * range;
 	}
-
-	if (AShieldActor* interactable = Cast<AShieldActor>(hitActor))
+	else if (AShieldActor* interactable = Cast<AShieldActor>(hitActor))
 	{
+		//target = hitresult.TraceEnd;
+	//	target = hitActor->GetActorLocation();
 		interactable->OnHitInteractable(this);
 	}
 	else if (UMlgGameplayStatics::CanDealDamageTo(ProjectileInstigator, hitActor))
 	{
+	//	target = hitActor->GetActorLocation();
 		UGameplayStatics::ApplyPointDamage(hitActor, Damage * OptionalParams.DamageScale, -DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UHitscanProjectileDamage::StaticClass());
 	}
+
+
+	FBeamEmitterSpawnParams params2(beamParticleSystem, transform.GetLocation(), target);
+	UMlgGameplayStatics::SpawnBeamEmitterNetworkedPredicted(ProjectileInstigator->GetPawn(), params2);
+
 
 	return nullptr;
 }

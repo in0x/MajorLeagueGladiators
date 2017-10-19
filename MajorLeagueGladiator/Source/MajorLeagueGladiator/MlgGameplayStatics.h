@@ -4,6 +4,7 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "EmitterSpawnParams.h"
+#include "BeamEmitterSpawnParams.h"
 #include "SoundParams.h"
 #include "MlgGameplayStatics.generated.h"
 
@@ -23,9 +24,16 @@ public:
 	static bool ComponentIsDamageableFrom(UPrimitiveComponent* VictimComp, FVector const& Origin, AActor const* IgnoredActor, const TArray<AActor*>& IgnoreActors, ECollisionChannel TraceChannel, FHitResult& OutHitResult);
 	static bool ApplyRadialDamageWithFalloff(const UObject* WorldContextObject, float BaseDamage, float MinimumDamage, const FVector& Origin, float DamageInnerRadius, float DamageOuterRadius, float DamageFalloff, TSubclassOf<class UDamageType> DamageTypeClass, AActor* DamageCauser, AController* InstigatedByController, bool bDrawDebug = false, const TArray<AActor*>& IgnoreActors = TArray<AActor*>(), ECollisionChannel DamagePreventionChannel = ECC_Visibility);
 
+	static UParticleSystemComponent* CreateParticleSystem(UParticleSystem* EmitterTemplate, UWorld* World, AActor* Actor, bool bAutoDestroy);
+	static UParticleSystemComponent* SpawnBeamEmitter(UWorld* World, const FBeamEmitterSpawnParams& Params);
+
 	static void SpawnEmitterNetworked(UWorld* World, const FEmitterSpawnParams& Params);
 	static void SpawnEmitterNetworkedPredicted(const APawn* Source, const FEmitterSpawnParams& Params);
 	static void SpawnEmitterLocalOnly(const APawn* Source, const FEmitterSpawnParams& Params);
+
+	static void SpawnBeamEmitterNetworked(UWorld* World, const FBeamEmitterSpawnParams& Params);
+	static void SpawnBeamEmitterNetworkedPredicted(const APawn* Source, const FBeamEmitterSpawnParams& Params);
+	static void SpawnBeamEmitterLocalOnly(const APawn* Source, const FBeamEmitterSpawnParams& Params);
 
 	static void PlaySoundNetworked(UWorld* World, const FSoundParams& Params);
 	static void PlaySoundNetworkedPredicted(const APawn* Source, const FSoundParams& Params);
