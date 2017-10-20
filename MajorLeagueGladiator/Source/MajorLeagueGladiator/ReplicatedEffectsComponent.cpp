@@ -9,6 +9,20 @@ UReplicatedEffectsComponent::UReplicatedEffectsComponent()
 }
 
 /************************************************************************/
+/*                   Damage                                             */
+/************************************************************************/
+
+bool UReplicatedEffectsComponent::ApplyPointDamage_Server_Validate(AActor* DamagedActor, float BaseDamage, const FVector& HitFromDirection, const FHitResult& HitInfo, AController* EventInstigator, AActor* DamageCauser, TSubclassOf<class UDamageType> DamageTypeClass)
+{
+	return true;
+}
+
+void UReplicatedEffectsComponent::ApplyPointDamage_Server_Implementation(AActor* DamagedActor, float BaseDamage, const FVector& HitFromDirection, const FHitResult& HitInfo, AController* EventInstigator, AActor* DamageCauser, TSubclassOf<class UDamageType> DamageTypeClass)
+{
+	UGameplayStatics::ApplyPointDamage(DamagedActor, BaseDamage, HitFromDirection, HitInfo, EventInstigator, DamageCauser, DamageTypeClass);
+}
+
+/************************************************************************/
 /*                Particles                                             */
 /************************************************************************/
 

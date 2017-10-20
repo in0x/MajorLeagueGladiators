@@ -32,31 +32,21 @@ ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector Di
 	params.Transform = transform;
 	params.bAutoDestroy = true;
 
-	//UMlgGameplayStatics::SpawnEmitterNetworkedPredicted(ProjectileInstigator->GetPawn(), params);
-
-
-	FVector target = hitresult.ImpactPoint;
+	FBeamEmitterSpawnParams params2(beamParticleSystem, transform.GetLocation(), hitresult.ImpactPoint);
+	UMlgGameplayStatics::SpawnBeamEmitterNetworkedPredicted(ProjectileInstigator->GetPawn(), params2);
 
 	if (hitActor == nullptr)
 	{
-		//target = transform.GetLocation() + DirectionVector * range;
 	}
 	else if (AShieldActor* interactable = Cast<AShieldActor>(hitActor))
 	{
-		//target = hitresult.TraceEnd;
-	//	target = hitActor->GetActorLocation();
-		interactable->OnHitInteractable(this);
+		FTransform reflectTranform = interactable->GetReflectSpawnTransform();
+		FireProjectile(reflectTranform.GetLocation(), reflectTranform.GetRotation().GetForwardVector(), ProjectileOwner, ProjectileInstigator, OptionalParams);
 	}
 	else if (UMlgGameplayStatics::CanDealDamageTo(ProjectileInstigator, hitActor))
 	{
-	//	target = hitActor->GetActorLocation();
 		UGameplayStatics::ApplyPointDamage(hitActor, Damage * OptionalParams.DamageScale, -DirectionVector, hitresult, ProjectileInstigator, ProjectileOwner, UHitscanProjectileDamage::StaticClass());
 	}
-
-
-	FBeamEmitterSpawnParams params2(beamParticleSystem, transform.GetLocation(), target);
-	UMlgGameplayStatics::SpawnBeamEmitterNetworkedPredicted(ProjectileInstigator->GetPawn(), params2);
-
 
 	return nullptr;
 }
