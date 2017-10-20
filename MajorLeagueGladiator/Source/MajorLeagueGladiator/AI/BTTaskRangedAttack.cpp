@@ -9,10 +9,12 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "MlgGameplayStatics.h"
 
+#include "ShootPhysicsProjectileComponent.h"
+
+// "gunSocket"
 
 UBTTaskRangedAttack::UBTTaskRangedAttack()
-	: ProjectileClass(APhysicsProjectile::StaticClass())
-	, SocketName("gunSocket")
+	: controller(nullptr)
 {
 	NodeName = "BTTaskRangedAttack";
 	bCreateNodeInstance = true;
@@ -32,16 +34,8 @@ EBTNodeResult::Type UBTTaskRangedAttack::ExecuteTask(UBehaviorTreeComponent& Own
 	}
 
 	APawn* pawn = controller->GetPawn();
-	USkeletalMeshComponent* meshComponent = pawn->FindComponentByClass<USkeletalMeshComponent>();
 
-	const FTransform socketTransform = meshComponent->GetSocketTransform(SocketName);	
-
-	FVector shotLocation = socketTransform.GetLocation();
-
-	FVector targetDir = targetActor->GetActorLocation() - shotLocation;
-	targetDir.Normalize();
-
-	ProjectileClass.GetDefaultObject()->FireProjectile(shotLocation, targetDir, pawn, controller);
+	pawn->FindComponentByClass<UShootPhysicsProjectileComponent>()->ShootAt(targetActor->GetActorLocation());
 
 	return EBTNodeResult::Succeeded;
 }
