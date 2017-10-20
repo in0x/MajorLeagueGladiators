@@ -22,6 +22,9 @@ public:
 
 	void PlaySoundNetworked(const FSoundParams& Params) const;
 
+	UFUNCTION(Server, reliable, WithValidation)
+	void ApplyPointDamage_Server(AActor* DamagedActor, float BaseDamage, const FVector& HitFromDirection, const FHitResult& HitInfo, AController* EventInstigator, AActor* DamageCauser, TSubclassOf<class UDamageType> DamageTypeClass);
+
 private:
 	UFUNCTION(Server, unreliable, WithValidation)
 	void createParticleSystem_Server(const FEmitterSpawnParams& Params) const;

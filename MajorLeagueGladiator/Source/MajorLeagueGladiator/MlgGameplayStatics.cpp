@@ -226,17 +226,10 @@ bool UMlgGameplayStatics::ApplyRadialDamageWithFalloff(const UObject* WorldConte
 }
 
 
-UParticleSystemComponent* UMlgGameplayStatics::CreateParticleSystem(UParticleSystem* EmitterTemplate, UWorld* World, AActor* Actor, bool bAutoDestroy)
+void UMlgGameplayStatics::ApplyPointDamageNetworked(AActor* DamagedActor, float BaseDamage, const FVector& HitFromDirection, const FHitResult& HitInfo, AController* EventInstigator, AActor* DamageCauser, TSubclassOf<class UDamageType> DamageTypeClass)
 {
-	UParticleSystemComponent* PSC = NewObject<UParticleSystemComponent>((Actor ? Actor : (UObject*)World));
-	PSC->bAutoDestroy = bAutoDestroy;
-	PSC->bAllowAnyoneToDestroyMe = true;
-	PSC->SecondsBeforeInactive = 0.0f;
-	PSC->bAutoActivate = false;
-	PSC->SetTemplate(EmitterTemplate);
-	PSC->bOverrideLODMethod = false;
-
-	return PSC;
+	check(CanDealDamageTo(EventInstigator, DamagedActor));
+	getReplicatedEffectsComponent(EventInstigator->GetWorld())->ApplyPointDamage_Server(DamagedActor, BaseDamage, HitFromDirection, HitInfo, EventInstigator, DamageCauser, DamageTypeClass);
 }
 
 UParticleSystemComponent* UMlgGameplayStatics::SpawnBeamEmitter(UWorld* World, const FBeamEmitterSpawnParams& Params)
@@ -245,12 +238,7 @@ UParticleSystemComponent* UMlgGameplayStatics::SpawnBeamEmitter(UWorld* World, c
 	if (World && Params.Template)
 	{
 		PSC = UGameplayStatics::SpawnEmitterAtLocation(World, Params.Template, Params.Source, (Params.Target - Params.Source).Rotation(), Params.bAutoDestroy);
-
-
-
 		PSC->SetVectorParameter(BEAM_EMITTER_TARGET_NAME, Params.Target);
-
-
 	}
 	return PSC;
 }
