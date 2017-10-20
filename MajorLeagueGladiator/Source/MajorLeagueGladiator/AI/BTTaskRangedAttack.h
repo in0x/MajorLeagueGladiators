@@ -22,12 +22,6 @@ public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<ABaseProjectile> ProjectileClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName SocketName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FBlackboardKeySelector Target;
 
 protected:
