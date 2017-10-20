@@ -181,7 +181,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 
 	pullConeParticleSystemComponent = ObjectInitializer.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("pullConeParticleSystemComponent"));
-	ConstructorHelpers::FObjectFinder<UParticleSystem> cone(TEXT("ParticleSystem'/Game/ParticleSystems/PS_GravityGun_2.PS_GravityGun_2'"));
+	ConstructorHelpers::FObjectFinder<UParticleSystem> cone(TEXT("ParticleSystem'/Game/ParticleSystems/PS_GravityGun3.PS_GravityGun3'"));
 	pullConeParticleSystemComponent->SetTemplate(cone.Object);
 	pullConeParticleSystemComponent->SetupAttachment(leftMesh, AIM_SOCKET_NAME);
 	pullConeParticleSystemComponent->bAutoActivate = false;

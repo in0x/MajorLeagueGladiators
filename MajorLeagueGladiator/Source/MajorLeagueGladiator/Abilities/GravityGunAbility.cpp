@@ -102,7 +102,7 @@ void UGravityGunAbility::SearchAndPull()
 
 	searchActor->Range = PullRange;
 	searchActor->AutoConfirm = true;
-	searchActor->IsVisualizingCone = true;
+	searchActor->IsVisualizingCone = false;
 	searchActor->HalfAngleDegrees = HalfAngleDegrees;
 
 	searchActor->IgnoredActors.Add(GetOwningActorFromActorInfo());
