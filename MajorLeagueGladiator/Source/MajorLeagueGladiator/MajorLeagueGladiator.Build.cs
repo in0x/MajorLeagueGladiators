@@ -65,7 +65,9 @@ public class MajorLeagueGladiator : ModuleRules
 			}
 			);
 
+		AddThirdPartyPrivateStaticDependencies(Target, "Steamworks");
 		DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
+		PrivateDependencyModuleNames.Add("Steamworks");
 
 		// Don't load APEX on incompatible platforms
 		if (

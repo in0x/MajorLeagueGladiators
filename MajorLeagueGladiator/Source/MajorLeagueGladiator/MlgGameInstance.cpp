@@ -287,54 +287,6 @@ void UMlgGameInstance::ReadFriendList()
 	}
 }
 
-//UTexture2D *ATheGamePlayerController::getSteamAvatar() {
-//	uint32 Width;
-//	uint32 Height;
-//
-//	if (SteamAPI_Init())
-//	{
-//		//Getting the PictureID from the SteamAPI and getting the Size with the ID
-//		int Picture = SteamFriends()->GetMediumFriendAvatar(SteamUser()->GetSteamID());
-//		SteamUtils()->GetImageSize(Picture, &Width, &Height);
-//
-//
-//		if (Width > 0 && Height > 0)
-//		{
-//			//Creating the buffer "oAvatarRGBA" and then filling it with the RGBA Stream from the Steam Avatar
-//			BYTE *oAvatarRGBA = new BYTE[Width * Height * 4];
-//
-//			//Filling the buffer with the RGBA Stream from the Steam Avatar and creating a UTextur2D to parse the RGBA Steam in
-//			SteamUtils()->GetImageRGBA(Picture, (uint8*)oAvatarRGBA, 4 * Height * Width * sizeof(char));
-//
-//			//Swap R and B channels because for some reason the games whack
-//			for (uint32 i = 0; i < (Width * Height * 4); i += 4)
-//			{
-//				uint8 Temp = oAvatarRGBA[i + 0];
-//				oAvatarRGBA[i + 0] = oAvatarRGBA[i + 2];
-//				oAvatarRGBA[i + 2] = Temp;
-//			}
-//
-//			UTexture2D* Avatar = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8);
-//
-//			//MAGIC!
-//			uint8* MipData = (uint8*)Avatar->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-//			FMemory::Memcpy(MipData, (void*)oAvatarRGBA, Height * Width * 4);
-//			Avatar->PlatformData->Mips[0].BulkData.Unlock();
-//
-//			//Setting some Parameters for the Texture and finally returning it
-//			Avatar->PlatformData->NumSlices = 1;
-//			Avatar->NeverStream = true;
-//			//Avatar->CompressionSettings = TC_EditorIcon;
-//
-//			Avatar->UpdateResource();
-//
-//			return Avatar;
-//		}
-//		return nullptr;
-//	}
-//	return nullptr;
-//}
-
 void UMlgGameInstance::OnReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr)
 {
 	if (!bWasSuccessful)
@@ -448,4 +400,59 @@ void UMlgGameInstance::InviteFirstAvailableFriend()
 		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::JoinFirstAvailableFriend(): Start Find Friend Session Failed"));
 		session->ClearOnFindFriendSessionCompleteDelegate_Handle(0, onFindFriendSessionCompleteDelegateHandle);
 	}
+}
+
+//#include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
+#include "ThirdParty/Steamworks/Steamv139/sdk/public/steam/steam_api.h"
+#include "ThirdParty/Steamworks/Steamv139/sdk/public/steam/isteamuser.h"
+
+//#include "steam/steam_api.h"
+//#include "steam/isteamuser.h"
+
+UTexture2D* UMlgGameInstance::GetProfilePicture()
+{
+	uint32 width;
+	uint32 height;
+
+	if (SteamAPI_Init())
+	{
+		//Getting the PictureID from the SteamAPI and getting the Size with the ID
+		int Picture = SteamFriends()->GetMediumFriendAvatar(SteamUser()->GetSteamID());
+		SteamUtils()->GetImageSize(Picture, &width, &height);
+
+		if (width > 0 && height > 0)
+		{
+			//Creating the buffer "oAvatarRGBA" and then filling it with the RGBA Stream from the Steam Avatar
+			BYTE *oAvatarRGBA = new BYTE[width * height * 4];
+
+			//Filling the buffer with the RGBA Stream from the Steam Avatar and creating a UTextur2D to parse the RGBA Steam in
+			SteamUtils()->GetImageRGBA(Picture, (uint8*)oAvatarRGBA, 4 * height * width * sizeof(char));
+
+			//Swap R and B channels because for some reason the games whack
+			for (uint32 i = 0; i < (width * height * 4); i += 4)
+			{
+				uint8 Temp = oAvatarRGBA[i + 0];
+				oAvatarRGBA[i + 0] = oAvatarRGBA[i + 2];
+				oAvatarRGBA[i + 2] = Temp;
+			}
+
+			UTexture2D* Avatar = UTexture2D::CreateTransient(width, height, PF_B8G8R8A8);
+
+			//MAGIC!
+			uint8* MipData = (uint8*)Avatar->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+			FMemory::Memcpy(MipData, (void*)oAvatarRGBA, height * width * 4);
+			Avatar->PlatformData->Mips[0].BulkData.Unlock();
+
+			//Setting some Parameters for the Texture and finally returning it
+			Avatar->PlatformData->NumSlices = 1;
+			Avatar->NeverStream = true;
+			//Avatar->CompressionSettings = TC_EditorIcon;
+
+			Avatar->UpdateResource();
+
+			return Avatar;
+		}
+		return nullptr;
+	}
+	return nullptr;
 }
