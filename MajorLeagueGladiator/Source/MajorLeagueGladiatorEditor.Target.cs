@@ -10,13 +10,14 @@ public class MajorLeagueGladiatorEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
         ExtraModuleNames.Add("MajorLeagueGladiator");
-    }
+		bUsesSteam = true;
+	}
 
-    //
-    // TargetRules interface.
-    //
+	//
+	// TargetRules interface.
+	//
 
- //   public override void SetupBinaries(
+	//   public override void SetupBinaries(
 	//	TargetInfo Target,
 	//	ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
 	//	ref List<string> OutExtraModuleNames
