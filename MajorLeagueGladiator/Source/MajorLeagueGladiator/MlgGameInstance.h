@@ -47,7 +47,6 @@ public:
 	void JoinFriend(int32 friendlistIndex);
 	void JoinFirstAvailableFriend();
 	void InviteFirstAvailableFriend();
-	UTexture2D* GetProfilePicture();
 
 	void TravelToMainMenu();
 
