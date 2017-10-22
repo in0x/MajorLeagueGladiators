@@ -26,8 +26,9 @@ struct FFriendState
 
 	FFriendState() = default;
 
-	FFriendState(const FString& Username, int32 FriendIndex, EOnlineState::Type OnlineState, bool bJoinable)
+	FFriendState(const FString& Username, UTexture2D* AvatarTex, int32 FriendIndex, EOnlineState::Type OnlineState, bool bJoinable)
 		: username(Username)
+		, avatar(AvatarTex)
 		, friendIndex(FriendIndex)
 		, onlineState(OnlineState)
 		, bCanJoin(bJoinable)
@@ -35,6 +36,9 @@ struct FFriendState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString username;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* avatar;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 friendIndex;
@@ -60,6 +64,9 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void ChangeCanJoin(bool bJoinable);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void ChangeAvatar(UTexture2D* texture);
 
 	UFUNCTION(BlueprintCallable)
 	void ChangeFriendIndex(int32 Index);

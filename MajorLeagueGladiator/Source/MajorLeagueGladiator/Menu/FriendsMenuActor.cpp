@@ -5,6 +5,7 @@
 #include "MlgGameInstance.h"
 #include "WidgetComponent.h"
 #include "FriendListWidget.h"
+#include "SteamBridge.h"
 
 AFriendsMenuActor::AFriendsMenuActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -53,10 +54,50 @@ void AFriendsMenuActor::OnFriendsInfoLoaded_Implementation(const TArray<FFriendS
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("OnFriendsInfoLoaded_Implementation called"));
 }
 
+void AFriendsMenuActor::AdjustAvatarTextures(int32 NumFriends)
+{
+	int32 numMissingTex = NumFriends - avatarTextures.Num();
+
+	if (numMissingTex <= 0)
+	{
+		return;
+	}
+
+	if (GEngine->IsEditor())
+	{
+		for (int32 i = 0; i < numMissingTex; ++i)
+		{
+			avatarTextures.Add(nullptr);
+		}
+	}
+	else
+	{
+		USteamBridge* steamBridge = USteamBridge::Get();
+		check(steamBridge);
+
+		for (int32 i = 0; i < numMissingTex; ++i)
+		{
+			avatarTextures.Add(steamBridge->CreateAvatarTexture());
+		}
+	}
+}
+
 void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend>>& friendlist)
 {
 	TArray<FFriendState> friendStates;
 	int32 numFriends = friendlist.Num();
+
+	UGameInstance* result = GetGameInstance();
+	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(result);
+
+	AdjustAvatarTextures(numFriends);
+
+	USteamBridge* steamBridge = nullptr;
+	if (!GEngine->IsEditor())
+	{
+		steamBridge = USteamBridge::Get();
+		check(steamBridge);
+	}
 
 	for (int32 i = 0; i < numFriends; ++i)
 	{
@@ -78,7 +119,7 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 			}
 			else
 			{
-				UE_LOG(DebugLog, Log, TEXT("Not checing joinable status in editor to prevent crash"));
+				UE_LOG(DebugLog, Log, TEXT("Not checking joinable status in editor to prevent crash"));
 			}
 		}
 		else if (!bIsPlaying && bIsOnline)
@@ -90,7 +131,14 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 			state = EOnlineState::Offline;
 		}
 
-		friendStates.Emplace(name, i, state, bCanJoin);
+		UTexture2D* avatar = nullptr;
+		if (!GEngine->IsEditor())
+		{
+			avatar = avatarTextures[i];
+			steamBridge->GetAvatar(i, avatar);
+		}
+
+		friendStates.Emplace(name, avatar, i, state, bCanJoin);
 	}
 
 	friendStates.Sort([](const FFriendState& lhs, const FFriendState& rhs) { return lhs.onlineState < rhs.onlineState; });
@@ -100,8 +148,6 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 
 void AFriendsMenuActor::OnJoinFriendRequest(int32 friendIndex)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("OnJoinFriendRequested called"));
-
 	UGameInstance* result = GetGameInstance();
 	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(result);
 	gameInstance->JoinFriend(friendIndex);

@@ -9,7 +9,7 @@ namespace
 	const FString PRE_BEGIN_MAP("/Game/PreGame?listen");
 	const FString MAIN_MENU_MAP("/Game/MainMenu");
 	const FString DefaultFriendsList(EFriendsLists::ToString(EFriendsLists::Default));
-	
+
 	IOnlineSubsystem* getOnlineSubsystem()
 	{
 		IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
@@ -63,11 +63,11 @@ void UMlgGameInstance::Shutdown()
 AMlgGameSession* UMlgGameInstance::GetGameSession() const
 {
 	UWorld* const World = GetWorld();
-	check(World);	
+	check(World);
 
 	AGameModeBase* const Game = World->GetAuthGameMode();
 	check(Game);
-	
+
 	return CastChecked<AMlgGameSession>(Game->GameSession);
 }
 
@@ -98,14 +98,14 @@ bool UMlgGameInstance::HostSession(bool bIsLan, bool bIsPresence, int32 MaxNumPl
 {
 	AMlgGameSession* const GameSession = GetGameSession();
 	check(GameSession);
-	
+
 	ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	onCreateSessionCompleteDelegateHandle = GameSession->CreateSessionCompleteEvent.AddUObject(this, &UMlgGameInstance::onCreateSessionComplete);
 	if (GameSession->HostSession(localPlayer->GetPreferredUniqueNetId(), GameSessionName, bIsLan, bIsPresence, MaxNumPlayers))
-	{	
+	{
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -113,9 +113,9 @@ void UMlgGameInstance::onCreateSessionComplete(FName SessionName, bool bWasSucce
 {
 	AMlgGameSession* const GameSession = GetGameSession();
 	check(GameSession);
-	
+
 	GameSession->CreateSessionCompleteEvent.Remove(onCreateSessionCompleteDelegateHandle);
-	
+
 	if (!bWasSuccessful)
 	{
 		UE_LOG(DebugLog, Error, TEXT("UMlgGameInstance::onCreateSessionComplete: CreateSession failed"));
@@ -128,16 +128,16 @@ void UMlgGameInstance::onCreateSessionComplete(FName SessionName, bool bWasSucce
 
 bool UMlgGameInstance::FindSessions(ULocalPlayer* PlayerOwner, bool bFindLan)
 {
-	check(PlayerOwner);	
-	
+	check(PlayerOwner);
+
 	AMlgGameSession* const GameSession = GetGameSession();
 	check(GameSession);
-	
+
 	GameSession->FindSessionsCompleteEvent.RemoveAll(this);
 	onFindSessionsCompleteDelegateHandle = GameSession->FindSessionsCompleteEvent.AddUObject(this, &UMlgGameInstance::onFindSessionsComplete);
 
 	GameSession->FindSessions(PlayerOwner->GetPreferredUniqueNetId(), GameSessionName, bFindLan, true);
-	
+
 	return true;
 }
 
@@ -150,9 +150,9 @@ void UMlgGameInstance::onFindSessionsComplete(bool bWasSuccessful)
 
 	AMlgGameSession* const Session = GetGameSession();
 	check(Session)
-	
-	Session->FindSessionsCompleteEvent.Remove(onFindSessionsCompleteDelegateHandle);
-	OnFindSessionFinished.Broadcast(Session->GetSearchResults());		
+
+		Session->FindSessionsCompleteEvent.Remove(onFindSessionsCompleteDelegateHandle);
+	OnFindSessionFinished.Broadcast(Session->GetSearchResults());
 }
 
 bool UMlgGameInstance::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults)
@@ -170,8 +170,8 @@ bool UMlgGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessi
 	check(LocalPlayer);
 	AMlgGameSession* const GameSession = GetGameSession();
 	check(GameSession)
-	
-	AddNetworkFailureHandlers();
+
+		AddNetworkFailureHandlers();
 
 	onJoinSessionCompleteDelegateHandle = GameSession->JoinSessionCompleteEvent.AddUObject(this, &UMlgGameInstance::OnJoinSessionComplete);
 
@@ -183,7 +183,7 @@ void UMlgGameInstance::OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type 
 {
 	AMlgGameSession* const GameSession = GetGameSession();
 	check(GameSession);
-	
+
 	GameSession->JoinSessionCompleteEvent.Remove(onJoinSessionCompleteDelegateHandle);
 
 	if (Result != EOnJoinSessionCompleteResult::Success)
@@ -208,7 +208,7 @@ void UMlgGameInstance::OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type 
 	APlayerController * const PlayerController = GetFirstLocalPlayerController();
 	check(PlayerController)
 
-	FString URL;
+		FString URL;
 	IOnlineSessionPtr Sessions = findOnlineSession();
 
 	if (!Sessions.IsValid() || !Sessions->GetResolvedConnectString(GameSessionName, URL))
@@ -234,7 +234,7 @@ void UMlgGameInstance::TravelToMainMenu()
 	if (Sessions.IsValid())
 	{
 		onDestroySessionCompleteDelegateHandle = Sessions->AddOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteDelegate);
-			
+
 		Sessions->DestroySession(GameSessionName);
 	}
 }
@@ -307,7 +307,7 @@ void UMlgGameInstance::OnReadFriendsListComplete(int32 LocalUserNum, bool bWasSu
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Index %i: Name: %s"), i, *friendList[i]->GetDisplayName()));
 	}
-	
+
 	OnFriendlistRead.Broadcast(friendList);
 }
 
@@ -402,57 +402,3 @@ void UMlgGameInstance::InviteFirstAvailableFriend()
 	}
 }
 
-//#include "Runtime/Engine/Private/PhysicsEngine/PhysXSupport.h"
-#include "ThirdParty/Steamworks/Steamv139/sdk/public/steam/steam_api.h"
-#include "ThirdParty/Steamworks/Steamv139/sdk/public/steam/isteamuser.h"
-
-//#include "steam/steam_api.h"
-//#include "steam/isteamuser.h"
-
-UTexture2D* UMlgGameInstance::GetProfilePicture()
-{
-	uint32 width;
-	uint32 height;
-
-	if (SteamAPI_Init())
-	{
-		//Getting the PictureID from the SteamAPI and getting the Size with the ID
-		int Picture = SteamFriends()->GetMediumFriendAvatar(SteamUser()->GetSteamID());
-		SteamUtils()->GetImageSize(Picture, &width, &height);
-
-		if (width > 0 && height > 0)
-		{
-			//Creating the buffer "oAvatarRGBA" and then filling it with the RGBA Stream from the Steam Avatar
-			BYTE *oAvatarRGBA = new BYTE[width * height * 4];
-
-			//Filling the buffer with the RGBA Stream from the Steam Avatar and creating a UTextur2D to parse the RGBA Steam in
-			SteamUtils()->GetImageRGBA(Picture, (uint8*)oAvatarRGBA, 4 * height * width * sizeof(char));
-
-			//Swap R and B channels because for some reason the games whack
-			for (uint32 i = 0; i < (width * height * 4); i += 4)
-			{
-				uint8 Temp = oAvatarRGBA[i + 0];
-				oAvatarRGBA[i + 0] = oAvatarRGBA[i + 2];
-				oAvatarRGBA[i + 2] = Temp;
-			}
-
-			UTexture2D* Avatar = UTexture2D::CreateTransient(width, height, PF_B8G8R8A8);
-
-			//MAGIC!
-			uint8* MipData = (uint8*)Avatar->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-			FMemory::Memcpy(MipData, (void*)oAvatarRGBA, height * width * 4);
-			Avatar->PlatformData->Mips[0].BulkData.Unlock();
-
-			//Setting some Parameters for the Texture and finally returning it
-			Avatar->PlatformData->NumSlices = 1;
-			Avatar->NeverStream = true;
-			//Avatar->CompressionSettings = TC_EditorIcon;
-
-			Avatar->UpdateResource();
-
-			return Avatar;
-		}
-		return nullptr;
-	}
-	return nullptr;
-}
