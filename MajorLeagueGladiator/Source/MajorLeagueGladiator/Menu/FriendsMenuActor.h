@@ -54,7 +54,7 @@ private:
 	FOnFindFriendSessionCompleteDelegate onFindFriendSessionCompleteDelegate;
 	FDelegateHandle onFindFriendSessionCompleteDelegateHandle;
 
-	void AdjustAvatarTextures(int32 NumFriends);
+	void UpdateAvatarTextureCount(int32 CurrentNumFriends);
 
 	UPROPERTY()
 	TArray<UTexture2D*> avatarTextures;

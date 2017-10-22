@@ -33,11 +33,11 @@ UTexture2D* USteamBridge::CreateAvatarTexture()
 	uint32 height = 0;
 
 	CSteamID friendSteamID = SteamFriends()->GetFriendByIndex(0, k_EFriendFlagImmediate);
-	int friendPicture = SteamFriends()->GetLargeFriendAvatar(friendSteamID);
+	int friendPictureHandle = SteamFriends()->GetLargeFriendAvatar(friendSteamID);
 
-	SteamUtils()->GetImageSize(friendPicture, &width, &height);
+	bool success = SteamUtils()->GetImageSize(friendPictureHandle, &width, &height);
 
-	if (width <= 0 || height <= 0)
+	if (!success || width <= 0 || height <= 0)
 	{
 		return nullptr;
 	}
@@ -46,28 +46,28 @@ UTexture2D* USteamBridge::CreateAvatarTexture()
 	return avatar;
 }
 
-void USteamBridge::GetAvatar(int32 FriendIndex, UTexture2D* Avatar)
+void USteamBridge::LoadAvatarData(int32 FriendIndex, UTexture2D* OutAvatar)
 {
-	check(FriendIndex < SteamFriends()->GetFriendCount(k_EFriendFlagImmediate));
+	check(FriendIndex >= 0 && FriendIndex < SteamFriends()->GetFriendCount(k_EFriendFlagImmediate));
 
-	uint32 width = Avatar->GetSurfaceWidth();
-	uint32 height = Avatar->GetSurfaceHeight();
+	uint32 width = OutAvatar->GetSurfaceWidth();
+	uint32 height = OutAvatar->GetSurfaceHeight();
 
 	CSteamID friendSteamID = SteamFriends()->GetFriendByIndex(FriendIndex, k_EFriendFlagImmediate);
-	int friendPicture = SteamFriends()->GetLargeFriendAvatar(friendSteamID);
+	int friendPictureHandle = SteamFriends()->GetLargeFriendAvatar(friendSteamID);
 
-	uint8* mipData = (uint8*)Avatar->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+	uint8* mipData = (uint8*)OutAvatar->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
 
-	SteamUtils()->GetImageRGBA(friendPicture, mipData, 4 * height * width * sizeof(uint8));
+	SteamUtils()->GetImageRGBA(friendPictureHandle, mipData, 4 * height * width * sizeof(uint8));
 
-	Avatar->PlatformData->Mips[0].BulkData.Unlock();
+	OutAvatar->PlatformData->Mips[0].BulkData.Unlock();
 
-	Avatar->PlatformData->NumSlices = 1;
-	Avatar->NeverStream = true;
+	OutAvatar->PlatformData->NumSlices = 1;
+	OutAvatar->NeverStream = true;
 
 	const char* friendName = SteamFriends()->GetFriendPersonaName(friendSteamID);
-	Avatar->Rename(*FString::Printf(TEXT("ProfilePicture%s"), ANSI_TO_TCHAR(friendName)));
-	Avatar->UpdateResource();
+	OutAvatar->Rename(*FString::Printf(TEXT("ProfilePicture%s"), ANSI_TO_TCHAR(friendName)));
+	OutAvatar->UpdateResource();
 }
 
 

@@ -27,5 +27,5 @@ public:
 
 	UTexture2D* CreateAvatarTexture();
 
-	void GetAvatar(int32 FriendIndex, UTexture2D* Avatar);
+	void LoadAvatarData(int32 FriendIndex, UTexture2D* OutAvatar);
 };
