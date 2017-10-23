@@ -56,6 +56,9 @@ private:
 
 	void UpdateAvatarTextureCount(int32 CurrentNumFriends);
 
+	UFUNCTION()
+	void OnAvatarDownloaded(int32 FriendIndex);
+
 	UPROPERTY()
 	TArray<UTexture2D*> avatarTextures;
 };

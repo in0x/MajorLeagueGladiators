@@ -28,6 +28,7 @@ void AFriendsMenuActor::BeginPlay()
 	{
 		gameInstance->OnFriendlistRead.AddUObject(this, &AFriendsMenuActor::OnFriendlistLoaded);
 		gameInstance->ReadFriendList();
+		USteamBridge::Get()->AvatarDownloaded.AddDynamic(this, &AFriendsMenuActor::OnAvatarDownloaded);
 	}
 	else
 	{
@@ -63,22 +64,9 @@ void AFriendsMenuActor::UpdateAvatarTextureCount(int32 CurrentNumFriends)
 		return;
 	}
 
-	if (GEngine->IsEditor())
+	for (int32 i = 0; i < numMissingTex; ++i)
 	{
-		for (int32 i = 0; i < numMissingTex; ++i)
-		{
-			avatarTextures.Add(nullptr);
-		}
-	}
-	else
-	{
-		USteamBridge* steamBridge = USteamBridge::Get();
-		check(steamBridge);
-
-		for (int32 i = 0; i < numMissingTex; ++i)
-		{
-			avatarTextures.Add(steamBridge->CreateAvatarTexture());
-		}
+		avatarTextures.Add(nullptr);
 	}
 }
 
@@ -89,11 +77,11 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 
 	UpdateAvatarTextureCount(numFriends);
 
-	USteamBridge* steamBridge = nullptr;
+	USteamBridge* steam = nullptr;
 	if (!GEngine->IsEditor())
 	{
-		steamBridge = USteamBridge::Get();
-		check(steamBridge);
+		steam = USteamBridge::Get();
+		check(steam);
 	}
 
 	for (int32 i = 0; i < numFriends; ++i)
@@ -131,7 +119,18 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 		UTexture2D* avatar = avatarTextures[i];
 		if (!GEngine->IsEditor())
 		{
-			steamBridge->LoadAvatarData(i, avatar);
+			bool bAvatarAvailable = steam->RequestAvatarData(i);
+
+			if (bAvatarAvailable)
+			{
+				if (nullptr == avatar)
+				{
+					avatar = steam->CreateAvatarTexture(i);
+				}
+
+				avatarTextures[i] = avatar;
+				steam->LoadAvatarData(i, avatar);
+			}
 		}
 
 		friendStates.Emplace(name, avatar, i, state, bCanJoin);
@@ -140,6 +139,25 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 	friendStates.Sort([](const FFriendState& lhs, const FFriendState& rhs) { return lhs.onlineState < rhs.onlineState; });
 
 	OnFriendsInfoLoaded(friendStates);	
+}
+
+void AFriendsMenuActor::OnAvatarDownloaded(int32 FriendIndex)
+{
+	UpdateAvatarTextureCount(FriendIndex);
+	
+	USteamBridge* steam = USteamBridge::Get();
+
+	UTexture2D* avatar = avatarTextures[FriendIndex];
+	if (nullptr == avatar)
+	{
+		avatar = steam->CreateAvatarTexture(FriendIndex);
+		avatarTextures[FriendIndex] = avatar;
+	}
+	
+	steam->LoadAvatarData(FriendIndex, avatar);
+
+	UFriendWidget* widget = *friendWidgets.FindByPredicate([&](const UFriendWidget* widget) {return widget->GetFriendIndex() == FriendIndex; });
+	widget->ChangeAvatar(avatar);
 }
 
 void AFriendsMenuActor::OnJoinFriendRequest(int32 friendIndex)
