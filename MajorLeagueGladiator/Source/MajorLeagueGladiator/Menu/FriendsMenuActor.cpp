@@ -28,7 +28,10 @@ void AFriendsMenuActor::BeginPlay()
 	{
 		gameInstance->OnFriendlistRead.AddUObject(this, &AFriendsMenuActor::OnFriendlistLoaded);
 		gameInstance->ReadFriendList();
-		USteamBridge::Get()->AvatarDownloaded.AddDynamic(this, &AFriendsMenuActor::OnAvatarDownloaded);
+		
+		USteamBridge* steam = USteamBridge::Get();
+		check(steam);
+		steam->AvatarDownloaded.AddDynamic(this, &AFriendsMenuActor::OnAvatarDownloaded);
 	}
 	else
 	{
