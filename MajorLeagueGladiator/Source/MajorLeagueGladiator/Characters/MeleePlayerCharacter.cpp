@@ -7,6 +7,7 @@
 #include "Abilities/JumpDashAbility.h"
 #include "Animation/BlendSpace1D.h"
 #include "PlayerDeathComponent.h"
+#include "MlgGrippableMeshActor.h"
 
 namespace
 {
@@ -106,4 +107,10 @@ void AMeleePlayerCharacter::ToggleMenuState(bool bMenuEnabled)
 
 	topAbilityWidget->SetVisibility(!bMenuEnabled);
 	bottomAbilityWidget->SetVisibility(!bMenuEnabled);
+
+	if (attachedWeapon != nullptr)
+	{
+		auto staticMesh = attachedWeapon->FindComponentByClass<UStaticMeshComponent>();
+		staticMesh->SetVisibility(false);
+	}
 }
