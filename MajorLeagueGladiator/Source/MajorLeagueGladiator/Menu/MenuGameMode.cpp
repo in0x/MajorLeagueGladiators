@@ -29,6 +29,17 @@ TSubclassOf<AGameSession> AMenuGameMode::GetGameSessionClass() const
 
 void AMenuGameMode::BeginPlay()
 {
+	Super::BeginPlay();
+
+	if (!GEngine->IsEditor())
+	{
+		bUseSeamlessTravel = true;
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Orange, TEXT("Not enabling seamless travel in editor as it is not supported in PIE."));
+	}
+
 	for (TObjectIterator<UMenuActionComponent> iter; iter; ++iter)
 	{
 		iter->OnMenuActionTriggered.AddUObject(this, &AMenuGameMode::onMenuAction);
