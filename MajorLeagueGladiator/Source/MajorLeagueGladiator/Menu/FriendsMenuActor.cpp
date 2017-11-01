@@ -10,7 +10,7 @@
 AFriendsMenuActor::AFriendsMenuActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
- 	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = false;
 
 	widgetComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("WidgetComponent"));
 	ConstructorHelpers::FClassFinder<UUserWidget> friendlistWidgetFinder(TEXT("/Game/BluePrints/Menu/FriendlistWidgetBP"));
@@ -20,7 +20,7 @@ AFriendsMenuActor::AFriendsMenuActor(const FObjectInitializer& ObjectInitializer
 void AFriendsMenuActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	UGameInstance* result = GetGameInstance();
 	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(result);
 
@@ -28,14 +28,15 @@ void AFriendsMenuActor::BeginPlay()
 	{
 		gameInstance->OnFriendlistRead.AddUObject(this, &AFriendsMenuActor::OnFriendlistLoaded);
 		gameInstance->ReadFriendList();
-		
+
 		USteamBridge* steam = USteamBridge::Get();
 		check(steam);
 		steam->AvatarDownloaded.AddDynamic(this, &AFriendsMenuActor::OnAvatarDownloaded);
 	}
 	else
 	{
-		UE_LOG(DebugLog, Log, TEXT("Not fetching friends in editor to prevent crash"));
+		UE_LOG(DebugLog, Log, TEXT("Using mock fetch friends in editor to prevent crash"));
+		MockFriendsListLoadedEditor();
 	}
 
 	UFriendlistWidget* listWidget = CastChecked<UFriendlistWidget>(widgetComponent->GetUserWidgetObject());
@@ -71,6 +72,35 @@ void AFriendsMenuActor::UpdateAvatarTextureCount(int32 CurrentNumFriends)
 	{
 		avatarTextures.Add(nullptr);
 	}
+}
+
+void AFriendsMenuActor::MockFriendsListLoadedEditor()
+{
+	TArray<FFriendState> friendStates;
+	int32 numFriends = 15;
+
+	UpdateAvatarTextureCount(numFriends);
+
+	for (int32 i = 0; i < 5; ++i)
+	{
+		FString name = FString::Printf(TEXT("Friend#%d"), numFriends);
+		friendStates.Emplace(name, nullptr, i, EOnlineState::InGame, false);
+	}
+
+	for (int32 i = 5; i < 10; ++i)
+	{
+		FString name = FString::Printf(TEXT("Friend#%d"), numFriends);
+		friendStates.Emplace(name, nullptr, i, EOnlineState::Online, false);
+	}
+
+	for (int32 i = 10; i < 15; ++i)
+	{
+		FString name = FString::Printf(TEXT("Friend#%d"), numFriends);
+		friendStates.Emplace(name, nullptr, i, EOnlineState::Offline, false);
+	}
+
+	friendStates.Sort([](const FFriendState& lhs, const FFriendState& rhs) { return lhs.onlineState < rhs.onlineState; });
+	OnFriendsInfoLoaded(friendStates);
 }
 
 void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend>>& friendlist)
@@ -141,13 +171,13 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 
 	friendStates.Sort([](const FFriendState& lhs, const FFriendState& rhs) { return lhs.onlineState < rhs.onlineState; });
 
-	OnFriendsInfoLoaded(friendStates);	
+	OnFriendsInfoLoaded(friendStates);
 }
 
 void AFriendsMenuActor::OnAvatarDownloaded(int32 FriendIndex)
 {
 	UpdateAvatarTextureCount(FriendIndex);
-	
+
 	USteamBridge* steam = USteamBridge::Get();
 
 	UTexture2D* avatar = avatarTextures[FriendIndex];
@@ -156,7 +186,7 @@ void AFriendsMenuActor::OnAvatarDownloaded(int32 FriendIndex)
 		avatar = steam->CreateAvatarTexture(FriendIndex);
 		avatarTextures[FriendIndex] = avatar;
 	}
-	
+
 	steam->LoadAvatarData(FriendIndex, avatar);
 
 	UFriendWidget* widget = *friendWidgets.FindByPredicate([&](const UFriendWidget* widget) {return widget->GetFriendIndex() == FriendIndex; });
@@ -180,7 +210,7 @@ void AFriendsMenuActor::HideUnusedWidgets(int32 LastUsedIndex)
 	{
 		return;
 	}
-	 
+
 	int32 numWidgets = friendWidgets.Num();
 	for (int i = LastUsedIndex; i < numWidgets; ++i)
 	{
@@ -200,7 +230,7 @@ IOnlineSessionPtr GetOnlineSession()
 void AFriendsMenuActor::FindFriendSession(TSharedRef<FOnlineFriend> Friend)
 {
 	IOnlineSessionPtr session = GetOnlineSession();
-	
+
 	onFindFriendSessionCompleteDelegateHandle = session->AddOnFindFriendSessionCompleteDelegate_Handle(0, onFindFriendSessionCompleteDelegate);
 	if (!session->FindFriendSession(0, *Friend->GetUserId()))
 	{
@@ -212,7 +242,7 @@ void AFriendsMenuActor::FindFriendSession(TSharedRef<FOnlineFriend> Friend)
 void AFriendsMenuActor::OnFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult)
 {
 	IOnlineSessionPtr session = GetOnlineSession();
-	
+
 	session->ClearOnFindFriendSessionCompleteDelegate_Handle(0, onFindFriendSessionCompleteDelegateHandle);
 
 	if (!bWasSuccessful)
@@ -225,7 +255,7 @@ void AFriendsMenuActor::OnFindFriendSessionComplete(int32 LocalUserNum, bool bWa
 	{
 		return;
 	}
-	
+
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, *FString::Printf(TEXT("Found session for user %s"), *SearchResult[0].Session.OwningUserName));
 
 	UFriendWidget* widget = *friendWidgets.FindByPredicate([&](const UFriendWidget* widget) { return widget->GetUsername() == SearchResult[0].Session.OwningUserName; });

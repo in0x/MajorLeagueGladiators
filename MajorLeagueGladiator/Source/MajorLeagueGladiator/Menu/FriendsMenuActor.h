@@ -38,6 +38,7 @@ protected:
 
 private:
 	void OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend>>& friendlist);
+	void MockFriendsListLoadedEditor();
 
 	UFUNCTION()
 	void OnFriendsRefreshRequested();
