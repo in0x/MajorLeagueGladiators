@@ -30,7 +30,6 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	PlayerStateClass = AMlgPlayerState::StaticClass();
 	GameStateClass = AMlgGameState::StaticClass();
 	waveSpawnerManger = ObjectInitializer.CreateDefaultSubobject<UWaveSpawnerManagerComponent>(this, TEXT("WaveSpawnerManager"));
-	bUseSeamlessTravel = true;
 }
 
 TSubclassOf<AGameSession> AMlgGameMode::GetGameSessionClass() const
@@ -41,6 +40,15 @@ TSubclassOf<AGameSession> AMlgGameMode::GetGameSessionClass() const
 void AMlgGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!GEngine->IsEditor())
+	{
+		bUseSeamlessTravel = true;
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Orange, TEXT("Not enabling seamless travel in editor as it is not supported in PIE."));
+	}
 
 	for (TObjectIterator<UMenuActionComponent> iter; iter; ++iter)
 	{
@@ -91,8 +99,11 @@ void AMlgGameMode::setIsInRoomOfShame(bool NewIsInRoomOfShame)
 
 UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
 {
-	// Handle only Player Controllers for now, as AI is spawned differently
-	check(InController->IsPlayerController());
+	// Handle only Player Controllers, as AI is spawned differently
+	if (!InController->IsPlayerController())
+	{
+		return nullptr;
+	}
 
 	// For now this just assigns the Server the DPS class and the Client the Tank Class.
 	// Game Mode is only on the Server. If the controller is locally controlled it is the
@@ -188,6 +199,8 @@ void AMlgGameMode::onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction)
 
 void AMlgGameMode::travelToMainMenu()
 {
+	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
+	waveSystemComponent->Stop();
 	CastChecked<UMlgGameInstance>(GetGameInstance())->TravelToMainMenu();
 }
 
