@@ -83,19 +83,19 @@ void AFriendsMenuActor::MockFriendsListLoadedEditor()
 
 	for (int32 i = 0; i < 5; ++i)
 	{
-		FString name = FString::Printf(TEXT("Friend#%d"), numFriends);
+		FString name = FString::Printf(TEXT("Friend#%dNameTooLongBoiiii12345689"), numFriends);
 		friendStates.Emplace(name, nullptr, i, EOnlineState::InGame, false);
 	}
 
 	for (int32 i = 5; i < 10; ++i)
 	{
-		FString name = FString::Printf(TEXT("Friend#%d"), numFriends);
+		FString name = FString::Printf(TEXT("Friend#%dNameTooLongBoiiii12345689"), numFriends);
 		friendStates.Emplace(name, nullptr, i, EOnlineState::Online, false);
 	}
 
 	for (int32 i = 10; i < 15; ++i)
 	{
-		FString name = FString::Printf(TEXT("Friend#%d"), numFriends);
+		FString name = FString::Printf(TEXT("Friend#%dNameTooLongBoiiii12345689"), numFriends);
 		friendStates.Emplace(name, nullptr, i, EOnlineState::Offline, false);
 	}
 
