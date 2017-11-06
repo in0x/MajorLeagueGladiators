@@ -216,7 +216,7 @@ void UMlgGameInstance::OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type 
 	APlayerController * const PlayerController = GetFirstLocalPlayerController();
 	check(PlayerController)
 
-		FString URL;
+	FString URL;
 	IOnlineSessionPtr Sessions = findOnlineSession();
 
 	if (!Sessions.IsValid() || !Sessions->GetResolvedConnectString(GameSessionName, URL))
@@ -226,7 +226,8 @@ void UMlgGameInstance::OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type 
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnJoinSessionComplete Call Client Travel"));
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("UMlgGameInstance::OnJoinSessionComplete Call Client Travel: URL: %s"), *URL));
 	PlayerController->ClientTravel(URL, ETravelType::TRAVEL_Absolute);
 }
 
