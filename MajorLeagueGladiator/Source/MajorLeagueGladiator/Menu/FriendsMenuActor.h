@@ -33,6 +33,9 @@ protected:
 	UFUNCTION()
 	void OnJoinFriendRequest(int32 friendIndex);
 
+	UFUNCTION()
+	void OnInviteFriendRequest(int32 friendIndex);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<UFriendWidget*> friendWidgets;
 
