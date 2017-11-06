@@ -84,19 +84,19 @@ void AFriendsMenuActor::MockFriendsListLoadedEditor()
 	for (int32 i = 0; i < 5; ++i)
 	{
 		FString name = FString::Printf(TEXT("Friend#%dNameTooLongBoiiii12345689"), numFriends);
-		friendStates.Emplace(name, nullptr, i, EOnlineState::InGame, false);
+		friendStates.Emplace(name, nullptr, i, EOnlineState::InGame, false, true);
 	}
 
 	for (int32 i = 5; i < 10; ++i)
 	{
 		FString name = FString::Printf(TEXT("Friend#%dNameTooLongBoiiii12345689"), numFriends);
-		friendStates.Emplace(name, nullptr, i, EOnlineState::Online, false);
+		friendStates.Emplace(name, nullptr, i, EOnlineState::Online, false, true);
 	}
 
 	for (int32 i = 10; i < 15; ++i)
 	{
 		FString name = FString::Printf(TEXT("Friend#%dNameTooLongBoiiii12345689"), numFriends);
-		friendStates.Emplace(name, nullptr, i, EOnlineState::Offline, false);
+		friendStates.Emplace(name, nullptr, i, EOnlineState::Offline, false, false);
 	}
 
 	friendStates.Sort([](const FFriendState& lhs, const FFriendState& rhs) { return lhs.onlineState < rhs.onlineState; });
@@ -125,6 +125,7 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 		bool bIsPlaying = presence.bIsPlayingThisGame;
 		bool bCanJoin = presence.bIsJoinable;
 
+		bool bCanBeInvited = bIsOnline || bIsPlaying;
 		EOnlineState::Type state;
 
 		if (bIsPlaying)
@@ -166,7 +167,7 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 			}
 		}
 
-		friendStates.Emplace(name, avatar, i, state, bCanJoin);
+		friendStates.Emplace(name, avatar, i, state, bCanJoin, bCanBeInvited);
 	}
 
 	friendStates.Sort([](const FFriendState& lhs, const FFriendState& rhs) { return lhs.onlineState < rhs.onlineState; });

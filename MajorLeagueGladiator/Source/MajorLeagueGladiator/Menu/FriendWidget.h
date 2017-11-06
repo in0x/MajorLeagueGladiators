@@ -27,12 +27,13 @@ struct FFriendState
 
 	FFriendState() = default;
 
-	FFriendState(const FString& Username, UTexture2D* AvatarTex, int32 FriendIndex, EOnlineState::Type OnlineState, bool bJoinable)
+	FFriendState(const FString& Username, UTexture2D* AvatarTex, int32 FriendIndex, EOnlineState::Type OnlineState, bool bJoinable, bool bInvitable)
 		: username(Username)
 		, avatar(AvatarTex)
 		, friendIndex(FriendIndex)
 		, onlineState(OnlineState)
 		, bCanJoin(bJoinable)
+		, bCanInvite(bInvitable)
 	{}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -49,6 +50,9 @@ struct FFriendState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanJoin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanInvite;
 };
 
 UCLASS(Blueprintable)
@@ -65,6 +69,9 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void ChangeCanJoin(bool bJoinable);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void ChangeCanInvite(bool bInvitable);
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void ChangeAvatar(UTexture2D* texture);
@@ -87,6 +94,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetCanJoin() const;
 
+	UFUNCTION(BlueprintCallable)
+	bool GetCanInvite() const;
+
 protected:
 	UFUNCTION(BlueprintCallable)
 	void EmitJoinFriendRequested() const;
@@ -106,5 +116,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanJoin;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanInvite;
 };
