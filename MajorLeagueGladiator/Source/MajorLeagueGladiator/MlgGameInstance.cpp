@@ -44,6 +44,9 @@ void UMlgGameInstance::Init()
 	onDestroySessionCompleteWhenShutdownDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onDestroySessionCompleteWhenShutdown);
 	onFindFriendSessionCompleteDelegate = FOnFindFriendSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onFindFriendSessionComplete);
 	onReadFriendsListCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UMlgGameInstance::OnReadFriendsListComplete);
+	onSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UMlgGameInstance::OnSessionUserInviteAccepted);
+
+	onSessionUserInviteAcceptedDelegateHandle = findOnlineSession()->AddOnSessionUserInviteAcceptedDelegate_Handle(onSessionUserInviteAcceptedDelegate);
 }
 
 void UMlgGameInstance::Shutdown()
@@ -55,6 +58,7 @@ void UMlgGameInstance::Shutdown()
 	if (Sessions.IsValid())
 	{
 		onDestroySessionCompleteWhenShutdownDelegateHandle = Sessions->AddOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteWhenShutdownDelegate);
+		Sessions->ClearOnSessionUserInviteAcceptedDelegate_Handle(onSessionUserInviteAcceptedDelegateHandle);
 
 		Sessions->DestroySession(GameSessionName);
 	}
@@ -308,6 +312,25 @@ void UMlgGameInstance::OnReadFriendsListComplete(int32 LocalUserNum, bool bWasSu
 	}
 
 	OnFriendlistRead.Broadcast(friendList);
+}
+
+void UMlgGameInstance::OnSessionUserInviteAccepted(bool bWasSuccessful, int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& SearchResult)
+{
+	UE_LOG(LogOnline, Verbose, TEXT("OnSessionUserInviteAccepted LocalUserNum: %d bSuccess: %d"), ControllerId, bWasSuccessful);
+	// Don't clear invite accept delegate
+
+	if (bWasSuccessful)
+	{
+		if (SearchResult.IsValid())
+		{
+			ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+			JoinSession(localPlayer, SearchResult);
+		}
+		else
+		{
+			UE_LOG(LogOnline, Warning, TEXT("Invite accept returned no search result."));
+		}
+	}
 }
 
 void UMlgGameInstance::JoinFirstAvailableFriend()
