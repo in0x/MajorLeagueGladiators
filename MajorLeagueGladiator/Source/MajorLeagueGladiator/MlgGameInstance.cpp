@@ -175,7 +175,7 @@ bool UMlgGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessi
 	AMlgGameSession* const GameSession = GetGameSession();
 	check(GameSession)
 
-		AddNetworkFailureHandlers();
+	AddNetworkFailureHandlers();
 
 	onJoinSessionCompleteDelegateHandle = GameSession->JoinSessionCompleteEvent.AddUObject(this, &UMlgGameInstance::OnJoinSessionComplete);
 
@@ -184,6 +184,8 @@ bool UMlgGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessi
 
 void UMlgGameInstance::OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type Result)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnJoinSessionComplete Called"));
+
 	AMlgGameSession* const GameSession = GetGameSession();
 	check(GameSession);
 
@@ -196,12 +198,15 @@ void UMlgGameInstance::OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type 
 		{
 		case EOnJoinSessionCompleteResult::SessionIsFull:
 			UE_LOG(DebugLog, Error, TEXT("JoinSessionFailed - Game is full."));
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnJoinSessionComplete JoinSessionFailed - Game is full."));
 			break;
 		case EOnJoinSessionCompleteResult::SessionDoesNotExist:
 			UE_LOG(DebugLog, Error, TEXT("JoinSessionFailed - Game no longer exists"));
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnJoinSessionComplete JoinSessionFailed - Game no longer exists"));
 			break;
 		default:
 			UE_LOG(DebugLog, Error, TEXT("JoinSessionFailed"));
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnJoinSessionComplete JoinSessionFailed"));
 			break;
 		}
 
@@ -216,10 +221,12 @@ void UMlgGameInstance::OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type 
 
 	if (!Sessions.IsValid() || !Sessions->GetResolvedConnectString(GameSessionName, URL))
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnJoinSessionComplete Failed to travel to session upon joining it"));
 		UE_LOG(DebugLog, Warning, TEXT("Failed to travel to session upon joining it"));
 		return;
 	}
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnJoinSessionComplete Call Client Travel"));
 	PlayerController->ClientTravel(URL, ETravelType::TRAVEL_Absolute);
 }
 
@@ -328,7 +335,15 @@ void UMlgGameInstance::OnSessionUserInviteAccepted(bool bWasSuccessful, int32 Co
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnSessionUserInviteAccepted  Trying to join lobby"));
 			ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-			JoinSession(localPlayer, SearchResult);
+			bool success = JoinSession(localPlayer, SearchResult);
+			if (success)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnSessionUserInviteAccepted Begin Join lobby sucessful"));
+			}
+			else
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnSessionUserInviteAccepted Begin Join lobby failed"));
+			}
 		}
 		else
 		{
