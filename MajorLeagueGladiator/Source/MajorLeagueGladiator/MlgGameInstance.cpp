@@ -319,17 +319,26 @@ void UMlgGameInstance::OnSessionUserInviteAccepted(bool bWasSuccessful, int32 Co
 	UE_LOG(LogOnline, Verbose, TEXT("OnSessionUserInviteAccepted LocalUserNum: %d bSuccess: %d"), ControllerId, bWasSuccessful);
 	// Don't clear invite accept delegate
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnSessionUserInviteAccepted called"));
+
 	if (bWasSuccessful)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnSessionUserInviteAccepted  was successful"));
 		if (SearchResult.IsValid())
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnSessionUserInviteAccepted  Trying to join lobby"));
 			ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 			JoinSession(localPlayer, SearchResult);
 		}
 		else
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnSessionUserInviteAccepted Invite returned no search result"));
 			UE_LOG(LogOnline, Warning, TEXT("Invite accept returned no search result."));
 		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("UMlgGameInstance::OnSessionUserInviteAccepted  was not successful"));
 	}
 }
 
