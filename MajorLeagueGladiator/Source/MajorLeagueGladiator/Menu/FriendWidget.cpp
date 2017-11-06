@@ -32,3 +32,8 @@ bool UFriendWidget::GetCanJoin() const
 {
 	return bCanJoin;
 }
+
+bool UFriendWidget::GetCanInvite() const
+{
+	return bCanInvite;
+}
