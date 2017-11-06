@@ -70,11 +70,13 @@ private:
 	void onFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult);
 
 	void OnReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
+	void OnSessionUserInviteAccepted(bool bWasSuccessful, int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& SearchResult);
 
 	FOnDestroySessionCompleteDelegate onDestroySessionCompleteDelegate;
 	FOnDestroySessionCompleteDelegate onDestroySessionCompleteWhenShutdownDelegate;
 	FOnFindFriendSessionCompleteDelegate onFindFriendSessionCompleteDelegate;
 	FOnStartSessionCompleteDelegate onStartSessionCompleteDelegate;
+	FOnSessionUserInviteAcceptedDelegate onSessionUserInviteAcceptedDelegate;
 
 	FDelegateHandle onCreateSessionCompleteDelegateHandle;
 	FDelegateHandle onStartSessionCompleteDelegateHandle;
@@ -84,6 +86,7 @@ private:
 	FDelegateHandle onDestroySessionCompleteWhenShutdownDelegateHandle;
 	FDelegateHandle onFindFriendSessionCompleteDelegateHandle;
 	FDelegateHandle onTravelLocalSessionFailureDelegateHandle;
+	FDelegateHandle onSessionUserInviteAcceptedDelegateHandle;
 
 	FOnReadFriendsListComplete onReadFriendsListCompleteDelegate;
 
