@@ -18,6 +18,7 @@ namespace EOnlineState
 }
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FJoinFriendRequestDelegate, int32, FriendIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInviteFriendRequestDelegate, int32, FriendIndex);
 
 USTRUCT(BlueprintType)
 struct FFriendState
@@ -74,6 +75,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FJoinFriendRequestDelegate JoinFriendRequested;
 
+	UPROPERTY(BlueprintAssignable)
+	FInviteFriendRequestDelegate InviteFriendRequested;
+
 	UFUNCTION(BlueprintCallable)
 	const FString& GetUsername() const;
 
@@ -86,6 +90,9 @@ public:
 protected:
 	UFUNCTION(BlueprintCallable)
 	void EmitJoinFriendRequested() const;
+
+	UFUNCTION(BlueprintCallable)
+	void EmitInviteFriendRequested() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString username;

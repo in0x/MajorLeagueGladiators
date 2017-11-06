@@ -199,9 +199,16 @@ void AFriendsMenuActor::OnJoinFriendRequest(int32 friendIndex)
 	gameInstance->JoinFriend(friendIndex);
 }
 
+void AFriendsMenuActor::OnInviteFriendRequest(int32 friendIndex)
+{
+	UMlgGameInstance* gameInstance = CastChecked<UMlgGameInstance>(GetGameInstance());
+	gameInstance->InviteFriend(friendIndex);
+}
+
 void AFriendsMenuActor::BindToFriendWidget(UFriendWidget* Widget)
 {
 	Widget->JoinFriendRequested.AddDynamic(this, &AFriendsMenuActor::OnJoinFriendRequest);
+	Widget->InviteFriendRequested.AddDynamic(this, &AFriendsMenuActor::OnInviteFriendRequest);
 }
 
 void AFriendsMenuActor::HideUnusedWidgets(int32 LastUsedIndex)

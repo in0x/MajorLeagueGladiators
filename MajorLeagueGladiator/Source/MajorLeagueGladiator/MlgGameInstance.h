@@ -43,9 +43,10 @@ public:
 	virtual bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult) override;
 
 	void ReadFriendList();
-	
+
 	void JoinFriend(int32 friendlistIndex);
 	void JoinFirstAvailableFriend();
+	void InviteFriend(int32 friendlistIndex);
 	void InviteFirstAvailableFriend();
 
 	void TravelToMainMenu();
@@ -85,6 +86,6 @@ private:
 	FDelegateHandle onTravelLocalSessionFailureDelegateHandle;
 
 	FOnReadFriendsListComplete onReadFriendsListCompleteDelegate;
-	
+
 	TArray<TSharedRef<FOnlineFriend>> friendList;
 };

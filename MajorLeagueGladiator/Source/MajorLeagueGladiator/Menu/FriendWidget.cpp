@@ -13,6 +13,11 @@ void UFriendWidget::EmitJoinFriendRequested() const
 	JoinFriendRequested.Broadcast(friendIndex);
 }
 
+void UFriendWidget::EmitInviteFriendRequested() const
+{
+	InviteFriendRequested.Broadcast(friendIndex);
+}
+
 const FString& UFriendWidget::GetUsername() const
 {
 	return username;
