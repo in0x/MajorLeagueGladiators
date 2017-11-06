@@ -11,6 +11,16 @@
 class FOnlineFriend;
 class UWidgetComponent;
 
+UENUM(BlueprintType)
+namespace EFriendsMenuLocation
+{
+	enum Type
+	{
+		MainMenu UMETA(DisplayName = "MainMenu"),
+		Lobby	 UMETA(DisplayName = "Lobby")
+	};
+}
+
 UCLASS(Blueprintable)
 class MAJORLEAGUEGLADIATOR_API AFriendsMenuActor : public AActor
 {
@@ -39,6 +49,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<UFriendWidget*> friendWidgets;
 
+	// Decides wether the invite button is shown or not.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<EFriendsMenuLocation::Type> menuLocation;
 private:
 	void OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend>>& friendlist);
 	void MockFriendsListLoadedEditor();
@@ -63,6 +76,14 @@ private:
 	UFUNCTION()
 	void OnAvatarDownloaded(int32 FriendIndex);
 
+	void SetInviteButtonShowState();
+
 	UPROPERTY()
 	TArray<UTexture2D*> avatarTextures;
+
+	UPROPERTY(EditAnywhere)
+	FVector2D drawSizeWithInviteButton;
+
+	UPROPERTY(EditAnywhere)
+	FVector2D drawSizeRegular;
 };

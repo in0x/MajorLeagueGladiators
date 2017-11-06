@@ -9,6 +9,7 @@
 
 AFriendsMenuActor::AFriendsMenuActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
+	, menuLocation(EFriendsMenuLocation::MainMenu)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -43,6 +44,14 @@ void AFriendsMenuActor::BeginPlay()
 	listWidget->FriendsRefreshRequest.AddDynamic(this, &AFriendsMenuActor::OnFriendsRefreshRequested);
 
 	onFindFriendSessionCompleteDelegate = FOnFindFriendSessionCompleteDelegate::CreateUObject(this, &AFriendsMenuActor::OnFindFriendSessionComplete);
+}
+
+void AFriendsMenuActor::SetInviteButtonShowState()
+{
+	FVector2D drawSize = menuLocation == EFriendsMenuLocation::MainMenu ? drawSizeRegular : drawSizeWithInviteButton;
+
+	widgetComponent->SetDrawSize(drawSize);
+	widgetComponent->GetUserWidgetObject()->SetDesiredSizeInViewport(drawSize);
 }
 
 void AFriendsMenuActor::OnFriendsRefreshRequested()
