@@ -46,14 +46,6 @@ void AFriendsMenuActor::BeginPlay()
 	onFindFriendSessionCompleteDelegate = FOnFindFriendSessionCompleteDelegate::CreateUObject(this, &AFriendsMenuActor::OnFindFriendSessionComplete);
 }
 
-void AFriendsMenuActor::SetInviteButtonShowState()
-{
-	FVector2D drawSize = menuLocation == EFriendsMenuLocation::MainMenu ? drawSizeRegular : drawSizeWithInviteButton;
-
-	widgetComponent->SetDrawSize(drawSize);
-	widgetComponent->GetUserWidgetObject()->SetDesiredSizeInViewport(drawSize);
-}
-
 void AFriendsMenuActor::OnFriendsRefreshRequested()
 {
 	UGameInstance* result = GetGameInstance();

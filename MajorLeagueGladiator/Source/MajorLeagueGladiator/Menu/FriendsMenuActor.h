@@ -76,14 +76,6 @@ private:
 	UFUNCTION()
 	void OnAvatarDownloaded(int32 FriendIndex);
 
-	void SetInviteButtonShowState();
-
 	UPROPERTY()
 	TArray<UTexture2D*> avatarTextures;
-
-	UPROPERTY(EditAnywhere)
-	FVector2D drawSizeWithInviteButton;
-
-	UPROPERTY(EditAnywhere)
-	FVector2D drawSizeRegular;
 };
