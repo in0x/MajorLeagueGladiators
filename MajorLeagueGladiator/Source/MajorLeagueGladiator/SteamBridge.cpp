@@ -23,6 +23,9 @@ private:
 SteamCallbackHandler::SteamCallbackHandler()
 {
 	LoadSteamIDs();
+
+	UE_LOG(DebugLog, Warning, TEXT("SteamCallbackHandler::SteamCallbackHandler(), reseting Steam Achievements and stats, this needs to be removed when implementation is done."));
+	SteamUserStats()->ResetAllStats(true);
 }
 
 void SteamCallbackHandler::OnAvatarImageLoaded(AvatarImageLoaded_t* cbData)
