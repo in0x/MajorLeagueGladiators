@@ -31,6 +31,17 @@ namespace
 		return Sessions;
 	}
 
+	IOnlineAchievementsPtr findAchievements()
+	{
+		IOnlineAchievementsPtr achievements = getOnlineSubsystem()->GetAchievementsInterface();
+		check(achievements.IsValid());
+		return achievements;
+	}
+
+	TSharedPtr<const FUniqueNetId> getLocalPlayerNetId()
+	{
+		return getOnlineSubsystem()->GetIdentityInterface()->GetUniquePlayerId(0);
+	}
 }
 
 UMlgGameInstance::UMlgGameInstance(const FObjectInitializer & ObjectInitializer)
@@ -45,8 +56,14 @@ void UMlgGameInstance::Init()
 	onFindFriendSessionCompleteDelegate = FOnFindFriendSessionCompleteDelegate::CreateUObject(this, &UMlgGameInstance::onFindFriendSessionComplete);
 	onReadFriendsListCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UMlgGameInstance::OnReadFriendsListComplete);
 	onSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UMlgGameInstance::OnSessionUserInviteAccepted);
+	onQueryAchievementsCompleteDelegate = FOnQueryAchievementsCompleteDelegate::CreateUObject(this, &UMlgGameInstance::OnQueryAchievementsComplete);
+	onAchievementsWrittenDelegate = FOnAchievementsWrittenDelegate::CreateUObject(this, &UMlgGameInstance::OnAchievementsWritten);
+	onAchievementUnlockedDelegate = FOnAchievementUnlockedDelegate::CreateUObject(this, &UMlgGameInstance::onAchievementUnlocked);
 
 	onSessionUserInviteAcceptedDelegateHandle = findOnlineSession()->AddOnSessionUserInviteAcceptedDelegate_Handle(onSessionUserInviteAcceptedDelegate);
+
+	//findAchievements()->ResetAchievements(*getLocalPlayerNetId());
+	//QueryAchievements();
 }
 
 void UMlgGameInstance::Shutdown()
@@ -175,7 +192,7 @@ bool UMlgGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessi
 	AMlgGameSession* const GameSession = GetGameSession();
 	check(GameSession)
 
-	AddNetworkFailureHandlers();
+		AddNetworkFailureHandlers();
 
 	onJoinSessionCompleteDelegateHandle = GameSession->JoinSessionCompleteEvent.AddUObject(this, &UMlgGameInstance::OnJoinSessionComplete);
 
@@ -216,7 +233,7 @@ void UMlgGameInstance::OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type 
 	APlayerController * const PlayerController = GetFirstLocalPlayerController();
 	check(PlayerController)
 
-	FString URL;
+		FString URL;
 	IOnlineSessionPtr Sessions = findOnlineSession();
 
 	if (!Sessions.IsValid() || !Sessions->GetResolvedConnectString(GameSessionName, URL))
@@ -415,7 +432,6 @@ void UMlgGameInstance::onFindFriendSessionComplete(int32 LocalUserNum, bool bWas
 	JoinSession(localPlayer, SearchResult[0]);
 }
 
-// Work in Progress
 void UMlgGameInstance::InviteFirstAvailableFriend()
 {
 	int32 IndexOfFirstAvailableFriend = 0;
@@ -443,9 +459,77 @@ void UMlgGameInstance::InviteFirstAvailableFriend()
 void UMlgGameInstance::InviteFriend(int32 friendlistIndex)
 {
 	IOnlineSessionPtr sessions = findOnlineSession();
-	
-	TSharedPtr<const FUniqueNetId> localId = getOnlineSubsystem()->GetIdentityInterface()->GetUniquePlayerId(0);
+
+	TSharedPtr<const FUniqueNetId> localId = getLocalPlayerNetId();
 	AMlgGameSession* const gameSession = GetGameSession();
 
 	sessions->SendSessionInviteToFriend(*localId, gameSession->SessionName, *friendList[friendlistIndex]->GetUserId());
+}
+
+void UMlgGameInstance::QueryAchievements()
+{
+	IOnlineAchievementsPtr achievements = findAchievements();
+	achievements->QueryAchievements(*getLocalPlayerNetId(), onQueryAchievementsCompleteDelegate);
+}
+
+void UMlgGameInstance::OnQueryAchievementsComplete(const FUniqueNetId& PlayerId, const bool bWasSuccessful)
+{
+	if (!bWasSuccessful)
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::onQueryAchievementsComplete(): QueryAchievements failed"));
+		return;
+	}
+
+	IOnlineAchievementsPtr achievements = findAchievements();
+
+	if (achievements->GetCachedAchievements(*getLocalPlayerNetId(), playerAchievements) != EOnlineCachedResult::Success)
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::OnQueryAchievementsComplete(): GetCachedAchievements failed"));
+	}
+
+	if (playerAchievements.Num() == 0)
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::OnQueryAchievementsComplete(): GetCachedAchievements returned 0 achievements"));
+	}
+
+	int32 numAchievements = playerAchievements.Num();
+	for (int i = 0; i < numAchievements; ++i)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, FString::Printf(TEXT("%s"), *playerAchievements[i].ToDebugString()));
+	}
+
+	WriteAchievements();
+}
+
+void UMlgGameInstance::WriteAchievements()
+{
+	FOnlineAchievementsWritePtr writeObject = MakeShareable(new FOnlineAchievementsWrite());
+
+	writeObject->SetFloatStat(*playerAchievements[0].Id, 1);
+
+	IOnlineAchievementsPtr achievements = findAchievements();
+	FOnlineAchievementsWriteRef writeObjectRef = writeObject.ToSharedRef();
+	
+	onAchievementUnlockedDelegateHandle = achievements->AddOnAchievementUnlockedDelegate_Handle(onAchievementUnlockedDelegate);
+	achievements->WriteAchievements(*getLocalPlayerNetId(), writeObjectRef/*, onAchievementsWrittenDelegate*/);
+}
+
+void UMlgGameInstance::OnAchievementsWritten(const FUniqueNetId& PlayerId, bool bWasSuccessful)
+{
+	IOnlineAchievementsPtr achievements = findAchievements();
+	achievements->ClearOnAchievementUnlockedDelegate_Handle(onAchievementUnlockedDelegateHandle);
+	
+	if (bWasSuccessful)
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::OnAchievementsWritten(): WriteAchievements succeeded"));
+	}
+	else
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::OnAchievementsWritten(): WriteAchievements failed"));
+	}
+}
+
+void UMlgGameInstance::onAchievementUnlocked(const FUniqueNetId& PlayerId, const FString& AchievementId)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, FString::Printf(TEXT("Achievement Unlocked - %s"), *AchievementId));
 }

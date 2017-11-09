@@ -51,6 +51,9 @@ public:
 
 	void TravelToMainMenu();
 
+	void QueryAchievements();
+	void WriteAchievements();
+
 	SearchFinishedDelegate OnFindSessionFinished;
 
 	FriendlistReadFinishedDelegate OnFriendlistRead;
@@ -68,9 +71,12 @@ private:
 	void onDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 	void onDestroySessionCompleteWhenShutdown(FName SessionName, bool bWasSuccessful);
 	void onFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult);
+	void onAchievementUnlocked(const FUniqueNetId& PlayerId, const FString& AchievementId);
 
 	void OnReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
 	void OnSessionUserInviteAccepted(bool bWasSuccessful, int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& SearchResult);
+	void OnQueryAchievementsComplete(const FUniqueNetId& PlayerId, const bool bWasSuccessful);
+	void OnAchievementsWritten(const FUniqueNetId& PlayerId, bool bWasSuccessful);
 
 	FOnDestroySessionCompleteDelegate onDestroySessionCompleteDelegate;
 	FOnDestroySessionCompleteDelegate onDestroySessionCompleteWhenShutdownDelegate;
@@ -87,8 +93,13 @@ private:
 	FDelegateHandle onFindFriendSessionCompleteDelegateHandle;
 	FDelegateHandle onTravelLocalSessionFailureDelegateHandle;
 	FDelegateHandle onSessionUserInviteAcceptedDelegateHandle;
-
+	FDelegateHandle onAchievementUnlockedDelegateHandle;
+	
 	FOnReadFriendsListComplete onReadFriendsListCompleteDelegate;
+	FOnQueryAchievementsCompleteDelegate onQueryAchievementsCompleteDelegate;
+	FOnAchievementsWrittenDelegate onAchievementsWrittenDelegate;
+	FOnAchievementUnlockedDelegate onAchievementUnlockedDelegate;
 
 	TArray<TSharedRef<FOnlineFriend>> friendList;
+	TArray<FOnlineAchievement> playerAchievements;
 };
