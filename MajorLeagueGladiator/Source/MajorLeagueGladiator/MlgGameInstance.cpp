@@ -62,8 +62,7 @@ void UMlgGameInstance::Init()
 
 	onSessionUserInviteAcceptedDelegateHandle = findOnlineSession()->AddOnSessionUserInviteAcceptedDelegate_Handle(onSessionUserInviteAcceptedDelegate);
 
-	//findAchievements()->ResetAchievements(*getLocalPlayerNetId());
-	//QueryAchievements();
+	QueryAchievements();
 }
 
 void UMlgGameInstance::Shutdown()
@@ -497,21 +496,27 @@ void UMlgGameInstance::OnQueryAchievementsComplete(const FUniqueNetId& PlayerId,
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, FString::Printf(TEXT("%s"), *playerAchievements[i].ToDebugString()));
 	}
-
-	WriteAchievements();
 }
 
-void UMlgGameInstance::WriteAchievements()
+void UMlgGameInstance::WriteAchievement(const FString& Id, float value)
 {
 	FOnlineAchievementsWritePtr writeObject = MakeShareable(new FOnlineAchievementsWrite());
 
-	writeObject->SetFloatStat(*playerAchievements[0].Id, 1);
+	const FOnlineAchievement* ach = playerAchievements.FindByPredicate([&Id](const auto& ach) {return ach.Id == Id; });
+
+	if (nullptr == ach)
+	{
+		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::WriteAchievement(): Achievement with Id %s is not cached."), *Id);
+		return;
+	}
+
+	writeObject->SetFloatStat(*Id, value);
 
 	IOnlineAchievementsPtr achievements = findAchievements();
 	FOnlineAchievementsWriteRef writeObjectRef = writeObject.ToSharedRef();
-	
+
 	onAchievementUnlockedDelegateHandle = achievements->AddOnAchievementUnlockedDelegate_Handle(onAchievementUnlockedDelegate);
-	achievements->WriteAchievements(*getLocalPlayerNetId(), writeObjectRef/*, onAchievementsWrittenDelegate*/);
+	achievements->WriteAchievements(*getLocalPlayerNetId(), writeObjectRef, onAchievementsWrittenDelegate);
 }
 
 void UMlgGameInstance::OnAchievementsWritten(const FUniqueNetId& PlayerId, bool bWasSuccessful)

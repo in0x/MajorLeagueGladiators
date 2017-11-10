@@ -52,8 +52,8 @@ public:
 	void TravelToMainMenu();
 
 	void QueryAchievements();
-	void WriteAchievements();
-
+	void WriteAchievement(const FString& Id, float value);
+	
 	SearchFinishedDelegate OnFindSessionFinished;
 
 	FriendlistReadFinishedDelegate OnFriendlistRead;
