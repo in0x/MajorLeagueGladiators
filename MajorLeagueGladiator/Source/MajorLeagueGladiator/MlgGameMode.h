@@ -10,7 +10,7 @@ namespace EMenuAction { enum Type; }
 class AMlgPlayerCharacter;
 class UWaveSpawnerManagerComponent;
 
-UCLASS()
+UCLASS(Config=Game)
 class MAJORLEAGUEGLADIATOR_API AMlgGameMode : public AGameMode
 {
 	GENERATED_BODY()
@@ -53,12 +53,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	UWaveSpawnerManagerComponent* waveSpawnerManger;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Config)
 	int32 easyStartWave;
-
-	UPROPERTY(EditAnywhere)
+	 
+	UPROPERTY(Config)
 	int32 mediumStartWave;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Config)
 	int32 hardStartWave;
 };
