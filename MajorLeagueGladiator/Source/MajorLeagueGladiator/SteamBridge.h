@@ -40,7 +40,7 @@ public:
 	UTexture2D* CreateAvatarTexture(int32 FriendIndex);
 
 	// Returns true if Avatar is availible and LoadAvatarData() can
-	// be called immediately. Returns bool if Avatar has to be downloaded.
+	// be called immediately. Returns false if Avatar has to be downloaded.
 	// In this case wait for OnAvatarLoaded to be broadcast with your FriendIndex
 	// before calling LoadAvatarData();
 	bool RequestAvatarData(int32 FriendIndex);
