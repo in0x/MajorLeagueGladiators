@@ -65,6 +65,10 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void HideUnusedWidgets(int32 LastUsedIndex);
 
+	// To be called after widgets have been constructed to run dependent inits (e.g. Friend Avatars).
+	UFUNCTION(BlueprintCallable)
+	void PostWidgetsConstructed();
+
 	void FindFriendSession(TSharedRef<FOnlineFriend> Friend);
 	void OnFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResult);
 

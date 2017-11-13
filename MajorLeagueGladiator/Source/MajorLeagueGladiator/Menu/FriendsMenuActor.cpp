@@ -29,10 +29,6 @@ void AFriendsMenuActor::BeginPlay()
 	{
 		gameInstance->OnFriendlistRead.AddUObject(this, &AFriendsMenuActor::OnFriendlistLoaded);
 		gameInstance->ReadFriendList();
-
-		USteamBridge* steam = USteamBridge::Get();
-		check(steam);
-		steam->AvatarDownloaded.AddDynamic(this, &AFriendsMenuActor::OnAvatarDownloaded);
 	}
 	else
 	{
@@ -154,8 +150,8 @@ void AFriendsMenuActor::OnFriendlistLoaded(const TArray<TSharedRef<FOnlineFriend
 		UTexture2D* avatar = avatarTextures[i];
 		if (!GEngine->IsEditor())
 		{
-			bool bAvatarAvailable = steam->RequestAvatarData(i);
-
+			bool bAvatarAvailable = steam->RequestAvatarData(i); // We need to defer this
+			
 			if (bAvatarAvailable)
 			{
 				if (nullptr == avatar)
@@ -192,8 +188,52 @@ void AFriendsMenuActor::OnAvatarDownloaded(int32 FriendIndex)
 	steam->LoadAvatarData(FriendIndex, avatar);
 
 	// NOTE(Phil): I think this may be the cause of the texture related crash. (Null when no matching widget is found).
+	check(friendWidgets.Num() != 0);
 	UFriendWidget* widget = *friendWidgets.FindByPredicate([&](const UFriendWidget* widget) {return widget->GetFriendIndex() == FriendIndex; });
+	check(widget);
 	widget->ChangeAvatar(avatar);
+}
+
+void AFriendsMenuActor::PostWidgetsConstructed()
+{
+	// NOTE(Phil): We run this again after constructing the widgets
+	// to check if either the avatars have been fetched after first
+	// requesting in OnFriendlistLoaded() or else we wait on the 
+	// fetch by listening to the AvatarDownloaded callback. We only 
+	// listen for this after constructing the widgets as it would else
+	// be possible to be interupted by the callback while the widgets 
+	// are still being constructed.
+
+	if (!GEngine->IsEditor())
+	{
+		USteamBridge* steam = USteamBridge::Get();
+		check(steam);
+		
+		if (steam->AvatarDownloaded.IsBound())
+		{
+			steam->AvatarDownloaded.AddDynamic(this, &AFriendsMenuActor::OnAvatarDownloaded);
+		}
+
+		for (UFriendWidget* widget : friendWidgets)
+		{
+			int32 friendIndex = widget->GetFriendIndex();
+			UTexture2D* avatar = avatarTextures[friendIndex];
+		
+			bool bAvatarAvailable = steam->RequestAvatarData(friendIndex);
+
+			if (bAvatarAvailable)
+			{
+				if (nullptr == avatar)
+				{
+					avatar = steam->CreateAvatarTexture(friendIndex);
+				}
+
+				avatarTextures[friendIndex] = avatar;
+				steam->LoadAvatarData(friendIndex, avatar);
+				widget->ChangeAvatar(avatar);
+			}	
+		}
+	}
 }
 
 void AFriendsMenuActor::OnJoinFriendRequest(int32 friendIndex)
@@ -230,9 +270,9 @@ void AFriendsMenuActor::HideUnusedWidgets(int32 LastUsedIndex)
 
 IOnlineSessionPtr GetOnlineSession()
 {
-	IOnlineSubsystem* onlineSub = IOnlineSubsystem::Get();
-	check(onlineSub);
-	IOnlineSessionPtr session = onlineSub->GetSessionInterface();
+	IOnlineSubsystem* online = IOnlineSubsystem::Get();
+	check(online);
+	IOnlineSessionPtr session = online->GetSessionInterface();
 	check(session.IsValid());
 	return session;
 }
