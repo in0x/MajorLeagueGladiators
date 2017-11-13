@@ -6,42 +6,24 @@
 #include "MlgGameState.generated.h"
 
 class UReplicatedEffectsComponent;
+class UMlgAchievementsComponent;
 class UWaveSystemComponent;
 
-UCLASS(Config=Game)
+UCLASS()
 class MAJORLEAGUEGLADIATOR_API AMlgGameState : public AGameState
 {
 	GENERATED_BODY()
 		
 public:
 	AMlgGameState(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	virtual void BeginPlay() override;
-
+	
 private:
-	UFUNCTION()
-	void WaveCleared(int32 WaveNumber);
-
 	UPROPERTY()
 	UReplicatedEffectsComponent* replicatedEffectsComponent;
 
+	UPROPERTY()
+	UMlgAchievementsComponent* achievementsComponent;
+
 	UPROPERTY(EditAnywhere)
 	UWaveSystemComponent* waveSystemComponent;
-
-	UPROPERTY(Config)
-	int32 easyAchievementWave;
-
-	UPROPERTY(Config)
-	int32 mediumAchievementWave;
-
-	UPROPERTY(Config)
-	int32 hardAchievementWave;
-
-	UPROPERTY(Config)
-	FString beatEasyAchievementId;
-
-	UPROPERTY(Config)
-	FString beatMediumAchievementId;
-
-	UPROPERTY(Config)
-	FString beatHardAchievementId;
 };

@@ -191,6 +191,7 @@ void AFriendsMenuActor::OnAvatarDownloaded(int32 FriendIndex)
 
 	steam->LoadAvatarData(FriendIndex, avatar);
 
+	// NOTE(Phil): I think this may be the cause of the texture related crash. (Null when no matching widget is found).
 	UFriendWidget* widget = *friendWidgets.FindByPredicate([&](const UFriendWidget* widget) {return widget->GetFriendIndex() == FriendIndex; });
 	widget->ChangeAvatar(avatar);
 }
