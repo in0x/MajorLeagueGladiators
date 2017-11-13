@@ -47,5 +47,7 @@ public:
 
 	void LoadAvatarData(int32 FriendIndex, UTexture2D* OutAvatar);
 
+	void ResetSteamAchievementsAndStats();
+
 	FOnAvatarDownloadedDelegate AvatarDownloaded;
 };

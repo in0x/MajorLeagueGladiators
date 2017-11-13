@@ -23,9 +23,6 @@ private:
 SteamCallbackHandler::SteamCallbackHandler()
 {
 	LoadSteamIDs();
-
-	UE_LOG(DebugLog, Warning, TEXT("SteamCallbackHandler::SteamCallbackHandler(), reseting Steam Achievements and stats, this needs to be removed when implementation is done."));
-	SteamUserStats()->ResetAllStats(true);
 }
 
 void SteamCallbackHandler::OnAvatarImageLoaded(AvatarImageLoaded_t* cbData)
@@ -161,5 +158,10 @@ void USteamBridge::LoadAvatarData(int32 FriendIndex, UTexture2D* OutAvatar)
 	OutAvatar->UpdateResource();
 }
 
+void USteamBridge::ResetSteamAchievementsAndStats()
+{
+	UE_LOG(DebugLog, Warning, TEXT("Reseting Steam Achievements and stats."));
+	SteamUserStats()->ResetAllStats(true);
+}
 
 
