@@ -26,13 +26,13 @@
 #include "WidgetInteractionComponent.h"
 #include "MlgGameInstance.h"
 
-namespace 
+namespace
 {
 	const FName PAWN_COLLISION_PROFILE_NAME("Pawn");
 	const FName NO_COLLISION_PROFILE_NAME("NoCollision");
 	const FName VR_CAPSULE_COLLISION_NAME("VrCapsule");
 	const FName VR_GRIP_1_NAME("VRGripP1");
-	const FVector INVALID_TARGET_LOCATION = FVector(0,0, 9'999'999);
+	const FVector INVALID_TARGET_LOCATION = FVector(0, 0, 9'999'999);
 	const FName TETHER_TARGET_NAME("Target");
 	const FName AIM_SOCKET_NAME("Aim");
 
@@ -53,7 +53,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	CastChecked<UPrimitiveComponent>(RootComponent)->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
 
 	healthComp = ObjectInitializer.CreateDefaultSubobject<UHealthComponent>(this, TEXT("HealthComp"));
-	healthComp->SetIsReplicated(true);	
+	healthComp->SetIsReplicated(true);
 
 	dmgReceiverComp = ObjectInitializer.CreateDefaultSubobject<UDamageReceiverComponent>(this, TEXT("DmgReceiverComp"));
 
@@ -61,7 +61,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	rightMesh = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("RightMesh"));
 	headMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh"));
 	bodyMesh2 = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("BodyMesh2"));
-	
+
 	headMesh->bRenderCustomDepth = true;
 	bodyMesh2->bRenderCustomDepth = true;
 
@@ -88,7 +88,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 			rightMesh->OverrideAnimationData(blendSpace.Object);
 		}
 	}
-	
+
 	GetCapsuleComponent()->SetCollisionProfileName(VR_CAPSULE_COLLISION_NAME);
 
 	LeftMotionController->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
@@ -117,12 +117,12 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	hudHealth->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> sphereMesh(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Sphere.Shape_Sphere'"));
-	
+
 	healthTriggerZone = ObjectInitializer.CreateDefaultSubobject<UTriggerZoneComponent>(this, TEXT("healthTriggerZone"));
 	healthTriggerZone->SetupAttachment(VRReplicatedCamera);
 	healthTriggerZone->SetTriggerType(TriggerType::Health);
 	healthTriggerZone->SetRelativeScale3D({ 0.2, 0.2, 0.2 });
-	healthTriggerZone->SetRelativeLocation({ 0, 0, -20});
+	healthTriggerZone->SetRelativeLocation({ 0, 0, -20 });
 	healthTriggerZone->SetStaticMesh(sphereMesh.Object);
 
 	auto classString = TEXT("WidgetBlueprint'/Game/BluePrints/PlayerHudBP.PlayerHudBP'");
@@ -131,7 +131,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	hudHealth->SetWidgetClass(healthWidgetClass.Class);
 	hudHealth->SetDrawSize({ 400, 100 });
 	hudHealth->SetTwoSided(true);
-	
+
 	abilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAbilitySystemComponent>(this, TEXT("GameplayTasks"));
 	abilitySystemComponent->SetIsReplicated(true);
 
@@ -185,7 +185,17 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	pullConeParticleSystemComponent->SetTemplate(cone.Object);
 	pullConeParticleSystemComponent->SetupAttachment(leftMesh, AIM_SOCKET_NAME);
 	pullConeParticleSystemComponent->bAutoActivate = false;
-	
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> pointerMeshLoader(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Cylinder.Shape_Cylinder'"));
+
+	menuPointerMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("MenuPointerMeshComponent"));
+	menuPointerMesh->SetupAttachment(rightMesh, FName(TEXT("Touch")));
+	menuPointerMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+	menuPointerMesh->SetStaticMesh(pointerMeshLoader.Object);
+	menuPointerMesh->SetWorldLocation(FVector(2501.892578, 0, 0.260551));
+	FRotator rotator(90, 0, 0);
+	menuPointerMesh->SetWorldRotation(rotator);
+	menuPointerMesh->SetWorldScale3D(FVector(0.015, 0.0075, 25));
 
 	//if (bRenderSecondWindow)
 	//{
@@ -224,7 +234,7 @@ void AMlgPlayerCharacter::BeginPlay()
 		bUseControllerRotationYaw = true;
 #endif
 	}
-	
+
 	damageFeedback = FindComponentByClass<UPlayerDamageFeedbackComponent>();
 	if (!damageFeedback)
 	{
@@ -236,7 +246,7 @@ void AMlgPlayerCharacter::BeginPlay()
 	healthWidget->SetCurrentPercentage(healthComp->GetCurrentHealthPercentage(), 1.0f);
 
 	healthComp->HealthChangedDelegate.AddDynamic(this, &AMlgPlayerCharacter::OnHealthChanged);
-	
+
 	LandedDelegate.AddDynamic(this, &AMlgPlayerCharacter::OnLand);
 
 	if (HasAuthority())
@@ -246,7 +256,7 @@ void AMlgPlayerCharacter::BeginPlay()
 
 	bIsMenuEnabled = false;
 	ToggleMenuState(false);
-	
+
 	//if (bRenderSecondWindow)
 	//{
 	//	if (IsLocallyControlled())
@@ -376,9 +386,9 @@ void AMlgPlayerCharacter::PossessedBy(AController* NewController)
 	abilitySystemComponent->RefreshAbilityActorInfo();
 	if (Role >= ROLE_Authority)
 	{
-		
+
 		const UMlgAbilitySet* abilitySet = GetOrLoadAbilitySet();
-		if(abilitySet)
+		if (abilitySet)
 		{
 			abilitySet->GiveAbilities(abilitySystemComponent);
 		}
@@ -386,21 +396,21 @@ void AMlgPlayerCharacter::PossessedBy(AController* NewController)
 		{
 			UE_LOG(DebugLog, Warning, TEXT("Ability Set Is null. GiveAbilities has not been called."));
 		}
-		
-	} 
+
+	}
 }
 
 const UMlgAbilitySet* AMlgPlayerCharacter::GetOrLoadAbilitySet()
 {
-	if(!cachedAbilitySet)
+	if (!cachedAbilitySet)
 	{
 		cachedAbilitySet = abilitySetClass.LoadSynchronous()->GetDefaultObject<UMlgAbilitySet>();
 	}
-	
+
 	return cachedAbilitySet;
 }
 
-void AMlgPlayerCharacter::BecomeViewTarget(APlayerController* PC) 
+void AMlgPlayerCharacter::BecomeViewTarget(APlayerController* PC)
 {
 	Super::BecomeViewTarget(PC);
 
@@ -416,11 +426,11 @@ void AMlgPlayerCharacter::SpawnWeapon()
 		spawnParams.Instigator = this;
 		spawnParams.Owner = this;
 		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	
+
 		attachedWeapon = GetWorld()->SpawnActor<AMlgGrippableMeshActor>(
 			startWeaponClass.Get(), GetTransform(), spawnParams);
 
-		OnAttachedWeaponSet();	
+		OnAttachedWeaponSet();
 	}
 	else
 	{
@@ -536,8 +546,8 @@ UVRControllerComponent* AMlgPlayerCharacter::GetMotionController(EControllerHand
 FVector AMlgPlayerCharacter::AMlgPlayerCharacter::CalcFeetPosition() const
 {
 	const UCapsuleComponent* capsuleComponent = GetCapsuleComponent();
-	const FVector CapsuleLocation = capsuleComponent->GetComponentLocation();	
-	const FVector FeetOffset = capsuleComponent->GetUpVector() * capsuleComponent->GetScaledCapsuleHalfHeight();	
+	const FVector CapsuleLocation = capsuleComponent->GetComponentLocation();
+	const FVector FeetOffset = capsuleComponent->GetUpVector() * capsuleComponent->GetScaledCapsuleHalfHeight();
 	return CapsuleLocation - FeetOffset;
 }
 
@@ -679,7 +689,7 @@ void AMlgPlayerCharacter::OnEnableMenu()
 {
 	ClearBindings(InputComponent);
 	SetupMenuBindings(InputComponent);
-	
+
 	if (pHandMotionController)
 	{
 		pHandMotionController->SetCustomRotation(FRotator::MakeFromEuler(FVector(0, 0, 0)));
@@ -705,13 +715,14 @@ void AMlgPlayerCharacter::ToggleMenuState(bool bMenuEnabled)
 		rightViveMesh->SetVisibility(bMenuEnabled);
 		widgetInteraction->SetActive(bMenuEnabled);
 		menuWidgetComponent->SetVisibility(bMenuEnabled);
+		menuPointerMesh->SetVisibility(bMenuEnabled);
 	}
 
 	// Non-Menu stuff
 	{
 		leftMesh->SetVisibility(!bMenuEnabled);
 		rightMesh->SetVisibility(!bMenuEnabled);
-	
+
 		if (attachedWeapon != nullptr)
 		{
 			attachedWeapon->GetRootComponent()->SetVisibility(!bMenuEnabled, true);
