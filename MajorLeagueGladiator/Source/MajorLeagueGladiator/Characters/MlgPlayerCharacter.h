@@ -148,6 +148,9 @@ private:
 	UWidgetInteractionComponent* widgetInteraction;
 
 	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* menuPointerMesh;
+
+	UPROPERTY(EditAnywhere)
 	UWidgetComponent* menuWidgetComponent;
 
 	UPROPERTY(EditAnywhere)

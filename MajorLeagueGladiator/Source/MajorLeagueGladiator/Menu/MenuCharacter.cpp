@@ -48,6 +48,10 @@ AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
 	menuWidgetComponent->SetWidgetClass(mainMenuWidget.Class);
 	menuWidgetComponent->SetupAttachment(leftMesh, FName(TEXT("Touch")));
 
+	menuPointerMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("MenuPointerMeshComponent"));
+	menuPointerMesh->SetupAttachment(rightMesh, FName(TEXT("Touch")));
+	menuPointerMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+
 #if 1 //If this is on you can move with the mouse, however it also causes the sliding bug
 	bUseControllerRotationPitch = true;
 	bUseControllerRotationRoll = true;

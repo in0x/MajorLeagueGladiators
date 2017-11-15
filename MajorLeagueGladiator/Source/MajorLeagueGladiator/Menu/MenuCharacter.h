@@ -50,6 +50,9 @@ private:
 	UWidgetComponent* menuWidgetComponent;
 
 	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* menuPointerMesh;
+
+	UPROPERTY(EditAnywhere)
 	float MenuSelectionRayCastRange;
 
 	std::unique_ptr<HandMotionController> pHandMotionController;
