@@ -44,6 +44,7 @@ AMlgAICharacter::AMlgAICharacter(const FObjectInitializer& ObjectInitializer)
 	GetMesh()->bGenerateOverlapEvents = true;
 
 	audioComponent = ObjectInitializer.CreateDefaultSubobject<UAudioComponent>(this, TEXT("AudioComponent"));
+	audioComponent->SetupAttachment(GetRootComponent());
 }
 
 void AMlgAICharacter::BeginPlay()
