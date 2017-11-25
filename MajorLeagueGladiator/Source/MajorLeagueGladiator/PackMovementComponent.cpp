@@ -12,11 +12,6 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogProjectileMovement, Log, All);
 
-namespace
-{
-	const FVector SLIGHTLY_DOWNWARDS(0.f, 0.f, KINDA_SMALL_NUMBER);
-}
-
 const float UPackMovementComponent::MIN_TICK_TIME = 1e-6f;
 
 
@@ -531,11 +526,7 @@ void UPackMovementComponent::StopSimulating()
 
 void UPackMovementComponent::StartSimulating()
 {
-	if (!bIsSimulating)
-	{
-		// We need to pass a Velocity other than exactly FVector::Zero to start simulating
-		SetVelocity(SLIGHTLY_DOWNWARDS);
-	}
+	bIsSimulating = true;
 }
 
 void UPackMovementComponent::SetVelocity(FVector NewVelocity)
