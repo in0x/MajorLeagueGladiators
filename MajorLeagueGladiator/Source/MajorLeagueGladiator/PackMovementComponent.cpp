@@ -12,7 +12,13 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogProjectileMovement, Log, All);
 
+namespace
+{
+	const FVector SLIGHTLY_DOWNWARDS(0.f, 0.f, KINDA_SMALL_NUMBER);
+}
+
 const float UPackMovementComponent::MIN_TICK_TIME = 1e-6f;
+
 
 UPackMovementComponent::UPackMovementComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -355,6 +361,8 @@ void UPackMovementComponent::StopSimulating(const FHitResult& HitResult)
 }
 
 
+
+
 UPackMovementComponent::EHandleBlockingHitResult UPackMovementComponent::HandleBlockingHit(const FHitResult& Hit, float TimeTick, const FVector& MoveDelta, float& SubTickTimeRemaining)
 {
 	AActor* ActorOwner = UpdatedComponent ? UpdatedComponent->GetOwner() : NULL;
@@ -519,6 +527,15 @@ float UPackMovementComponent::GetSimulationTimeStep(float RemainingTime, int32 I
 void UPackMovementComponent::StopSimulating()
 {
 	SetVelocity(FVector::ZeroVector);
+}
+
+void UPackMovementComponent::StartSimulating()
+{
+	if (!bIsSimulating)
+	{
+		// We need to pass a Velocity other than exactly FVector::Zero to start simulating
+		SetVelocity(SLIGHTLY_DOWNWARDS);
+	}
 }
 
 void UPackMovementComponent::SetVelocity(FVector NewVelocity)
