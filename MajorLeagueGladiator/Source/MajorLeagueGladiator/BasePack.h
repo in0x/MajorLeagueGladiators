@@ -22,6 +22,7 @@ public:
 
 	bool IsCharged() const;
 	virtual void Tick(float DeltaTime) override;
+	virtual void OnGripRelease_Implementation(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation) override;
 
 protected:
 	UPROPERTY(EditAnywhere)

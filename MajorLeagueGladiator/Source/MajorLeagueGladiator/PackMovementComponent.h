@@ -133,6 +133,7 @@ class MAJORLEAGUEGLADIATOR_API UPackMovementComponent : public UMovementComponen
 	UFUNCTION(BlueprintCallable, Category = "Game|Components|ProjectileMovement")
 		virtual void StopSimulating(const FHitResult& HitResult);
 
+
 	bool HasStoppedSimulation() { return UpdatedComponent == nullptr || !bIsSimulating; }
 
 	/**
@@ -251,6 +252,9 @@ public:
 	void SyncVelocity();
 
 	void StopSimulating();
+
+	// It only makes sense to call Start Simulation when the Pack is in Midair. 
+	void StartSimulating();
 	void SetVelocity(FVector NewVelocity);
 
 private:

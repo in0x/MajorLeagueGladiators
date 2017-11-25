@@ -152,3 +152,9 @@ void ABasePack::Tick(float DeltaTime)
 		setTimeChargeLeftSeonds(newTimeChargeLeftSeconds);
 	}
 }
+
+void ABasePack::OnGripRelease_Implementation(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation)
+{
+	Super::OnGripRelease_Implementation(ReleasingController, GripInformation);
+	movementComponent->StartSimulating();
+}
