@@ -14,10 +14,10 @@ UWaveSystemComponent::UWaveSystemComponent()
 {
 	SetIsReplicated(true);
 
-	ConstructorHelpers::FObjectFinder<USoundBase> welcome(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/TEMP/Welcome.Welcome'"));
+	ConstructorHelpers::FObjectFinder<USoundBase> welcome(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/TEMP/welcome2.welcome2'"));
 	firstWaveSound = welcome.Object;
 
-	ConstructorHelpers::FObjectFinder<USoundBase> nextWave(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/TEMP/NextWave.NextWave'"));
+	ConstructorHelpers::FObjectFinder<USoundBase> nextWave(TEXT("SoundWave'/Game/MVRCFPS_Assets/Sounds/TEMP/nextwave2.nextwave2'"));
 	beginOfWaveSound = nextWave.Object;
 
 	ConstructorHelpers::FObjectFinder<USoundCue> endWaveCueFinder(TEXT("SoundCue'/Game/MVRCFPS_Assets/Sounds/TEMP/EndWave_Cue.EndWave_Cue'"));
