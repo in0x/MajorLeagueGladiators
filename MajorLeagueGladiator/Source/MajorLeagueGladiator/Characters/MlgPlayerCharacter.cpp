@@ -220,7 +220,8 @@ void AMlgPlayerCharacter::BeginPlay()
 	if (g_IsVREnabled())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("VR MODE"));
-		GEngine->HMDDevice->SetBaseOrientation(FQuat::Identity);
+		//GEngine->XRSystem->GetHMDDevice()->SetBaseOrientation(FQuat::Identity);
+		GEngine->XRSystem->ResetOrientation();
 	}
 	else
 	{

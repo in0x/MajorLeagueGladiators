@@ -28,6 +28,18 @@
 #include "Slate/SWorldWidgetScreenLayer.h"
 #include "SViewport.h"
 
+// CVars
+namespace StereoWidgetCvars
+{
+	static int32 ForceNoStereoWithVRWidgets = 0;
+	FAutoConsoleVariableRef CVarForceNoStereoWithVRWidgets(
+		TEXT("vr.ForceNoStereoWithVRWidgets"),
+		ForceNoStereoWithVRWidgets,
+		TEXT("When on, will not allow stereo widget components to use stereo layers, will instead fall back to default widget rendering.\n")
+		TEXT("0: Disable, 1: Enable"),
+		ECVF_Default);
+}
+
   //=============================================================================
 UVRStereoWidgetComponent::UVRStereoWidgetComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -53,6 +65,7 @@ UVRStereoWidgetComponent::UVRStereoWidgetComponent(const FObjectInitializer& Obj
 {
 	bShouldCreateProxy = true;
 	bLastWidgetDrew = false;
+	bUseEpicsWorldLockedStereo = false;
 	// Replace quad size with DrawSize instead
 	//StereoLayerQuadSize = DrawSize;
 
@@ -66,14 +79,27 @@ UVRStereoWidgetComponent::~UVRStereoWidgetComponent()
 
 void UVRStereoWidgetComponent::BeginDestroy()
 {
-	Super::BeginDestroy();
-
 	IStereoLayers* StereoLayers;
-	if (LayerId && GEngine->HMDDevice.IsValid() && (StereoLayers = GEngine->HMDDevice->GetStereoLayers()) != nullptr)
+	if (LayerId && GEngine->StereoRenderingDevice.IsValid() && (StereoLayers = GEngine->StereoRenderingDevice->GetStereoLayers()) != nullptr)
 	{
 		StereoLayers->DestroyLayer(LayerId);
 		LayerId = 0;
 	}
+
+	Super::BeginDestroy();
+}
+
+
+void UVRStereoWidgetComponent::OnUnregister()
+{
+	IStereoLayers* StereoLayers;
+	if (LayerId && GEngine->StereoRenderingDevice.IsValid() && (StereoLayers = GEngine->StereoRenderingDevice->GetStereoLayers()) != nullptr)
+	{
+		StereoLayers->DestroyLayer(LayerId);
+		LayerId = 0;
+	}
+
+	Super::OnUnregister();
 }
 
 void UVRStereoWidgetComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
@@ -84,14 +110,52 @@ void UVRStereoWidgetComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-
-	if (!UVRExpansionFunctionLibrary::IsInVREditorPreviewOrGame() || !GEngine->HMDDevice.IsValid() || (GEngine->HMDDevice->GetStereoLayers() == nullptr))
+	if (StereoWidgetCvars::ForceNoStereoWithVRWidgets)
 	{
-		bShouldCreateProxy = true;
+		if (!bShouldCreateProxy)
+		{
+			bShouldCreateProxy = true;
+			MarkRenderStateDirty(); // Recreate
+			if (LayerId)
+			{
+				if (GEngine->StereoRenderingDevice.IsValid())
+				{
+					IStereoLayers* StereoLayers = GEngine->StereoRenderingDevice->GetStereoLayers();
+					if (StereoLayers)
+						StereoLayers->DestroyLayer(LayerId);
+				}
+				LayerId = 0;
+			}
+		}
+
+		return;
+	}
+
+	if (!UVRExpansionFunctionLibrary::IsInVREditorPreviewOrGame() || !GEngine->StereoRenderingDevice.IsValid() || (GEngine->StereoRenderingDevice->GetStereoLayers() == nullptr))
+	{
+		if (!bShouldCreateProxy)
+		{
+			bShouldCreateProxy = true;
+			MarkRenderStateDirty(); // Recreate
+			if (LayerId)
+			{
+				if (GEngine->StereoRenderingDevice.IsValid())
+				{
+					IStereoLayers* StereoLayers = GEngine->StereoRenderingDevice->GetStereoLayers();
+					if (StereoLayers)
+						StereoLayers->DestroyLayer(LayerId);
+				}
+				LayerId = 0;
+			}
+		}
 	}
 	else
 	{
-		bShouldCreateProxy = false;
+		if (bShouldCreateProxy)
+		{
+			bShouldCreateProxy = false;
+			MarkRenderStateDirty(); // Recreate
+		}
 	}
 
 #if !UE_SERVER
@@ -103,7 +167,7 @@ void UVRStereoWidgetComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 	}
 
 	IStereoLayers* StereoLayers;
-	if (!UVRExpansionFunctionLibrary::IsInVREditorPreviewOrGame() || !GEngine->HMDDevice.IsValid() || (StereoLayers = GEngine->HMDDevice->GetStereoLayers()) == nullptr || !RenderTarget)
+	if (!UVRExpansionFunctionLibrary::IsInVREditorPreviewOrGame() || !GEngine->StereoRenderingDevice.IsValid() || (StereoLayers = GEngine->StereoRenderingDevice->GetStereoLayers()) == nullptr || !RenderTarget)
 	{
 		return;
 	}
@@ -121,48 +185,59 @@ void UVRStereoWidgetComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 	}
 	else // World locked here now
 	{
-		// Fix this when stereo world locked works again
-		// Thanks to mitch for the temp work around idea
 
-		// Get first local player controller
-		APlayerController* PC = nullptr;
-		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+		if (bUseEpicsWorldLockedStereo)
 		{
-			if (Iterator->Get()->IsLocalPlayerController())
-			{
-				PC = Iterator->Get();
-				break;
-			}
-		}
-		
-		if (PC)
-		{
-			APawn * mpawn = PC->GetPawnOrSpectator();
-			//bTextureNeedsUpdate = true;
-			if (mpawn)
-			{		
-				// Set transform to this relative transform
-				
-				Transform = GetComponentTransform().GetRelativeTransform(mpawn->GetTransform());
-				Transform.ConcatenateRotation(FRotator(0.0f, -180.0f, 0.0f).Quaternion());
-				// I might need to inverse X axis here to get it facing the correct way, we'll see
-
-				//Transform = mpawn->GetActorTransform().GetRelativeTransform(GetComponentTransform());
-			}
+			// Its incorrect......even in 4.17
+			Transform = GetComponentTransform();
+			Transform.ConcatenateRotation(FRotator(0.0f, -180.0f, 0.0f).Quaternion());
 		}
 		else
 		{
-			// No PC, destroy the layer and enable drawing it normally.
-			bShouldCreateProxy = true;
-			if (LayerId)
+			// Fix this when stereo world locked works again
+			// Thanks to mitch for the temp work around idea
+
+			// Get first local player controller
+			APlayerController* PC = nullptr;
+			for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 			{
-				StereoLayers->DestroyLayer(LayerId);
-				LayerId = 0;
+				if (Iterator->Get()->IsLocalPlayerController())
+				{
+					PC = Iterator->Get();
+					break;
+				}
 			}
-			return;
+
+			if (PC)
+			{
+				APawn * mpawn = PC->GetPawnOrSpectator();
+				//bTextureNeedsUpdate = true;
+				if (mpawn)
+				{
+					// Set transform to this relative transform
+
+					Transform = GetComponentTransform().GetRelativeTransform(mpawn->GetTransform());
+					Transform.ConcatenateRotation(FRotator(0.0f, -180.0f, 0.0f).Quaternion());
+					// I might need to inverse X axis here to get it facing the correct way, we'll see
+
+					//Transform = mpawn->GetActorTransform().GetRelativeTransform(GetComponentTransform());
+				}
+			}
+			else
+			{
+				// No PC, destroy the layer and enable drawing it normally.
+				bShouldCreateProxy = true;
+
+				if (LayerId)
+				{
+					StereoLayers->DestroyLayer(LayerId);
+					LayerId = 0;
+				}
+				return;
+			}
+			//
+			//Transform = GetRelativeTransform();
 		}
-		//
-		//Transform = GetRelativeTransform();
 	}
 
 	// If the transform changed dirty the layer and push the new transform
@@ -195,14 +270,14 @@ void UVRStereoWidgetComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 			LayerDsec.Priority = Priority;
 			LayerDsec.QuadSize = FVector2D(DrawSize);//StereoLayerQuadSize;
 
-			if (DrawSize.X != DrawSize.Y)
+			/*if (DrawSize.X != DrawSize.Y)
 			{
 				// This might be a SteamVR only thing, it appears to always make the quad the largest of the two on the back end
 				if (DrawSize.X > DrawSize.Y) 
 					LayerDsec.QuadSize.Y = LayerDsec.QuadSize.X;
 				else
 					LayerDsec.QuadSize.X = LayerDsec.QuadSize.Y;
-			}
+			}*/
 
 			LayerDsec.UVRect = UVRect;
 			LayerDsec.Transform = Transform;
@@ -237,8 +312,11 @@ void UVRStereoWidgetComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 			{
 			case EWidgetSpace::World:
 			{
-				//LayerDsec.PositionType = IStereoLayers::WorldLocked;
-				LayerDsec.PositionType = IStereoLayers::TrackerLocked;
+				if(bUseEpicsWorldLockedStereo)
+					LayerDsec.PositionType = IStereoLayers::WorldLocked;
+				else
+					LayerDsec.PositionType = IStereoLayers::TrackerLocked;
+
 				LayerDsec.Flags |= IStereoLayers::LAYER_FLAG_SUPPORT_DEPTH;
 			}break;
 
@@ -333,11 +411,11 @@ void UVRStereoWidgetComponent::UpdateRenderTarget(FIntPoint DesiredRenderTargetS
 }
 
 /** Represents a billboard sprite to the scene manager. */
-class FWidget3DSceneProxy : public FPrimitiveSceneProxy
+class FStereoWidget3DSceneProxy : public FPrimitiveSceneProxy
 {
 public:
 	/** Initialization constructor. */
-	FWidget3DSceneProxy(UVRStereoWidgetComponent* InComponent, ISlate3DRenderer& InRenderer)
+	FStereoWidget3DSceneProxy(UVRStereoWidgetComponent* InComponent, ISlate3DRenderer& InRenderer)
 		: FPrimitiveSceneProxy(InComponent)
 		, Pivot(InComponent->GetPivot())
 		, Renderer(InRenderer)
@@ -356,6 +434,9 @@ public:
 	// FPrimitiveSceneProxy interface.
 	virtual void GetDynamicMeshElements(const TArray<const FSceneView*>& Views, const FSceneViewFamily& ViewFamily, uint32 VisibilityMap, FMeshElementCollector& Collector) const override
 	{
+		if(!bCreateSceneProxy)
+			return;
+
 #if WITH_EDITOR
 		const bool bWireframe = AllowDebugViewmodes() && ViewFamily.EngineShowFlags.Wireframe;
 
@@ -383,7 +464,7 @@ public:
 
 		const FMatrix& ViewportLocalToWorld = GetLocalToWorld();
 
-		if (RenderTarget && bCreateSceneProxy)//false)//RenderTarget)
+		if (RenderTarget)//false)//RenderTarget)
 		{
 			FTextureResource* TextureResource = RenderTarget->Resource;
 			if (TextureResource)
@@ -629,7 +710,7 @@ FPrimitiveSceneProxy* UVRStereoWidgetComponent::CreateSceneProxy()
 		RequestRedraw();
 		LastWidgetRenderTime = 0;
 
-		return new FWidget3DSceneProxy(this, *WidgetRenderer->GetSlateRenderer());
+		return new FStereoWidget3DSceneProxy(this, *WidgetRenderer->GetSlateRenderer());
 	}
 
 	return nullptr;

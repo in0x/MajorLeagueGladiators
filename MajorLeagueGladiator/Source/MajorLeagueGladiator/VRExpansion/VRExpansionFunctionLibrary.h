@@ -4,12 +4,16 @@
 #include "CoreMinimal.h"
 #include "IMotionController.h"
 
-#include "HeadMountedDisplay.h" 
-//#include "Runtime/Engine/Classes/Kismet/HeadMountedDisplayFunctionLibrary.h"
-#include "HeadMountedDisplayFunctionLibrary.h" 
-#include "HeadMountedDisplayTypes.h"
+#include "Components/SplineComponent.h"
+#include "Components/SplineMeshComponent.h"
+
+//#include "HeadMountedDisplay.h" 
+#include "HeadMountedDisplayFunctionLibrary.h"
+//#include "HeadMountedDisplayFunctionLibrary.h"
+#include "IHeadMountedDisplay.h"
 
 #include "VRBPDatatypes.h"
+#include "GameplayTagContainer.h"
 
 #include "VRExpansionFunctionLibrary.generated.h"
 
@@ -41,7 +45,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "VRExpansionFunctions", meta = (bIgnoreSelf = "true", DisplayName = "GetHMDPureYaw"))
 	static FRotator GetHMDPureYaw(FRotator HMDRotation);
 
-	FORCEINLINE static FRotator GetHMDPureYaw_I(FRotator HMDRotation)
+	inline static FRotator GetHMDPureYaw_I(FRotator HMDRotation)
 	{
 		// Took this from UnityVRToolkit, no shame, I liked it
 		FRotationMatrix HeadMat(HMDRotation);
@@ -113,6 +117,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "VRExpansionFunctions", meta = (bIgnoreSelf = "true", DisplayName = "IsInVREditorPreviewOrGame"))
 	static bool IsInVREditorPreviewOrGame();
 
+	// Gets whether the game is running in VRPreview
+	UFUNCTION(BlueprintPure, Category = "VRExpansionFunctions", meta = (bIgnoreSelf = "true", DisplayName = "IsInVREditorPreview"))
+	static bool IsInVREditorPreview();
+
 	/**
 	* Finds the minimum area rectangle that encloses all of the points in InVerts
 	* Engine default version is server only for some reason
@@ -166,4 +174,130 @@ public:
 	// Adds a USceneComponent Subclass, that is based on the passed in Class, and added to the Outer(Actor) object
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add Scene Component By Class"), Category = "VRExpansionLibrary")
 		static USceneComponent* AddSceneComponentByClass(UObject* Outer, TSubclassOf<USceneComponent> Class, const FTransform & ComponentRelativeTransform);
+	
+
+	/** Resets a Euro Low Pass Filter so that the first time it is used again it is clean */
+	UFUNCTION(BlueprintCallable, Category = "EuroLowPassFilter")
+	static void ResetEuroSmoothingFilter(UPARAM(ref) FBPEuroLowPassFilter& TargetEuroFilter)
+	{
+		TargetEuroFilter.ResetSmoothingFilter();
+	}
+
+	/** Runs the smoothing function of a Euro Low Pass Filter */
+	UFUNCTION(BlueprintCallable, Category = "EuroLowPassFilter")
+	static void RunEuroSmoothingFilter(UPARAM(ref) FBPEuroLowPassFilter& TargetEuroFilter, FVector InRawValue, const float DeltaTime, FVector & SmoothedValue)
+	{
+		SmoothedValue = TargetEuroFilter.RunFilterSmoothing(InRawValue, DeltaTime);
+	}
+
+	// Applies the same laser smoothing that the vr editor uses to an array of points
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Smooth Update Laser Spline"), Category = "VRExpansionLibrary")
+	static void SmoothUpdateLaserSpline(USplineComponent * LaserSplineComponent, TArray<USplineMeshComponent *> LaserSplineMeshComponents, FVector InStartLocation, FVector InEndLocation, FVector InForward, float LaserRadius)
+	{
+		if (LaserSplineComponent == nullptr)
+			return;
+
+		LaserSplineComponent->ClearSplinePoints();
+
+		const FVector SmoothLaserDirection = InEndLocation - InStartLocation;
+		float Distance = SmoothLaserDirection.Size();
+		const FVector StraightLaserEndLocation = InStartLocation + (InForward * Distance);
+		const int32 NumLaserSplinePoints = LaserSplineMeshComponents.Num();
+
+		LaserSplineComponent->AddSplinePoint(InStartLocation, ESplineCoordinateSpace::World, false);
+		for (int32 Index = 1; Index < NumLaserSplinePoints; Index++)
+		{
+			float Alpha = (float)Index / (float)NumLaserSplinePoints;
+			Alpha = FMath::Sin(Alpha * PI * 0.5f);
+			const FVector PointOnStraightLaser = FMath::Lerp(InStartLocation, StraightLaserEndLocation, Alpha);
+			const FVector PointOnSmoothLaser = FMath::Lerp(InStartLocation, InEndLocation, Alpha);
+			const FVector PointBetweenLasers = FMath::Lerp(PointOnStraightLaser, PointOnSmoothLaser, Alpha);
+			LaserSplineComponent->AddSplinePoint(PointBetweenLasers, ESplineCoordinateSpace::World, false);
+		}
+		LaserSplineComponent->AddSplinePoint(InEndLocation, ESplineCoordinateSpace::World, false);
+		
+		// Update all the segments of the spline
+		LaserSplineComponent->UpdateSpline();
+
+		const float LaserPointerRadius = LaserRadius;
+		Distance *= 0.0001f;
+		for (int32 Index = 0; Index < NumLaserSplinePoints; Index++)
+		{
+			USplineMeshComponent* SplineMeshComponent = LaserSplineMeshComponents[Index];
+			check(SplineMeshComponent != nullptr);
+
+			FVector StartLoc, StartTangent, EndLoc, EndTangent;
+			LaserSplineComponent->GetLocationAndTangentAtSplinePoint(Index, StartLoc, StartTangent, ESplineCoordinateSpace::Local);
+			LaserSplineComponent->GetLocationAndTangentAtSplinePoint(Index + 1, EndLoc, EndTangent, ESplineCoordinateSpace::Local);
+
+			const float AlphaIndex = (float)Index / (float)NumLaserSplinePoints;
+			const float AlphaDistance = Distance * AlphaIndex;
+			float Radius = LaserPointerRadius * ((AlphaIndex * AlphaDistance) + 1);
+			FVector2D LaserScale(Radius, Radius);
+			SplineMeshComponent->SetStartScale(LaserScale, false);
+
+			const float NextAlphaIndex = (float)(Index + 1) / (float)NumLaserSplinePoints;
+			const float NextAlphaDistance = Distance * NextAlphaIndex;
+			Radius = LaserPointerRadius * ((NextAlphaIndex * NextAlphaDistance) + 1);
+			LaserScale = FVector2D(Radius, Radius);
+			SplineMeshComponent->SetEndScale(LaserScale, false);
+
+			SplineMeshComponent->SetStartAndEnd(StartLoc, StartTangent, EndLoc, EndTangent, true);
+		}
+
+	}
+
+	/**
+	* Determine if any tag in the BaseContainer matches against any tag in OtherContainer with a required direct parent for both
+	*
+	* @param TagParent		Required direct parent tag
+	* @param BaseContainer	Container containing values to check
+	* @param OtherContainer	Container to check against.
+	*
+	* @return True if any tag was found that matches any tags explicitly present in OtherContainer with the same DirectParent
+	*/
+	UFUNCTION(BlueprintPure, Category = "GameplayTags")
+	static bool MatchesAnyTagsWithDirectParentTag(FGameplayTag DirectParentTag,const FGameplayTagContainer& BaseContainer, const FGameplayTagContainer& OtherContainer)
+	{
+		TArray<FGameplayTag> BaseContainerTags;
+		BaseContainer.GetGameplayTagArray(BaseContainerTags);
+
+		for (const FGameplayTag& OtherTag : BaseContainerTags)
+		{
+			if (OtherTag.RequestDirectParent().MatchesTagExact(DirectParentTag))
+			{
+				if (OtherContainer.HasTagExact(OtherTag))
+					return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	* Determine if any tag in the BaseContainer has the exact same direct parent tag and returns the first one
+	* @param TagParent		Required direct parent tag
+	* @param BaseContainer	Container containing values to check
+
+	* @return True if any tag was found and also returns the tag
+	*/
+	UFUNCTION(BlueprintPure, Category = "GameplayTags")
+	static bool GetFirstGameplayTagWithExactParent(FGameplayTag DirectParentTag, const FGameplayTagContainer& BaseContainer, FGameplayTag& FoundTag)
+	{
+		TArray<FGameplayTag> BaseContainerTags;
+		BaseContainer.GetGameplayTagArray(BaseContainerTags);
+
+		for (const FGameplayTag& OtherTag : BaseContainerTags)
+		{
+			if (OtherTag.RequestDirectParent().MatchesTagExact(DirectParentTag))
+			{
+				FoundTag = OtherTag;
+				return true;
+			}
+		}
+
+		return false;
+	}
 };	
+
+

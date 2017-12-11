@@ -93,15 +93,15 @@ float AMlgGrippableActor::GripBreakDistance_Implementation()
 	return VRGripInterfaceSettings.ConstraintBreakDistance;
 }
 
-void AMlgGrippableActor::ClosestSecondarySlotInRange_Implementation(FVector WorldLocation, bool & bHadSlotInRange, FTransform & SlotWorldTransform)
-{
-	UVRExpansionFunctionLibrary::GetGripSlotInRangeByTypeName("VRGripS", this, WorldLocation, VRGripInterfaceSettings.SecondarySlotRange, bHadSlotInRange, SlotWorldTransform);
-}
-
-void AMlgGrippableActor::ClosestPrimarySlotInRange_Implementation(FVector WorldLocation, bool & bHadSlotInRange, FTransform & SlotWorldTransform)
-{
-	UVRExpansionFunctionLibrary::GetGripSlotInRangeByTypeName("VRGripP", this, WorldLocation, VRGripInterfaceSettings.PrimarySlotRange, bHadSlotInRange, SlotWorldTransform);
-}
+//void AMlgGrippableActor::ClosestSecondarySlotInRange_Implementation(FVector WorldLocation, bool & bHadSlotInRange, FTransform & SlotWorldTransform)
+//{
+//	UVRExpansionFunctionLibrary::GetGripSlotInRangeByTypeName("VRGripS", this, WorldLocation, VRGripInterfaceSettings.SecondarySlotRange, bHadSlotInRange, SlotWorldTransform);
+//}
+//
+//void AMlgGrippableActor::ClosestPrimarySlotInRange_Implementation(FVector WorldLocation, bool & bHadSlotInRange, FTransform & SlotWorldTransform)
+//{
+//	UVRExpansionFunctionLibrary::GetGripSlotInRangeByTypeName("VRGripP", this, WorldLocation, VRGripInterfaceSettings.PrimarySlotRange, bHadSlotInRange, SlotWorldTransform);
+//}
 
 bool AMlgGrippableActor::IsInteractible_Implementation()
 {
@@ -129,13 +129,35 @@ FBPInteractionSettings AMlgGrippableActor::GetInteractionSettings_Implementation
 	return VRGripInterfaceSettings.InteractionSettings;
 }
 
-FBPAdvGripPhysicsSettings AMlgGrippableActor::AdvancedPhysicsSettings_Implementation()
+FBPAdvGripSettings AMlgGrippableActor::AdvancedGripSettings_Implementation()
 {
-	return VRGripInterfaceSettings.AdvancedPhysicsSettings;
+	return VRGripInterfaceSettings.AdvancedGripSettings;
+}
+
+EGripCollisionType AMlgGrippableActor::GetPrimaryGripType_Implementation(bool bIsSlot) 
+{
+	if (bIsSlot)
+	{
+		return VRGripInterfaceSettings.SlotDefaultGripType;
+	}
+
+	return VRGripInterfaceSettings.FreeDefaultGripType;
 }
 
 ESecondaryGripType AMlgGrippableActor::SecondaryGripType_Implementation()
 {
 	return VRGripInterfaceSettings.SecondaryGripType;
+}
+
+void AMlgGrippableActor::ClosestGripSlotInRange_Implementation(FVector WorldLocation, bool bSecondarySlot, bool & bHadSlotInRange, FTransform & SlotWorldTransform, UGripMotionControllerComponent * CallingController, FName OverridePrefix) 
+{
+	if (bSecondarySlot)
+	{
+		UVRExpansionFunctionLibrary::GetGripSlotInRangeByTypeName("VRGripS", this, WorldLocation, VRGripInterfaceSettings.SecondarySlotRange, bHadSlotInRange, SlotWorldTransform);
+	}
+	else
+	{
+		UVRExpansionFunctionLibrary::GetGripSlotInRangeByTypeName("VRGripP", this, WorldLocation, VRGripInterfaceSettings.PrimarySlotRange, bHadSlotInRange, SlotWorldTransform);
+	}
 }
 

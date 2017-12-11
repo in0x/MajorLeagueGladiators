@@ -56,12 +56,12 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 	float GripBreakDistance();
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
+	/*UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 	void ClosestSecondarySlotInRange(FVector WorldLocation, bool & bHadSlotInRange, FTransform & SlotWorldTransform);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 	void ClosestPrimarySlotInRange(FVector WorldLocation, bool & bHadSlotInRange, FTransform & SlotWorldTransform);
-
+*/
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "VRGripInterface")
 	bool IsInteractible();
 
@@ -85,8 +85,12 @@ public:
 	void OnChildGripRelease_Implementation(UGripMotionControllerComponent* ReleasingController, const FBPActorGripInformation & GripInformation) override { }
 	void OnGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation) override { }
 	void OnGripRelease_Implementation(UGripMotionControllerComponent * ReleasingController, const FBPActorGripInformation & GripInformation) override { }
-	void TickGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation, FVector MControllerLocDelta, float DeltaTime) override { }
-	FBPAdvGripPhysicsSettings AdvancedPhysicsSettings_Implementation() override;
+	void TickGrip_Implementation(UGripMotionControllerComponent * GrippingController, const FBPActorGripInformation & GripInformation, float DeltaTime) override { }
+	FBPAdvGripSettings AdvancedGripSettings_Implementation() override;
 	ESecondaryGripType SecondaryGripType_Implementation() override;
 
+	void OnInput_Implementation(FKey, EInputEvent) override {}
+	void ClosestGripSlotInRange_Implementation(FVector WorldLocation, bool bSecondarySlot, bool & bHadSlotInRange, FTransform & SlotWorldTransform, UGripMotionControllerComponent * CallingController = nullptr, FName OverridePrefix = NAME_None) override;
+	void GetGripStiffnessAndDamping_Implementation(float &, float &) override {}
+	EGripCollisionType GetPrimaryGripType_Implementation(bool bIsSlot) override;
 };

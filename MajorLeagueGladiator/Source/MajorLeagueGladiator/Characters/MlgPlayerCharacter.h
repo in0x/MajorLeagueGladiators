@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VRExpansion/VRSimpleCharacter.h"
+#include "VRExpansion/SimpleChar/VRSimpleCharacter.h"
 
 #include "ChaperoneBounds.h"
 #include "AbilitySystemInterface.h"

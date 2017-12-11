@@ -63,7 +63,7 @@ void UPlayAreaMeshComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 
 	FQuat curRot;
 	FVector curLoc;
-	GEngine->HMDDevice->GetCurrentOrientationAndPosition(curRot, curLoc);
+	GEngine->XRSystem->GetCurrentPose(0, curRot, curLoc); // NOTE(Phil): Device ID 0 might be incorrect here.
 	curLoc.Z = 0;
 
 	SetWorldScale3D(FVector(outLengthX, outLengthY, 100));

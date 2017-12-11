@@ -17,6 +17,10 @@ DECLARE_STATS_GROUP(TEXT("VRRootComponent"), STATGROUP_VRRootComponent, STATCAT_
 DECLARE_CYCLE_STAT(TEXT("VR Root Set Half Height"), STAT_VRRootSetHalfHeight, STATGROUP_VRRootComponent);
 DECLARE_CYCLE_STAT(TEXT("VR Root Set Capsule Size"), STAT_VRRootSetCapsuleSize, STATGROUP_VRRootComponent);
 
+/**
+* A capsule component that repositions its physics scene and rendering location to the camera/HMD's relative position.
+* Generally not to be used by itself unless on a base Pawn and not a character, the VRCharacter has been highly customized to correctly support it.
+*/
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = VRExpansionLibrary)
 class MAJORLEAGUEGLADIATOR_API UVRRootComponent : public UCapsuleComponent, public IVRTrackedParentInterface
 {
@@ -25,7 +29,7 @@ class MAJORLEAGUEGLADIATOR_API UVRRootComponent : public UCapsuleComponent, publ
 public:
 	friend class FDrawCylinderSceneProxy;
 
-	FORCEINLINE void GenerateOffsetToWorld(bool bUpdateBounds = true);
+	FORCEINLINE void GenerateOffsetToWorld(bool bUpdateBounds = true, bool bGetPureYaw = true);
 
 	// If valid will use this as the tracked parent instead of the HMD / Parent
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRTrackedParentInterface")
@@ -51,11 +55,12 @@ public:
 		void SetCapsuleHalfHeightVR(float HalfHeight, bool bUpdateOverlaps = true);
 
 protected:
-
 	virtual bool MoveComponentImpl(const FVector& Delta, const FQuat& NewRotation, bool bSweep, FHitResult* OutHit = NULL, EMoveComponentFlags MoveFlags = MOVECOMP_NoFlags, ETeleportType Teleport = ETeleportType::None) override;
 	virtual void OnUpdateTransform(EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport = ETeleportType::None) override;
 
 	void SendPhysicsTransform(ETeleportType Teleport);
+
+	virtual void UpdateOverlaps(TArray<FOverlapInfo> const* NewPendingOverlaps = nullptr, bool bDoNotifies = true, const TArray<FOverlapInfo>* OverlapsAtEndLocation = nullptr) override;
 
 	const TArray<FOverlapInfo>* ConvertRotationOverlapsToCurrentOverlaps(TArray<FOverlapInfo>& OverlapsAtEndLocation, const TArray<FOverlapInfo>& CurrentOverlaps);
 	const TArray<FOverlapInfo>* ConvertSweptOverlapsToCurrentOverlaps(
@@ -90,6 +95,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
 	FVector VRCapsuleOffset;
 
+	// #TODO: See if making this multiplayer compatible is viable
+	// Offsets capsule to be centered on HMD - currently NOT multiplayer compatible
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
+	bool bCenterCapsuleOnHMD;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VRExpansionLibrary")
 	bool bUseWalkingCollisionOverride;
 
@@ -110,6 +120,8 @@ public:
 	FVector lastCameraLoc;
 	FRotator lastCameraRot;
 
+	// While misnamed, is true if we collided with a wall/obstacle due to the HMDs movement in this frame (not movement components)
+	UPROPERTY(BlueprintReadOnly, Category = "VRExpansionLibrary")
 	bool bHadRelativeMovement;
 
 	FPrimitiveSceneProxy* CreateSceneProxy() override;
@@ -124,16 +136,24 @@ public:
 	// End UObject interface
 
 	virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
+
+	private:
+		friend class FVRCharacterScopedMovementUpdate;
 };
 
 
 // Have to declare inlines here for blueprint
 
-void UVRRootComponent::GenerateOffsetToWorld(bool bUpdateBounds)
+void UVRRootComponent::GenerateOffsetToWorld(bool bUpdateBounds, bool bGetPureYaw)
 {
-	FRotator CamRotOffset = UVRExpansionFunctionLibrary::GetHMDPureYaw_I(curCameraRot);
+	FRotator CamRotOffset;
+	
+	if (bGetPureYaw)
+		CamRotOffset = UVRExpansionFunctionLibrary::GetHMDPureYaw_I(curCameraRot);
+	else
+		CamRotOffset = curCameraRot;
 
-	OffsetComponentToWorld = FTransform(CamRotOffset.Quaternion(), FVector(curCameraLoc.X, curCameraLoc.Y, CapsuleHalfHeight) + CamRotOffset.RotateVector(VRCapsuleOffset), FVector(1.0f)) * ComponentToWorld;
+	OffsetComponentToWorld = FTransform(CamRotOffset.Quaternion(), FVector(curCameraLoc.X, curCameraLoc.Y, bCenterCapsuleOnHMD ? curCameraLoc.Z : CapsuleHalfHeight) + CamRotOffset.RotateVector(VRCapsuleOffset), FVector(1.0f)) * GetComponentTransform();
 
 	if (owningVRChar)
 	{
@@ -178,7 +198,7 @@ FORCEINLINE void UVRRootComponent::SetCapsuleSizeVR(float NewRadius, float NewHa
 	if (bPhysicsStateCreated)
 	{
 		// Update physics engine collision shapes
-		BodyInstance.UpdateBodyScale(ComponentToWorld.GetScale3D(), true);
+		BodyInstance.UpdateBodyScale(GetComponentTransform().GetScale3D(), true);
 
 		if (bUpdateOverlaps && IsCollisionEnabled() && GetOwner())
 		{

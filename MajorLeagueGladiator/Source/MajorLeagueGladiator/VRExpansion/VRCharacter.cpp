@@ -2,6 +2,7 @@
 
 #include "MajorLeagueGladiator.h"
 #include "VRCharacter.h"
+#include "VRPathFollowingComponent.h"
 //#include "Runtime/Engine/Private/EnginePrivate.h"
 
 AVRCharacter::AVRCharacter(const FObjectInitializer& ObjectInitializer)
@@ -52,10 +53,10 @@ void AVRCharacter::NotifyOfTeleport_Implementation()
 		VRRootReference->GenerateOffsetToWorld();
 
 	if (LeftMotionController)
-		LeftMotionController->PostTeleportMoveGrippedActors();
+		LeftMotionController->PostTeleportMoveGrippedObjects();
 
 	if (RightMotionController)
-		RightMotionController->PostTeleportMoveGrippedActors();
+		RightMotionController->PostTeleportMoveGrippedObjects();
 }
 
 FVector AVRCharacter::GetNavAgentLocation() const
