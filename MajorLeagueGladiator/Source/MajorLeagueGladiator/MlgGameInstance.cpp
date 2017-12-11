@@ -63,6 +63,11 @@ void UMlgGameInstance::Init()
 	onSessionUserInviteAcceptedDelegateHandle = findOnlineSession()->AddOnSessionUserInviteAcceptedDelegate_Handle(onSessionUserInviteAcceptedDelegate);
 
 	QueryAchievements();
+
+	// NOTE(Phil): Since 4.18 UE overrides this with 100 which makes the game a blurry mess, and it refuses to take
+	// any other value from configs. Other people have previously had problems with this variable not taking values as well.
+	auto ScreenPercentageCVar = IConsoleManager::Get().FindConsoleVariable(TEXT("r.ScreenPercentage"));
+	ScreenPercentageCVar->Set(140, EConsoleVariableFlags(ScreenPercentageCVar->GetFlags() & ECVF_SetByMask)); 
 }
 
 void UMlgGameInstance::Shutdown()
