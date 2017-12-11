@@ -10,10 +10,12 @@
 
 #include "VRStereoWidgetComponent.generated.h"
 
-/**
-*
-*/
 
+/**
+* A widget component that displays the widget in a stereo layer instead of in worldspace.
+* Currently this class uses a custom postion instead of the engines WorldLocked for stereo layers
+* This is because world locked stereo layers don't account for player movement currently.
+*/
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent), ClassGroup = (VRExpansionPlugin))
 class MAJORLEAGUEGLADIATOR_API UVRStereoWidgetComponent : public UWidgetComponent
 {
@@ -23,7 +25,7 @@ class MAJORLEAGUEGLADIATOR_API UVRStereoWidgetComponent : public UWidgetComponen
 	~UVRStereoWidgetComponent();
 
 	void BeginDestroy() override;
-
+	void OnUnregister() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
 	virtual FActorComponentInstanceData* GetComponentInstanceData() const override;
@@ -43,6 +45,9 @@ class MAJORLEAGUEGLADIATOR_API UVRStereoWidgetComponent : public UWidgetComponen
 	//UFUNCTION(BlueprintCallable, Category = "Components|Stereo Layer")
 	//	void MarkTextureForUpdate();
 
+	// If true, use Epics world locked stereo implementation instead of my own temp solution
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StereoLayer")
+		bool bUseEpicsWorldLockedStereo;
 
 	/**
 	* Change the layer's render priority, higher priorities render on top of lower priorities

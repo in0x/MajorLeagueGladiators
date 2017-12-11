@@ -204,5 +204,5 @@ void UGravityGunAbility::SetGripControllerFromOwner()
 bool UGravityGunAbility::HasGrippedActor() const
 {
 	check(gripController);
-	return gripController->GrippedActors.Num() > 0;
+	return gripController->GrippedObjects.Num() > 0;
 }

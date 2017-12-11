@@ -2,6 +2,9 @@
 #include "MajorLeagueGladiator.h"
 #include "VRExpansionFunctionLibrary.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/Engine.h"
+#include "IXRTrackingSystem.h"
+#include "IHeadMountedDisplay.h"
 
 #if WITH_EDITOR
 #include "Editor/UnrealEd/Classes/Editor/EditorEngine.h"
@@ -43,10 +46,11 @@ void UVRExpansionFunctionLibrary::GetGripSlotInRangeByTypeName(FName SlotType, A
 	if (!Actor)
 		return;
 
+	MaxRange = FMath::Square(MaxRange);
+
 	if (USceneComponent *rootComp = Actor->GetRootComponent())
 	{
-		FTransform RelTransform = rootComp->GetComponentTransform().Inverse();
-
+		FVector RelativeWorldLocation = rootComp->GetComponentTransform().InverseTransformPosition(WorldLocation);
 		float ClosestSlotDistance = -0.1f;
 
 		TArray<FName> SocketNames = rootComp->GetAllSocketNames();
@@ -60,8 +64,7 @@ void UVRExpansionFunctionLibrary::GetGripSlotInRangeByTypeName(FName SlotType, A
 			if (SocketNames[i].ToString().Contains(GripIdentifier, ESearchCase::IgnoreCase, ESearchDir::FromStart))
 			{
 			
-				float vecLen = (rootComp->GetSocketTransform(SocketNames[i], ERelativeTransformSpace::RTS_Component).GetLocation() - RelTransform.TransformPosition(WorldLocation)).Size();
-				//float vecLen = (rootComp->GetSocketLocation(SocketNames[i]) - WorldLocation).Size();
+				float vecLen = FVector::DistSquared(RelativeWorldLocation, rootComp->GetSocketTransform(SocketNames[i], ERelativeTransformSpace::RTS_Component).GetLocation());
 
 				if (MaxRange >= vecLen && (ClosestSlotDistance < 0.0f || vecLen < ClosestSlotDistance))
 				{
@@ -88,7 +91,8 @@ void UVRExpansionFunctionLibrary::GetGripSlotInRangeByTypeName_Component(FName S
 	if (!Component)
 		return;
 
-	FTransform RelTransform = Component->GetComponentTransform().Inverse();
+	FVector RelativeWorldLocation = Component->GetComponentTransform().InverseTransformPosition(WorldLocation);
+	MaxRange = FMath::Square(MaxRange);
 
 	float ClosestSlotDistance = -0.1f;
 
@@ -102,8 +106,7 @@ void UVRExpansionFunctionLibrary::GetGripSlotInRangeByTypeName_Component(FName S
 	{
 		if (SocketNames[i].ToString().Contains(GripIdentifier, ESearchCase::IgnoreCase, ESearchDir::FromStart))
 		{
-			float vecLen = (Component->GetSocketTransform(SocketNames[i], ERelativeTransformSpace::RTS_Component).GetLocation() - RelTransform.TransformPosition(WorldLocation)).Size();
-			//float vecLen = (Component->GetSocketLocation(SocketNames[i]) - WorldLocation).Size();
+			float vecLen = FVector::DistSquared(RelativeWorldLocation, Component->GetSocketTransform(SocketNames[i], ERelativeTransformSpace::RTS_Component).GetLocation());
 
 			if (MaxRange >= vecLen && (ClosestSlotDistance < 0.0f || vecLen < ClosestSlotDistance))
 			{
@@ -128,9 +131,10 @@ FRotator UVRExpansionFunctionLibrary::GetHMDPureYaw(FRotator HMDRotation)
 
 EBPHMDWornState UVRExpansionFunctionLibrary::GetIsHMDWorn()
 {
-	if (GEngine && GEngine->HMDDevice.IsValid())
+
+	if (GEngine->XRSystem.IsValid() && GEngine->XRSystem->GetHMDDevice())
 	{
-		return ((EBPHMDWornState)GEngine->HMDDevice->GetHMDWornState());
+		return (EBPHMDWornState)GEngine->XRSystem->GetHMDDevice()->GetHMDWornState();
 	}
 
 	return EBPHMDWornState::Unknown;
@@ -138,30 +142,65 @@ EBPHMDWornState UVRExpansionFunctionLibrary::GetIsHMDWorn()
 
 bool UVRExpansionFunctionLibrary::GetIsHMDConnected()
 {
-	if (GEngine && GEngine->HMDDevice.IsValid() && GEngine->HMDDevice->IsHMDConnected())
-		return true;
-
-	return false;
+	return GEngine->XRSystem.IsValid() && GEngine->XRSystem->GetHMDDevice() && GEngine->XRSystem->GetHMDDevice()->IsHMDConnected();
 }
 
 EBPHMDDeviceType UVRExpansionFunctionLibrary::GetHMDType()
 {
-	if (GEngine && GEngine->HMDDevice.IsValid())
+	// Temp workaround for 4.18 which doesn't have the enum anymore and only deals in names
+	if (GEngine && GEngine->XRSystem.IsValid())
 	{
-		switch (GEngine->HMDDevice->GetHMDDeviceType())
+		IHeadMountedDisplay* HMDDevice = GEngine->XRSystem->GetHMDDevice();
+		if (HMDDevice)
 		{
-		case EHMDDeviceType::DT_ES2GenericStereoMesh: return EBPHMDDeviceType::DT_ES2GenericStereoMesh; break;
-		case EHMDDeviceType::DT_GearVR: return EBPHMDDeviceType::DT_GearVR; break;
-		case EHMDDeviceType::DT_Morpheus: return EBPHMDDeviceType::DT_Morpheus; break;
-		case EHMDDeviceType::DT_OculusRift: return EBPHMDDeviceType::DT_OculusRift; break;
-		case EHMDDeviceType::DT_SteamVR: return EBPHMDDeviceType::DT_SteamVR; break;
-		case EHMDDeviceType::DT_GoogleVR: return EBPHMDDeviceType::DT_GoogleVR; break;
-	
-		// Return unknown if not a matching enum, may need to add new entries in the copied enum if the original adds new ones in this case
-		default: return EBPHMDDeviceType::DT_Unknown; break;
+			EHMDDeviceType::Type HMDDeviceType = HMDDevice->GetHMDDeviceType();
+
+			switch (HMDDeviceType)
+			{
+			case EHMDDeviceType::DT_ES2GenericStereoMesh: return EBPHMDDeviceType::DT_ES2GenericStereoMesh; break;
+			case EHMDDeviceType::DT_GearVR: return EBPHMDDeviceType::DT_GearVR; break;
+			case EHMDDeviceType::DT_Morpheus: return EBPHMDDeviceType::DT_Morpheus; break;
+			case EHMDDeviceType::DT_OculusRift: return EBPHMDDeviceType::DT_OculusRift; break;
+			case EHMDDeviceType::DT_SteamVR: return EBPHMDDeviceType::DT_SteamVR; break;
+			case EHMDDeviceType::DT_GoogleVR: return EBPHMDDeviceType::DT_GoogleVR; break;
+			}
+
 		}
+
+		// There are no device type entries for these now....
+		// Does the device type go away soon leaving only FNames?
+		// #TODO: 4.19?
+		// GearVR doesn't even return anything gut OculusHMD in FName currently.
+
+		//static FName SteamVRName(TEXT("SteamVR"));
+		static FName OSVRName(TEXT("OSVR"));
+		static FName AppleARKitName(TEXT("AppleARKit"));
+		static FName GoogleARCoreHMDName(TEXT("FGoogleARCoreHMD"));
+
+		static FName DeviceName(NAME_None);
+		DeviceName = GEngine->XRSystem->GetSystemName();
+
+		/*if (DeviceName == FName("SimpleHMD"))
+			return EBPHMDDeviceType::DT_ES2GenericStereoMesh;
+		else if (DeviceName == FName(""))
+			return EBPHMDDeviceType::DT_GearVR;
+		else if (DeviceName == FName("PSVR"))
+			return EBPHMDDeviceType::DT_Morpheus;
+		else if (DeviceName == FName("OculusHMD"))
+			return EBPHMDDeviceType::DT_OculusRift;
+		else if (DeviceName == FName("SteamVR"))
+			return EBPHMDDeviceType::DT_SteamVR;
+		else if (DeviceName == FName("FGoogleVRHMD"))
+			return EBPHMDDeviceType::DT_GoogleVR;*/
+		if (DeviceName == OSVRName)
+			return EBPHMDDeviceType::DT_OSVR;
+		else if (DeviceName == AppleARKitName)
+			return EBPHMDDeviceType::DT_AppleARKit;
+		else if (DeviceName == GoogleARCoreHMDName)
+			return EBPHMDDeviceType::DT_GoogleARCore;
 	}
 
+	// Default to unknown
 	return EBPHMDDeviceType::DT_Unknown;
 }
 
@@ -179,6 +218,21 @@ bool UVRExpansionFunctionLibrary::IsInVREditorPreviewOrGame()
 
 	// Is not an editor build, default to true here
 	return true;
+}
+
+bool UVRExpansionFunctionLibrary::IsInVREditorPreview()
+{
+#if WITH_EDITOR
+	if (GIsEditor)
+	{
+
+		UEditorEngine* EdEngine = Cast<UEditorEngine>(GEngine);
+		return EdEngine->bUseVRPreviewForPlayWorld;
+	}
+#endif
+
+	// Is not an editor build, default to false here
+	return false;
 }
 
 void UVRExpansionFunctionLibrary::NonAuthorityMinimumAreaRectangle(class UObject* WorldContextObject, const TArray<FVector>& InVerts, const FVector& SampleSurfaceNormal, FVector& OutRectCenter, FRotator& OutRectRotation, float& OutSideLengthX, float& OutSideLengthY, bool bDebugDraw)
@@ -272,7 +326,7 @@ void UVRExpansionFunctionLibrary::NonAuthorityMinimumAreaRectangle(class UObject
 #if ENABLE_DRAW_DEBUG
 	if (bDebugDraw)
 	{
-		UWorld* World = (WorldContextObject) ? GEngine->GetWorldFromContextObject(WorldContextObject) : nullptr;
+		UWorld* World = (WorldContextObject) ? GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull) : nullptr;
 		if (World != nullptr)
 		{
 			DrawDebugSphere(World, OutRectCenter, 10.f, 12, FColor::Yellow, true);

@@ -4,7 +4,7 @@
 #include "BoltAction.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/ConstraintInstance.h"
-#include "VRExpansion/GrippableStaticMeshComponent.h"
+#include "VRExpansion/Grippables/GrippableStaticMeshComponent.h"
 
 ABoltAction::ABoltAction(const FObjectInitializer& ObjectInitializer) 
 	: Super(ObjectInitializer)

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "VRExpansion/GrippableStaticMeshActor.h"
+#include "VRExpansion/Grippables/GrippableStaticMeshActor.h"
 #include "BoltAction.generated.h"
 
 UCLASS(Blueprintable, meta = (BlueprintSpawnableComponent))

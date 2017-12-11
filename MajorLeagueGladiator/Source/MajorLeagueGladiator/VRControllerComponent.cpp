@@ -25,7 +25,7 @@ UVRControllerComponent::UVRControllerComponent(const FObjectInitializer& ObjectI
 
 bool UVRControllerComponent::GrabNearestActor()
 {	
-	if (GrippedActors.Num() > 0)
+	if (GrippedObjects.Num() > 0)
 		return false;
 
 	auto grabData = getNearestGrabableActor();
@@ -42,27 +42,27 @@ bool UVRControllerComponent::GrabNearestActor()
 
 void UVRControllerComponent::DropAllGrips()
 {
-	for (int i = GrippedActors.Num()-1; i >= 0; --i)
+	for (int i = GrippedObjects.Num()-1; i >= 0; --i)
 	{
-		DropGrip(GrippedActors[i], true);
+		DropGrip(GrippedObjects[i], true);
 	}
 }
 
 void UVRControllerComponent::DropNonInteractGrips()
 {
-	for (int i = GrippedActors.Num() - 1; i >= 0; --i)
+	for (int i = GrippedObjects.Num() - 1; i >= 0; --i)
 	{
 		IVRGripInterface* vrGrip;
-		vrGrip = Cast<IVRGripInterface>(CastChecked<AActor>(GrippedActors[i].GrippedObject));
+		vrGrip = Cast<IVRGripInterface>(CastChecked<AActor>(GrippedObjects[i].GrippedObject));
 
 		if (!vrGrip) 
 		{
-			vrGrip = Cast<IVRGripInterface>(CastChecked<AActor>(GrippedActors[i].GrippedObject)->GetRootComponent());
+			vrGrip = Cast<IVRGripInterface>(CastChecked<AActor>(GrippedObjects[i].GrippedObject)->GetRootComponent());
 		}
 
 		if (!vrGrip->IsInteractible_Implementation())
 		{
-			DropGrip(GrippedActors[i], true);
+			DropGrip(GrippedObjects[i], true);
 		}
 	}
 }
@@ -111,7 +111,7 @@ UVRControllerComponent::ActorGrabData UVRControllerComponent::getNearestGrabable
 
 void UVRControllerComponent::UseGrippedActors()
 {
-	for (auto& grip : GrippedActors)
+	for (auto& grip : GrippedObjects)
 	{
 		auto gripActor = Cast<IVRGripInterface>(CastChecked<AActor>(grip.GrippedObject));
 
@@ -120,7 +120,7 @@ void UVRControllerComponent::UseGrippedActors()
 			gripActor->OnUsed();
 		}
 	}
-	for (auto& grip : LocallyGrippedActors)
+	for (auto& grip : LocallyGrippedObjects)
 	{
 		auto gripActor = Cast<IVRGripInterface>(CastChecked<AActor>(grip.GrippedObject));
 
@@ -133,7 +133,7 @@ void UVRControllerComponent::UseGrippedActors()
 
 void UVRControllerComponent::EndUseGrippedActors()
 {
-	for (auto& grip : GrippedActors)
+	for (auto& grip : GrippedObjects)
 	{
 		auto gripActor = Cast<IVRGripInterface>(CastChecked<AActor>(grip.GrippedObject));
 
@@ -142,7 +142,7 @@ void UVRControllerComponent::EndUseGrippedActors()
 			gripActor->OnEndUsed();
 		}
 	}
-	for (auto& grip : LocallyGrippedActors)
+	for (auto& grip : LocallyGrippedObjects)
 	{
 		auto gripActor = Cast<IVRGripInterface>(CastChecked<AActor>(grip.GrippedObject));
 
@@ -155,18 +155,17 @@ void UVRControllerComponent::EndUseGrippedActors()
 
 bool UVRControllerComponent::HasGrip() const
 {
-	return GrippedActors.Num() > 0 || LocallyGrippedActors.Num() > 0;
+	return GrippedObjects.Num() > 0 || LocallyGrippedObjects.Num() > 0;
 }
-
 
 AMlgGrippableActor* UVRControllerComponent::GetGrippedActor() const
 {
-	if (GrippedActors.Num() == 0)
+	if (GrippedObjects.Num() == 0)
 	{
 		return nullptr;
 	}
 
-	AActor* grippedActor = CastChecked<AActor>(GrippedActors[0].GrippedObject);
+	AActor* grippedActor = CastChecked<AActor>(GrippedObjects[0].GrippedObject);
 	return  CastChecked<AMlgGrippableActor>(grippedActor);
 }
 
@@ -181,7 +180,7 @@ AMlgPlayerController* UVRControllerComponent::GetMlgPlayerController()
 
 bool UVRControllerComponent::TryGrabActor(AActor* Actor)
 {
-	if (GrippedActors.Num() > 0)
+	if (GrippedObjects.Num() > 0)
 		return false;
 
 	IVRGripInterface* gripInterface = Cast<IVRGripInterface>(Actor->GetRootComponent());
@@ -210,7 +209,7 @@ void UVRControllerComponent::GrabActorImpl(ActorGrabData GrabData)
 {
 	check(GrabData.pActorToGrip);
 	check(GrabData.pIVRGrip);
-	check(GrippedActors.Num() == 0);
+	check(GrippedObjects.Num() == 0);
 
 	if (auto* moveComp = GrabData.pActorToGrip->FindComponentByClass<UPackMovementComponent>())
 	{
@@ -218,16 +217,17 @@ void UVRControllerComponent::GrabActorImpl(ActorGrabData GrabData)
 	}
 
 	bool foundSlot;
+	bool bFindPrimarySlot = true;
 	FTransform slotTrafo;
 
-	GrabData.pIVRGrip->ClosestPrimarySlotInRange_Implementation(GetComponentLocation(), foundSlot, slotTrafo);
+	GrabData.pIVRGrip->ClosestGripSlotInRange_Implementation(GetComponentLocation(), bFindPrimarySlot, foundSlot, slotTrafo, nullptr, NAME_None);
 	FTransform actorTransform = GrabData.pActorToGrip->GetTransform();
 
 	if (foundSlot)
 	{
 		slotTrafo = UKismetMathLibrary::ConvertTransformToRelative(slotTrafo, actorTransform);
 		slotTrafo.SetScale3D(actorTransform.GetScale3D());
-		GripActor(GrabData.pActorToGrip, slotTrafo, true, NAME_None, GrabData.pIVRGrip->SlotGripType_Implementation());
+		GripActor(GrabData.pActorToGrip, slotTrafo, true, NAME_None, GrabData.pIVRGrip->GetPrimaryGripType(foundSlot));
 	}
 	else
 	{
@@ -240,13 +240,13 @@ void UVRControllerComponent::GrabActorImpl(ActorGrabData GrabData)
 		FVector locationToCenterOffset = actorCenter - actorLocation;
 
 		actorTransform.SetLocation(gripLocation - locationToCenterOffset);
-		GripActor(GrabData.pActorToGrip, actorTransform, false, NAME_None, GrabData.pIVRGrip->FreeGripType_Implementation());
+		GripActor(GrabData.pActorToGrip, actorTransform, false, NAME_None, GrabData.pIVRGrip->GetPrimaryGripType(foundSlot));
 	}
 }
 
 bool UVRControllerComponent::LaunchActor(FVector Velocity, bool IgnoreWeight)
 {
-	if(GrippedActors.Num() == 0)
+	if(GrippedObjects.Num() == 0)
 	{
 		UE_LOG(DebugLog, Warning, TEXT("Tried to launch Actor but not actor was present"));
 		return false;
@@ -264,7 +264,7 @@ bool UVRControllerComponent::LaunchActor(FVector Velocity, bool IgnoreWeight)
 	const float TimeUntilClearMoveIgnore = 0.5f;
 	timer.SetTimer(timerhandle, rootComp, &UPrimitiveComponent::ClearMoveIgnoreActors, TimeUntilClearMoveIgnore, false);
 
-	auto& grippedActorInfo = GrippedActors[0];
+	auto& grippedActorInfo = GrippedObjects[0];
 
 	DropGrip(grippedActorInfo, grippedActor->SimulateOnDrop());
 	rootComp->SetPhysicsLinearVelocity(FVector::ZeroVector);

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "VRExpansion/VRSimpleCharacter.h"
+#include "VRExpansion/SimpleChar/VRSimpleCharacter.h"
 #include "TravelMapCharacter.generated.h"
 
 class UWidgetInteractionComponent;
