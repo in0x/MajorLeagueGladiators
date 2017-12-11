@@ -7,6 +7,6 @@ DEFINE_LOG_CATEGORY(DebugLog);
 
 bool g_IsVREnabled()
 {
-	bool isEnabled = (GEngine && GEngine->XRSystem->GetHMDDevice() != nullptr && GEngine->XRSystem->GetHMDDevice()->IsHMDConnected());
+	bool isEnabled = (GEngine && GEngine->XRSystem.IsValid() && GEngine->XRSystem->GetHMDDevice() != nullptr && GEngine->XRSystem->GetHMDDevice()->IsHMDConnected());
 	return isEnabled;
 }
