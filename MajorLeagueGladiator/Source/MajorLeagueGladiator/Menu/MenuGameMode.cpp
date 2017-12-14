@@ -31,6 +31,8 @@ void AMenuGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CastChecked<UMlgGameInstance>(GetGameInstance())->DestroyGameSession();
+
 	for (TObjectIterator<UMenuActionComponent> iter; iter; ++iter)
 	{
 		iter->OnMenuActionTriggered.AddUObject(this, &AMenuGameMode::onMenuAction);
