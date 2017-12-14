@@ -279,7 +279,7 @@ void UMlgGameInstance::onDestroySessionComplete(FName SessionName, bool bWasSucc
 
 	if (bWasSuccessful)
 	{
-		GetWorld()->ServerTravel(MAIN_MENU_MAP);
+		UGameplayStatics::OpenLevel(GetWorld(), "/Game/MainMenu");
 	}
 	else
 	{
