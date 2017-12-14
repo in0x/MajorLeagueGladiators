@@ -63,6 +63,8 @@ public:
 	WaveSystemSavedState WaveSystemSavedState;
 	bool bIsInRoomOfShame;
 
+	void DestroyGameSession();
+
 private:
 
 	void onCreateSessionComplete(FName SessionName, bool bWasSuccessful);

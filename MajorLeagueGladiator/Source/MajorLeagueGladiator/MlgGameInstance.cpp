@@ -67,7 +67,7 @@ void UMlgGameInstance::Init()
 	// NOTE(Phil): Since 4.18 UE overrides this with 100 which makes the game a blurry mess, and it refuses to take
 	// any other value from configs. Other people have previously had problems with this variable not taking values as well.
 	auto ScreenPercentageCVar = IConsoleManager::Get().FindConsoleVariable(TEXT("r.ScreenPercentage"));
-	ScreenPercentageCVar->Set(140, EConsoleVariableFlags(ScreenPercentageCVar->GetFlags() & ECVF_SetByMask)); 
+	ScreenPercentageCVar->Set(140, EConsoleVariableFlags(ScreenPercentageCVar->GetFlags() & ECVF_SetByMask));
 }
 
 void UMlgGameInstance::Shutdown()
@@ -261,6 +261,18 @@ void UMlgGameInstance::TravelToMainMenu()
 		return;
 	}
 
+	IOnlineSessionPtr Sessions = findOnlineSession();
+
+	if (Sessions.IsValid())
+	{
+		onDestroySessionCompleteDelegateHandle = Sessions->AddOnDestroySessionCompleteDelegate_Handle(onDestroySessionCompleteDelegate);
+
+		Sessions->DestroySession(GameSessionName);
+	}
+}
+
+void UMlgGameInstance::DestroyGameSession()
+{
 	IOnlineSessionPtr Sessions = findOnlineSession();
 
 	if (Sessions.IsValid())
@@ -528,7 +540,7 @@ void UMlgGameInstance::OnAchievementsWritten(const FUniqueNetId& PlayerId, bool 
 {
 	IOnlineAchievementsPtr achievements = findAchievements();
 	achievements->ClearOnAchievementUnlockedDelegate_Handle(onAchievementUnlockedDelegateHandle);
-	
+
 	if (bWasSuccessful)
 	{
 		UE_LOG(DebugLog, Warning, TEXT("UMlgGameInstance::OnAchievementsWritten(): WriteAchievements succeeded"));
