@@ -5,6 +5,7 @@
 #include "ChaperoneBounds.h"
 #include "AbilitySystemInterface.h"
 #include "HandMotionController.h"
+#include "Menu/MenuAction.h"
 #include "MlgPlayerCharacter.generated.h"
 
 class UHealthComponent;
@@ -131,6 +132,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystemComponent* pullConeParticleSystemComponent;
+
+	UFUNCTION()
+	void onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction);
 
 private:
 	std::unique_ptr<HandMotionController> pHandMotionController;
