@@ -98,8 +98,14 @@ public:
 	bool GetCanInvite() const;
 
 protected:
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void JoinButtonClicked();
+
 	UFUNCTION(BlueprintCallable)
 	void EmitJoinFriendRequested() const;
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void InviteButtonClicked();
 
 	UFUNCTION(BlueprintCallable)
 	void EmitInviteFriendRequested() const;
