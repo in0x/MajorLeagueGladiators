@@ -305,7 +305,13 @@ void AFriendsMenuActor::OnFindFriendSessionComplete(int32 LocalUserNum, bool bWa
 
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, *FString::Printf(TEXT("Found session for user %s"), *SearchResult[0].Session.OwningUserName));
 
-	UFriendWidget* widget = *friendWidgets.FindByPredicate([&](const UFriendWidget* widget) { return widget->GetUsername() == SearchResult[0].Session.OwningUserName; });
+	UFriendWidget** widgetPtr = friendWidgets.FindByPredicate([&](const UFriendWidget* widget) { return widget->GetUsername() == SearchResult[0].Session.OwningUserName; });
+	if (widgetPtr == nullptr)
+	{
+		return;
+	}
+
+	UFriendWidget* widget = *widgetPtr;
 	check(widget != nullptr);
 	widget->ChangeCanJoin(true);
 }
