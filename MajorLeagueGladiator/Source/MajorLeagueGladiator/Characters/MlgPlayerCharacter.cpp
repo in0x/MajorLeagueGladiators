@@ -25,6 +25,8 @@
 #include "SpectatorComponent.h"
 #include "WidgetInteractionComponent.h"
 #include "MlgGameInstance.h"
+#include "Menu/MenuActionComponent.h"
+#include "Menu/MenuActionWidget.h"
 
 namespace
 {
@@ -270,6 +272,34 @@ void AMlgPlayerCharacter::BeginPlay()
 	//		sceneCapture->bCaptureEveryFrame = false;
 	//	}
 	//}
+
+	if (!HasAuthority()) // So that we can get TravelToMainMenu requests, only client needs to handle this.
+	{
+		for (TObjectIterator<UMenuActionComponent> iter; iter; ++iter)
+		{
+			iter->OnMenuActionTriggered.AddUObject(this, &AMlgPlayerCharacter::onMenuAction);
+		}
+
+		UWorld* world = GetWorld();
+
+		for (TObjectIterator<UMenuActionWidget> iter; iter; ++iter)
+		{
+			if (iter->GetWorld() != world)
+			{
+				continue;
+			}
+
+			iter->OnMenuActionTriggered.AddUObject(this, &AMlgPlayerCharacter::onMenuAction);
+		}
+	}
+}
+
+void AMlgPlayerCharacter::onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction)
+{
+	if (menuAction == EMenuAction::GoToMainMenu)
+	{
+		CastChecked<UMlgGameInstance>(GetGameInstance())->TravelToMainMenu();
+	}
 }
 
 void AMlgPlayerCharacter::OnHealthChanged(float newHealthPercentage, float oldHealthPercentage)
