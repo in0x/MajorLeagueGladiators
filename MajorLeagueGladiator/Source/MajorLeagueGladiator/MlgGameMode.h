@@ -10,6 +10,16 @@ namespace EMenuAction { enum Type; }
 class AMlgPlayerCharacter;
 class UWaveSpawnerManagerComponent;
 
+UENUM(BlueprintType)
+namespace EClassSelection
+{
+	enum Type
+	{
+		Ranged			UMETA(DisplayName = "Ranged"),
+		Melee			UMETA(DisplayName = "Melee"),
+	};
+}
+
 UCLASS(Config=Game)
 class MAJORLEAGUEGLADIATOR_API AMlgGameMode : public AGameMode
 {
@@ -41,14 +51,19 @@ private:
 
 	bool isInRoomOfShame() const;
 	void setIsInRoomOfShame(bool NewIsInRoomOfShame);
+
+	UClass* getUClassFromClassSelection(EClassSelection::Type selection);
 	
 	// The Tank Class. For now this is always assigned to the client.
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AMlgPlayerCharacter> tankClass;
+	TSubclassOf<AMlgPlayerCharacter> meleeClass;
 
 	// The DPS Class. For now this is always assigned to the server.
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AMlgPlayerCharacter> dpsClass;
+	TSubclassOf<AMlgPlayerCharacter> rangedClass;
+
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EClassSelection::Type> hostClassSelection;
 
 	UPROPERTY(EditAnywhere)
 	UWaveSpawnerManagerComponent* waveSpawnerManger;

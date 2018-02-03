@@ -24,6 +24,7 @@ AMlgGameMode::AMlgGameMode(const FObjectInitializer& ObjectInitializer)
 	: easyStartWave(1)
 	, mediumStartWave(11)
 	, hardStartWave(21)
+	, hostClassSelection(EClassSelection::Ranged)
 {
 	//DefaultPawnClass = AMlgPlayerCharacter::StaticClass();
 	//PlayerControllerClass = AMlgPlayerController::StaticClass();
@@ -97,6 +98,24 @@ void AMlgGameMode::setIsInRoomOfShame(bool NewIsInRoomOfShame)
 	CastChecked<UMlgGameInstance>(GetGameInstance())->bIsInRoomOfShame = NewIsInRoomOfShame;
 }
 
+UClass* AMlgGameMode::getUClassFromClassSelection(EClassSelection::Type selection)
+{
+	UClass* selectedClass = nullptr;
+
+	if (selection == EClassSelection::Ranged)
+	{
+		selectedClass = rangedClass.Get();
+		checkf(selectedClass, TEXT("Failed to get Ranged class."));
+	}
+	else
+	{
+		selectedClass = meleeClass.Get();
+		checkf(selectedClass, TEXT("Failed to get Melee class."));
+	}
+	
+	return selectedClass;
+}
+
 UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
 {
 	// Handle only Player Controllers, as AI is spawned differently
@@ -105,27 +124,20 @@ UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AControlle
 		return nullptr;
 	}
 
-	// For now this just assigns the Server the DPS class and the Client the Tank Class.
-	// Game Mode is only on the Server. If the controller is locally controlled it is the
-	// server's controller
 	if (InController->IsLocalPlayerController())
 	{
-		if (dpsClass.Get() == nullptr)
-		{
-			UE_LOG(DebugLog, Warning, TEXT("DPS Class not set. Using Default Pawn Class"));
-			return Super::GetDefaultPawnClassForController_Implementation(InController);
-		}
-		return dpsClass.Get();
+		return getUClassFromClassSelection(hostClassSelection);
 	}
 	else
 	{
-		if (tankClass.Get() == nullptr)
+		if (hostClassSelection == EClassSelection::Ranged)
 		{
-			UE_LOG(DebugLog, Warning, TEXT("Tank Class not set. Using Default Pawn Class"));
-			return Super::GetDefaultPawnClassForController_Implementation(InController);
+			return getUClassFromClassSelection(EClassSelection::Melee);
 		}
-
-		return tankClass.Get();
+		else
+		{
+			return getUClassFromClassSelection(EClassSelection::Ranged);
+		}
 	}
 }
 
