@@ -6,19 +6,10 @@
 #include "MlgGameMode.generated.h"
 
 namespace EMenuAction { enum Type; }
+namespace EClassSelection { enum Type; }
 
 class AMlgPlayerCharacter;
 class UWaveSpawnerManagerComponent;
-
-UENUM(BlueprintType)
-namespace EClassSelection
-{
-	enum Type
-	{
-		Ranged			UMETA(DisplayName = "Ranged"),
-		Melee			UMETA(DisplayName = "Melee"),
-	};
-}
 
 UCLASS(Config=Game)
 class MAJORLEAGUEGLADIATOR_API AMlgGameMode : public AGameMode
@@ -31,7 +22,7 @@ public:
 	virtual	TSubclassOf<AGameSession> GetGameSessionClass() const override;
 	virtual void BeginPlay() override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
-
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	void MatchLost();
 	
 	void DestroyAllAi();
@@ -51,6 +42,8 @@ private:
 
 	bool isInRoomOfShame() const;
 	void setIsInRoomOfShame(bool NewIsInRoomOfShame);
+
+	FString getClassParamString() const;
 
 	UClass* getUClassFromClassSelection(EClassSelection::Type selection);
 	

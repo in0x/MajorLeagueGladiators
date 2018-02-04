@@ -13,6 +13,7 @@
 #include "Menu/MenuActionComponent.h"
 #include "Menu/MenuActionWidget.h"
 #include "MlgGameSession.h"
+#include "ClassSelection.h"
 
 namespace
 {
@@ -78,6 +79,22 @@ void AMlgGameMode::BeginPlay()
 	}
 }
 
+void AMlgGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+
+	FString hostClassParam = UGameplayStatics::ParseOption(Options, TEXT("hostClass"));
+
+	if (hostClassParam == "Melee")
+	{
+		hostClassSelection = EClassSelection::Melee;
+	}
+	else 
+	{
+		hostClassSelection = EClassSelection::Ranged;
+	}
+}
+
 void AMlgGameMode::enterGameMap()
 {
 	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
@@ -105,13 +122,15 @@ UClass* AMlgGameMode::getUClassFromClassSelection(EClassSelection::Type selectio
 	if (selection == EClassSelection::Ranged)
 	{
 		selectedClass = rangedClass.Get();
-		checkf(selectedClass, TEXT("Failed to get Ranged class."));
 	}
 	else
 	{
 		selectedClass = meleeClass.Get();
-		checkf(selectedClass, TEXT("Failed to get Melee class."));
 	}
+
+	const UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EClassSelection"), true);
+	check(enumPtr);
+	checkf(selectedClass, TEXT("Failed to get UClass for %s"), *enumPtr->GetNameByValue((int64)selection).ToString());
 	
 	return selectedClass;
 }
@@ -156,9 +175,10 @@ void AMlgGameMode::HandleMatchHasEnded()
 void AMlgGameMode::travelToRoomOfShame()
 {
 	setIsInRoomOfShame(true);
-
 	filterOutAiPlayerStates();
-	GetWorld()->ServerTravel(PRE_GAME_MAP, true);
+
+	FString mapWithParam = FString::Printf(TEXT("%s?hostClass=%s"), *PRE_GAME_MAP, *getClassParamString());
+	GetWorld()->ServerTravel(mapWithParam, true);
 }
 
 void AMlgGameMode::DestroyAllAi()
@@ -235,6 +255,21 @@ void AMlgGameMode::travelToGameMap()
 {
 	setIsInRoomOfShame(false);
 
-	GetWorld()->ServerTravel(GAME_MAP, true);
+	FString mapWithParam = FString::Printf(TEXT("%s?hostClass=%s"), *GAME_MAP, *getClassParamString());
+
+	GetWorld()->ServerTravel(mapWithParam, true);
 }
+
+FString AMlgGameMode::getClassParamString() const
+{
+	if (hostClassSelection == EClassSelection::Ranged)
+	{
+		return FString("Ranged");
+	}
+	else
+	{
+		return FString("Melee");
+	}
+}
+
 

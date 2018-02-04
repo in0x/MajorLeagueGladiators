@@ -3,6 +3,8 @@
 #include "MajorLeagueGladiator.h"
 #include "MlgGameInstance.h"
 #include "MlgGameSession.h"
+#include "Menu/MenuGameMode.h"
+#include "ClassSelection.h"
 
 namespace
 {
@@ -148,7 +150,31 @@ void UMlgGameInstance::onCreateSessionComplete(FName SessionName, bool bWasSucce
 	}
 
 	bIsInRoomOfShame = true;
-	GetWorld()->ServerTravel(PRE_BEGIN_MAP);
+	
+	FString mapWithParam;
+
+	AGameModeBase* gameMode = GetWorld()->GetAuthGameMode();
+	AMenuGameMode* menuMode = CastChecked<AMenuGameMode>(gameMode);
+	
+	if (menuMode)
+	{
+		EClassSelection::Type hostClass = menuMode->hostClassSelection;
+
+		if (hostClass == EClassSelection::Ranged)
+		{
+			mapWithParam = FString::Printf(TEXT("%s?hostClass=%s"), *PRE_BEGIN_MAP, *FString("Ranged"));
+		}
+		else
+		{
+			mapWithParam = FString::Printf(TEXT("%s?hostClass=%s"), *PRE_BEGIN_MAP, *FString("Melee"));
+		}
+	}
+	else
+	{
+		mapWithParam = PRE_BEGIN_MAP;
+	}
+
+	GetWorld()->ServerTravel(mapWithParam);
 }
 
 bool UMlgGameInstance::FindSessions(ULocalPlayer* PlayerOwner, bool bFindLan)

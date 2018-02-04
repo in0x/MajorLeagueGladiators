@@ -9,6 +9,8 @@
 #include "MenuGameMode.generated.h"
 
 namespace EMenuAction { enum Type; }
+namespace EClassSelection { enum Type; }
+
 class UMlgGameInstance;
 
 UCLASS()
@@ -19,6 +21,9 @@ public:
 	AMenuGameMode();
 	virtual	TSubclassOf<AGameSession> GetGameSessionClass() const override;
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<EClassSelection::Type> hostClassSelection;
 
 private:
 	void startRangedTutorial();

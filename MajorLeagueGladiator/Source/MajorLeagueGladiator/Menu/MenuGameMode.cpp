@@ -9,6 +9,7 @@
 #include "MenuActionComponent.h"
 #include "MlgGameSession.h"
 #include "MenuActionWidget.h"
+#include "ClassSelection.h"
 
 namespace
 {
@@ -17,6 +18,7 @@ namespace
 }
 
 AMenuGameMode::AMenuGameMode()
+	: hostClassSelection(EClassSelection::Ranged)
 {
 	ConstructorHelpers::FClassFinder<AMenuCharacter> menuCharacterBP(TEXT("/Game/BluePrints/Characters/MenuCharacterBP"));
 	DefaultPawnClass = menuCharacterBP.Class;
@@ -154,3 +156,4 @@ TSharedPtr<const FUniqueNetId> AMenuGameMode::getUniqueNetID() const
 	auto playerId = localplayer->GetPreferredUniqueNetId();
 	return playerId;
 }
+
