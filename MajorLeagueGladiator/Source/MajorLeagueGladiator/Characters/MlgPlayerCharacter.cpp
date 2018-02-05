@@ -28,6 +28,7 @@
 #include "Menu/MenuActionComponent.h"
 #include "Menu/MenuActionWidget.h"
 
+
 namespace
 {
 	const FName PAWN_COLLISION_PROFILE_NAME("Pawn");
@@ -198,6 +199,22 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FRotator rotator(90, 0, 0);
 	menuPointerMesh->SetWorldRotation(rotator);
 	menuPointerMesh->SetWorldScale3D(FVector(0.015, 0.0075, 25));
+
+	StepsForFullRotation = 8;
+	SnapRotationInputThreshold = 0.5f;
+	SnapRotationCooldownSeconds = 0.5f;
+	//if (bRenderSecondWindow)
+	//{
+	//	spectator = ObjectInitializer.CreateDefaultSubobject<USpectatorComponent>(this, TEXT("Spectator"));
+	//	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
+	//	sceneCapture->SetupAttachment(VRReplicatedCamera);
+	//	spectator->SetSceneCapture(sceneCapture);
+	//}
+	//else
+	//{
+	//	spectator = nullptr;
+	//	sceneCapture = nullptr;
+	//}
 }
 
 void AMlgPlayerCharacter::BeginPlay()
@@ -211,6 +228,11 @@ void AMlgPlayerCharacter::BeginPlay()
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("VR MODE"));
 		//GEngine->XRSystem->GetHMDDevice()->SetBaseOrientation(FQuat::Identity);
 		GEngine->XRSystem->ResetOrientation();
+
+		if (GEngine->XRSystem->GetHMDDevice()->GetHMDDeviceType() == EHMDDeviceType::DT_OculusRift)
+		{
+			AdjustForOculus();
+		}
 	}
 	else
 	{
@@ -330,6 +352,9 @@ void AMlgPlayerCharacter::Tick(float DelataTime)
 	Super::Tick(DelataTime);
 
 	updateBodyMeshTransform();
+
+	const FRotator OldRoation = GetActorRotation();
+	//SetActorRotation(FRotator(OldRoation.Pitch, CalcQuantizedRoationOffset(), OldRoation.Roll));
 }
 
 void AMlgPlayerCharacter::updateBodyMeshTransform()
@@ -352,6 +377,7 @@ void AMlgPlayerCharacter::PlayRumbleRight() const
 	APlayerController* playerController = CastChecked<APlayerController>(GetController());
 	playerController->ClientPlayForceFeedback(rumbleRight, false, FName("rumbleRight"));
 }
+
 
 void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -389,6 +415,8 @@ void AMlgPlayerCharacter::SetupMenuBindings(UInputComponent* PlayerInputComponen
 {
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMlgPlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMlgPlayerCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("SnapTurn", this, &AMlgPlayerCharacter::SnapTurnInput);
+	
 
 	PlayerInputComponent->BindAxis("Turn", this, &AMlgPlayerCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &AMlgPlayerCharacter::AddControllerPitchInput);
@@ -415,6 +443,13 @@ void AMlgPlayerCharacter::PossessedBy(AController* NewController)
 		}
 
 	}
+}
+
+void AMlgPlayerCharacter::AdjustForOculus()
+{
+	FRotator OculusControllerRotation(30, 0, 0);
+	leftMesh->SetRelativeRotation(OculusControllerRotation);
+	rightMesh->SetRelativeRotation(OculusControllerRotation);
 }
 
 const UMlgAbilitySet* AMlgPlayerCharacter::GetOrLoadAbilitySet()
@@ -467,13 +502,14 @@ void AMlgPlayerCharacter::OnAttachedWeaponSet()
 	// However the values of the object will still be replicated and RPC can be used
 	attachedWeapon->SetReplicateMovement(false);
 
+	FAttachmentTransformRules transRules(EAttachmentRule::SnapToTarget, true);
+	attachedWeapon->AttachToComponent(rightMesh, transRules);
+
 	UPrimitiveComponent* weaponRootComp = CastChecked<UPrimitiveComponent>(attachedWeapon->GetRootComponent());
 	const FTransform sockTrans = weaponRootComp->GetSocketTransform(VR_GRIP_1_NAME, ERelativeTransformSpace::RTS_Component);
 	const FTransform relativeTransform = sockTrans.Inverse();
 	weaponRootComp->SetRelativeTransform(relativeTransform);
 
-	FAttachmentTransformRules transRules(EAttachmentRule::KeepRelative, true);
-	attachedWeapon->AttachToComponent(GetMotionController(EControllerHand::Right), transRules);
 }
 
 AMlgGrippableMeshActor* AMlgPlayerCharacter::GetAttachedWeapon()
@@ -491,6 +527,27 @@ void AMlgPlayerCharacter::MoveRight(float Value)
 {
 	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
 	AddMovementInput(direction, Value);
+}
+
+void AMlgPlayerCharacter::SnapTurnInput(float Value)
+{
+	if (FMath::Abs(Value) < SnapRotationInputThreshold)
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager = GetWorldTimerManager();
+	if (TimerManager.IsTimerActive(SnapRotationCooldown))
+	{
+		return;
+	}
+
+	TimerManager.SetTimer(SnapRotationCooldown, SnapRotationCooldownSeconds, false);
+
+	// we do this directly, so we can ignore input the rotation scale stuff, which would not make sense for fixed rotation steps.
+	const float YawInput = (360.f / StepsForFullRotation) * FMath::Sign(Value);
+	APlayerController* const PC = CastChecked<APlayerController>(Controller);
+	PC->RotationInput.Yaw += YawInput;	
 }
 
 void AMlgPlayerCharacter::OnLeftTriggerClicked()

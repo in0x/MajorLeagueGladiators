@@ -41,9 +41,11 @@ public:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void PossessedBy(AController* NewController) override;
+	void AdjustForOculus();
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	void SnapTurnInput(float Value);
 	void SetLeftTriggerStatus(float Value);
 	void SetRightTriggerStatus(float Value);
 	
@@ -132,6 +134,20 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystemComponent* pullConeParticleSystemComponent;
+
+	// Turns are not continues, it occures in fixed steps. How many Steps should a full turn take
+	UPROPERTY(EditAnywhere, Category="Snap Rotation")
+	int32 StepsForFullRotation;
+
+	// Only Snap Rotate when Controller input is over this threshold
+	UPROPERTY(EditAnywhere, Category = "Snap Rotation")
+	float SnapRotationInputThreshold;
+
+	UPROPERTY(EditAnywhere, Category = "Snap Rotation")
+	float SnapRotationCooldownSeconds;
+
+	UPROPERTY(Transient)
+	FTimerHandle SnapRotationCooldown;
 
 	UFUNCTION()
 	void onMenuAction(TEnumAsByte<EMenuAction::Type> menuAction);
@@ -265,4 +281,5 @@ private:
 
 	UFUNCTION()
 	void OnRep_bIsLookingForPullTarget(bool oldValue);
+
 };
