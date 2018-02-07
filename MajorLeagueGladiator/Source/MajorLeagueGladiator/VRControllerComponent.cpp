@@ -12,6 +12,7 @@
 
 #include "MlgGrippableActor.h"
 
+
 namespace
 {
 	const FName PACK_SOCKET_NAME("Pack");
@@ -220,14 +221,17 @@ void UVRControllerComponent::GrabActorImpl(ActorGrabData GrabData)
 	bool bFindPrimarySlot = true;
 	FTransform slotTrafo;
 
-	GrabData.pIVRGrip->ClosestGripSlotInRange_Implementation(GetComponentLocation(), bFindPrimarySlot, foundSlot, slotTrafo, nullptr, NAME_None);
+
+	IVRGripInterface::Execute_ClosestGripSlotInRange(GrabData.pActorToGrip, GetComponentLocation(), bFindPrimarySlot, foundSlot, slotTrafo, nullptr, NAME_None);
 	FTransform actorTransform = GrabData.pActorToGrip->GetTransform();
 
 	if (foundSlot)
 	{
 		slotTrafo = UKismetMathLibrary::ConvertTransformToRelative(slotTrafo, actorTransform);
 		slotTrafo.SetScale3D(actorTransform.GetScale3D());
-		GripActor(GrabData.pActorToGrip, slotTrafo, true, NAME_None, GrabData.pIVRGrip->GetPrimaryGripType(foundSlot));
+
+
+		GripActor(GrabData.pActorToGrip, slotTrafo, true, NAME_None, IVRGripInterface::Execute_GetPrimaryGripType(GrabData.pActorToGrip, foundSlot));
 	}
 	else
 	{
@@ -240,7 +244,7 @@ void UVRControllerComponent::GrabActorImpl(ActorGrabData GrabData)
 		FVector locationToCenterOffset = actorCenter - actorLocation;
 
 		actorTransform.SetLocation(gripLocation - locationToCenterOffset);
-		GripActor(GrabData.pActorToGrip, actorTransform, false, NAME_None, GrabData.pIVRGrip->GetPrimaryGripType(foundSlot));
+		GripActor(GrabData.pActorToGrip, actorTransform, false, NAME_None, IVRGripInterface::Execute_GetPrimaryGripType(GrabData.pActorToGrip, foundSlot));
 	}
 }
 
