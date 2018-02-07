@@ -221,6 +221,11 @@ void AMlgPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (GEngine->XRSystem.IsValid() && GEngine->XRSystem->IsHeadTrackingAllowed())
+	{
+		GEngine->XRSystem->SetTrackingOrigin(EHMDTrackingOrigin::Floor);
+	}
+
 	pChaperoneBounds = std::make_unique<ChaperoneBounds>(chaperone);
 
 	if (g_IsVREnabled())
