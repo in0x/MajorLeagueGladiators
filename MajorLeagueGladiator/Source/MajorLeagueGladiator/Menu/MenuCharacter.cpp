@@ -63,6 +63,11 @@ void AMenuCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (GEngine->XRSystem.IsValid() && GEngine->XRSystem->IsHeadTrackingAllowed())
+	{
+		GEngine->XRSystem->SetTrackingOrigin(EHMDTrackingOrigin::Floor);
+	}
+
 	if (!g_IsVREnabled())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("\'J\' -> Join first Friend"));
