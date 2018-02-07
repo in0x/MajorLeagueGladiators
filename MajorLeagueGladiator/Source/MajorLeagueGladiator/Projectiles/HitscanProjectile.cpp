@@ -22,18 +22,16 @@ ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector Di
 	}
 
 	FHitResult hitresult = Trace(ProjectileOwner->GetWorld(), Location, DirectionVector, { ProjectileOwner });
+
 	AActor* hitActor = hitresult.GetActor();
 
 	FTransform transform = FTransform(DirectionVector.Rotation().Quaternion(), Location);
 	transform.SetScale3D(OptionalParams.Scale3DMultiplier);
 
-	FEmitterSpawnParams params;
-	params.Template = beamParticleSystem;
-	params.Transform = transform;
-	params.bAutoDestroy = true;
+	FVector ImpactPoint = hitresult.bBlockingHit ? hitresult.ImpactPoint : Location + DirectionVector * range;
 
-	FBeamEmitterSpawnParams params2(beamParticleSystem, transform.GetLocation(), hitresult.ImpactPoint);
-	UMlgGameplayStatics::SpawnBeamEmitterNetworked(ProjectileInstigator->GetWorld(), params2);
+	FBeamEmitterSpawnParams params(beamParticleSystem, transform.GetLocation(), ImpactPoint);
+	UMlgGameplayStatics::SpawnBeamEmitterNetworked(ProjectileInstigator->GetPawn(), params);
 
 	if (hitActor == nullptr)
 	{
