@@ -357,9 +357,6 @@ void AMlgPlayerCharacter::Tick(float DelataTime)
 	Super::Tick(DelataTime);
 
 	updateBodyMeshTransform();
-
-	const FRotator OldRoation = GetActorRotation();
-	//SetActorRotation(FRotator(OldRoation.Pitch, CalcQuantizedRoationOffset(), OldRoation.Roll));
 }
 
 void AMlgPlayerCharacter::updateBodyMeshTransform()
