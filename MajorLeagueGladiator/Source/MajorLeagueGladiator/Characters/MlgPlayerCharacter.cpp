@@ -50,7 +50,10 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 {
 	BaseEyeHeight = 0.0f;
 	CrouchedEyeHeight = 0.0f;
-	bUseControllerRotationYaw = false;
+
+	// needed for snap turning
+	bUseControllerRotationYaw = true;
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	CastChecked<UPrimitiveComponent>(RootComponent)->SetCollisionProfileName(PAWN_COLLISION_PROFILE_NAME);
@@ -171,6 +174,12 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 		rightViveMesh->SetStaticMesh(viveMeshLoader.Object);
 	}
 
+	ConstructorHelpers::FObjectFinder<UStaticMesh> OcculusControllerLeftMeshLoader(TEXT("StaticMesh'/Game/MVRCFPS_Assets/OculusControllerMesh_Left.OculusControllerMesh_Left'"));
+	if (OcculusControllerLeftMeshLoader.Succeeded())
+	{
+		OcculusControllerLeftMesh = OcculusControllerLeftMeshLoader.Object;
+	}
+
 	leftViveMesh->SetupAttachment(LeftMotionController);
 	rightViveMesh->SetupAttachment(RightMotionController);
 	leftViveMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
@@ -201,7 +210,7 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	menuPointerMesh->SetWorldScale3D(FVector(0.015, 0.0075, 25));
 
 	StepsForFullRotation = 8;
-	SnapRotationInputThreshold = 0.5f;
+	SnapRotationInputThreshold = 0.2f;
 	SnapRotationCooldownSeconds = 0.5f;
 	//if (bRenderSecondWindow)
 	//{
@@ -227,6 +236,9 @@ void AMlgPlayerCharacter::BeginPlay()
 	}
 
 	pChaperoneBounds = std::make_unique<ChaperoneBounds>(chaperone);
+
+	// TODO: Delete the following line and this commet if I left it in by accident!
+	//AdjustForOculus();
 
 	if (g_IsVREnabled())
 	{
@@ -452,6 +464,18 @@ void AMlgPlayerCharacter::AdjustForOculus()
 	FRotator OculusControllerRotation(30, 0, 0);
 	leftMesh->SetRelativeRotation(OculusControllerRotation);
 	rightMesh->SetRelativeRotation(OculusControllerRotation);
+
+	FAttachmentTransformRules rules(EAttachmentRule::SnapToTarget, true);
+	
+	leftViveMesh->SetStaticMesh(OcculusControllerLeftMesh);
+	menuWidgetComponent->AttachToComponent(leftViveMesh, rules);
+
+
+	rightViveMesh->SetStaticMesh(OcculusControllerLeftMesh);
+	FVector OldScale = rightViveMesh->RelativeScale3D;
+	rightViveMesh->SetRelativeScale3D(FVector(OldScale.X, -OldScale.Y, OldScale.Z));
+	widgetInteraction->AttachToComponent(rightViveMesh, rules);
+
 }
 
 const UMlgAbilitySet* AMlgPlayerCharacter::GetOrLoadAbilitySet()
@@ -535,14 +559,19 @@ void AMlgPlayerCharacter::SnapTurnInput(float Value)
 {
 	if (FMath::Abs(Value) < SnapRotationInputThreshold)
 	{
+		UE_LOG(LogTemp, Log, TEXT("Snap turn controller input under threshold: %f"), Value);
 		return;
 	}
 
+	UE_LOG(LogTemp, Log, TEXT("Snap turn controller input over threshold: %f"), Value);
 	FTimerManager& TimerManager = GetWorldTimerManager();
 	if (TimerManager.IsTimerActive(SnapRotationCooldown))
 	{
+		UE_LOG(LogTemp, Log, TEXT("Cooldown for snapp turning active"));
 		return;
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Perform Snap Turn"));
 
 	TimerManager.SetTimer(SnapRotationCooldown, SnapRotationCooldownSeconds, false);
 

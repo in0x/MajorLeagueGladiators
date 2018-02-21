@@ -165,6 +165,9 @@ private:
 	UStaticMeshComponent* menuPointerMesh;
 
 	UPROPERTY(EditAnywhere)
+	UStaticMesh* OcculusControllerLeftMesh;
+
+	UPROPERTY(EditAnywhere)
 	UWidgetComponent* menuWidgetComponent;
 
 	UPROPERTY(EditAnywhere)
