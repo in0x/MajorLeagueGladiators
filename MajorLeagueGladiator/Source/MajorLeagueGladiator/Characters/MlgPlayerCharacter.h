@@ -165,9 +165,6 @@ private:
 	UStaticMeshComponent* menuPointerMesh;
 
 	UPROPERTY(EditAnywhere)
-	UStaticMesh* OcculusControllerLeftMesh;
-
-	UPROPERTY(EditAnywhere)
 	UWidgetComponent* menuWidgetComponent;
 
 	UPROPERTY(EditAnywhere)
@@ -264,14 +261,23 @@ private:
 
 	void OnDisableMenu();
 
-	UPROPERTY()
-	UStaticMesh* viveMesh;
-
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* leftViveMesh;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* rightViveMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* leftOculusMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* rightOculusMesh;
+
+	UPROPERTY(Transient)
+	UStaticMeshComponent* leftVrMesh;
+
+	UPROPERTY(Transient)
+	UStaticMeshComponent* rightVrMesh;
 	
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_tetherTarget)
 	AActor* tetherTarget;

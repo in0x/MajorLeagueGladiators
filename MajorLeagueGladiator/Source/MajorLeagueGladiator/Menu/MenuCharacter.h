@@ -20,6 +20,7 @@ public:
 	
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
+	void AdjustForOculus();
 	FMenuActionDelegate OnMenuActionTriggered;
 
 private:
@@ -38,10 +39,16 @@ private:
 	void OnInviteFirstPlayerInFriendslist();
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* leftMesh;
+	UStaticMeshComponent* leftViveMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* rightMesh;
+	UStaticMeshComponent* rightViveMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* leftOculusMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* rightOculusMesh;
 	
 	UPROPERTY(EditAnywhere)
 	UWidgetInteractionComponent* widgetInteraction;

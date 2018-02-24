@@ -27,6 +27,7 @@
 #include "MlgGameInstance.h"
 #include "Menu/MenuActionComponent.h"
 #include "Menu/MenuActionWidget.h"
+#include "Menu/MenuUtilities.h"
 
 
 namespace
@@ -38,8 +39,14 @@ namespace
 	const FVector INVALID_TARGET_LOCATION = FVector(0, 0, 9'999'999);
 	const FName TETHER_TARGET_NAME("Target");
 	const FName AIM_SOCKET_NAME("Aim");
+	const FName ATTACHMENT_SOCKET_NAME("Attachment");
 
 	constexpr bool bRenderSecondWindow = false;
+
+	bool IsOculus()
+	{
+		return g_IsVREnabled() && GEngine->XRSystem->GetHMDDevice()->GetHMDDeviceType() == EHMDDeviceType::DT_OculusRift;
+	}
 }
 
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -158,15 +165,6 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	leftViveMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftViveMesh"));
 	rightViveMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightViveMesh"));
 
-	widgetInteraction = ObjectInitializer.CreateDefaultSubobject<UWidgetInteractionComponent>(this, TEXT("WidgetInteraction"));
-	widgetInteraction->SetupAttachment(rightViveMesh, FName(TEXT("Touch")));
-	widgetInteraction->bShowDebug = true;
-
-	menuWidgetComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("MenuWidgetComponent"));
-	ConstructorHelpers::FClassFinder<UUserWidget> mainMenuWidget(TEXT("/Game/BluePrints/Menu/MainMenuWidget"));
-	menuWidgetComponent->SetWidgetClass(mainMenuWidget.Class);
-	menuWidgetComponent->SetupAttachment(leftViveMesh, FName(TEXT("Touch")));
-
 	ConstructorHelpers::FObjectFinder<UStaticMesh> viveMeshLoader(TEXT("StaticMesh'/Game/MVRCFPS_Assets/vive_controller.vive_controller'"));
 	if (viveMeshLoader.Succeeded())
 	{
@@ -174,16 +172,14 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 		rightViveMesh->SetStaticMesh(viveMeshLoader.Object);
 	}
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> OcculusControllerLeftMeshLoader(TEXT("StaticMesh'/Game/MVRCFPS_Assets/OculusControllerMesh_Left.OculusControllerMesh_Left'"));
-	if (OcculusControllerLeftMeshLoader.Succeeded())
-	{
-		OcculusControllerLeftMesh = OcculusControllerLeftMeshLoader.Object;
-	}
-
 	leftViveMesh->SetupAttachment(LeftMotionController);
 	rightViveMesh->SetupAttachment(RightMotionController);
 	leftViveMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	rightViveMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+
+	leftViveMesh->SetVisibility(false);
+	rightViveMesh->SetVisibility(false);
+
 
 	tetherParticleSystemComponent = ObjectInitializer.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("tetherParticleSystemComponent"));
 	ConstructorHelpers::FObjectFinder<UParticleSystem> tether(TEXT("ParticleSystem'/Game/ParticleSystems/PS_GravityBeam.PS_GravityBeam'"));
@@ -198,32 +194,51 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	pullConeParticleSystemComponent->SetupAttachment(leftMesh, AIM_SOCKET_NAME);
 	pullConeParticleSystemComponent->bAutoActivate = false;
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> pointerMeshLoader(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Cylinder.Shape_Cylinder'"));
+	{
+		//ConstructorHelpers::FObjectFinder<UStaticMesh> pointerMeshLoader(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Cylinder.Shape_Cylinder'"));
+		ConstructorHelpers::FObjectFinder<UStaticMesh> pointerMeshLoader(TEXT("StaticMesh'/Game/MVRCFPS_Assets/pointer.pointer'"));
 
-	menuPointerMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("MenuPointerMeshComponent"));
-	menuPointerMesh->SetupAttachment(rightMesh, FName(TEXT("Touch")));
-	menuPointerMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
-	menuPointerMesh->SetStaticMesh(pointerMeshLoader.Object);
-	menuPointerMesh->SetWorldLocation(FVector(2501.892578, 0, 0.260551));
-	FRotator rotator(90, 0, 0);
-	menuPointerMesh->SetWorldRotation(rotator);
-	menuPointerMesh->SetWorldScale3D(FVector(0.015, 0.0075, 25));
+		menuPointerMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("MenuPointerMeshComponent"));
+		menuPointerMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+		menuPointerMesh->SetStaticMesh(pointerMeshLoader.Object);
+
+		
+	}
+
+	widgetInteraction = ObjectInitializer.CreateDefaultSubobject<UWidgetInteractionComponent>(this, TEXT("WidgetInteraction"));
+	//widgetInteraction->bShowDebug = true;
+
+	menuWidgetComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("MenuWidgetComponent"));
+	ConstructorHelpers::FClassFinder<UUserWidget> mainMenuWidget(TEXT("/Game/BluePrints/Menu/MainMenuWidget"));
+	menuWidgetComponent->SetWidgetClass(mainMenuWidget.Class);
+
+	MenuUtilities::AttachMenu(leftViveMesh, rightViveMesh, menuWidgetComponent, widgetInteraction, menuPointerMesh, true);
+	{
+		ConstructorHelpers::FObjectFinder<UStaticMesh> OcculusControllerLeftMeshLoader(TEXT("StaticMesh'/Game/MVRCFPS_Assets/OculusControllerMesh_Left.OculusControllerMesh_Left'"));
+
+		leftOculusMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftOculus"));
+		rightOculusMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightOculus"));
+
+		leftOculusMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+		rightOculusMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+
+		leftOculusMesh->SetupAttachment(LeftMotionController);
+		rightOculusMesh->SetupAttachment(RightMotionController);
+
+		leftOculusMesh->SetStaticMesh(OcculusControllerLeftMeshLoader.Object);
+		rightOculusMesh->SetStaticMesh(OcculusControllerLeftMeshLoader.Object);
+
+		// Flip Mesh
+		rightOculusMesh->SetRelativeScale3D(FVector(1, -1, 1));
+
+		leftOculusMesh->SetVisibility(false);
+		rightOculusMesh->SetVisibility(false);
+	}
 
 	StepsForFullRotation = 8;
 	SnapRotationInputThreshold = 0.2f;
 	SnapRotationCooldownSeconds = 0.5f;
-	//if (bRenderSecondWindow)
-	//{
-	//	spectator = ObjectInitializer.CreateDefaultSubobject<USpectatorComponent>(this, TEXT("Spectator"));
-	//	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
-	//	sceneCapture->SetupAttachment(VRReplicatedCamera);
-	//	spectator->SetSceneCapture(sceneCapture);
-	//}
-	//else
-	//{
-	//	spectator = nullptr;
-	//	sceneCapture = nullptr;
-	//}
+
 }
 
 void AMlgPlayerCharacter::BeginPlay()
@@ -235,10 +250,13 @@ void AMlgPlayerCharacter::BeginPlay()
 		GEngine->XRSystem->SetTrackingOrigin(EHMDTrackingOrigin::Floor);
 	}
 
+	leftVrMesh = leftViveMesh;
+	rightVrMesh = rightViveMesh;
+
 	pChaperoneBounds = std::make_unique<ChaperoneBounds>(chaperone);
 
 	// TODO: Delete the following line and this commet if I left it in by accident!
-	//AdjustForOculus();
+	AdjustForOculus();
 
 	if (g_IsVREnabled())
 	{
@@ -246,7 +264,7 @@ void AMlgPlayerCharacter::BeginPlay()
 		//GEngine->XRSystem->GetHMDDevice()->SetBaseOrientation(FQuat::Identity);
 		GEngine->XRSystem->ResetOrientation();
 
-		if (GEngine->XRSystem->GetHMDDevice()->GetHMDDeviceType() == EHMDDeviceType::DT_OculusRift)
+		if (IsOculus())
 		{
 			AdjustForOculus();
 		}
@@ -465,17 +483,10 @@ void AMlgPlayerCharacter::AdjustForOculus()
 	leftMesh->SetRelativeRotation(OculusControllerRotation);
 	rightMesh->SetRelativeRotation(OculusControllerRotation);
 
-	FAttachmentTransformRules rules(EAttachmentRule::SnapToTarget, true);
-	
-	leftViveMesh->SetStaticMesh(OcculusControllerLeftMesh);
-	menuWidgetComponent->AttachToComponent(leftViveMesh, rules);
+	leftVrMesh = leftOculusMesh;
+	rightVrMesh = rightOculusMesh;
 
-
-	rightViveMesh->SetStaticMesh(OcculusControllerLeftMesh);
-	FVector OldScale = rightViveMesh->RelativeScale3D;
-	rightViveMesh->SetRelativeScale3D(FVector(OldScale.X, -OldScale.Y, OldScale.Z));
-	widgetInteraction->AttachToComponent(rightViveMesh, rules);
-
+	MenuUtilities::AttachMenu(leftOculusMesh, rightOculusMesh, menuWidgetComponent, widgetInteraction, menuPointerMesh, false);
 }
 
 const UMlgAbilitySet* AMlgPlayerCharacter::GetOrLoadAbilitySet()
@@ -826,8 +837,10 @@ void AMlgPlayerCharacter::ToggleMenuState(bool bMenuEnabled)
 {
 	// Menu stuff
 	{
-		leftViveMesh->SetVisibility(bMenuEnabled);
-		rightViveMesh->SetVisibility(bMenuEnabled);
+		const bool UseOculus = IsOculus();
+
+		leftVrMesh->SetVisibility(bMenuEnabled);
+		rightVrMesh->SetVisibility(bMenuEnabled);
 		widgetInteraction->SetActive(bMenuEnabled);
 		menuWidgetComponent->SetVisibility(bMenuEnabled);
 		menuPointerMesh->SetVisibility(bMenuEnabled);

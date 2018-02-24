@@ -7,11 +7,13 @@
 #include "MenuActionComponent.h"
 #include "MlgGameInstance.h"
 #include "WidgetInteractionComponent.h"
+#include "MenuUtilities.h"
 
 namespace
 {
 	const FName NO_COLLISION_PROFILE_NAME("NoCollision");
 	const FName AIM_SOCKET_NAME("Aim");
+	const FName ATTACHMENT_SOCKET_NAME("Attachment");
 }
 
 AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
@@ -21,36 +23,63 @@ AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
 	BaseEyeHeight = 0.0f;
 	CrouchedEyeHeight = 0.0f;
 
-	leftMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftMesh"));
-	rightMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightMesh"));
+	leftViveMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftMesh"));
+	rightViveMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightMesh"));
 
-	leftMesh->SetupAttachment(LeftMotionController);
-	rightMesh->SetupAttachment(RightMotionController);
+	leftViveMesh->SetupAttachment(LeftMotionController);
+	rightViveMesh->SetupAttachment(RightMotionController);
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> viveMesh(TEXT("StaticMesh'/Game/MVRCFPS_Assets/vive_controller.vive_controller'"));
 	if (viveMesh.Succeeded())
 	{
-		leftMesh->SetStaticMesh(viveMesh.Object);
-		rightMesh->SetStaticMesh(viveMesh.Object);
+		leftViveMesh->SetStaticMesh(viveMesh.Object);
+		rightViveMesh->SetStaticMesh(viveMesh.Object);
 	}
 
 	LeftMotionController->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 	RightMotionController->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
-	leftMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
-	rightMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+	leftViveMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+	rightViveMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
 
 	widgetInteraction = ObjectInitializer.CreateDefaultSubobject<UWidgetInteractionComponent>(this, TEXT("WidgetInteraction"));
-	widgetInteraction->SetupAttachment(rightMesh, FName(TEXT("Touch")));
 	widgetInteraction->bShowDebug = true;
 
 	menuWidgetComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("MenuWidgetComponent"));
 	ConstructorHelpers::FClassFinder<UUserWidget> mainMenuWidget(TEXT("/Game/BluePrints/Menu/MainMenuWidget"));
 	menuWidgetComponent->SetWidgetClass(mainMenuWidget.Class);
-	menuWidgetComponent->SetupAttachment(leftMesh, FName(TEXT("Touch")));
 
+	//ConstructorHelpers::FObjectFinder<UStaticMesh> pointerMeshLoader(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Cylinder.Shape_Cylinder'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> pointerMeshLoader(TEXT("StaticMesh'/Game/MVRCFPS_Assets/pointer.pointer'"));
+	
 	menuPointerMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("MenuPointerMeshComponent"));
-	menuPointerMesh->SetupAttachment(rightMesh, FName(TEXT("Touch")));
 	menuPointerMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+	menuPointerMesh->SetStaticMesh(pointerMeshLoader.Object);
+
+	MenuUtilities::AttachMenu(leftViveMesh, rightViveMesh, menuWidgetComponent, widgetInteraction, menuPointerMesh, true);
+		
+	{
+		ConstructorHelpers::FObjectFinder<UStaticMesh> OcculusControllerLeftMeshLoader(TEXT("StaticMesh'/Game/MVRCFPS_Assets/OculusControllerMesh_Left.OculusControllerMesh_Left'"));
+
+		leftOculusMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("LeftOculus"));
+		rightOculusMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("RightOculus"));
+
+		leftOculusMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+		rightOculusMesh->SetCollisionProfileName(NO_COLLISION_PROFILE_NAME);
+
+		leftOculusMesh->SetupAttachment(LeftMotionController);
+		rightOculusMesh->SetupAttachment(RightMotionController);
+
+		leftOculusMesh->SetStaticMesh(OcculusControllerLeftMeshLoader.Object);
+		rightOculusMesh->SetStaticMesh(OcculusControllerLeftMeshLoader.Object);
+
+		// Flip Mesh
+		rightOculusMesh->SetRelativeScale3D(FVector(1, -1, 1));
+
+		leftOculusMesh->SetHiddenInGame(true);
+		rightOculusMesh->SetHiddenInGame(true);
+	}
+
+
 
 #if 1 //If this is on you can move with the mouse, however it also causes the sliding bug
 	bUseControllerRotationPitch = true;
@@ -66,6 +95,13 @@ void AMenuCharacter::BeginPlay()
 	if (GEngine->XRSystem.IsValid() && GEngine->XRSystem->IsHeadTrackingAllowed())
 	{
 		GEngine->XRSystem->SetTrackingOrigin(EHMDTrackingOrigin::Floor);
+	}
+	// TODO: Delete the following line and this commet if I left it in by accident!
+	AdjustForOculus();
+
+	if (g_IsVREnabled() && GEngine->XRSystem->GetHMDDevice()->GetHMDDeviceType() == EHMDDeviceType::DT_OculusRift)
+	{
+		AdjustForOculus();
 	}
 
 	if (!g_IsVREnabled())
@@ -115,6 +151,17 @@ void AMenuCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PlayerInputComponent->BindAction("JoinFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnJoinFirstFriendInList);
 		PlayerInputComponent->BindAction("InviteFriend", EInputEvent::IE_Pressed, this, &AMenuCharacter::OnInviteFirstPlayerInFriendslist);
 	}
+}
+
+void AMenuCharacter::AdjustForOculus()
+{
+	leftViveMesh->SetHiddenInGame(true);
+	rightViveMesh->SetHiddenInGame(true);
+
+	leftOculusMesh->SetHiddenInGame(false);
+	rightOculusMesh->SetHiddenInGame(false);
+
+	MenuUtilities::AttachMenu(leftOculusMesh, rightOculusMesh, menuWidgetComponent, widgetInteraction, menuPointerMesh, false);
 }
 
 void AMenuCharacter::MoveForward(float Value)
