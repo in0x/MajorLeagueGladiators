@@ -206,10 +206,11 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	}
 
 	widgetInteraction = ObjectInitializer.CreateDefaultSubobject<UWidgetInteractionComponent>(this, TEXT("WidgetInteraction"));
-	//widgetInteraction->bShowDebug = true;
+	widgetInteraction->bShowDebug = true;
 
 	menuWidgetComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("MenuWidgetComponent"));
 	ConstructorHelpers::FClassFinder<UUserWidget> mainMenuWidget(TEXT("/Game/BluePrints/Menu/MainMenuWidget"));
+	menuWidgetComponent->SetTwoSided(true);
 	menuWidgetComponent->SetWidgetClass(mainMenuWidget.Class);
 
 	MenuUtilities::AttachMenu(leftViveMesh, rightViveMesh, menuWidgetComponent, widgetInteraction, menuPointerMesh, true);
@@ -256,7 +257,7 @@ void AMlgPlayerCharacter::BeginPlay()
 	pChaperoneBounds = std::make_unique<ChaperoneBounds>(chaperone);
 
 	// TODO: Delete the following line and this commet if I left it in by accident!
-	AdjustForOculus();
+	//AdjustForOculus();
 
 	if (g_IsVREnabled())
 	{

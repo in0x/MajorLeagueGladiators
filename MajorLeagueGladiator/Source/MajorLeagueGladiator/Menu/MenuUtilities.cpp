@@ -32,7 +32,7 @@ void MenuUtilities::AttachMenu(UStaticMeshComponent * Left, UStaticMeshComponent
 {
 	auto AttachFunction = InConstructor ? &AttachInConstructor : Attach;
 
-	AttachFunction(Widget, Left, FName(TEXT("Touch")));
+	AttachFunction(Widget, Left, FName(TEXT("Menu")));
 
 	AttachFunction(WidgetInteraction, Right, AIM_SOCKET_NAME);
 

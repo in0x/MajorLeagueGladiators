@@ -47,6 +47,8 @@ AMenuCharacter::AMenuCharacter(const FObjectInitializer& ObjectInitializer)
 	menuWidgetComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("MenuWidgetComponent"));
 	ConstructorHelpers::FClassFinder<UUserWidget> mainMenuWidget(TEXT("/Game/BluePrints/Menu/MainMenuWidget"));
 	menuWidgetComponent->SetWidgetClass(mainMenuWidget.Class);
+	menuWidgetComponent->SetTwoSided(true);
+
 
 	//ConstructorHelpers::FObjectFinder<UStaticMesh> pointerMeshLoader(TEXT("StaticMesh'/Game/MobileStarterContent/Shapes/Shape_Cylinder.Shape_Cylinder'"));
 	ConstructorHelpers::FObjectFinder<UStaticMesh> pointerMeshLoader(TEXT("StaticMesh'/Game/MVRCFPS_Assets/pointer.pointer'"));
