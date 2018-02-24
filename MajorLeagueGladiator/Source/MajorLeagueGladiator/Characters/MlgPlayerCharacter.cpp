@@ -256,9 +256,6 @@ void AMlgPlayerCharacter::BeginPlay()
 
 	pChaperoneBounds = std::make_unique<ChaperoneBounds>(chaperone);
 
-	// TODO: Delete the following line and this commet if I left it in by accident!
-	//AdjustForOculus();
-
 	if (g_IsVREnabled())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("VR MODE"));
@@ -571,19 +568,14 @@ void AMlgPlayerCharacter::SnapTurnInput(float Value)
 {
 	if (FMath::Abs(Value) < SnapRotationInputThreshold)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Snap turn controller input under threshold: %f"), Value);
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Snap turn controller input over threshold: %f"), Value);
 	FTimerManager& TimerManager = GetWorldTimerManager();
 	if (TimerManager.IsTimerActive(SnapRotationCooldown))
 	{
-		UE_LOG(LogTemp, Log, TEXT("Cooldown for snapp turning active"));
 		return;
 	}
-
-	UE_LOG(LogTemp, Log, TEXT("Perform Snap Turn"));
 
 	TimerManager.SetTimer(SnapRotationCooldown, SnapRotationCooldownSeconds, false);
 

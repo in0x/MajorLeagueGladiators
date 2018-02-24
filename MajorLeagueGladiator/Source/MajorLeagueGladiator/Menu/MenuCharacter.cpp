@@ -98,8 +98,6 @@ void AMenuCharacter::BeginPlay()
 	{
 		GEngine->XRSystem->SetTrackingOrigin(EHMDTrackingOrigin::Floor);
 	}
-	// TODO: Delete the following line and this commet if I left it in by accident!
-	AdjustForOculus();
 
 	if (g_IsVREnabled() && GEngine->XRSystem->GetHMDDevice()->GetHMDDeviceType() == EHMDDeviceType::DT_OculusRift)
 	{
