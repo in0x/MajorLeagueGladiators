@@ -198,19 +198,6 @@ AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FRotator rotator(90, 0, 0);
 	menuPointerMesh->SetWorldRotation(rotator);
 	menuPointerMesh->SetWorldScale3D(FVector(0.015, 0.0075, 25));
-
-	//if (bRenderSecondWindow)
-	//{
-	//	spectator = ObjectInitializer.CreateDefaultSubobject<USpectatorComponent>(this, TEXT("Spectator"));
-	//	sceneCapture = ObjectInitializer.CreateDefaultSubobject<USceneCaptureComponent2D>(this, TEXT("SceneCapture"));
-	//	sceneCapture->SetupAttachment(VRReplicatedCamera);
-	//	spectator->SetSceneCapture(sceneCapture);
-	//}
-	//else
-	//{
-	//	spectator = nullptr;
-	//	sceneCapture = nullptr;
-	//}
 }
 
 void AMlgPlayerCharacter::BeginPlay()
@@ -375,8 +362,7 @@ void AMlgPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnRightTriggerClicked);
 	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerReleased);
-	PlayerInputComponent->BindAction("RightTriggerClicked", EInputEvent::IE_Released, this, &AMlgPlayerCharacter::OnRightTriggerClicked);
-
+	
 	PlayerInputComponent->BindAction("SideGripButtonLeft", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonLeft);
 	PlayerInputComponent->BindAction("SideGripButtonRight", EInputEvent::IE_Pressed, this, &AMlgPlayerCharacter::OnSideGripButtonRight);
 

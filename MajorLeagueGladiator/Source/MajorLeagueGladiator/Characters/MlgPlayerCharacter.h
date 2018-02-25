@@ -142,12 +142,6 @@ private:
 
 	FVector abilityMoveTargetLocation;
 
-	/*UPROPERTY(EditAnywhere)
-	USpectatorComponent* spectator;*/
-
-	//UPROPERTY(EditAnywhere)
-	//USceneCaptureComponent2D* sceneCapture;
-
 	UPROPERTY(EditAnywhere)
 	UWidgetInteractionComponent* widgetInteraction;
 
