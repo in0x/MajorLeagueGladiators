@@ -212,7 +212,11 @@ private:
 
 	void SpawnWeapon();
 
+	UFUNCTION()
 	void OnMenuInteract();
+
+	UFUNCTION(Server, WithValidation, reliable)
+	void OnMenuInteract_Server();
 
 	UFUNCTION()
 	void OnHealthChanged(float newHealthPercentage, float oldHealthPercentage);

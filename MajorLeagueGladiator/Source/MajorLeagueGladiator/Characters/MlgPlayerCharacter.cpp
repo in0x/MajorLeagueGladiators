@@ -510,6 +510,16 @@ void AMlgPlayerCharacter::OnRightTriggerClicked()
 
 void AMlgPlayerCharacter::OnMenuInteract()
 {
+	OnMenuInteract_Server();
+}
+
+bool AMlgPlayerCharacter::OnMenuInteract_Server_Validate()
+{
+	return true;
+}
+
+void AMlgPlayerCharacter::OnMenuInteract_Server_Implementation()
+{
 	widgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
 	widgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
 }
