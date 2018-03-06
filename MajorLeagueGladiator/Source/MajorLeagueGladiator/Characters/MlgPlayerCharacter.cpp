@@ -246,11 +246,6 @@ void AMlgPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (GEngine->XRSystem.IsValid() && GEngine->XRSystem->IsHeadTrackingAllowed())
-	{
-		GEngine->XRSystem->SetTrackingOrigin(EHMDTrackingOrigin::Floor);
-	}
-
 	leftVrMesh = leftViveMesh;
 	rightVrMesh = rightViveMesh;
 

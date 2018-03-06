@@ -30,6 +30,7 @@ public:
 	UMlgGameInstance(const FObjectInitializer& ObjectInitializer);
 
 	virtual void Init() override;
+
 	virtual void Shutdown() override;
 
 	AMlgGameSession* GetGameSession() const;

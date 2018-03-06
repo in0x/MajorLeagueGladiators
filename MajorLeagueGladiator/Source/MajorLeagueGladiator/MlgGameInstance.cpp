@@ -70,6 +70,14 @@ void UMlgGameInstance::Init()
 	// any other value from configs. Other people have previously had problems with this variable not taking values as well.
 	auto ScreenPercentageCVar = IConsoleManager::Get().FindConsoleVariable(TEXT("r.ScreenPercentage"));
 	ScreenPercentageCVar->Set(140, EConsoleVariableFlags(ScreenPercentageCVar->GetFlags() & ECVF_SetByMask));
+
+
+	if (GEngine->XRSystem.IsValid())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Game Instance: Tracking origin set to floor"));
+		GEngine->XRSystem->SetTrackingOrigin(EHMDTrackingOrigin::Floor);
+	}
+
 }
 
 void UMlgGameInstance::Shutdown()

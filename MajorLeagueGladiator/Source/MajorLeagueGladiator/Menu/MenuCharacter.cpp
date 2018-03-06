@@ -94,11 +94,6 @@ void AMenuCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (GEngine->XRSystem.IsValid() && GEngine->XRSystem->IsHeadTrackingAllowed())
-	{
-		GEngine->XRSystem->SetTrackingOrigin(EHMDTrackingOrigin::Floor);
-	}
-
 	if (g_IsVREnabled() && GEngine->XRSystem->GetHMDDevice()->GetHMDDeviceType() == EHMDDeviceType::DT_OculusRift)
 	{
 		AdjustForOculus();
