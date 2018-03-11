@@ -33,7 +33,7 @@ ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector Di
 	params.bAutoDestroy = true;
 
 	FBeamEmitterSpawnParams params2(beamParticleSystem, transform.GetLocation(), hitresult.ImpactPoint);
-	UMlgGameplayStatics::SpawnBeamEmitterNetworkedPredicted(ProjectileInstigator->GetPawn(), params2);
+	UMlgGameplayStatics::SpawnBeamEmitterNetworked(ProjectileInstigator->GetWorld(), params2);
 
 	if (hitActor == nullptr)
 	{
