@@ -25,11 +25,26 @@ public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	void MatchLost();
 	
+	// Calls Destroy an all AI characters.
+	UFUNCTION(exec)
 	void DestroyAllAi();
+	
+	// Applies lethal damage to all AI characters.
+	UFUNCTION(exec)
+	void KillAllAi();
+	
 	virtual void HandleMatchHasStarted() override;
 	virtual void HandleMatchHasEnded() override;
+
+protected:
+	UFUNCTION()
+	void onWaveCleared(int32 ClearedWave);
+
 private:
+
+	UFUNCTION(exec)
 	void beginMatch(int32 StartWave);
+
 	void travelToMainMenu();
 	void travelToRoomOfShame();
 	void travelToGameMap();
@@ -69,4 +84,8 @@ private:
 
 	UPROPERTY(Config)
 	int32 hardStartWave;
+
+	// Game ends after this wave.
+	UPROPERTY(Config)
+	int32 finalWave;
 };

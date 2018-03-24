@@ -581,3 +581,12 @@ void UMlgGameInstance::onAchievementUnlocked(const FUniqueNetId& PlayerId, const
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, FString::Printf(TEXT("Achievement Unlocked - %s"), *AchievementId));
 }
+
+void UMlgGameInstance::wipeAchievments()
+{
+#if !UE_BUILD_SHIPPING 
+		WriteAchievement("AchBeatEasy", 0.0f);
+		WriteAchievement("AchBeatMedium", 0.0f);
+		WriteAchievement("AchBeatHard", 0.0f);
+#endif
+}

@@ -66,7 +66,9 @@ public:
 	void DestroyGameSession();
 
 private:
-
+	UFUNCTION(exec)
+	void wipeAchievments();
+	
 	void onCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void onFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type Result);

@@ -14,6 +14,7 @@
 #include "Menu/MenuActionWidget.h"
 #include "MlgGameSession.h"
 #include "ClassSelection.h"
+#include "HealthComponent.h"
 
 namespace
 {
@@ -68,6 +69,9 @@ void AMlgGameMode::BeginPlay()
 		
 		iter->OnMenuActionTriggered.AddUObject(this, &AMlgGameMode::onMenuAction);
 	}
+
+	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
+	waveSystemComponent->OnWaveCleared.AddUObject(this, &AMlgGameMode::onWaveCleared);
 	
 	if (isInRoomOfShame())
 	{
@@ -160,6 +164,14 @@ UClass* AMlgGameMode::GetDefaultPawnClassForController_Implementation(AControlle
 	}
 }
 
+void AMlgGameMode::onWaveCleared(int32 ClearedWave)
+{
+	if (ClearedWave == finalWave)
+	{
+		MatchLost();
+	}
+}
+
 void AMlgGameMode::MatchLost()
 {
 	UWaveSystemComponent* waveSystemComponent = GameState->FindComponentByClass<UWaveSystemComponent>();
@@ -186,6 +198,15 @@ void AMlgGameMode::DestroyAllAi()
 	for (TActorIterator<AMlgAICharacter> iter(GetWorld(), AMlgAICharacter::StaticClass()); iter; ++iter)
 	{
 		iter->Destroy();
+	}
+}
+
+void AMlgGameMode::KillAllAi()
+{
+	for (TActorIterator<AMlgAICharacter> iter(GetWorld(), AMlgAICharacter::StaticClass()); iter; ++iter)
+	{
+		UHealthComponent* health = iter->FindComponentByClass<UHealthComponent>();
+		health->DecreaseHealth(health->GetMaxHealth());
 	}
 }
 
