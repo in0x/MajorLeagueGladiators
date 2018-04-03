@@ -31,7 +31,7 @@ ABaseProjectile* AHitscanProjectile::FireProjectile(FVector Location, FVector Di
 	FVector ImpactPoint = hitresult.bBlockingHit ? hitresult.ImpactPoint : Location + DirectionVector * range;
 
 	FBeamEmitterSpawnParams params(beamParticleSystem, transform.GetLocation(), ImpactPoint);
-	UMlgGameplayStatics::SpawnBeamEmitterNetworked(ProjectileInstigator->GetPawn(), params);
+	UMlgGameplayStatics::SpawnBeamEmitterNetworked(ProjectileInstigator->GetWorld(), params);
 
 	if (hitActor == nullptr)
 	{
