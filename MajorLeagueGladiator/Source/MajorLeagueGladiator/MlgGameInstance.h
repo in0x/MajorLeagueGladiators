@@ -69,7 +69,8 @@ public:
 private:
 	UFUNCTION(exec)
 	void wipeAchievments();
-	
+	void AdjustForOculus();
+
 	void onCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void onFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type Result);

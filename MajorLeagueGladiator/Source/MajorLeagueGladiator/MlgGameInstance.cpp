@@ -78,6 +78,12 @@ void UMlgGameInstance::Init()
 		GEngine->XRSystem->SetTrackingOrigin(EHMDTrackingOrigin::Floor);
 	}
 
+	
+	bool bIsOcculus = g_IsVREnabled() && GEngine->XRSystem->GetHMDDevice()->GetHMDDeviceType() == EHMDDeviceType::DT_OculusRift;
+	if (bIsOcculus)
+	{
+		AdjustForOculus();
+	}
 }
 
 void UMlgGameInstance::Shutdown()
@@ -597,4 +603,65 @@ void UMlgGameInstance::wipeAchievments()
 		WriteAchievement("AchBeatMedium", 0.0f);
 		WriteAchievement("AchBeatHard", 0.0f);
 #endif
+}
+
+void UMlgGameInstance::AdjustForOculus()
+{
+	UInputSettings* Settings = UInputSettings::GetInputSettings();
+	check(Settings);
+
+	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
+
+	// we are changing many things, so disable automatic rebuilding and only rebuild at the end
+	constexpr bool bRebuildKeyMaps = false;
+
+
+	// Typo is intentintional to match input config
+	FName TouchPadNames[4] = {
+		FName("LeftTouchpadX"),
+		FName("LeftTouchpadY"),
+		FName("RighTouchpadX"),
+		FName("RighTouchpadY")
+	};
+
+	// remove touch pad mappings
+	for (const FName touchPadMappingName : TouchPadNames)
+	{
+		TArray<FInputAxisKeyMapping> OutMappings;
+		Settings->GetAxisMappingByName(touchPadMappingName, OutMappings);
+		for (const auto& mapping : OutMappings)
+		{
+			Settings->RemoveAxisMapping(mapping, bRebuildKeyMaps);
+		}
+
+	}
+
+
+	// add snap turning for occulus
+	FName SnapTurn("SnapTurn");
+	Settings->AddAxisMapping(FInputAxisKeyMapping(SnapTurn, EKeys::MotionController_Right_Thumbstick_X), bRebuildKeyMaps);
+
+	// change inputs for ability 2 and 5
+	FName Ability2("Ability2");
+	FName Ability5("Ability5");
+	for (FInputActionKeyMapping& Each : Actions)
+	{
+		if (Each.ActionName == Ability2)
+		{
+			Each.Key = EKeys::MotionController_Left_FaceButton2;
+		}
+		else if (Each.ActionName == Ability5)
+		{
+			Each.Key = EKeys::MotionController_Right_FaceButton1;
+		}
+	}
+
+	// add additional button for abilitiy 5, because we can
+	Settings->AddActionMapping(FInputActionKeyMapping(Ability5, EKeys::MotionController_Right_FaceButton2), bRebuildKeyMaps);
+
+	FName Menu("Menu");	
+	Settings->AddActionMapping(FInputActionKeyMapping(Menu, EKeys::Gamepad_Special_Left), bRebuildKeyMaps);
+	Settings->AddActionMapping(FInputActionKeyMapping(Menu, EKeys::Gamepad_Special_Right), bRebuildKeyMaps);
+
+	Settings->ForceRebuildKeymaps();
 }
