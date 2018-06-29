@@ -5,6 +5,7 @@
 #include "MlgGameSession.h"
 #include "Menu/MenuGameMode.h"
 #include "ClassSelection.h"
+#include "MlgGameplayStatics.h"
 
 namespace
 {
@@ -78,9 +79,7 @@ void UMlgGameInstance::Init()
 		GEngine->XRSystem->SetTrackingOrigin(EHMDTrackingOrigin::Floor);
 	}
 
-	
-	bool bIsOcculus = g_IsVREnabled() && GEngine->XRSystem->GetHMDDevice()->GetHMDDeviceType() == EHMDDeviceType::DT_OculusRift;
-	if (bIsOcculus)
+	if (UMlgGameplayStatics::IsUsingDeviceOfType(EHMDDeviceType::DT_OculusRift))
 	{
 		AdjustForOculus();
 	}

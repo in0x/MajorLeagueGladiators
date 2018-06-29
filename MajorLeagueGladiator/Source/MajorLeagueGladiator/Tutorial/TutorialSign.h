@@ -20,5 +20,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	UTexture* signTexture;
 
+	UPROPERTY(EditAnywhere)
+	UTexture* signTextureOculus;
+
 	UMaterialInterface* materialInterface;
 };

@@ -1,7 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MajorLeagueGladiator.h"
+#include "MlgGameplayStatics.h"
 #include "TutorialSign.h"
+
+namespace
+{
+	static const FName TextureParamName = FName(TEXT("SignTexture"));
+}
 
 ATutorialSign::ATutorialSign()
 {
@@ -10,6 +16,12 @@ ATutorialSign::ATutorialSign()
 	
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> material(TEXT("Material'/Game/Materials/SignMaterial.SignMaterial'"));
 	materialInterface = material.Object;
+
+	if (!signTextureOculus)
+	{
+		ConstructorHelpers::FObjectFinder<UTexture> oculusPlaceholder(TEXT("Texture2D'/Game/MVRCFPS_Assets/Tutorial/Images/Occulus/oculus-userguide.oculus-userguide'"));
+		signTextureOculus = oculusPlaceholder.Object;
+	}
 }
 
 void ATutorialSign::BeginPlay()
@@ -19,5 +31,13 @@ void ATutorialSign::BeginPlay()
 	
 	mesh->SetMaterial(0, materialInterface);
 	UMaterialInstanceDynamic* materialInstance = mesh->CreateAndSetMaterialInstanceDynamic(0);
-	materialInstance->SetTextureParameterValue(FName(TEXT("SignTexture")), signTexture);
+	
+	if (UMlgGameplayStatics::IsUsingDeviceOfType(EHMDDeviceType::DT_OculusRift))
+	{
+		materialInstance->SetTextureParameterValue(::TextureParamName, signTextureOculus);
+	}
+	else
+	{
+		materialInstance->SetTextureParameterValue(::TextureParamName, signTexture);
+	}
 }

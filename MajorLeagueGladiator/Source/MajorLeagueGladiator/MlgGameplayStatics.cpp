@@ -293,3 +293,17 @@ void UMlgGameplayStatics::PlaySoundLocalOnly(const APawn* Source, const FSoundPa
 	getPredictedEffectsComponent(Source)->PlaySoundLocal(Params);
 }
 
+bool UMlgGameplayStatics::IsUsingDeviceOfType(EHMDDeviceType::Type DeviceType)
+{
+#define HACK_FORCE_OCULUS 0
+
+#if HACK_FORCE_OCULUS
+	return DeviceType == EHMDDeviceType::DT_OculusRift;
+#else
+	return GEngine
+		&& g_IsVREnabled()
+		&& (GEngine->XRSystem->GetHMDDevice()->GetHMDDeviceType() == DeviceType);
+#endif
+}
+
+

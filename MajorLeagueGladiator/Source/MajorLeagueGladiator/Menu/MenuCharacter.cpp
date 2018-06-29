@@ -8,6 +8,7 @@
 #include "MlgGameInstance.h"
 #include "WidgetInteractionComponent.h"
 #include "MenuUtilities.h"
+#include "MlgGameplayStatics.h"
 
 namespace
 {
@@ -94,7 +95,7 @@ void AMenuCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (g_IsVREnabled() && GEngine->XRSystem->GetHMDDevice()->GetHMDDeviceType() == EHMDDeviceType::DT_OculusRift)
+	if (UMlgGameplayStatics::IsUsingDeviceOfType(EHMDDeviceType::DT_OculusRift))
 	{
 		AdjustForOculus();
 	}

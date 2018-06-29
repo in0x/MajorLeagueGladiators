@@ -28,6 +28,7 @@
 #include "Menu/MenuActionComponent.h"
 #include "Menu/MenuActionWidget.h"
 #include "Menu/MenuUtilities.h"
+#include "MlgGameplayStatics.h"
 
 
 namespace
@@ -42,11 +43,6 @@ namespace
 	const FName ATTACHMENT_SOCKET_NAME("Attachment");
 
 	constexpr bool bRenderSecondWindow = false;
-
-	bool IsOculus()
-	{
-		return g_IsVREnabled() && GEngine->XRSystem->GetHMDDevice()->GetHMDDeviceType() == EHMDDeviceType::DT_OculusRift;
-	}
 }
 
 AMlgPlayerCharacter::AMlgPlayerCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -257,7 +253,7 @@ void AMlgPlayerCharacter::BeginPlay()
 		//GEngine->XRSystem->GetHMDDevice()->SetBaseOrientation(FQuat::Identity);
 		GEngine->XRSystem->ResetOrientation();
 
-		if (IsOculus())
+		if (UMlgGameplayStatics::IsUsingDeviceOfType(EHMDDeviceType::DT_OculusRift))
 		{
 			AdjustForOculus();
 		}
@@ -825,7 +821,7 @@ void AMlgPlayerCharacter::ToggleMenuState(bool bMenuEnabled)
 {
 	// Menu stuff
 	{
-		const bool UseOculus = IsOculus();
+		const bool UseOculus = UMlgGameplayStatics::IsUsingDeviceOfType(EHMDDeviceType::DT_OculusRift);
 
 		leftVrMesh->SetVisibility(bMenuEnabled);
 		rightVrMesh->SetVisibility(bMenuEnabled);

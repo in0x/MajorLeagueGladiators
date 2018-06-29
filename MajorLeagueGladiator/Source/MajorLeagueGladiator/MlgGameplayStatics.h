@@ -38,4 +38,6 @@ public:
 	static void PlaySoundNetworked(UWorld* World, const FSoundParams& Params);
 	static void PlaySoundNetworkedPredicted(const APawn* Source, const FSoundParams& Params);
 	static void PlaySoundLocalOnly(const APawn* Source, const FSoundParams& Params);
+
+	static bool IsUsingDeviceOfType(EHMDDeviceType::Type DeviceType);
 };
