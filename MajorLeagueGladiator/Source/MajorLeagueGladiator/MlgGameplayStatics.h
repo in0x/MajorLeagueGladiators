@@ -6,6 +6,7 @@
 #include "EmitterSpawnParams.h"
 #include "BeamEmitterSpawnParams.h"
 #include "SoundParams.h"
+#include "VRExpansion/VRBPDatatypes.h"
 #include "MlgGameplayStatics.generated.h"
 
 class AMlgPlayerState;
@@ -40,4 +41,7 @@ public:
 	static void PlaySoundLocalOnly(const APawn* Source, const FSoundParams& Params);
 
 	static bool IsUsingDeviceOfType(EHMDDeviceType::Type DeviceType);
+
+	UFUNCTION(BlueprintCallable, Category = "MlgGameplayStaticsFunction", meta = (DisplayName = "IsUsingDeviceOfTypeBP"))
+	static bool IsUsingDeviceOfTypeBP(EBPHMDDeviceType DeviceType);
 };

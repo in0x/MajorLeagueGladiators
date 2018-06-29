@@ -306,4 +306,27 @@ bool UMlgGameplayStatics::IsUsingDeviceOfType(EHMDDeviceType::Type DeviceType)
 #endif
 }
 
+namespace
+{
+	EHMDDeviceType::Type BpHmdTypeToEHmdType(EBPHMDDeviceType HMDDeviceType)
+	{
+		switch (HMDDeviceType)
+		{
+		case EBPHMDDeviceType::DT_ES2GenericStereoMesh: return EHMDDeviceType::DT_ES2GenericStereoMesh; 
+		case EBPHMDDeviceType::DT_GearVR: return EHMDDeviceType::DT_GearVR; 
+		case EBPHMDDeviceType::DT_Morpheus: return EHMDDeviceType::DT_Morpheus; 
+		case EBPHMDDeviceType::DT_OculusRift: return EHMDDeviceType::DT_OculusRift; 
+		case EBPHMDDeviceType::DT_SteamVR: return EHMDDeviceType::DT_SteamVR; 
+		case EBPHMDDeviceType::DT_GoogleVR: return EHMDDeviceType::DT_GoogleVR; 
+		default: checkNoEntry(); return EHMDDeviceType::DT_ES2GenericStereoMesh; 
+		}
+	}
+}
+
+bool UMlgGameplayStatics::IsUsingDeviceOfTypeBP(EBPHMDDeviceType DeviceType)
+{
+	return IsUsingDeviceOfType(::BpHmdTypeToEHmdType(DeviceType));
+}
+
+
 

@@ -16,12 +16,6 @@ ATutorialSign::ATutorialSign()
 	
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> material(TEXT("Material'/Game/Materials/SignMaterial.SignMaterial'"));
 	materialInterface = material.Object;
-
-	if (!signTextureOculus)
-	{
-		ConstructorHelpers::FObjectFinder<UTexture> oculusPlaceholder(TEXT("Texture2D'/Game/MVRCFPS_Assets/Tutorial/Images/Occulus/oculus-userguide.oculus-userguide'"));
-		signTextureOculus = oculusPlaceholder.Object;
-	}
 }
 
 void ATutorialSign::BeginPlay()
@@ -32,7 +26,7 @@ void ATutorialSign::BeginPlay()
 	mesh->SetMaterial(0, materialInterface);
 	UMaterialInstanceDynamic* materialInstance = mesh->CreateAndSetMaterialInstanceDynamic(0);
 	
-	if (UMlgGameplayStatics::IsUsingDeviceOfType(EHMDDeviceType::DT_OculusRift))
+	if (UMlgGameplayStatics::IsUsingDeviceOfType(EHMDDeviceType::DT_OculusRift) && signTextureOculus != nullptr)
 	{
 		materialInstance->SetTextureParameterValue(::TextureParamName, signTextureOculus);
 	}
