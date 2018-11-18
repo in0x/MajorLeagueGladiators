@@ -1,5 +1,3 @@
-After cloning, locate your local starter content (Program Files (x86)/Epic Games/ 4.14/Samples/MobileStarterContent/Content/MobileStarterContent) and copy it to your working copy (MVRCFPS/Prototype/Content).
-
-[Wiki](http://mmp3admin.bplaced.net/wiki/index.php?title=Hauptseite)
-[Slack](https://bottompit.slack.com)
-[Coding Conventions](http://mmp3admin.bplaced.net/wiki/index.php?title=Coding_Conventions)
+The code repository for the game "Major League Gladiators".
+Assets are hosted privately outside of this repository.
+[The game is available to download for free from Steam!](https://store.steampowered.com/app/727310/Major_League_Gladiators/)
